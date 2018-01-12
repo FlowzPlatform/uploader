@@ -1,8 +1,5 @@
 FROM whiledo/letsencrypt-apache-ubuntu
 
-ARG accesskey
-ARG secretkey
-
 #FROM ubuntu:16.04
 
 # install dependencies
