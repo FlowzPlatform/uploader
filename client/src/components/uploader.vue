@@ -130,8 +130,8 @@ export default {
           this.$router.push('/landing/' + data.data[0].id)
         }
         else {
-          this.$store.state.jobData = []
-          
+          this.$store.state.jobData = {}
+
         }
       })
     }
