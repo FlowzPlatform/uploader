@@ -59,7 +59,7 @@
                   </div>
               </div>
 
-              <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
+              <div v-if="loading || mObj[activeTab].loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
                         <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
                         <div>Loading</div>
                     </Spin></div>
@@ -449,7 +449,8 @@ export default {
                   newSchemaDisplay : false,
                   newUploadCSV : [],
                   new_flag : 0,
-                  csv_arr: []
+                  csv_arr: [],
+                  loading: false
           },
           'Product Price':{
                   selected_schema: '',
@@ -472,7 +473,8 @@ export default {
                   newSchemaDisplay : false,
                   newUploadCSV : [],
                   new_flag : 0,
-                  csv_arr : []
+                  csv_arr : [],
+                  loading: false
 
           },
           'Product Imprint Data':{
@@ -1770,94 +1772,115 @@ export default {
       let self = this
       id = self.$route.params.id
       self.loading = true
-      // if(this.$store.state.jobData != []){
-      //
-      //   let jobData = this.$store.state.jobData
-      //     console.log("+++++++++jobData+++",jobData)
-      //   if(jobData.stepStatus == 'upload_pending'){
-      //     this.currentStep = 0
-      //     if(jobData.stepStatus == 'upload_pending'){
-      //       if(Object.keys(jobData).indexOf("ProductInformation") >= 0){
-      //         api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductinformation').then(res => {
-      //           console.log("%%%%%%%%%%%%%",res)
-      //           self.mObj["Product Information"].newUploadCSV = res.data
-      //           self.mObj["Product Information"].headers = Object.keys(res.data[0])
-      //           self.map = true
-      //           self.mObj["Product Information"].uploadDisplay = false
-      //           self.mObj["Product Information"].previewDisplay = true
-      //
-      //         })
-      //       }
-      //       if(Object.keys(jobData).indexOf("ProductPrice") >= 0){
-      //         api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductprice').then(res => {
-      //           console.log("%%%%%%%%%%%%%",res)
-      //           self.mObj["Product Price"].newUploadCSV = res.data
-      //           self.mObj["Product Price"].headers = Object.keys(res.data[0])
-      //           self.map = true
-      //           self.mObj["Product Price"].uploadDisplay = false
-      //           self.mObj["Product Price"].previewDisplay = true
-      //         })
-      //       }
-      //       if(Object.keys(jobData).indexOf("ProductImprintData") >= 0){
-      //         api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimprintdata').then(res => {
-      //           console.log("%%%%%%%%%%%%%",res)
-      //           self.mObj["Product Imprint Data"].newUploadCSV = res.data
-      //           self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
-      //           self.map = true
-      //           self.mObj["Product Imprint Data"].uploadDisplay = false
-      //           self.mObj["Product Imprint Data"].previewDisplay = true
-      //         })
-      //       }
-      //       if(Object.keys(jobData).indexOf("ProductShipping") >= 0){
-      //         api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductshipping').then(res => {
-      //           console.log("%%%%%%%%%%%%%",res)
-      //           self.mObj["Product Shipping"].newUploadCSV = res.data
-      //           self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
-      //           self.map = true
-      //           self.mObj["Product Shipping"].uploadDisplay = false
-      //           self.mObj["Product Shipping"].previewDisplay = true
-      //         })
-      //       }
-      //       if(Object.keys(jobData).indexOf("ProductImage") >= 0){
-      //         api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimage').then(res => {
-      //           console.log("%%%%%%%%%%%%%",res)
-      //           self.mObj["Product Image"].newUploadCSV = res.data
-      //           self.mObj["Product Image"].headers = Object.keys(res.data[0])
-      //           self.map = true
-      //           self.mObj["Product Image"].uploadDisplay = false
-      //           self.mObj["Product Image"].previewDisplay = true
-      //         })
-      //       }
-      //       if(Object.keys(jobData).indexOf("ProductAdditionalCharges") >= 0){
-      //         api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductadditionalcharges').then(res => {
-      //           console.log("%%%%%%%%%%%%%",res)
-      //           self.mObj["Product Additional Charges"].newUploadCSV = res.data
-      //           self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
-      //           self.map = true
-      //           self.mObj["Product Additional Charges"].uploadDisplay = false
-      //           self.mObj["Product Additional Charges"].previewDisplay = true
-      //         })
-      //       }
-      //       if(Object.keys(jobData).indexOf("ProductVariationPrice") >= 0){
-      //         api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductvariationprice').then(res => {
-      //           console.log("%%%%%%%%%%%%%",res)
-      //           self.mObj["Product Variation Price"].newUploadCSV = res.data
-      //           self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
-      //           self.map = true
-      //           self.mObj["Product Variation Price"].uploadDisplay = false
-      //           self.mObj["Product Variation Price"].previewDisplay = true
-      //         })
-      //       }
-      //          self.validate = false
-      //     }
-      //   }
-      //   else if(jobData.stepStatus == 'validation_completed'){
-      //     this.currentStep = 1
-      //   }
-      //   else {
-      //     this.currentStep = 2
-      //   }
-      // }
+      if(this.$store.state.jobData.hasOwnProperty("id")){
+        let jobData = this.$store.state.jobData
+          console.log("+++++++++jobData+++",jobData)
+        if(jobData.stepStatus == 'upload_pending'){
+          this.currentStep = 0
+          if(jobData.stepStatus == 'upload_pending'){
+            if(Object.keys(jobData).indexOf("ProductInformation") >= 0){
+              // self.mObj["Product Information"].loading = true
+              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductinformation').then(res => {
+                console.log("%%%%%%%%%%%%%",res)
+
+                self.mObj["Product Information"].newUploadCSV = res.data
+                self.mObj["Product Information"].headers = Object.keys(res.data[0])
+                self.map = true
+                // self.mObj["Product Information"].loading = false
+                self.mObj["Product Information"].uploadDisplay = false
+                self.mObj["Product Information"].previewDisplay = true
+
+
+              })
+            }
+            if(Object.keys(jobData).indexOf("ProductPrice") >= 0){
+                // self.mObj["Product Price"].loading = true
+              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductprice').then(res => {
+                console.log("%%%%%%%%%%%%%",res)
+
+                self.mObj["Product Price"].newUploadCSV = res.data
+                self.mObj["Product Price"].headers = Object.keys(res.data[0])
+                self.map = true
+                // self.mObj["Product Price"].loading = false
+                self.mObj["Product Price"].uploadDisplay = false
+                self.mObj["Product Price"].previewDisplay = true
+              })
+            }
+            if(Object.keys(jobData).indexOf("ProductImprintData") >= 0){
+              // self.mObj["Product Imprint Data"].loading = true
+              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimprintdata').then(res => {
+                console.log("%%%%%%%%%%%%%",res)
+
+                self.mObj["Product Imprint Data"].newUploadCSV = res.data
+                self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
+                self.map = true
+                // self.mObj["Product Imprint Data"].loading = false
+                self.mObj["Product Imprint Data"].uploadDisplay = false
+                self.mObj["Product Imprint Data"].previewDisplay = true
+              })
+            }
+            if(Object.keys(jobData).indexOf("ProductShipping") >= 0){
+              // self.mObj["Product Shipping"].loading = true
+              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductshipping').then(res => {
+                console.log("%%%%%%%%%%%%%",res)
+
+                self.mObj["Product Shipping"].newUploadCSV = res.data
+                self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
+                self.map = true
+                // self.mObj["Product Shipping"].loading = false
+                self.mObj["Product Shipping"].uploadDisplay = false
+                self.mObj["Product Shipping"].previewDisplay = true
+              })
+            }
+            if(Object.keys(jobData).indexOf("ProductImage") >= 0){
+              // self.mObj["Product Image"].loading = true
+              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimage').then(res => {
+                console.log("%%%%%%%%%%%%%",res)
+
+                self.mObj["Product Image"].newUploadCSV = res.data
+                self.mObj["Product Image"].headers = Object.keys(res.data[0])
+                self.map = true
+                // self.mObj["Product Image"].loading = false
+                self.mObj["Product Image"].uploadDisplay = false
+                self.mObj["Product Image"].previewDisplay = true
+              })
+            }
+            if(Object.keys(jobData).indexOf("ProductAdditionalCharges") >= 0){
+              // self.mObj["Product Additional Charges"].loading = true
+              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductadditionalcharges').then(res => {
+                console.log("%%%%%%%%%%%%%",res)
+
+                self.mObj["Product Additional Charges"].newUploadCSV = res.data
+                self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
+                self.map = true
+                // self.mObj["Product Additional Charges"].loading = false
+                self.mObj["Product Additional Charges"].uploadDisplay = false
+                self.mObj["Product Additional Charges"].previewDisplay = true
+              })
+            }
+            if(Object.keys(jobData).indexOf("ProductVariationPrice") >= 0){
+              // self.mObj["Product Variation Price"].loading = true
+              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductvariationprice').then(res => {
+                console.log("%%%%%%%%%%%%%",res)
+
+                self.mObj["Product Variation Price"].newUploadCSV = res.data
+                self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
+                self.map = true
+                // self.mObj["Product Variation Price"].loading = false
+                self.mObj["Product Variation Price"].uploadDisplay = false
+                self.mObj["Product Variation Price"].previewDisplay = true
+              })
+            }
+               self.validate = false
+          }
+        }
+        else if(jobData.stepStatus == 'validation_completed'){
+          this.currentStep = 1
+        }
+        else {
+          this.currentStep = 2
+        }
+      }
       api.request('get', '/uploader-schema/').then(res => {
         self.existingSchemaData = res.data.data
         let schemaNames = _.map(res.data.data, 'name');

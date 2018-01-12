@@ -100,7 +100,7 @@
       </div>
     </div>
 
-    <div class="ivu-table" v-if="job[0].stepStatus !='upload_pending'">
+    <div class="ivu-table" v-if="show">
     <div class="ivu-table-header">
       <table cellspacing="0" cellpadding="0" border='1' style="width:80%">
         <colgroup>
@@ -226,7 +226,8 @@ export default {
         return {
             job: [],
             modal1:false,
-            job2: []
+            keys: [],
+            show: false
         }
     },
     methods:{
@@ -267,9 +268,17 @@ export default {
     mounted(){
       console.log("landing page.....")
       socket.emit('uploader::find', {id: this.$route.params.id}, (e, data) => {
-        console.log("++++++++++++++",data.data[0])
         this.$store.state.jobData = data.data[0]
+        console.log("++++++++++++++",  this.$store.state.jobData)
         this.job.push(data.data[0])
+        console.log("^^^^^^^^^^^^^^",this.job)
+        this.keys = Object.keys(this.job[0])
+        for(let i=0 ;i<this.keys.length;i++){
+          if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
+          this.keys[i] == 'ProductVariationPrice'){
+              this.show = true
+          }
+        }
       })
     }
 }
