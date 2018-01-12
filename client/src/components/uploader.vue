@@ -1,31 +1,40 @@
 <template>
-  <div class="right col-md-6 col-sm-12 col-xs-12 col-md-offset-3">
-    <h3 style="margin-top: 12px;">Choose a method for upload the data</h3>
-    <Form>
-       <ul class="mySection">
-          <div class="row">
+  <div class="right" style="margin-top: 150px">
+    <Row>
+      <h1 style="margin-top: 12px;">Choose a method for upload the data</h1>
+    </Row>
+    <Row>
+      <Form>
+        <Row style="padding: 15px">
+          <ul class="mySection">
             <div v-for="(method,mIndex) in methods1">
-            <li class="btn col-md-3" @click="methodChanged(mIndex)" @mouseover="display(method.name)" @mouseout="hide(method.name)" >
-                <img src="../assets/images/tick.png" class="selected_tick" v-if="method.selected == true">
-                <label class="dropbtn" :id="mIndex">
-               {{method.name}}
-               </label>
-            </li>
+              <Col span="6" style="padding: 0px">
+                <li class="btn" @click="methodChanged(mIndex)" @mouseover="display(method.name)" @mouseout="hide(method.name)" >
+                    <img src="../assets/images/tick.png" class="selected_tick" v-if="method.selected == true">
+                    <label class="dropbtn" :id="mIndex">
+                   {{method.name}}
+                   </label>
+                </li>
+              </Col>
+            </div>
+          </ul>
+        </Row>
+        <Row>
+          <div id="dv" class="clearfix col-md-10 col-md-offset-1 col-sm-12 col-xs-12" style="display:none">
+              <Button type="ghost" class="ghtbtn">×</Button>
+              <img class="bulb" src="../assets/images/idea.png" />
+              <p id="get"></p>
           </div>
-          </div>
-       </ul>
-       <div id="dv" class="clearfix col-md-10 col-md-offset-1 col-sm-12 col-xs-12" style="display:none">
-          <Button type="ghost">×</Button>
-          <img class="bulb" src="../assets/images/idea.png" />
-          <p id="get"></p>
-       </div>
-       <div class="landing_progress">
-          <Button type="primary" @click="Proceed()" :disabled="disabled">Proceed</Button>
-       </div>
-       <div id="display-error" style="display:none">Please choose a method of your choice.</div>
-    </Form>
-    </div>
+        </Row>
+        <div class="landing_progress">
+            <Button type="primary" size="large" class="custombtn" @click="Proceed()" :disabled="disabled">Proceed</Button>
+        </div>
+        <div id="display-error" style="display:none">Please choose a method of your choice.</div>
+      </Form>
+    </Row>
+  </div>
 </template>
+
 <script>
 /*eslint-disable*/
 let axios = require("axios")
@@ -116,7 +125,7 @@ export default {
            user_id:this.$store.state.user._id
          }
          api.request('post', '/uploader', obj).then(res => {
-           console.log("==================",res)
+           // console.log("==================",res)
            id = res.data.id
            this.$router.push('/upload/' + id)
          })
@@ -125,7 +134,7 @@ export default {
     },
     mounted(){
       socket.emit('uploader::find', {user_id:this.$store.state.user._id,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
-        console.log("data......",data)
+        // console.log("data......",data)
         if (data.data.length !== 0) {
           this.$router.push('/landing/' + data.data[0].id)
         }
@@ -138,13 +147,13 @@ export default {
 }
 </script>
 <style scoped>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/** { box-sizing: border-box; margin: 0; padding: 0; }*/
 ul.mySection { margin: 16px; list-style: none; }
 ul.mySection li { margin: 0px 0px; display: inline-block;}
 ul.mySection input[type=radio] { display: none; }
 ul.mySection label {
     display: table-cell; cursor: pointer;
-    width: 200px; height: 120px;
+    width: 250px; height: 120px;
     vertical-align: middle; text-align: center;
     background-color: #494e6b;
     color:#fff
@@ -169,7 +178,7 @@ ul.mySection label:hover {
   }
   #dv {
   height: 185px;
-  margin-left: 13%;
+  /*margin-left: 13%;*/
   margin-bottom: 19px;
   width: 90px;
   width: 74%;
@@ -189,10 +198,13 @@ ul.mySection label:hover {
   }
 }
 
-.right[data-v-ae883134] {
-    position: absolute;
-    left: 10%;
-    top: 60%;
+.right {
+    /*position: absolute;*/
+    /*left: 10%;
+    top: 60%;*/
+    margin-top: 200px;
+    margin-left: auto;
+    margin-right: auto;
     text-align: -webkit-center;
     border: 2px #7c7e86 dashed;
     width: 60%;
@@ -203,7 +215,7 @@ ul.mySection label:hover {
     padding: 10px;
     width:8%;
 }
-.ivu-btn-primary {
+/*.ivu-btn-primary {
     position: relative;
     display: inline-block;
     padding: 0 25px;
@@ -211,17 +223,17 @@ ul.mySection label:hover {
     border: none;
     background: #1fb58f;
     color: #fff;
-    /* text-transform: uppercase; */
+     text-transform: uppercase; 
     letter-spacing: 1px;
     font-size: 1em;
     line-height: 3;
     margin-bottom:10px;
-}
+}*/
 .selected_tick {
       margin-left: -65px;
       position: absolute;
 }
-button {margin-left: 20px;}
+/*button {margin-left: 20px;}*/
 #display-error {
     display:none;
     background-color: #f2dede;
@@ -230,10 +242,41 @@ button {margin-left: 20px;}
     padding: 4px;
     margin-top: 9px;
 }
-.ivu-btn-ghost{
+/*.ivu-btn-ghost{
   padding: 0px 9px !important;
   float: right;
   border: 0;
 }
-
+*/
+.ghtbtn {
+  padding: 0px 9px !important;
+  float: right;
+  border: 0; 
+}
+.custombtn {
+  position: relative;
+  display: inline-block;
+  padding: 0 25px;
+  outline: none;
+  border: none;
+  background: #1fb58f !important;
+  color: #fff !important;
+  letter-spacing: 1px;
+  font-size: 1em;
+  line-height: 3;
+  margin-bottom:10px;
+}
+.custombtn:hover {
+  position: relative;
+  display: inline-block;
+  padding: 0 25px;
+  outline: none;
+  border: none;
+  background: #1fb58f !important;
+  color: #fff !important;
+  letter-spacing: 1px;
+  font-size: 1em;
+  line-height: 3;
+  margin-bottom:10px;
+}
 </style>
