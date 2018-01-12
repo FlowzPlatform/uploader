@@ -1,19 +1,19 @@
 <template>
     <Menu mode="horizontal" :theme="'primary'">
         <Row type="flex">
-        <Col :span="1" v-if="toggeleEnable">
+        <!-- <Col :span="1" v-if="toggeleEnable">
             <Row type="flex" justify="end" align="middle">
               <span @click="$store.state.sidenavtoggle = !$store.state.sidenavtoggle">
                 <Icon type="navicon-round" :size="32" style="line-height: inherit;cursor:pointer"></Icon>
               </span>
             </Row>
-        </Col>
-        <i-col :span="5">
+        </Col> -->
+        <Col span="6">
             <div class="f-logo">
                 <img src="../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
             </div>
-        </i-col>
-        <i-col :span="18">
+        </Col>
+        <Col span="18">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
                     <!-- <Menu-item name="1">
@@ -22,10 +22,16 @@
                             Schema
                         </router-link>
                     </Menu-item> -->
+                    <Menu-item name="1">
+                        <router-link to="/uploader-joblist">
+                            <Icon type="navicon-round" :size="14"></Icon>
+                            &nbsp;Joblist
+                        </router-link>
+                    </Menu-item>
                     <Menu-item name="2">
-                        <router-link to="/db">
-                            <Icon type="gear-b" :size="14"></Icon>
-                            Settings
+                        <router-link to="/uploader">
+                            <Icon type="cloud" :size="14"></Icon>
+                            &nbsp;Uploader
                         </router-link>
                     </Menu-item>
                     <Menu-item name="3">
@@ -43,8 +49,8 @@
                     </Submenu>
                     </Menu-item>
                 </div>
-                </Row>
-        </i-col>
+              </Row>
+        </Col>
         </Row>
     </Menu>
 </template>
@@ -53,9 +59,9 @@
 import psl from 'psl'
   export default {
     computed: {
-      toggeleEnable () {
-        return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
-      },
+      // toggeleEnable () {
+      //   return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
+      // },
       user () {
           return {emailId: 'test'}
       }

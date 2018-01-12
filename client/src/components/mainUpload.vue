@@ -21,7 +21,7 @@
                     </div>
                 </vue-tabs>
                 <div style="margin-top: 20px;position: absolute;top: 300px;">
-                      <Button type="success" size="large" style="font-size:15px" :disabled="validate" @click="startValidation()">Start validation<i class="ivu-icon ivu-icon-android-arrow-dropright-circle" style="margin-left:7%"></i></Button>
+                      <Button type="success" class="sucessbtn" size="large" style="font-size:15px" :disabled="validate" @click="startValidation()">Start validation<i class="ivu-icon ivu-icon-android-arrow-dropright-circle" style="margin-left:7%"></i></Button>
                 </div>
           </Col>
           <Col span="18">
@@ -33,16 +33,16 @@
                             <Option v-for="schema in schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
                         </Select>
 
-                        <Poptip placement="top" width="250" v-model = "mObj[activeTab].poptip_display">
+                        <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
                           <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled schema</a>
                            <div class="api" slot="content">
                              <Form inline>
                                <FormItem>
-                                   <Input type="text" v-model="mObj[activeTab].new_schema" style="margin-left:-18px">
+                                   <Input type="text" v-model="mObj[activeTab].new_schema" style="margin-left:-65px">
                                    </Input>
                                </FormItem>
-                                  <Button type="ghost" icon="ios-checkmark" style="font-size: 25px;margin-left:-25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
-                                  <Button type="ghost" icon="ios-close" style="font-size: 25px;" @click="mObj[activeTab].poptip_display = false"></Button>
+                                  <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
+                                  <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
                            </Form>
                            </div>
                        </Poptip>
@@ -67,7 +67,7 @@
               <div  v-if="mObj[activeTab].previewDisplay">
               <h3 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h3>
                <div class="schema-form ivu-table-wrapper">
-                 <div class="ivu-table ivu-table-border" style="display:block;white-space: nowrap;">
+                 <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
                    <div class="ivu-table-body">
                      <table style="min-width:1077px;overflow-x: auto;">
                        <thead>
@@ -102,7 +102,7 @@
             <div v-if="mObj[activeTab].headerDisplay">
             <h3 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h3>
              <div class="schema-form ivu-table-wrapper" >
-               <div class="ivu-table ivu-table-border" >
+               <div class="ivu-table ivu-table-border customtable" >
                  <div class="ivu-table-body">
                    <table class="mapping-table" style="width:100%;overflow-y:auto;">
                      <colgroup>
@@ -152,7 +152,7 @@
          <div v-if="mObj[activeTab].newSchemaDisplay">
          <h3 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h3>
          <div class="schema-form ivu-table-wrapper">
-           <div class="ivu-table ivu-table-border" >
+           <div class="ivu-table ivu-table-border customtable" >
              <div class="ivu-table-body">
                <table class="mapping-table" style="width:100%;overflow-y:auto;">
                  <colgroup>
@@ -174,7 +174,7 @@
                  <tbody class="ivu-table-tbody">
                    <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping">
                      <th>
-                       <div class="ivu-table-cell">
+                       <div class="ivu-table-cell headercolor">
                          <span>{{item.sysHeader}}</span>
                        </div>
                      </th>
@@ -345,6 +345,8 @@ import Papa from 'papaparse'
 import 'vue-nav-tabs/themes/vue-tabs.css'
 import _ from 'underscore'
 import lodash from 'lodash'
+import Vue from 'vue'
+import VueCodeMirror from 'vue-codemirror'
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
@@ -352,6 +354,7 @@ import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
+Vue.use(VueCodeMirror)
 var Schema = require('simpleschema')
 const uuidV1 = require('uuid/v1');
 console.log("product_info",ProductInformationSchema)
@@ -2019,7 +2022,7 @@ export default {
     transition: border .2s ease-in-out,background .2s ease-in-out,box-shadow .2s ease-in-out;
     margin-top: 4%;
 }
-.ivu-btn-ghost {
+/*.ivu-btn-ghost {
     color: #495060;
     background-color: transparent;
     border-color: #fff;
@@ -2033,7 +2036,21 @@ export default {
     padding-left: 0px;
     padding-right: 0px;
 }
-
+*/
+.btnghost {
+  color: #495060 !important;
+  background-color: transparent !important;
+  border-color: #fff !important;
+  /*padding-left: 0px !important;*/
+  /*padding-right: 0px !important;   */
+}
+.btnghost:hover {
+    color: #495060 !important;
+    background-color: transparent !important;
+    border-color: #fff !important;
+    /*padding-left: 0px !important;*/
+    /*padding-right: 0px !important;*/
+}
 .ivu-upload-drag {
   background: #fff;
   border: 2px dashed #494e6b;
@@ -2085,7 +2102,7 @@ export default {
     position: relative;
     display:none;
 }
-.ivu-btn-success {
+/*.ivu-btn-success {
     margin-top: 60%;
     color: #fff;
     background-color: #1fb58f;
@@ -2098,6 +2115,35 @@ export default {
     background-color: #1fb58f;
     border-color: #1fb58f;
     width: 152%;
+}*/
+.ivu-table-cell {
+  padding-left: 18px;
+  padding-right: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
+  box-sizing: border-box;
+  color: #495060 !important;
+  font-size: 13px !important;
+  text-align: left !important;
+}
+.headercolor {
+  color: #fff;
+}
+.sucessbtn {
+  margin-top: 60%;
+  color: #fff !important;
+  background-color: #1fb58f !important;
+  border-color: #1fb58f !important;
+  width: 152%;
+}
+.sucessbtn:disabled {
+  margin-top: 60%;
+  color: #fff !important;
+  background-color: #1fb58f !important;
+  border-color: #1fb58f !important;
+  width: 152%;
 }
 #upload-csv-zone>.file-zone {
   border: 2px dashed #494e6b;
@@ -2153,7 +2199,7 @@ export default {
     border-right: 0;
     /*margin-left: -3%;*/
 }
-.ivu-table th {
+/*.ivu-table th {
     height: 40px;
     white-space: nowrap;
     overflow: hidden;
@@ -2167,6 +2213,23 @@ export default {
     transition: background-color .2s ease-in-out;
     font-size: 13px;
     padding: 9px;
+}*/
+.customtable th {
+  height: 40px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  background-color: black !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  padding: 9px !important;
+}
+.customtable td {
+  height: 48px !important;
+  text-align: left !important;
+  background-color: #fff !important;
+  transition: background-color .2s ease-in-out;
+  font-size: 13px !important;
+  /*padding: 9px !important;*/
 }
 .handsontable thead {
     box-sizing: content-box;

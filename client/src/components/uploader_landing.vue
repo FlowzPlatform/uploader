@@ -194,8 +194,8 @@
            <p style="font-size:15px">All your existing uploaded file will be deleted and you have to upload the files again</p>
        </div>
        <div slot="footer">
-           <Button size="medium" @click="cancel" style="background-color:#ddd">Cancel</Button>
-           <Button type="error" size="medium"  @click="abort">Abort</Button>
+           <Button @click="cancel" style="background-color:#ddd">Cancel</Button>
+           <Button type="error"  @click="abort">Abort</Button>
        </div>
    </Modal>
 
@@ -294,16 +294,42 @@ export default {
     padding: 15px;
 }
 .landingAbortBtn{
-  width: 160px ;
-  border: none ;
-  background: #b51f1f ;
-  color: #fff ;
-  letter-spacing: 1px ;
-  line-height: 2.5;
-  font-size:14px;
+  width: 160px !important;
+  border: none !important;
+  background: #b51f1f !important;
+  color: #fff  !important;
+  letter-spacing: 1px  !important;
+  line-height: 2.5 !important;
+  font-size:14px !important;
 }
-
-.ivu-btn-primary{
+.landingAbortBtn:hover{
+  width: 160px !important;
+  border: none !important;
+  background: #f16543 !important;
+  color: #fff  !important;
+  letter-spacing: 1px  !important;
+  line-height: 2.5 !important;
+  font-size:14px !important;
+}
+.landingContinuetBtn{
+  width: 160px  !important;
+  border: none  !important;
+  background: #1fb58f  !important;
+  color: #fff  !important;
+  letter-spacing: 1px  !important;
+  line-height: 2.5  !important;
+  font-size:14px !important;
+}
+.landingContinuetBtn:hover{
+  width: 160px  !important;
+  border: none  !important;
+  background: #41e0c5 !important;
+  color: #fff  !important;
+  letter-spacing: 1px  !important;
+  line-height: 2.5  !important;
+  font-size:14px !important;
+}
+/*.ivu-btn-primary{
   width: 160px ;
   border: none ;
   background: #1fb58f ;
@@ -321,14 +347,6 @@ export default {
   letter-spacing: 1px ;
   line-height: 2.5;
   font-size:14px;
-}
-/*.landingContinuetBtn{
-    width: 160px ;
-    border: none ;
-    background: #1fb58f ;
-    color: #fff ;
-    letter-spacing: 1px ;
-    line-height: 3.5 ;
 }*/
 button, html input[type="button"], input[type="reset"], input[type="submit"] {
     -webkit-appearance: button;
