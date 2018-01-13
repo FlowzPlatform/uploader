@@ -1,11 +1,11 @@
 <template>
   <div class="right" style="margin-top: 150px">
     <Row>
-      <h1 style="margin-top: 12px;">Choose a method for upload the data</h1>
+      <h2 style="margin-top: 12px;">Choose a method for upload the data</h2>
     </Row>
     <Row>
       <Form>
-        <Row style="padding: 15px">
+        <Row style="padding: 15px !important">
           <ul class="mySection">
             <div v-for="(method,mIndex) in methods1">
               <Col span="6" style="padding: 0px">
@@ -153,7 +153,8 @@ ul.mySection li { margin: 0px 0px; display: inline-block;}
 ul.mySection input[type=radio] { display: none; }
 ul.mySection label {
     display: table-cell; cursor: pointer;
-    width: 250px; height: 120px;
+    width: 175px !important;
+    height: 105px !important;
     vertical-align: middle; text-align: center;
     background-color: #494e6b;
     color:#fff
@@ -223,7 +224,7 @@ ul.mySection label:hover {
     border: none;
     background: #1fb58f;
     color: #fff;
-     text-transform: uppercase; 
+     text-transform: uppercase;
     letter-spacing: 1px;
     font-size: 1em;
     line-height: 3;
@@ -251,7 +252,7 @@ ul.mySection label:hover {
 .ghtbtn {
   padding: 0px 9px !important;
   float: right;
-  border: 0; 
+  border: 0;
 }
 .custombtn {
   position: relative;

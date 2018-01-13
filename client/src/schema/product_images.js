@@ -1,16 +1,6 @@
 var Schema = require('simpleschema')
 /*eslint-disable*/
-export const ProductImagesSchemas = new Schema({
-    // sr_no: {
-    //     type: "number",
-    //     label: "sr no",
-    //     max: 1090,
-    //     optional: true,
-    //     allowedValues: [],
-    //     defaultValue: '',
-    //     maxLength : '',
-    //     regEx:''
-    // },
+export const ProductImagesSchema = new Schema({
     product_id: {
         type: "string",
         label: "Product Id",
@@ -516,33 +506,10 @@ export const ProductImagesSchemas = new Schema({
       maxLength : '',
       regEx:''
     },
-    fileID: {
-        type: "string",
-        label: "file ID",
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    owner: {
-        type: "string",
-        label: "owner",
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    username: {
-        type: "string",
-        label: "username",
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
     _id: {
         type: "string",
         label: "_id",
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -550,4 +517,4 @@ export const ProductImagesSchemas = new Schema({
     }
 });
 
-export default ProductImagesSchemas
+export default ProductImagesSchema

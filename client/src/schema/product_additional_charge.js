@@ -1,6 +1,6 @@
 var Schema = require('simpleschema')
 /*eslint-disable*/
-export const ProductAdditionalChargeSchemas = new Schema({
+export const ProductAdditionalChargeSchema = new Schema({
     // sr_no: {
     //     type: "number",
     //     label: "sr no",
@@ -338,37 +338,37 @@ export const ProductAdditionalChargeSchemas = new Schema({
         maxLength : '',
         regEx:''
     },
-    fileID: {
-        type: "string",
-        label: "file ID",
-        optional: true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    owner: {
-        type: "string",
-        label: "owner",
-        optional: true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    username: {
-        type: "string",
-        label: "username",
-        optional: true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
+    // fileID: {
+    //     type: "string",
+    //     label: "file ID",
+    //     optional: true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // owner: {
+    //     type: "string",
+    //     label: "owner",
+    //     optional: true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // username: {
+    //     type: "string",
+    //     label: "username",
+    //     optional: true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
     _id: {
         type: "string",
         label: "_id",
-        optional: true,
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -376,4 +376,4 @@ export const ProductAdditionalChargeSchemas = new Schema({
     }
 });
 
-export default ProductAdditionalChargeSchemas
+export default ProductAdditionalChargeSchema

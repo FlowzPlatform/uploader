@@ -1,6 +1,6 @@
 <template>
   <div id="landingPageStatusReport" class="clearfix" style="overflow:auto;border: 3px solid #7c7e86;color: black;text-align: center;padding-top: 4px;margin: 50px;padding-bottom: 26px;">
-    <h3 style="text-transform:uppercase;margin-top: 18px;">Welcome back,{{job[0].username}}</h3>
+    <h2 style="text-transform:uppercase;margin-top: 18px;">Welcome back,{{job[0].username}}</h2>
     <p style="margin-top: 10px;margin-bottom: 10px;font-size: 15px;">Following is the latest status of your file upload process.You can continue with your current status or abort the whole process to start again</p>
     <!-- <table class="landingStatus" border='1|1'>
       <tr>
@@ -53,7 +53,7 @@
           </colgroup>
             <tr>
               <td class="">
-                <div class="ivu-table-cell">
+                <div class="ivu-table-cell upload">
                   <span style='font-weight:bold'>uploadType</span>
                 </div>
               </td>
@@ -86,13 +86,13 @@
             </tr>
             <tr>
               <td class="">
-                <div class="ivu-table-cell">
+                <div class="ivu-table-cell upload">
                   <span style='font-weight:bold'>Started Process at</span>
                 </div>
               </td>
               <td class="">
-                <div class="ivu-table-cell">
-                  <span style='font-weight:500'>{{job[0].created}}</span>
+                <div class="ivu-table-cell upload">
+                  <span style='font-weight:500'>{{job[0].createdAt}}</span>
                 </div>
               </td>
             </tr>
@@ -112,22 +112,22 @@
         <thead>
           <tr>
           <th class="">
-            <div class="ivu-table-cell">
+            <div class="ivu-table-cell upload">
               <span style='font-weight:bold'>File</span>
             </div>
           </th>
           <th class="">
-            <div class="ivu-table-cell">
+            <div class="ivu-table-cell upload">
               <span style='font-weight:bold'>Upload Status</span>
             </div>
           </th>
           <th class="">
-            <div class="ivu-table-cell">
+            <div class="ivu-table-cell upload">
               <span style='font-weight:bold'>Validation Status</span>
             </div>
           </th>
           <th class="">
-            <div class="ivu-table-cell">
+            <div class="ivu-table-cell upload">
               <span style='font-weight:bold'>Import Status</span>
             </div>
           </th>
@@ -136,22 +136,22 @@
        <tbody v-for="(item,index) in Object.keys(job[0])">
           <tr  v-if="item == 'ProductInformation' || item == 'ProductPrice' || item == 'ProductImprintData' || item == 'ProductImage' || item == 'ProductShipping' || item == 'ProductAdditionalCharges' || item == 'ProductVariationPrice'">
             <td class="">
-              <div class="ivu-table-cell">
+              <div class="ivu-table-cell upload">
                 <span style='font-weight:500px'>{{convert(item)}}</span>
               </div>
             </td>
             <td style='text-transform:capitalize;'>
-                <div class="ivu-table-cell">
+                <div class="ivu-table-cell upload">
                 <span style='font-weight:500px'>{{job[0][item].uploadStatus}}</span>
               </div>
             </td>
             <td style='text-transform:capitalize;'>
-              <div class="ivu-table-cell">
+              <div class="ivu-table-cell upload">
                <span style='font-weight:500px'>{{job[0][item].validateStatus}}</span>
              </div>
             </td>
             <td>
-              <div class="ivu-table-cell">
+              <div class="ivu-table-cell upload">
                 <span style='font-weight:200px'>Pending</span>
               </div>
             </td>
@@ -287,8 +287,15 @@ export default {
 
 .upload-type > span{
   padding-right: 35px;
-  font-weight: 500;
+  font-weight: 500 !important;
+  font-size: 16px !important;
   color : #888383;
+}
+.upload{
+  font-size: 16px !important;
+  padding:5px;
+  word-break: break-all;
+  text-align:center !important;
 }
 .landingBtnDiv{
     padding: 15px;

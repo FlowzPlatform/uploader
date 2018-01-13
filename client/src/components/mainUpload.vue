@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Steps :current="currentStep">
+    <Steps :current="currentStep" class="uploadSteps">
        <Step content="Upload"></Step>
        <Step content="Validate"></Step>
        <Step content="Import"></Step>
@@ -64,8 +64,8 @@
                         <div>Loading</div>
                     </Spin></div>
 
-              <div  v-if="mObj[activeTab].previewDisplay">
-              <h3 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h3>
+              <div v-if="mObj[activeTab].previewDisplay">
+              <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
                <div class="schema-form ivu-table-wrapper">
                  <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
                    <div class="ivu-table-body">
@@ -100,7 +100,7 @@
            </div>
 
             <div v-if="mObj[activeTab].headerDisplay">
-            <h3 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h3>
+            <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
              <div class="schema-form ivu-table-wrapper" >
                <div class="ivu-table ivu-table-border customtable" >
                  <div class="ivu-table-body">
@@ -150,7 +150,7 @@
          </div>
 
          <div v-if="mObj[activeTab].newSchemaDisplay">
-         <h3 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h3>
+         <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
          <div class="schema-form ivu-table-wrapper">
            <div class="ivu-table ivu-table-border customtable" >
              <div class="ivu-table-body">
@@ -251,7 +251,7 @@
          </tr>
          </table>
          <div id="hot-preview" v-if="mObj[activeTab].showHandson">
-           <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Modify Data</Button>
+           <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
          </div>
 
          <Modal  v-model="model" title="Transform" @on-ok="handleModalOk" width="900px" :mask-closable="false ">
@@ -453,7 +453,8 @@ export default {
                   newUploadCSV : [],
                   new_flag : 0,
                   csv_arr: [],
-                  loading: false
+                  preview: false
+
           },
           'Product Price':{
                   selected_schema: '',
@@ -477,7 +478,7 @@ export default {
                   newUploadCSV : [],
                   new_flag : 0,
                   csv_arr : [],
-                  loading: false
+
 
           },
           'Product Imprint Data':{
@@ -884,9 +885,8 @@ export default {
         else{
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
-          api.request('get', '/uploader-schema/').then(res => {
-            // console.log("res....",res)
-            this.existingSchemaData = res.data.data
+          socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
+            this.existingSchemaData = res.data[0]
             // console.log("this.existing/////",this.existingSchemaData)
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
             // console.log("==============currentschema=================",currentschema)
@@ -913,9 +913,8 @@ export default {
               this.getMapping(tab)
             }
           })
-          .catch(error => {
-            console.log(error)
-          })
+
+
         }
       },
       getMapping(tab){
@@ -923,7 +922,7 @@ export default {
           //  console.log("this.mObj[tab].selected_schema",this.mObj[tab].selected_schema)
            this.map = true
            this.mObj[tab].mapping = []
-           socket.emit('uploader-csv-file-mapping::find', {fileTypeId : this.mObj[tab].selected_schema}, (e, data) => {
+           socket.emit('uploader-csv-file-mapping::find', {fileTypeId : this.mObj[tab].selected_schema,user_id:this.$store.state.user._id}, (e, data) => {
             //  console.log("data......",data)
              this.mObj[tab].mapping = data.data[0].mapping
              let schema_keys = _.keys(this.mObj[tab].schema.structure);
@@ -1630,7 +1629,8 @@ export default {
           schema: self.mObj[tab].schema.structure,
           createdAt: Date(),
           updatedAt: Date(),
-          username: self.$store.state.user.email
+          username: self.$store.state.user.email,
+          user_id: self.$store.state.user._id
         }
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
@@ -1645,6 +1645,7 @@ export default {
               updatedAt: Date(),
               deletedAt:'',
               username: self.$store.state.user.email,
+              user_id: self.$store.state.user._id
             }
             api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
               console.log('response', result)
@@ -1657,7 +1658,8 @@ export default {
                 createdAt : Date(),
                 updatedAt : Date(),
                 deletedAt : '',
-                username : self.$store.state.user.email
+                username : self.$store.state.user.email,
+                user_id: self.$store.state.user._id
               }
 
               api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
@@ -1681,6 +1683,7 @@ export default {
                 console.log("newCSV.......",newCSV)
 
                 self.loading = false
+                self.mObj[tab].preview = true
                 self.mObj[tab].previewDisplay = true
                 self.validate = false
 
@@ -1718,6 +1721,7 @@ export default {
           updatedAt: Date(),
           deletedAt:'',
           username: self.$store.state.user.email,
+          user_id: self.$store.state.user._id
         }
         api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
           console.log('response', result)
@@ -1884,9 +1888,12 @@ export default {
           this.currentStep = 2
         }
       }
-      api.request('get', '/uploader-schema/').then(res => {
-        self.existingSchemaData = res.data.data
-        let schemaNames = _.map(res.data.data, 'name');
+
+      socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
+        // console.log("OOOOOOOOOOOOOOOOOO",res)
+        self.existingSchemaData = res.data[0]
+        // console.log("+++++++++++",self.existingSchemaData)
+        let schemaNames = _.map(res.data, 'name');
         _.forEach(schemaNames,(value,key) => {
             self.schemaList.push({"value":value,"label":value})
         })
@@ -1928,10 +1935,6 @@ export default {
 
         }
 
-
-      })
-      .catch(error => {
-        console.log(error)
       })
 
 
@@ -1939,6 +1942,9 @@ export default {
 }
 </script>
 <style>
+.uploadSteps{
+  margin-left: 13% !important;
+}
 .ivu-steps-item.ivu-steps-status-process .ivu-steps-content {
     color: #337ab7;
     position: absolute;
@@ -1979,7 +1985,7 @@ export default {
     border-radius: 5px;
     padding-left: 0px !important;
     color: #494e6b;
-    width: 160%;
+    width: 140% !important;
     margin-top: 30%;
     margin-bottom: -2px;
 }
@@ -2129,7 +2135,7 @@ export default {
   text-align: left !important;
 }
 .headercolor {
-  color: #fff;
+  color: #fff !important;
 }
 .sucessbtn {
   margin-top: 60%;
@@ -2259,6 +2265,10 @@ export default {
      height: 100px;
      position: relative;
      border: 1px solid #eee;
+ }
+ .preview{
+   border: 1px solid #bbbec4 !important;
+   padding: 25px !important;
  }
 
 </style>

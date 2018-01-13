@@ -1,6 +1,6 @@
 var Schema = require('simpleschema')
 /*eslint-disable*/
-export const ProductVariationPricingSchemas = new Schema({
+export const ProductVariationPricingSchema = new Schema({
     sr_no: {
         type: "number",
         label: "sr no",
@@ -626,37 +626,37 @@ export const ProductVariationPricingSchemas = new Schema({
         maxLength : '',
         regEx:''
     },
-    fileID: {
-        type: "string",
-        label: "file ID",
-        optional : true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    owner: {
-        type: "string",
-        label: "owner",
-        optional : true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    username: {
-        type: "string",
-        label: "username",
-        optional : true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
+    // fileID: {
+    //     type: "string",
+    //     label: "file ID",
+    //     optional : true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // owner: {
+    //     type: "string",
+    //     label: "owner",
+    //     optional : true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // username: {
+    //     type: "string",
+    //     label: "username",
+    //     optional : true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
     _id: {
         type: "string",
         label: "_id",
-        optional : true,
+        optional : false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -664,4 +664,4 @@ export const ProductVariationPricingSchemas = new Schema({
     }
 });
 
-export default ProductVariationPricingSchemas
+export default ProductVariationPricingSchema
