@@ -78,7 +78,7 @@ export default {
       'uploader': {
         updated (message) {
             let self = this
-            console.log("messages....",message)
+            // console.log("messages....",message)
             for(var i=0;i<self.data2.length;i++){
                 if(self.data2[i].id == message.id){
                     index = i
@@ -96,8 +96,8 @@ export default {
         },
         created (data) {
           let self = this
-          console.log('connectiondata created..', data)
-          console.log("data.....",data)
+          // console.log('connectiondata created..', data)
+          // console.log("data.....",data)
            self.data2.push(data)
            self.data2 = _.sortBy(self.data2, 'createdAt');
         //  self.data2 = desc.reverse()
@@ -111,11 +111,11 @@ export default {
     mounted(){
       var self = this
       socket.emit('uploader::find', {user_id : this.$store.state.user._id}, (e, data) => {
-        console.log("response",data.data)
+        // console.log("response",data.data)
         for(var i=0;i<data.data.length;i++){
           self.data2.push(data.data[i])
         }
-        console.log("------------>",self.data2)
+        // console.log("------------>",self.data2)
       })
 
     }

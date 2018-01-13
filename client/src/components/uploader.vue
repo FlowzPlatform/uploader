@@ -1,7 +1,7 @@
 <template>
   <div class="right" style="margin-top: 150px">
     <Row>
-      <h2 style="margin-top: 12px;">Choose a method for upload the data</h2>
+      <h2 style="margin-top: 12px;">Choose a method to upload the data</h2>
     </Row>
     <Row>
       <Form>
