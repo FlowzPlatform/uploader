@@ -131,7 +131,7 @@ export default {
     background: none;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding: 0 0 25px 0;
-  } 
+  }
   .registerpanel .pageicon {
       width: 70px;
       font-size: 42px;
@@ -179,7 +179,7 @@ export default {
 		color: #ddd;
 		margin-top: -21px;
 	}
-	.registerpanel .redirectlink a { 
+	.registerpanel .redirectlink a {
 		color: #fff;
 	}
   .animate0 {
@@ -198,8 +198,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: 0s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}         
+	animation-fill-mode: both;
+}
 
 .animate1{
    	-webkit-animation-duration: .8s;
@@ -217,8 +217,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .2s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-} 
+	animation-fill-mode: both;
+}
 
 .animate2{
    	-webkit-animation-duration: .8s;
@@ -236,8 +236,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .4s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-} 
+	animation-fill-mode: both;
+}
 
 .animate3{
    	-webkit-animation-duration: .8s;
@@ -255,8 +255,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .6s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}   
+	animation-fill-mode: both;
+}
 
 .animate4{
    	-webkit-animation-duration: .8s;
@@ -274,8 +274,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .8s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}  
+	animation-fill-mode: both;
+}
 
 .animate5{
    	-webkit-animation-duration: .8s;
@@ -293,7 +293,7 @@ export default {
 	animation-duration: .8s;
 	animation-delay: 1s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
+	animation-fill-mode: both;
 }
 #particles-js {
   position: fixed;
