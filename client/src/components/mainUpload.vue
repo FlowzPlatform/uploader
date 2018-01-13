@@ -1729,6 +1729,7 @@ export default {
 
           obj1 = {}
           let name = tab.replace(/\s/g, "")
+
           obj1[name] = {
             id: CSVFile_id,
             schema_id : schema_id,
