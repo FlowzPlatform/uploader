@@ -1665,7 +1665,7 @@ export default {
               api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
                 console.log('response', response)
 
-                let name = tab.replace(/\s+/, "")
+                let name = tab.replace(/\s/g, "")
                 console.log("name...",name)
                 obj1 = {}
                 obj1[name] = {
