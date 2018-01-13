@@ -1,6 +1,6 @@
 var Schema = require('simpleschema')
 /*eslint-disable*/
-export const ProductImprintDataSchemas = new Schema({
+export const ProductImprintDataSchema = new Schema({
 
     // sr_no: {
     //     type: "number",
@@ -555,33 +555,33 @@ export const ProductImprintDataSchemas = new Schema({
         maxLength : '',
         regEx:''
     },
-    fileID: {
-        type: "string",
-        label: "file ID",
-        optional : true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    owner: {
-        type: "string",
-        label: "owner",
-        optional : true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    username: {
-        type: "string",
-        label: "username",
-        optional : true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
+    // fileID: {
+    //     type: "string",
+    //     label: "file ID",
+    //     optional : true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // owner: {
+    //     type: "string",
+    //     label: "owner",
+    //     optional : true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // username: {
+    //     type: "string",
+    //     label: "username",
+    //     optional : true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
     type_of_charge:{
         type: "string",
         label: "Type of Charge",
@@ -621,7 +621,7 @@ export const ProductImprintDataSchemas = new Schema({
     _id: {
         type: "string",
         label: "_id",
-        optional : true,
+        optional : false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -629,4 +629,4 @@ export const ProductImprintDataSchemas = new Schema({
     }
 });
 
-export default ProductImprintDataSchemas
+export default ProductImprintDataSchema

@@ -1,16 +1,6 @@
 var Schema = require('simpleschema')
 /*eslint-disable*/
-export const ProductShippingSchemas = new Schema({
-    // sr_no: {
-    //     type: "number",
-    //     label: "sr no",
-    //     max: 1090,
-    //     optional: true,
-    //     allowedValues: [],
-    //     defaultValue: '',
-    //     maxLength : '',
-    //     regEx:''
-    // },
+export const ProductShippingSchema = new Schema({
     product_id: {
         type: "string",
         label: "Product Id",
@@ -374,41 +364,41 @@ export const ProductShippingSchemas = new Schema({
             maxLength : '',
             regEx:''
         },
-    fileID: {
-        type: "string",
-        label: "file ID",
-        optional: true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    owner: {
-        type: "string",
-        label: "owner",
-        optional: true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
-    username: {
-        type: "string",
-        label: "username",
-        optional: true,
-        allowedValues: [],
-        defaultValue: '',
-        maxLength : '',
-        regEx:''
-    },
+    // fileID: {
+    //     type: "string",
+    //     label: "file ID",
+    //     optional: true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // owner: {
+    //     type: "string",
+    //     label: "owner",
+    //     optional: true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
+    // username: {
+    //     type: "string",
+    //     label: "username",
+    //     optional: true,
+    //     allowedValues: [],
+    //     defaultValue: '',
+    //     maxLength : '',
+    //     regEx:''
+    // },
     _id: {
         type: "string",
         label: "_id",
-        optional: true,
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
         regEx:''
     }
 });
-export default ProductShippingSchemas
+export default ProductShippingSchema
