@@ -1729,7 +1729,7 @@ export default {
           console.log("-------csv_file_id-------",CSVFile_id)
 
           obj1 = {}
-          let name = tab.replace(/\s+/, "")
+          let name = tab.replace(/\s/g, "") 
           obj1[name] = {
             id: CSVFile_id,
             schema_id : schema_id,
