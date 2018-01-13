@@ -357,7 +357,7 @@ import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
 Vue.use(VueCodeMirror)
 var Schema = require('simpleschema')
 const uuidV1 = require('uuid/v1');
-console.log("product_info",ProductInformationSchema)
+
 let finalModifiedDataArray = []
 let res
 let id
@@ -378,14 +378,14 @@ if (process.env.NODE_ENV !== 'development') {
 const app = feathers().configure(socketio(socket))
 
 socket.on('response', (response) => {
-  console.log("socket response called......",response)
+
   if (response.stdout.ok == 1) {
-    console.log("id....",id)
+
     api.request('patch', '/uploader/' + id,obj1).then(res => {
-      console.log('response', res)
+
     })
     .catch(error => {
-      console.log(error)
+
     })
   }
 })
@@ -602,7 +602,7 @@ export default {
     methods:{
       hideHandson(){
         let self = this
-          // console.log("88888888888888",self.activeTab,self.mObj[self.activeTab].errDisplay,err_length)
+
           if(err_length != 0){
             if(self.mObj[self.activeTab].errDisplay == false ){
               document.getElementById('example1').style.display = 'none'
@@ -614,18 +614,16 @@ export default {
           }
       },
       setTransForm: function () {
-        // console.log("settransform called...")
+
         this.transformData = this.modelData
-        // console.log("this.transformData",this.transformData)
+
         if (this.mObj[this.activeTab].mapping[this.modelIndex].tranformMethod) {
-          // console.log("if called")
           this.dataMethod = this.mObj[this.activeTab].mapping[this.modelIndex].tranformMethod
           this.transformData = this.modelData + '.' + this.dataMethod
-          // console.log("this.transformData",transformData)
         }
       },
       modelshow: function (item, index) {
-        // console.log("item...",item,"index....",index)
+
         this.model = true
         this.modelData = 'return row["' + item.sysHeader + '"]'
         this.modelIndex = index
@@ -635,9 +633,9 @@ export default {
       handleModalOk () {
           let methodName = this.transformData.split('.')
           this.dataMethod = methodName[1]
-          // console.log("this.datMethod....",methodName[1],this.transformData)
+
           if (this.dataMethod) {
-            console.log(this.mObj[this.activeTab].mapping[this.modelIndex])
+
             this.mObj[this.activeTab].mapping[this.modelIndex].transform = this.transformData
             this.mObj[this.activeTab].mapping[this.modelIndex].transformMethod = this.dataMethod
           } else {
@@ -647,11 +645,10 @@ export default {
           var self = this
 
           self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].csv_arr, function (row, rinx) {
-            // console.log("called..")
+
             return _.reduce(row, function (result, value, key) {
               let inx = _.find( self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
               if (inx.transform !== '') {
-                  // console.log("called..1")
                 var s = new Function('row', inx.transform).call(self, row) // eslint-disable-line
                 result[key] = s
               } else {
@@ -668,7 +665,6 @@ export default {
         this.handleModalOk()
       },
       transform: function (event) {
-        // console.log("transform called....")
         var targetEl = event.currentTarget
         if (targetEl.getAttribute('data-method')) {
           this.dataMethod = targetEl.getAttribute('data-method')
@@ -687,7 +683,6 @@ export default {
       mapHeader(sysHeader,csvHeader){
         let self = this
         let tab = self.activeTab
-        // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",sysHeader,csvHeader)
         for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
            for(let key in self.mObj[tab].uploadCSV[i]){
              if(key == csvHeader){
@@ -696,67 +691,57 @@ export default {
            }
          }
 
-        // console.log("updated csv after changing mapping..............",self.mObj[tab].mapping)
       },
       startValidation(){
         let self = this
         self.currentStep = 1
         let obj2
         api.request('get', '/uploader/'+ id).then(response => {
-          console.log('response', response)
           obj2 = response.data
           if(response.data.hasOwnProperty("ProductInformation")){
             let Prod_info = response.data["ProductInformation"]
             delete obj2["ProductInformation"]
             Prod_info.validateStatus = "completed"
             obj2["ProductInformation"] = Prod_info
-            // console.log("Prod_info.....",Prod_info)
           }
           if(response.data.hasOwnProperty("ProductPrice")){
             let Prod_pricing = response.data["ProductPrice"]
             delete obj2["ProductPrice"]
             Prod_pricing.validateStatus = "completed"
             obj2["ProductPrice"] = Prod_pricing
-            // console.log("Prod_pricing.....",Prod_pricing)
           }
           if(response.data.hasOwnProperty("ProductImprintData")){
             let Prod_data = response.data["ProductImprintData"]
             delete obj2["ProductImprintData"]
             Prod_data.validateStatus = "completed"
             obj2["ProductImprintData"] = Prod_data
-            // console.log("Prod_data.....",Prod_data)
           }
           if(response.data.hasOwnProperty("ProductImage")){
             let Prod_images = response.data["ProductImage"]
             delete obj2["ProductImage"]
             Prod_images.validateStatus = "completed"
             obj2["ProductImage"] = Prod_images
-            // console.log("Prod_images.....",Prod_images)
           }
           if(response.data.hasOwnProperty("ProductShipping")){
             let Prod_shipping = response.data["ProductShipping"]
             delete obj2["ProductShipping"]
             Prod_shipping.validateStatus = "completed"
             obj2["ProductShipping"] = Prod_shipping
-            // console.log("Prod_shipping.....",Prod_shipping)
           }
           if(response.data.hasOwnProperty("ProductAdditionalCharges")){
             let Prod_charges = response.data["ProductAdditionalCharges"]
             delete obj2["ProductAdditionalCharges"]
             Prod_charges.validateStatus = "completed"
             obj2["ProductAdditionalCharges"] = Prod_charges
-            // console.log("Prod_charges.....",Prod_charges)
           }
           if(response.data.hasOwnProperty("ProductVariationPrice")){
             let Prod_var_price = response.data["ProductVariationPrice"]
               delete obj2["ProductVariationPrice"]
             Prod_var_prices.validateStatus = "completed"
             obj2["ProductVariationPrice"] = Prod_var_price
-            // console.log("Prod_var_price.....",Prod_var_price)
           }
 
           obj2.stepStatus = "validation_completed"
-          // console.log("obj2.....",obj2)
           api.request('put', '/uploader/'+ id,obj2).then(res => {
             self.validating = false
           })
@@ -784,19 +769,15 @@ export default {
               }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
-                console.log('jobqueue response', res)
                 let importObj = {
                   stepStatus : "import_in_progress"
                 }
                 api.request('patch', '/uploader/'+ id,importObj).then(res => {
-                  // console.log('response', res)
                 })
                 .catch(error => {
-                  console.log(error)
                 })
               })
               .catch(error => {
-                console.log(error)
               })
 
         //
@@ -824,16 +805,13 @@ export default {
 
               })
               .catch(error => {
-                console.log(error)
               })
       },
       mapType(sysHeader,type){
-        console.log("***************map type called******",sysHeader,type)
       },
       changeSchema(tab,value){
-        console.log("------value-----",tab,value)
         if(value == "--Add new--"){
-          console.log("called.....")
+
           this.mObj[tab].display = true
           this.mObj[tab].new_flag = 1
           if(this.mObj[tab].uploadDisplay){
@@ -851,7 +829,7 @@ export default {
           // this.mObj[tab].selected_schema = this.mObj[tab].new_schema
           if(tab == 'Product Information'){
             this.mObj[tab].schema = ProductInformationSchema
-            // console.log("***********",this.mObj[tab].schema)
+
             // this.mObj[tab].uploadDisplay = false
             // this.mObj[tab].newSchemaDisplay = true
             // this.mObj[tab].previewDisplay = true
@@ -878,7 +856,7 @@ export default {
           }
 
           let mapObj = this.generateHeadersandMapping(tab)
-          // console.log("++++++++++++++++++ mapObj ++++++++++++++++++",mapObj)
+
 
         }
         else{
@@ -886,13 +864,11 @@ export default {
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
             this.existingSchemaData = res.data[0]
-            // console.log("this.existing/////",this.existingSchemaData)
+
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
-            // console.log("==============currentschema=================",currentschema)
             if(currentschema.length != 0){
               schema_id = currentschema[0].id
               this.mObj[tab].schema = new Schema(currentschema[0].schema)
-              // console.log("***********",this.mObj[tab].schema)
               this.mObj[tab].display = false
 
               if(this.mObj[tab].uploadDisplay){
@@ -918,14 +894,11 @@ export default {
       },
       getMapping(tab){
          if(this.mObj[tab].selected_schema != '--Add new--'){
-          //  console.log("this.mObj[tab].selected_schema",this.mObj[tab].selected_schema)
            this.map = true
            this.mObj[tab].mapping = []
            socket.emit('uploader-csv-file-mapping::find', {fileTypeId : this.mObj[tab].selected_schema,user_id:this.$store.state.user._id}, (e, data) => {
-            //  console.log("data......",data)
              this.mObj[tab].mapping = data.data[0].mapping
              let schema_keys = _.keys(this.mObj[tab].schema.structure);
-            //  console.log("schema_keys.....",schema_keys)
              if(this.mObj[tab].uploadCSV.length != 0){
                this.mObj[tab].newUploadCSV = []
                for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
@@ -948,7 +921,6 @@ export default {
              let index = this.mObj[tab].newUploadCSV.length - 1
               this.mObj[tab].newUploadCSV.splice(index, 1)
               this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
-                // console.log("newUploadcsv +++++++++++++++", this.mObj[tab].newUploadCSV)
                 for(let k=0;k<this.mObj[tab].mapping.length;k++){
                  if(this.mObj[tab].mapping[k].transform != ""){
                    this.transformData = this.mObj[tab].mapping[k].transform
@@ -995,11 +967,8 @@ export default {
 
         $(document).ready(function () {
           $('#csv-file').change(function () {
-            // console.log("called uploadcsv",tab)
             let fileChooser = document.getElementById('csv-file')
-            // console.log("fileChooser....",fileChooser)
             file = fileChooser.files[0]
-            // console.log("file....",file)
             self.loading = true
             self.mObj[tab].uploadDisplay = false
             if (_.contains(self.mObj[tab].allowedFileType, file.type)) {
@@ -1012,19 +981,14 @@ export default {
                 encoding: "UTF-8",
                 skipEmptyLines: false,
                 chunk: function(results, streamer) {
-                  // console.log("recordss======",results.data)
                   self.mObj[tab].uploadCSV = results.data
-                  // console.log("====uploadCSV====",self.mObj[tab].uploadCSV)
                   self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                   self.mObj[tab].headers.push("_id")
-                  // console.log("+++++++++++++++++++++",self.mObj[tab].uploadCSV)
                   if(self.mObj[tab].new_flag == 1){
-                    // console.log("if called.....",self.mObj[tab].new_flag)
 
 
 
                     self.mObj[tab].mapping = []
-                    // console.log("self.mObj[tab].schema",self.mObj[tab].schema)
 
                     self.generateHeadersandMapping(tab)
                     self.mObj[tab].newSchemaDisplay = true
@@ -1032,7 +996,6 @@ export default {
                     self.loading = false
                   }
                   else{
-                    // console.log("else called.....",self.mObj[tab].new_flag)
 
                       // self.mObj[tab].uploadDisplay = false
                       self.mObj[tab].headerDisplay = true
@@ -1049,9 +1012,6 @@ export default {
 
 
                   }
-
-
-
 
                 }
               })
@@ -1084,13 +1044,11 @@ export default {
     generateHeadersandMapping(tab){
       let self = this
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
-      // console.log("schema_keys.....",schema_keys)
       // self.mObj[tab].headers.push("_id")
       self.mObj[tab].newUploadCSV = []
       for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
         let obj = {}
          for(let key in self.mObj[tab].uploadCSV[i]){
-          //  console.log("key....",key,"value....",self.mObj[tab].uploadCSV[i][key])
            for(let j=0;j<schema_keys.length;j++){
              if(schema_keys[j] == key.toLowerCase()){
                  obj[schema_keys[j]] = self.mObj[tab].uploadCSV[i][key]
@@ -1103,15 +1061,12 @@ export default {
          obj["_id"] = uuidV1()
          self.mObj[tab].newUploadCSV.push(obj)
         //  self.mObj[tab].previewDisplay = true
-        //  console.log("++++++++++newuploadCSV............ ",Object.keys(self.mObj[tab].newUploadCSV[0]))
       }
       let index = self.mObj[tab].newUploadCSV.length - 1
       self.mObj[tab].newUploadCSV.splice(index,1)
 
-        //  console.log("newUploadcsv +++++++++++++++", self.mObj[tab].newUploadCSV)
           self.mObj[tab].csv_arr = self.mObj[tab].newUploadCSV
 
-      // console.log("schema.....",self.mObj[tab].schema.structure)
       self.mObj[tab].mapping =[]
       for(let key in self.mObj[tab].schema.structure){
         self.mObj[tab].mapping.push({'sysHeader':key,"schemaObj": self.mObj[tab].schema.structure[key],"csvHeader":"","transform":"","transformMethod":""})
@@ -1126,18 +1081,15 @@ export default {
          }
       }
       //  _.map(self.mObj[tab].mapping,function(o) { if(o.csvHeader == undefined) return o.csvHeader = "--NA--"; })
-      // console.log("mapping after....",self.mObj[tab].mapping)
       //  self.mObj[tab].previewDisplay = true
       return self.mObj[tab].mapping;
     },
     ProceedToValidate(tab){
       let self = this
       let errcols = []
-      // console.log("======= proceed called =====",self.mObj[tab].newUploadCSV)
       let dateValidatorFunc = function (obj, value, fieldName) {
               if(value != "" || value != undefined){
                let date = moment(value)
-               console.log("date.....",date)
                let isValid = date.isValid()
                if (isValid != true) return 'invalid date. please provide date in y-m-d format'
                date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
@@ -1148,7 +1100,6 @@ export default {
 
                 if (value != "" || value != undefined) {
                   let re = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/
-                  console.log("value......",value)
                   if(re.test(value) !== true)
                   return 'invalid url'
                   else
@@ -1304,7 +1255,6 @@ export default {
         if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
           if (value !== undefined) {
             let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
-            console.log("check",check)
             if(check != true)
             return  'invalid allowedValue'
             else {
@@ -1315,7 +1265,6 @@ export default {
       }
 
       let defaultValidatorFunc = function (obj, value, fieldName) {
-        // console.log("%%%%%%%%%%%%%%55555")
         var i
         _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
           if (fieldName === value) {
@@ -1323,7 +1272,6 @@ export default {
           }
         })
         if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== '') {
-          // console.log("default value called from if.....")
           if (value == "")
             return  'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
             else
@@ -1332,7 +1280,6 @@ export default {
         }
 
         let maxLengthValidatorFunc = function (obj, value, fieldName) {
-          console.log("max length called")
           var i
           _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
             if (fieldName === value) {
@@ -1367,11 +1314,9 @@ export default {
         }
       }
 
-        // console.log("add new called ***********************",self.mObj[tab].mapping)
         let schema_Obj = {}
         _.forEach(self.mObj[tab].mapping, function (value, key) {
           if(value.schemaObj.optional == true){
-            // console.log("optional true called during property validation......")
               if(value.schemaObj.type == 'date'){
                 schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: dateValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
               }
@@ -1392,7 +1337,6 @@ export default {
               }
           }
           else if(value.schemaObj.optional == false) {
-            // console.log("optional false called during property validation......")
             if(value.schemaObj.type == 'date'){
               schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionDate,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
             }
@@ -1414,28 +1358,21 @@ export default {
           }
         })
         self.mObj[tab].schema = new Schema(schema_Obj)
-        // console.log("$$$$$$$$$$$$$$ new schema $$$$$$$$$$$$$$$$$",schema)
 
 
-        // console.log("schema...............",schema)
         // var errcols = []
          err_length = 0
         _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
-          // console.log("calleed...")
           self.mObj[tab].schema.validate(value, function (err, newP, errors) {
             if (err) {
               throw err
             } else {
               if (errors.length) {
                 err_length = errors.length
-                // console.log("errors in validation....",key,value,err_length)
-                // console.log("Validation errors!",errors.length)
 
                 if (!_.isEqual(Object.values(value), [""])) {
-                  // console.log("error+++++++++++++++",Object.values(value),Object.keys(value))
                   self.mObj[tab].data1.push(Object.values(value))
                   self.mObj[tab].headers1.push(Object.keys(value))
-                  // console.log("^^^^^^^self.mObj[tab].headers1",self.mObj[tab].headers1)
                   let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
                   _.forEach(errors, (item) => {
                     errcols.push({
@@ -1444,7 +1381,6 @@ export default {
                     })
                     self.mObj[tab].errmsg.push('* ' + item.message + ' at column: ' + item.field)
                   })
-                  // console.log("======errmsg====",self.mObj[tab].errmsg)
                   self.mObj[tab].headerDisplay = false
                   self.mObj[tab].newSchemaDisplay = false
                   self.mObj[tab].previewDisplay = false
@@ -1454,14 +1390,12 @@ export default {
                   self.showerrmsg(errcols,tab)
                 }
               } else {
-                // console.log('row ' + key + ' successfully parsed')
               }
             }
           })
         })
 
       if(err_length == 0){
-        // console.log("++++++++++++++ called without error")
         self.mObj[tab].headerDisplay = false
         self.mObj[tab].newSchemaDisplay = false
         self.mObj[tab].previewDisplay = false
@@ -1479,13 +1413,10 @@ export default {
       self.mObj[tab].uploadDisplay = true
     },
     showerrmsg (errcols,tab,schema) {
-      // console.log("called...... showerrmsg")
       var example1 = document.getElementById('example1')
-      // console.log(".......................",this.mObj[tab].data1[0])
       // _.forEach(, (value) => {
       //   headers.push(value.toLowerCase())
       // })
-      // console.log("haeders......showerrmsg")
       new Handsontable(example1, { // eslint-disable-line
         data: [this.mObj[tab].data1[0]],
         // rowHeaders: true,
@@ -1506,10 +1437,8 @@ export default {
       document.getElementById('hot-display-license-info').style.display = 'none'
     },
     modifyData (tab) {
-      console.log("modify data called....")
       let schema = this.mObj[tab].schema
       let colHeaders = this.mObj[tab].headers1[0]
-      // console.log("headers.....",colHeaders)
       let hotSettingsData = this.mObj[tab].data1
       // let showHandson = this.showHandson // eslint-disable-line
       let errMsgArray = this.mObj[tab].errmsg
@@ -1519,20 +1448,13 @@ export default {
       errMsgArray = []
       var errcols = []
       var self = this
-      // console.log("valueToBeValidat hotSettingsData " , hotSettingsData)
-      // console.log("valueToBeValidat colHeaders " , colHeaders)
       _.forEach(hotSettingsData, (value, key) => {
         let valueToBeValidated = _.object(colHeaders, value)
-        // console.log("value to be validated....",value,"key.....",key)
         schema.validate(valueToBeValidated, (err, newP, errors) => {
           if (err) {} else {
             if (errors.length) {
-              // console.log("Validation errors called from modify....!",key)
-              // console.log("error at : "+ JSON.stringify(errors) + " on row "+ key)
               newHotSettingsData.push(Object.values(value))
-              // console.log("newHotSettingsData ",newHotSettingsData)
               self.mObj[tab].data1 = newHotSettingsData
-              // console.log("========= self.mObj[tab].data1",self.mObj[tab].data1)
               _.forEach(errors, (item) => {
                 errcols.push({
                   cols: _.indexOf(colHeaders, item.field),
@@ -1545,14 +1467,10 @@ export default {
               // errMsgArray.push("error at : "+ JSON.stringify(errors) + " on row "+ key)
               // showHandson = true
             } else {
-              // console.log("=====errmsg====",self.mObj[tab].errmsg[0])
               let modified_field = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(":") + 1);
               modified_field = modified_field.trim()
-              // console.log("modified field.....",modified_field)
               let modifiedField_data = newP[modified_field]
               let modified_id = newP._id
-              // console.log("modified data " , newP,modifiedField_data,modified_id)
-              // console.log("userUploadedDataArray ", userUploadedDataArr)
               let new_arr = []
               lodash.transform(userUploadedDataArr, function(result, n) {
                   if (n._id == modified_id) {
@@ -1560,28 +1478,20 @@ export default {
                   }
                   new_arr.push(n)
                   })
-              //  console.log("res",new_arr)
 
               // finalModifiedDataArray.push(newP)
-              // console.log("11111111111",finalModifiedDataArray)
               // res = userUploadedDataArr.map(obj => finalModifiedDataArray.find(o => o._id === obj._id) || obj)
-              // console.log("res......",res)
               userUploadedDataArr = []
               userUploadedDataArr = new_arr
-              //  console.log("userUploadedDataArr......",userUploadedDataArr)
             }
           }
         })
       })
-      // console.log("@@@@@@res " , res)
       if (res !== undefined) {
         this.mObj[tab].newUploadCSV = res
-        // console.log("++++++updated csv......",this.mObj[tab].newUploadCSV)
       }
 
-      // console.log("newHotSettingsData..............",newHotSettingsData)
       if (newHotSettingsData.length == 0) {
-        // console.log("modify if called.....")
         self.mObj[tab].errmsg = []
         $('table.htCore').each(function () {
           this.remove()
@@ -1604,10 +1514,8 @@ export default {
         //   log: logs
         // }
         // api.request('patch', '/import-tracker/' + id, obj).then(function (res) {
-        //   console.log('response', res.data)
         // })
         // .catch(error => {
-        //   console.log(error)
         // })
       } else {
         // $('.ht_clone_top handsontable').remove()
@@ -1633,9 +1541,7 @@ export default {
         }
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
-            // console.log('response', res)
             schema_id = res.data.id
-            // console.log("schema_id....",schema_id)
             let CSVFileObj = {
               name : file.name,
               size: file.size,
@@ -1647,9 +1553,7 @@ export default {
               user_id: self.$store.state.user._id
             }
             api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-              // console.log('response', result)
               CSVFile_id = result.data.id
-              // console.log("-------csv_file_id-------",CSVFile_id)
 
               let mappingObj = {
                 mapping : self.mObj[tab].mapping,
@@ -1662,10 +1566,8 @@ export default {
               }
 
               api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
-                // console.log('response', response)
 
                 let name = tab.replace(/\s/g, "")
-                // console.log("name...",name)
                 obj1 = {}
                 obj1[name] = {
                   id: CSVFile_id,
@@ -1679,7 +1581,6 @@ export default {
                 var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
                   return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
                 });
-                // console.log("newCSV.......",newCSV)
 
                 self.loading = false
                 self.mObj[tab].preview = true
@@ -1692,22 +1593,18 @@ export default {
                 }
                 socket.emit('pdmData', obj, (err, data) => {
                   if (err) {
-                    console.log(err)
                     self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
                   }
                 })
               })
               .catch(error => {
-                console.log(error)
               })
 
             })
             .catch(error => {
-              console.log(error)
             })
         })
         .catch(error => {
-          console.log(error)
         })
       }
       else {
@@ -1723,9 +1620,7 @@ export default {
           user_id: self.$store.state.user._id
         }
         api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-          // console.log('response', result)
           CSVFile_id = result.data.id
-          // console.log("-------csv_file_id-------",CSVFile_id)
 
           obj1 = {}
           let name = tab.replace(/\s/g, "")
@@ -1742,7 +1637,6 @@ export default {
           var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
             return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
           });
-          // console.log("newCSV.......",newCSV)
           self.loading = false
           self.mObj[tab].previewDisplay = true
           self.validate = false
@@ -1752,13 +1646,11 @@ export default {
           }
           socket.emit('pdmData', obj, (err, data) => {
             if (err) {
-              console.log(err)
               self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
             }
           })
       })
       .catch(error => {
-        console.log(error)
       })
 
     }
@@ -1768,7 +1660,6 @@ export default {
     'uploader': {
       updated (message) {
           let self = this
-          // console.log("messages....",message)
           if(message.stepStatus == "import_to_confirm"){
             self.import1 = true
           }
@@ -1781,14 +1672,12 @@ export default {
       self.loading = true
       if(this.$store.state.jobData.hasOwnProperty("id")){
         let jobData = this.$store.state.jobData
-          // console.log("+++++++++jobData+++",jobData)
         if(jobData.stepStatus == 'upload_pending'){
           this.currentStep = 0
           if(jobData.stepStatus == 'upload_pending'){
             if(Object.keys(jobData).indexOf("ProductInformation") >= 0){
               // self.mObj["Product Information"].loading = true
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductinformation').then(res => {
-                // console.log("%%%%%%%%%%%%%",res)
 
                 self.mObj["Product Information"].newUploadCSV = res.data
                 self.mObj["Product Information"].headers = Object.keys(res.data[0])
@@ -1803,7 +1692,6 @@ export default {
             if(Object.keys(jobData).indexOf("ProductPrice") >= 0){
                 // self.mObj["Product Price"].loading = true
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductprice').then(res => {
-                // console.log("%%%%%%%%%%%%%",res)
 
                 self.mObj["Product Price"].newUploadCSV = res.data
                 self.mObj["Product Price"].headers = Object.keys(res.data[0])
@@ -1816,7 +1704,6 @@ export default {
             if(Object.keys(jobData).indexOf("ProductImprintData") >= 0){
               // self.mObj["Product Imprint Data"].loading = true
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimprintdata').then(res => {
-                // console.log("%%%%%%%%%%%%%",res)
 
                 self.mObj["Product Imprint Data"].newUploadCSV = res.data
                 self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
@@ -1829,7 +1716,6 @@ export default {
             if(Object.keys(jobData).indexOf("ProductShipping") >= 0){
               // self.mObj["Product Shipping"].loading = true
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductshipping').then(res => {
-                // console.log("%%%%%%%%%%%%%",res)
 
                 self.mObj["Product Shipping"].newUploadCSV = res.data
                 self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
@@ -1842,7 +1728,6 @@ export default {
             if(Object.keys(jobData).indexOf("ProductImage") >= 0){
               // self.mObj["Product Image"].loading = true
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimage').then(res => {
-                // console.log("%%%%%%%%%%%%%",res)
 
                 self.mObj["Product Image"].newUploadCSV = res.data
                 self.mObj["Product Image"].headers = Object.keys(res.data[0])
@@ -1855,7 +1740,6 @@ export default {
             if(Object.keys(jobData).indexOf("ProductAdditionalCharges") >= 0){
               // self.mObj["Product Additional Charges"].loading = true
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductadditionalcharges').then(res => {
-                // console.log("%%%%%%%%%%%%%",res)
 
                 self.mObj["Product Additional Charges"].newUploadCSV = res.data
                 self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
@@ -1868,7 +1752,6 @@ export default {
             if(Object.keys(jobData).indexOf("ProductVariationPrice") >= 0){
               // self.mObj["Product Variation Price"].loading = true
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductvariationprice').then(res => {
-                // console.log("%%%%%%%%%%%%%",res)
 
                 self.mObj["Product Variation Price"].newUploadCSV = res.data
                 self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
@@ -1890,15 +1773,12 @@ export default {
       }
 
       socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
-        // console.log("OOOOOOOOOOOOOOOOOO",res)
         self.existingSchemaData = res.data[0]
-        // console.log("+++++++++++",self.existingSchemaData)
         let schemaNames = _.map(res.data, 'name');
         _.forEach(schemaNames,(value,key) => {
             self.schemaList.push({"value":value,"label":value})
         })
         self.schemaList = self.schemaList.reverse()
-        // console.log("self.schemaList.....",self.schemaList)
         if(schemaNames.length == 0){
           self.mObj["Product Information"].selected_schema = "--Add new--"
           self.mObj["Product Price"].selected_schema = "--Add new--"

@@ -70,7 +70,6 @@ export default {
     },
     methods:{
       getData(value){
-        // console.log("dataa cameeeeeeeeeeeeeeee...",value)
         // this.broadcast("Settings","data",value)
       }
     },
@@ -78,16 +77,13 @@ export default {
       'uploader': {
         updated (message) {
             let self = this
-            // console.log("messages....",message)
             for(var i=0;i<self.data2.length;i++){
                 if(self.data2[i].id == message.id){
                     index = i
                 }
             }
-            // console.log("index",index)
 
             self.data2.splice(index, 1);
-            // console.log("message after splicing...",self.data2)
             self.data2.push(message)
             self.data2 = _.sortBy(self.data2, 'createdAt');
             // self.data2 = desc.reverse()
@@ -96,14 +92,11 @@ export default {
         },
         created (data) {
           let self = this
-          // console.log('connectiondata created..', data)
-          // console.log("data.....",data)
            self.data2.push(data)
            self.data2 = _.sortBy(self.data2, 'createdAt');
         //  self.data2 = desc.reverse()
         },
         removed (data) {
-          // console.log('connectiondata removed..', data)
           this.init()
         }
       }
@@ -111,11 +104,9 @@ export default {
     mounted(){
       var self = this
       socket.emit('uploader::find', {user_id : this.$store.state.user._id}, (e, data) => {
-        // console.log("response",data.data)
         for(var i=0;i<data.data.length;i++){
           self.data2.push(data.data[i])
         }
-        // console.log("------------>",self.data2)
       })
 
     }
