@@ -72,11 +72,11 @@ export default {
         if (valid) {
           this.loading = true
           var auth = await modelAuthentication.social(this.formLogin).catch(error => {
-            // console.log(error)
+
 						this.$Message.error(error.response.data)
             return
           })
-          // console.log(auth)
+          
           if (auth) {
             this.$store.commit('SET_TOKEN', auth.logintoken)
 						// Token Store in cookie

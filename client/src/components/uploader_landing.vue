@@ -236,7 +236,6 @@ export default {
       abort(){
         let self = this
         api.request('delete', '/uploader/' + this.$route.params.id).then(res => {
-          // console.log("==================",res)
           self.$Notice.error({
                      title: 'Your files has been deleted'
                  });
@@ -266,12 +265,9 @@ export default {
     },
 
     mounted(){
-      console.log("landing page.....")
       socket.emit('uploader::find', {id: this.$route.params.id}, (e, data) => {
         this.$store.state.jobData = data.data[0]
-        // console.log("++++++++++++++",  this.$store.state.jobData)
         this.job.push(data.data[0])
-        // console.log("^^^^^^^^^^^^^^",this.job)
         this.keys = Object.keys(this.job[0])
         for(let i=0 ;i<this.keys.length;i++){
           if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||

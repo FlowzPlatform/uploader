@@ -125,7 +125,6 @@ export default {
            user_id:this.$store.state.user._id
          }
          api.request('post', '/uploader', obj).then(res => {
-           // console.log("==================",res)
            id = res.data.id
            this.$router.push('/upload/' + id)
          })
@@ -134,7 +133,6 @@ export default {
     },
     mounted(){
       socket.emit('uploader::find', {user_id:this.$store.state.user._id,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
-        // console.log("data......",data)
         if (data.data.length !== 0) {
           this.$router.push('/landing/' + data.data[0].id)
         }

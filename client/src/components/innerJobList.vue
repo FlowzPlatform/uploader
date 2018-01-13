@@ -33,14 +33,14 @@
             }
         },
         mounted(){
-          // console.log("row.....",this.row)
+
           for(var key in this.row) {
 
               if (key == "ProductInformation" || key == "ProductPrice" || key == "ProductImprintData") {
                   this.data3.push({"name":key,"totalNoOfRecords":this.row[key].totalNoOfRecords,"uploadstatus" : this.row[key].uploadStatus,"validatestatus": this.row[key].validateStatus})
               }
           }
-          // console.log("this.data3.....",this.data3)
+          
         }
     };
 </script>
