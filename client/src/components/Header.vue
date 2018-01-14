@@ -61,4 +61,4 @@ import psl from 'psl'
       }
     }
   }
-</script>>
+</script>

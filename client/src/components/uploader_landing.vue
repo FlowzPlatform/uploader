@@ -205,7 +205,7 @@ export default {
       cancel(){
         this.modal1 = false
       },
-
+      //takes to the main upload page
       continue1(){
         this.$router.push('/upload/' + this.$route.params.id)
       }

@@ -37,7 +37,7 @@
           convert(item){
             item = item.replace(/([A-Z])/g, ' $1').trim()
             return item
-          },
+          }
         },
         mounted(){
           for(var key in this.row) {

@@ -2037,21 +2037,6 @@ export default {
     border-right: 0;
     /*margin-left: -3%;*/
 }
-/*.ivu-table th {
-    height: 40px;
-    white-space: nowrap;
-    overflow: hidden;
-    background-color: black;
-    color: #fff;
-    font-size: 13px;
-    padding: 9px;
-}
-.ivu-table td {
-    background-color: #fff;
-    transition: background-color .2s ease-in-out;
-    font-size: 13px;
-    padding: 9px;
-}*/
 .customtable th {
   height: 40px !important;
   white-space: nowrap;

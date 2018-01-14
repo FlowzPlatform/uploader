@@ -131,7 +131,7 @@ export default {
           }
         }
         else{
-          this.$Notice.info({
+          self.$Notice.info({
                    title: 'No Data Available',
            });
         }
