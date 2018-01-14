@@ -40,11 +40,13 @@
           }
         },
         mounted(){
+
           for(var key in this.row) {
               if (key == "ProductInformation" || key == "ProductPrice" || key == "ProductImprintData") {
                   this.data3.push({"name":key,"totalNoOfRecords":this.row[key].totalNoOfRecords,"uploadstatus" : this.row[key].uploadStatus,"validatestatus": this.row[key].validateStatus})
               }
           }
+
         }
     };
 </script>

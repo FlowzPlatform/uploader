@@ -214,6 +214,7 @@ export default {
 
     mounted(){
       socket.emit('uploader::find', {id: this.$route.params.id}, (e, data) => {
+
         if(data.data.length != 0){
           this.$store.state.jobData = data.data[0]
           this.job.push(data.data[0])
@@ -221,6 +222,7 @@ export default {
           for(let i=0 ;i<this.keys.length;i++){
             if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
             this.keys[i] == 'ProductVariationPrice'){
+
               this.show = true
             }
           }

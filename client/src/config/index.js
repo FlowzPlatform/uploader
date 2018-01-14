@@ -1,7 +1,6 @@
-// console.log('process.env.NODE_ENV', process.env)
 var temp = {
   serverURI: 'http://localhost:3034',
-  socketURI: 'http://localhost:3034',
+  socketURI: 'http://localhost:4034',
   fixedLayout: false,
   hideLogoOnMobile: false,
   microURI: 'http://auth.flowzcluster.tk/api',
@@ -20,7 +19,7 @@ var temp = {
 if (process.env.NODE_ENV !== 'development') {
   temp = {
     serverURI: 'http://api.flowzcluster.tk/dbetl', // 'http://api.flowzcluster.tk/dbetl', // ws.flowzcluster.tk:4034
-    socketURI: 'ws://ws.flowzcluster.tk:3034',
+    socketURI: 'ws://ws.flowzcluster.tk:4034',
     fixedLayout: false,
     hideLogoOnMobile: false,
     microURI: 'http://auth.flowzcluster.tk/api',
