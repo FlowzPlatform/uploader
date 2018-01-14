@@ -3,7 +3,7 @@
         <Row class="expand-row" v-for="(item,index) in data3">
             <Col span="6">
                 <span class="expand-key">File Name: </span>
-                <span class="expand-value">{{item.name}}</span>
+                <span class="expand-value">{{convert(item.name)}}</span>
             </Col>
             <Col span="6">
                 <span class="expand-key">Total No of Records: </span>
@@ -32,15 +32,21 @@
                 data3: []
             }
         },
+        methods:{
+          //converts into uppercase
+          convert(item){
+            item = item.replace(/([A-Z])/g, ' $1').trim()
+            return item
+          }
+        },
         mounted(){
 
           for(var key in this.row) {
-
               if (key == "ProductInformation" || key == "ProductPrice" || key == "ProductImprintData") {
                   this.data3.push({"name":key,"totalNoOfRecords":this.row[key].totalNoOfRecords,"uploadstatus" : this.row[key].uploadStatus,"validatestatus": this.row[key].validateStatus})
               }
           }
-          
+
         }
     };
 </script>

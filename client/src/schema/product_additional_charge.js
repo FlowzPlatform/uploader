@@ -1,16 +1,6 @@
 var Schema = require('simpleschema')
 /*eslint-disable*/
 export const ProductAdditionalChargeSchema = new Schema({
-    // sr_no: {
-    //     type: "number",
-    //     label: "sr no",
-    //     max: 1090,
-    //     optional: true,
-    //     allowedValues: [],
-    //     defaultValue: '',
-    //     maxLength : '',
-    //     regEx:''
-    // },
     product_id: {
         type: "string",
         label: "Product Id",
@@ -338,33 +328,6 @@ export const ProductAdditionalChargeSchema = new Schema({
         maxLength : '',
         regEx:''
     },
-    // fileID: {
-    //     type: "string",
-    //     label: "file ID",
-    //     optional: true,
-    //     allowedValues: [],
-    //     defaultValue: '',
-    //     maxLength : '',
-    //     regEx:''
-    // },
-    // owner: {
-    //     type: "string",
-    //     label: "owner",
-    //     optional: true,
-    //     allowedValues: [],
-    //     defaultValue: '',
-    //     maxLength : '',
-    //     regEx:''
-    // },
-    // username: {
-    //     type: "string",
-    //     label: "username",
-    //     optional: true,
-    //     allowedValues: [],
-    //     defaultValue: '',
-    //     maxLength : '',
-    //     regEx:''
-    // },
     _id: {
         type: "string",
         label: "_id",

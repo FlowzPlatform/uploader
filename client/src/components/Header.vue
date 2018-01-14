@@ -1,13 +1,6 @@
 <template>
     <Menu mode="horizontal" :theme="'primary'">
         <Row type="flex">
-        <!-- <Col :span="1" v-if="toggeleEnable">
-            <Row type="flex" justify="end" align="middle">
-              <span @click="$store.state.sidenavtoggle = !$store.state.sidenavtoggle">
-                <Icon type="navicon-round" :size="32" style="line-height: inherit;cursor:pointer"></Icon>
-              </span>
-            </Row>
-        </Col> -->
         <Col span="6">
             <div class="f-logo">
                 <img src="../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
@@ -16,12 +9,6 @@
         <Col span="18">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
-                    <!-- <Menu-item name="1">
-                        <router-link to="/schemaList">
-                            <Icon type="navicon-round" :size="14"></Icon>
-                            Schema
-                        </router-link>
-                    </Menu-item> -->
                     <Menu-item name="1">
                         <router-link to="/uploader-joblist">
                             <Icon type="navicon-round" :size="14"></Icon>
@@ -59,9 +46,6 @@
 import psl from 'psl'
   export default {
     computed: {
-      // toggeleEnable () {
-      //   return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
-      // },
       user () {
           return {emailId: 'test'}
       }
@@ -77,4 +61,4 @@ import psl from 'psl'
       }
     }
   }
-</script>>
+</script>
