@@ -1,11 +1,11 @@
 <template>
-  <div class="right" style="margin-top: 150px">
+  <div class="right" v-if="showDiv">
     <Row>
       <h2 style="margin-top: 12px;">Choose a method to upload the data</h2>
     </Row>
     <Row>
       <Form>
-        <Row style="padding: 15px !important">
+        <Row class="uploaderRow" style="padding: 15px !important">
           <ul class="mySection">
             <div v-for="(method,mIndex) in methods1">
               <Col span="6" style="padding: 0px">
@@ -27,7 +27,8 @@
           </div>
         </Row>
         <div class="landing_progress">
-            <Button type="primary" size="large" class="custombtn" @click="Proceed()" :disabled="disabled">Proceed</Button>
+            <Button type="primary" size="large" class="custombtn" @click="Proceed()" :disabled="disabled" v-if="!loadingBtn">Proceed</Button>
+            <Button type="primary" size="large" class="custombtn" v-if="loadingBtn">Loading...</Button>
         </div>
         <div id="display-error" style="display:none">Please choose a method of your choice.</div>
       </Form>
@@ -65,7 +66,9 @@ export default {
            { name: 'UPDATE',selected:false}
          ],
          selectedMethod:'',
-         disabled: true
+         disabled: true,
+         showDiv: false,
+         loadingBtn: false
         }
     },
     methods:{
@@ -111,6 +114,7 @@ export default {
      },
      // creates a job in import-tracker service
      Proceed(){
+       this.loadingBtn = true
        if(this.selectedMethod == ''){
          $('#display-error').fadeIn().delay(4000).fadeOut();
        }
@@ -125,7 +129,6 @@ export default {
            user_id:this.$store.state.user._id
          }
          api.request('post', '/uploader', obj).then(res => {
-           // console.log("==================",res)
            id = res.data.id
            this.$router.push('/upload/' + id)
          })
@@ -134,11 +137,12 @@ export default {
     },
     mounted(){
       socket.emit('uploader::find', {user_id:this.$store.state.user._id,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
-        // console.log("data......",data)
         if (data.data.length !== 0) {
+          this.showDiv = false
           this.$router.push('/landing/' + data.data[0].id)
         }
         else {
+          this.showDiv = true
           this.$store.state.jobData = {}
 
         }
@@ -148,12 +152,15 @@ export default {
 </script>
 <style scoped>
 /** { box-sizing: border-box; margin: 0; padding: 0; }*/
+.uploaderRow {
+  padding: 12px !important;
+}
 ul.mySection { margin: 16px; list-style: none; }
 ul.mySection li { margin: 0px 0px; display: inline-block;}
 ul.mySection input[type=radio] { display: none; }
 ul.mySection label {
     display: table-cell; cursor: pointer;
-    width: 175px !important;
+    width: 160px !important;
     height: 105px !important;
     vertical-align: middle; text-align: center;
     background-color: #494e6b;
@@ -162,10 +169,6 @@ ul.mySection label {
 ul.mySection label:hover {
     background-color: #7c7e86; color: aquamarine; transition: all 0.25s;
 }
-/*ul.mySection label[data-v-ae883134]:active{
-    background-color:  #1fb58f;
-    color: #fff;
-}*/
 .dropbtn {
     background-color: #4CAF50;
     color: white;
@@ -179,7 +182,6 @@ ul.mySection label:hover {
   }
   #dv {
   height: 185px;
-  /*margin-left: 13%;*/
   margin-bottom: 19px;
   width: 90px;
   width: 74%;
@@ -200,10 +202,7 @@ ul.mySection label:hover {
 }
 
 .right {
-    /*position: absolute;*/
-    /*left: 10%;
-    top: 60%;*/
-    margin-top: 200px;
+    margin-top: 100px !important;
     margin-left: auto;
     margin-right: auto;
     text-align: -webkit-center;
@@ -216,25 +215,12 @@ ul.mySection label:hover {
     padding: 10px;
     width:8%;
 }
-/*.ivu-btn-primary {
-    position: relative;
-    display: inline-block;
-    padding: 0 25px;
-    outline: none;
-    border: none;
-    background: #1fb58f;
-    color: #fff;
-     text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 1em;
-    line-height: 3;
-    margin-bottom:10px;
-}*/
+
 .selected_tick {
       margin-left: -65px;
       position: absolute;
 }
-/*button {margin-left: 20px;}*/
+
 #display-error {
     display:none;
     background-color: #f2dede;
@@ -243,12 +229,7 @@ ul.mySection label:hover {
     padding: 4px;
     margin-top: 9px;
 }
-/*.ivu-btn-ghost{
-  padding: 0px 9px !important;
-  float: right;
-  border: 0;
-}
-*/
+
 .ghtbtn {
   padding: 0px 9px !important;
   float: right;

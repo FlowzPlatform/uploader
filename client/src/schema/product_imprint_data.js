@@ -2,16 +2,6 @@ var Schema = require('simpleschema')
 /*eslint-disable*/
 export const ProductImprintDataSchema = new Schema({
 
-    // sr_no: {
-    //     type: "number",
-    //     label: "sr no",
-    //     max: 1090,
-    //     optional: true,
-    //     allowedValues: [],
-    //     defaultValue: '',
-    //     maxLength : '',
-    //     regEx:''
-    // },
     product_id: {
         type: "string",
         label: "Product Id",

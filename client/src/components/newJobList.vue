@@ -69,41 +69,48 @@ export default {
         }
     },
     methods:{
-      getData(value){
-        // console.log("dataa cameeeeeeeeeeeeeeee...",value)
-        // this.broadcast("Settings","data",value)
-      }
+
     },
     feathers: {
       'uploader': {
         updated (message) {
             let self = this
-            // console.log("messages....",message)
-            for(var i=0;i<self.data2.length;i++){
+            if(message.user_id == self.$store.state.user._id){
+              for(var i=0;i<self.data2.length;i++){
                 if(self.data2[i].id == message.id){
-                    index = i
+                  index = i
                 }
-            }
-            // console.log("index",index)
+              }
 
-            self.data2.splice(index, 1);
-            // console.log("message after splicing...",self.data2)
-            self.data2.push(message)
-            self.data2 = _.sortBy(self.data2, 'createdAt');
-            // self.data2 = desc.reverse()
+              self.data2.splice(index, 1);
+              for(var key in message){
+                if(key == "createdAt"){
+                  let created_at = moment(message[key]).fromNow()
+                  delete message[key]
+                  message["createdAt"] = created_at
+                }
+              }
+              self.data2.push(message)
+              self.data2 = _.sortBy(self.data2, 'createdAt');
+            }
 
 
         },
         created (data) {
           let self = this
-          // console.log('connectiondata created..', data)
-          // console.log("data.....",data)
-           self.data2.push(data)
-           self.data2 = _.sortBy(self.data2, 'createdAt');
-        //  self.data2 = desc.reverse()
+          if(data.user_id == self.$store.state.user._id){
+            for(var key in data){
+              if(key == "createdAt"){
+                let created_at = moment(data[key]).fromNow()
+                delete data[key]
+                data["createdAt"] = created_at
+              }
+            }
+            self.data2.push(data)
+            self.data2 = _.sortBy(self.data2, 'createdAt');
+          }
         },
         removed (data) {
-          // console.log('connectiondata removed..', data)
           this.init()
         }
       }
@@ -111,11 +118,23 @@ export default {
     mounted(){
       var self = this
       socket.emit('uploader::find', {user_id : this.$store.state.user._id}, (e, data) => {
-        // console.log("response",data.data)
-        for(var i=0;i<data.data.length;i++){
-          self.data2.push(data.data[i])
+        if(data.data.length != 0){
+          for(var i=0;i<data.data.length;i++){
+            for(var key in data.data[i]){
+              if(key == "createdAt"){
+                let created_at = moment(data.data[i][key]).fromNow()
+                delete data.data[i][key]
+                data.data[i]["createdAt"] = created_at
+              }
+            }
+            self.data2.push(data.data[i])
+          }
         }
-        // console.log("------------>",self.data2)
+        else{
+          this.$Notice.info({
+                   title: 'No Data Available',
+           });
+        }
       })
 
     }

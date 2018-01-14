@@ -13,9 +13,6 @@
                   <h1>Enter Email</h1>
                 </div>
               </div>
-              <!-- <div style="text-align: center;">
-                <img src="../assets/images/Flowz-Icon.png" style="width:60%;"/>
-              </div> -->
             </FormItem>
             <FormItem prop="email" class="animate1 bounceIn">
               <Input type="text" v-model="formLogin.email" placeholder="Email ID">
@@ -72,11 +69,10 @@ export default {
         if (valid) {
           this.loading = true
           var auth = await modelAuthentication.social(this.formLogin).catch(error => {
-            // console.log(error)
+
 						this.$Message.error(error.response.data)
             return
           })
-          // console.log(auth)
           if (auth) {
             this.$store.commit('SET_TOKEN', auth.logintoken)
 						// Token Store in cookie
@@ -88,7 +84,7 @@ export default {
           }
           this.loading = false
         } else {
-          // this.$Message.error('Form validation failed!')
+
         }
       })
     }

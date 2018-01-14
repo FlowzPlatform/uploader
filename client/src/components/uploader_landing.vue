@@ -2,45 +2,6 @@
   <div id="landingPageStatusReport" class="clearfix" style="overflow:auto;border: 3px solid #7c7e86;color: black;text-align: center;padding-top: 4px;margin: 50px;padding-bottom: 26px;">
     <h2 style="text-transform:uppercase;margin-top: 18px;">Welcome back,{{job[0].username}}</h2>
     <p style="margin-top: 10px;margin-bottom: 10px;font-size: 15px;">Following is the latest status of your file upload process.You can continue with your current status or abort the whole process to start again</p>
-    <!-- <table class="landingStatus" border='1|1'>
-      <tr>
-        <td style='font-weight:bold'>
-          uploadType
-        </td>
-        <td>
-          <div class="upload-type">
-            <span>
-                <i class="fa fa-dot-circle-o" v-if="job[0].uploadType == 'replace'"></i>
-                <i class="fa fa-circle-o" v-else></i>
-              Replace
-            </span>
-            <span>
-              <i class="fa fa-dot-circle-o" v-if="job[0].uploadType == 'append'"></i>
-              <i class="fa fa-circle-o" v-else></i>
-              Append
-            </span>
-            <span>
-              <i class="fa fa-dot-circle-o" v-if="job[0].uploadType == 'upsert'"></i>
-              <i class="fa fa-circle-o" v-else></i>
-              Upsert
-            </span>
-            <span>
-              <i class="fa fa-dot-circle-o" v-if="job[0].uploadType == 'update'"></i>
-              <i class="fa fa-circle-o" v-else></i>
-              Update
-            </span>
-          </div>
-        </td>
-      </tr>
-        <tr>
-          <td style='font-weight:bold'>
-            Started Process at
-          </td>
-          <td style='font-weight:500'>
-            {{job[0].created}}
-          </td>
-        </tr>
-      </table> -->
 
       <div class="ivu-tabs-tabpane">
       <div class="ivu-table-wrapper">
@@ -54,7 +15,7 @@
             <tr>
               <td class="">
                 <div class="ivu-table-cell upload">
-                  <span style='font-weight:bold'>uploadType</span>
+                  <span style='font-weight:bold;font-size:16px !important'>uploadType</span>
                 </div>
               </td>
               <td class="">
@@ -87,12 +48,12 @@
             <tr>
               <td class="">
                 <div class="ivu-table-cell upload">
-                  <span style='font-weight:bold'>Started Process at</span>
+                  <span style='font-weight:bold; font-size:16px !important'>Started Process at</span>
                 </div>
               </td>
               <td class="">
                 <div class="ivu-table-cell upload">
-                  <span style='font-weight:500'>{{job[0].createdAt}}</span>
+                  <span style='font-weight:500; font-size:16px !important'>{{moment(job[0].createdAt).fromNow()}}</span>
                 </div>
               </td>
             </tr>
@@ -113,22 +74,22 @@
           <tr>
           <th class="">
             <div class="ivu-table-cell upload">
-              <span style='font-weight:bold'>File</span>
+              <span style='font-weight:bold; font-size:16px !important'>File</span>
             </div>
           </th>
           <th class="">
             <div class="ivu-table-cell upload">
-              <span style='font-weight:bold'>Upload Status</span>
+              <span style='font-weight:bold; font-size:16px !important'>Upload Status</span>
             </div>
           </th>
           <th class="">
             <div class="ivu-table-cell upload">
-              <span style='font-weight:bold'>Validation Status</span>
+              <span style='font-weight:bold; font-size:16px !important'>Validation Status</span>
             </div>
           </th>
           <th class="">
             <div class="ivu-table-cell upload">
-              <span style='font-weight:bold'>Import Status</span>
+              <span style='font-weight:bold; font-size:16px !important'>Import Status</span>
             </div>
           </th>
          </tr>
@@ -137,22 +98,22 @@
           <tr  v-if="item == 'ProductInformation' || item == 'ProductPrice' || item == 'ProductImprintData' || item == 'ProductImage' || item == 'ProductShipping' || item == 'ProductAdditionalCharges' || item == 'ProductVariationPrice'">
             <td class="">
               <div class="ivu-table-cell upload">
-                <span style='font-weight:500px'>{{convert(item)}}</span>
+                <span style='font-weight:500px; font-size:16px !important'>{{convert(item)}}</span>
               </div>
             </td>
             <td style='text-transform:capitalize;'>
                 <div class="ivu-table-cell upload">
-                <span style='font-weight:500px'>{{job[0][item].uploadStatus}}</span>
+                <span style='font-weight:500px; font-size:16px !important'>{{job[0][item].uploadStatus}}</span>
               </div>
             </td>
             <td style='text-transform:capitalize;'>
               <div class="ivu-table-cell upload">
-               <span style='font-weight:500px'>{{job[0][item].validateStatus}}</span>
+               <span style='font-weight:500px; font-size:16px !important'>{{job[0][item].validateStatus}}</span>
              </div>
             </td>
             <td>
               <div class="ivu-table-cell upload">
-                <span style='font-weight:200px'>Pending</span>
+                <span style='font-weight:500px; font-size:16px !important'>Pending</span>
               </div>
             </td>
           </tr>
@@ -164,22 +125,6 @@
   </div>
 </div>
 
-      <!-- <table border='1|1' class="landingDetails" v-if="job[0].status != 'upload_pending'">
-        <th>File</th><th>Upload Status</th><th>Validation Status</th><th>Import Status</th>
-         <tr>
-            <td>
-            </td>
-            <td style='text-transform:capitalize;'>
-            <i class="fa fa-check-circle" style="color:green;color: #008000;font-size: 1.3em;" aria-hidden="true"></i>
-            </td>
-            <td style='text-transform:capitalize;'>
-            <i class="fa fa-check-circle" style="color:green;color: #008000;font-size: 1.3em;text-transform:capitalize;" aria-hidden="true"></i>
-            </td>
-            <td>
-              Pending
-            </td>
-        </tr>
-      </table> -->
 
       <div class="landingBtnDiv">
         <Button type="error" class="landingAbortBtn" @click="modal1 = true">Abort</Button>
@@ -210,6 +155,7 @@ import config from '@/config'
 import io from 'socket.io-client'
 import feathers from 'feathers/client'
 import socketio from 'feathers-socketio/client'
+var moment = require('moment');
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -218,6 +164,7 @@ if (process.env.NODE_ENV !== 'development') {
   socket = io(config.socketURI)
 }
 const app = feathers().configure(socketio(socket))
+moment().format();
 let id
 export default {
     name: 'uploaderLanding',
@@ -227,7 +174,8 @@ export default {
             job: [],
             modal1:false,
             keys: [],
-            show: false
+            show: false,
+            moment : moment
         }
     },
     methods:{
@@ -236,7 +184,6 @@ export default {
       abort(){
         let self = this
         api.request('delete', '/uploader/' + this.$route.params.id).then(res => {
-          // console.log("==================",res)
           self.$Notice.error({
                      title: 'Your files has been deleted'
                  });
@@ -266,18 +213,22 @@ export default {
     },
 
     mounted(){
-      console.log("landing page.....")
       socket.emit('uploader::find', {id: this.$route.params.id}, (e, data) => {
-        this.$store.state.jobData = data.data[0]
-        // console.log("++++++++++++++",  this.$store.state.jobData)
-        this.job.push(data.data[0])
-        // console.log("^^^^^^^^^^^^^^",this.job)
-        this.keys = Object.keys(this.job[0])
-        for(let i=0 ;i<this.keys.length;i++){
-          if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
-          this.keys[i] == 'ProductVariationPrice'){
+        if(data.data.length != 0){
+          this.$store.state.jobData = data.data[0]
+          this.job.push(data.data[0])
+          this.keys = Object.keys(this.job[0])
+          for(let i=0 ;i<this.keys.length;i++){
+            if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
+            this.keys[i] == 'ProductVariationPrice'){
               this.show = true
+            }
           }
+        }
+        else{
+          this.$Notice.info({
+                   title: 'No Data Available',
+           });
         }
       })
     }
@@ -336,64 +287,20 @@ export default {
   line-height: 2.5  !important;
   font-size:14px !important;
 }
-/*.ivu-btn-primary{
-  width: 160px ;
-  border: none ;
-  background: #1fb58f ;
-  color: #fff ;
-  letter-spacing: 1px ;
-  line-height: 2.5;
-  font-size:14px;
-}
 
-.ivu-btn-primary:hover{
-  width: 160px ;
-  border: none ;
-  background: #1fb58f ;
-  color: #fff ;
-  letter-spacing: 1px ;
-  line-height: 2.5;
-  font-size:14px;
-}*/
 button, html input[type="button"], input[type="reset"], input[type="submit"] {
     -webkit-appearance: button;
     cursor: pointer;
     font-size: 14px;
 }
-/*.landingStatus{
-    margin:auto;
-    width:850px;
-    border:solid 1px #ccc;
-    border-collapse: collapse;
-}*/
+
 .ivu-table table{
     margin:auto;
-    /*width:850px;*/
     border:solid 1px #ccc;
     border-collapse: collapse;
 }
 
-/*.landingStatus > tr > td{
-  color:#000;
-  font-size:14px;
-  padding:5px;
-  word-break: break-all;
-}*/
-.ivu-table-cell{
-  color:#000;
-  font-size:16px;
-  padding:5px;
-  word-break: break-all;
-  text-align:center;
-}
-/*.landingDetails{
-  background-color: #192231;
-  color: #fff;
-  margin:auto;
-  width:850px;
-  border:solid 1px #ccc;
-  border-collapse: collapse;
-}*/
+
 .ivu-table table > th > tr{
   color:#4e4e4e;
   background-color: #fff;
@@ -410,21 +317,6 @@ button, html input[type="button"], input[type="reset"], input[type="submit"] {
     text-align:center;
     background-color: #fff;
 }
-/*.landingDetails > th{
-
-}
-
-.landingDetails > tr{
-  color:#4e4e4e;
-  background-color: #fff;
-}
-.landingDetails > tr > td{
-  color:#000;
-  font-size:14px;
-  padding:5px;
-  word-break: break-all;
-  font-weight:bold;
-}*/
 
 .ivu-modal {
     width: auto;
