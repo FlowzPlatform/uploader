@@ -393,6 +393,7 @@ import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
 Vue.use(VueCodeMirror)
 var Schema = require('simpleschema')
 const uuidV1 = require('uuid/v1');
+
 let finalModifiedDataArray = []
 let res
 let id
@@ -413,11 +414,13 @@ if (process.env.NODE_ENV !== 'development') {
 const app = feathers().configure(socketio(socket))
 
 socket.on('response', (response) => {
+
   if (response.stdout.ok == 1) {
     api.request('patch', '/uploader/' + id,obj1).then(res => {
     })
     .catch(error => {
         this.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
+
     })
   }
 })
@@ -634,6 +637,7 @@ export default {
     methods:{
       hideHandson(){
         let self = this
+
           if(err_length != 0){
             if(self.mObj[self.activeTab].errDisplay == false ){
               document.getElementById('example1').style.display = 'none'
@@ -646,12 +650,14 @@ export default {
       },
       setTransForm: function () {
         this.transformData = this.modelData
+
         if (this.mObj[this.activeTab].mapping[this.modelIndex].tranformMethod) {
           this.dataMethod = this.mObj[this.activeTab].mapping[this.modelIndex].tranformMethod
           this.transformData = this.modelData + '.' + this.dataMethod
         }
       },
       modelshow: function (item, index) {
+
         this.model = true
         this.modelData = 'return row["' + item.sysHeader + '"]'
         this.modelIndex = index
@@ -661,7 +667,9 @@ export default {
       handleModalOk () {
           let methodName = this.transformData.split('.')
           this.dataMethod = methodName[1]
+
           if (this.dataMethod) {
+
             this.mObj[this.activeTab].mapping[this.modelIndex].transform = this.transformData
             this.mObj[this.activeTab].mapping[this.modelIndex].transformMethod = this.dataMethod
           } else {
@@ -671,6 +679,7 @@ export default {
           var self = this
 
           self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].csv_arr, function (row, rinx) {
+
             return _.reduce(row, function (result, value, key) {
               let inx = _.find( self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
               if (inx.transform !== '') {
@@ -806,6 +815,7 @@ export default {
                 api.request('patch', '/uploader/'+ id,importObj).then(res => {
                 })
                 .catch(error => {
+
                     this.$Notice.error({
                      title: 'Error'
                    });
@@ -815,6 +825,7 @@ export default {
                   this.$Notice.error({
                    title: 'Error'
                  });
+
               })
 
         //
@@ -866,6 +877,7 @@ export default {
 
           if(tab == 'Product Information'){
             this.mObj[tab].schema = ProductInformationSchema
+
           }
           else if(tab == 'Product Price'){
             this.mObj[tab].schema = ProductPricingSchema
@@ -890,12 +902,14 @@ export default {
 
           let mapObj = this.generateHeadersandMapping(tab)
 
+
         }
         else{
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
             this.existingSchemaData = res.data[0]
+
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
             if(currentschema.length != 0){
               schema_id = currentschema[0].id
@@ -1023,6 +1037,7 @@ export default {
                   self.mObj[tab].headers.push("_id")
                   if(self.mObj[tab].new_flag == 1){
                     self.mObj[tab].mapping = []
+
                     self.generateHeadersandMapping(tab)
                     self.mObj[tab].newSchemaDisplay = true
                     self.mObj[tab].previewDisplay = true
@@ -1044,9 +1059,6 @@ export default {
 
 
                   }
-
-
-
 
                 }
               })
@@ -1075,6 +1087,7 @@ export default {
          }
          obj["_id"] = uuidV1()
          self.mObj[tab].newUploadCSV.push(obj)
+
       }
       let index = self.mObj[tab].newUploadCSV.length - 1
       self.mObj[tab].newUploadCSV.splice(index,1)
@@ -1093,6 +1106,7 @@ export default {
            self.mObj[tab].mapping[index]['csvHeader'] = self.mObj[tab].headers[i]
          }
       }
+
       return self.mObj[tab].mapping;
     },
     ProceedToValidate(tab){
@@ -1328,7 +1342,6 @@ export default {
         }
       }
 
-
         let schema_Obj = {}
         _.forEach(self.mObj[tab].mapping, function (value, key) {
           if(value.schemaObj.optional == true){
@@ -1382,11 +1395,11 @@ export default {
             } else {
               if (errors.length) {
                 err_length = errors.length
+
                 if (!_.isEqual(Object.values(value), [""])) {
 
                   self.mObj[tab].data1.push(Object.values(value))
                   self.mObj[tab].headers1.push(Object.keys(value))
-
                   let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
                   _.forEach(errors, (item) => {
                     errcols.push({
@@ -1431,6 +1444,7 @@ export default {
     },
     showerrmsg (errcols,tab,schema) {
       var example1 = document.getElementById('example1')
+
       new Handsontable(example1, { // eslint-disable-line
         data: [this.mObj[tab].data1[0]],
         colHeaders:this.mObj[tab].headers1[0],
@@ -1478,6 +1492,7 @@ export default {
               let modified_field = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(":") + 1);
               modified_field = modified_field.trim()
 
+
               let modifiedField_data = newP[modified_field]
               let modified_id = newP._id
 
@@ -1489,8 +1504,10 @@ export default {
                   new_arr.push(n)
                   })
 
+
               userUploadedDataArr = []
               userUploadedDataArr = new_arr
+
 
             }
           }
@@ -1504,6 +1521,7 @@ export default {
 
 
       if (newHotSettingsData.length == 0) {
+
 
         self.mObj[tab].errmsg = []
         $('table.htCore').each(function () {
@@ -1598,16 +1616,20 @@ export default {
                 })
               })
               .catch(error => {
+
                   self.$Notice.error({title: 'Error!'})
+
               })
 
             })
             .catch(error => {
+
               self.$Notice.error({title: 'Error!'})
             })
         })
         .catch(error => {
           self.$Notice.error({title: 'Error!'})
+
         })
 
       }
@@ -1629,6 +1651,7 @@ export default {
 
           obj1 = {}
           let name = tab.replace(/\s/g, "")
+
           obj1[name] = {
             id: CSVFile_id,
             schema_id : schema_id,
@@ -1657,7 +1680,9 @@ export default {
           })
       })
       .catch(error => {
+
           self.$Notice.error({title: 'Error!'})
+
       })
 
 
@@ -1668,10 +1693,12 @@ export default {
     'uploader': {
       updated (message) {
           let self = this
+
           if(message.user_id == this.$store.state.user._id){
             if(message.stepStatus == "import_to_confirm"){
               self.import1 = true
             }
+
           }
       }
     }
@@ -1692,6 +1719,7 @@ export default {
                        duration: 1000
                });
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductinformation').then(res => {
+
                 self.mObj["Product Information"].newUploadCSV = res.data
                 self.mObj["Product Information"].headers = Object.keys(res.data[0])
                 self.map = true
@@ -1703,6 +1731,7 @@ export default {
             }
             if(Object.keys(jobData).indexOf("ProductPrice") >= 0){
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductprice').then(res => {
+
                 self.mObj["Product Price"].newUploadCSV = res.data
                 self.mObj["Product Price"].headers = Object.keys(res.data[0])
                 self.map = true
@@ -1712,6 +1741,7 @@ export default {
             }
             if(Object.keys(jobData).indexOf("ProductImprintData") >= 0){
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimprintdata').then(res => {
+
                 self.mObj["Product Imprint Data"].newUploadCSV = res.data
                 self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
                 self.map = true
@@ -1721,6 +1751,7 @@ export default {
             }
             if(Object.keys(jobData).indexOf("ProductShipping") >= 0){
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductshipping').then(res => {
+
                 self.mObj["Product Shipping"].newUploadCSV = res.data
                 self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
                 self.map = true
@@ -1740,6 +1771,7 @@ export default {
             }
             if(Object.keys(jobData).indexOf("ProductAdditionalCharges") >= 0){
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductadditionalcharges').then(res => {
+
                 self.mObj["Product Additional Charges"].newUploadCSV = res.data
                 self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
                 self.map = true
@@ -1749,6 +1781,7 @@ export default {
             }
             if(Object.keys(jobData).indexOf("ProductVariationPrice") >= 0){
               api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductvariationprice').then(res => {
+
                 self.mObj["Product Variation Price"].newUploadCSV = res.data
                 self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
                 self.map = true
