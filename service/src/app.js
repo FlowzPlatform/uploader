@@ -17,6 +17,9 @@ const appHooks = require('./app.hooks');
 const rethinkdb = require('./rethinkdb');
 // const mongodb = require('./mongodb');
 const app = feathers();
+
+
+
 // Load app configuration
 app.configure(configuration());
 // Enable CORS, security, compression, favicon and body parsing
@@ -34,10 +37,12 @@ app.configure(hooks());
 app.configure(rethinkdb);
 app.configure(rest());
 // app.configure(socketio());
-app.configure(socketio(process.env.socket_port, {
-  wsEngine: 'uws',
-  origin: '*.' + (process.env.domainkey ? 'localhost' : process.env.domainkey) + ':*'
-}));
+let socketport =  process.env.socket_port ? '4040' : process.env.socket_port
+
+// app.configure(socketio(socketport,{
+//   wsEngine: 'uws',
+//   origin: '*.' + (process.env.domainkey ? 'localhost' : process.env.domainkey) + ':*'
+// }));
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware);
 // Set up our services (see `services/index.js`)
@@ -46,4 +51,9 @@ app.configure(services);
 app.use(notFound());
 app.use(handler());
 app.hooks(appHooks);
+
+app.configure(socketio({
+  wsEngine: 'uws',
+  origin: '*.' + (process.env.domainkey ? 'localhost' : process.env.domainkey) + ':*'
+}));
 module.exports = app;

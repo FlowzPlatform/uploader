@@ -1,4 +1,4 @@
-// console.log('process.env.NODE_ENV', process.env.domainkey, process.env.port, process.env.socket_port)
+
 var temp = {
   serverURI: 'http://localhost:' + process.env.server_port,
   socketURI: 'http://localhost:' + process.env.socket_port,
@@ -20,7 +20,7 @@ var temp = {
 if (process.env.NODE_ENV !== 'development') {
   temp = {
     serverURI: 'http://api.' + process.env.domainkey + '/dbetl', // 'http://api.' + process.env.domainkey + '/dbetl', // ws.' + process.env.domainkey + ':4034
-    socketURI: 'ws://ws.' + process.env.domainkey,
+    socketURI: 'ws://ws.' + process.env.domainkey + ':' + process.env.socket_port,
     fixedLayout: false,
     hideLogoOnMobile: false,
     microURI: 'http://auth.' + process.env.domainkey + '/api',

@@ -48,19 +48,13 @@ module.exports = {
 };
 
 var beforeFind = async function(hook) {
-    // console.log("hook.....",hook)
     var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
     var cnn_with_mongo = await connectToMongo(url,hook)
-    console.log("cnn_with_mongo...............",cnn_with_mongo)
 }
 
 var connectToMongo = async function(url,hook){
   var db = await (MongoClient.connect(url))
-    console.log("Connected correctly to server.");
     let tables = hook.params.query.tables
-    console.log("tables...",tables)
-    //
     var result = await (db.collection(tables).find({"import-tracker_id":hook.params.query.import_tracker_id}).toArray())
-    console.log("result.......",result)
     hook.result = result
 }
