@@ -33,7 +33,7 @@
             }
         },
         methods:{
-          //converts into uppercase
+          //converts into uppercase and trims space
           convert(item){
             item = item.replace(/([A-Z])/g, ' $1').trim()
             return item

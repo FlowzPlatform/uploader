@@ -1583,7 +1583,6 @@ export default {
                 });
 
                 self.loading = false
-                // self.mObj[tab].savePreviewDisplay = true
                 self.mObj[tab].previewDisplay = true
                 self.validate = false
 

@@ -12,7 +12,6 @@ var checkAuth = (authToken) => {
       return response.data.data;
     } else {
       return
-      // reject(false)
     }
   }).catch(error => {
     return
