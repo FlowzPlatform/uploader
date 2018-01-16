@@ -1,0 +1,35 @@
+{
+  "host": "localhost",
+  "port": "server_port",
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "rdb_host": "RDB_HOST",
+  "rdb_port": "RDB_PORT",
+  "rdb_user": "",
+  "rdb_password": "",
+  "rdb_db": "FlowzDBETL",
+  "scheduler_table": "scheduler",
+  "qJobTimeout": 3600000,
+  "qJobRetryMax": 0,
+  "import": "importSchema",
+  "importToExternal": "import_to_external_db",
+  "instance_table": "flowzinstance",
+  "approvar_table": "approvalClass",
+  "mongodb": "MONGO_DB",
+  "mongodb_host": "mongodb_host",
+  "mongodb_port": "mongodb_host",
+  "jobqueueUrl": "jobqueueUrl",
+  "importToConfirmUrl": "",
+  "rethinkdb": {
+    "db": "FlowzDBETL",
+    "servers": [
+      {
+        "host": "localhost",
+        "port": "28015"
+      }
+    ]
+  }
+}

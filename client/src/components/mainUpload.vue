@@ -100,6 +100,43 @@
              <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:7%" @click="ProceedToValidate(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Proceed</Button>
            </div>
 
+           <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
+             <h2 style="margin-bottom:1%;text-transform: capitalize;">Uploaded Records of {{activeTab}}</h2>
+             <Button type="ghost" class="close"><Icon type="close-circled" class="redIcon"></Icon></Button>
+             <Button type="error" class="delete">Delete</Button>
+            <div class="schema-form ivu-table-wrapper">
+              <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
+                <div class="ivu-table-body">
+                  <table style="min-width:1077px;overflow-x: auto;">
+                    <thead>
+                      <tr>
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map">
+                          <div>
+                            <span>{{header}}</span>
+                          </div>
+                        </th>
+                      </tr>
+                      <tr>
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0]) " v-if="map">
+                          <div>
+                            <span>{{header}}</span>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
+                      <tr class="ivu-table-row" v-if="(index<5)">
+                        <td class="" v-if="index <= mObj[activeTab].newUploadCSV.length-2" v-for="data in item" style="overflow:hidden;">{{data}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+          </div>
+          <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
+          <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:7%" @click="ProceedToValidate(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Proceed</Button>
+        </div>
+
             <div v-if="mObj[activeTab].headerDisplay">
             <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
              <div class="schema-form ivu-table-wrapper" >
@@ -144,7 +181,6 @@
                        </tr>
                      </tbody>
                    </table>
-                   <!-- {{mObj[activeTab].mapping}} -->
                  </div>
                </div>
            </div>
@@ -239,7 +275,6 @@
                    </tr>
                  </tbody>
                </table>
-               <!-- {{mObj[activeTab].mapping}} -->
              </div>
            </div>
        </div>
@@ -450,7 +485,7 @@ export default {
                   newUploadCSV : [],
                   new_flag : 0,
                   csv_arr: [],
-                  preview: false
+                  savePreviewDisplay :false
 
           },
           'Product Price':{
@@ -684,59 +719,65 @@ export default {
       },
       startValidation(){
         let self = this
-        self.currentStep = 1
-        let obj2
-        api.request('get', '/uploader/'+ id).then(response => {
-          obj2 = response.data
-          if(response.data.hasOwnProperty("ProductInformation")){
-            let Prod_info = response.data["ProductInformation"]
-            delete obj2["ProductInformation"]
-            Prod_info.validateStatus = "completed"
-            obj2["ProductInformation"] = Prod_info
-          }
-          if(response.data.hasOwnProperty("ProductPrice")){
-            let Prod_pricing = response.data["ProductPrice"]
-            delete obj2["ProductPrice"]
-            Prod_pricing.validateStatus = "completed"
-            obj2["ProductPrice"] = Prod_pricing
-          }
-          if(response.data.hasOwnProperty("ProductImprintData")){
-            let Prod_data = response.data["ProductImprintData"]
-            delete obj2["ProductImprintData"]
-            Prod_data.validateStatus = "completed"
-            obj2["ProductImprintData"] = Prod_data
-          }
-          if(response.data.hasOwnProperty("ProductImage")){
-            let Prod_images = response.data["ProductImage"]
-            delete obj2["ProductImage"]
-            Prod_images.validateStatus = "completed"
-            obj2["ProductImage"] = Prod_images
-          }
-          if(response.data.hasOwnProperty("ProductShipping")){
-            let Prod_shipping = response.data["ProductShipping"]
-            delete obj2["ProductShipping"]
-            Prod_shipping.validateStatus = "completed"
-            obj2["ProductShipping"] = Prod_shipping
-          }
-          if(response.data.hasOwnProperty("ProductAdditionalCharges")){
-            let Prod_charges = response.data["ProductAdditionalCharges"]
-            delete obj2["ProductAdditionalCharges"]
-            Prod_charges.validateStatus = "completed"
-            obj2["ProductAdditionalCharges"] = Prod_charges
-          }
-          if(response.data.hasOwnProperty("ProductVariationPrice")){
-            let Prod_var_price = response.data["ProductVariationPrice"]
+        if(self.mObj["Product Information"].newUploadCSV.length == 0){
+          self.$Notice.info({
+                   title: 'Please upload Product Information file...'
+           });
+        }
+        else{
+          self.currentStep = 1
+          let obj2
+          api.request('get', '/uploader/'+ id).then(response => {
+            obj2 = response.data
+            if(response.data.hasOwnProperty("ProductInformation")){
+              let Prod_info = response.data["ProductInformation"]
+              delete obj2["ProductInformation"]
+              Prod_info.validateStatus = "completed"
+              obj2["ProductInformation"] = Prod_info
+            }
+            if(response.data.hasOwnProperty("ProductPrice")){
+              let Prod_pricing = response.data["ProductPrice"]
+              delete obj2["ProductPrice"]
+              Prod_pricing.validateStatus = "completed"
+              obj2["ProductPrice"] = Prod_pricing
+            }
+            if(response.data.hasOwnProperty("ProductImprintData")){
+              let Prod_data = response.data["ProductImprintData"]
+              delete obj2["ProductImprintData"]
+              Prod_data.validateStatus = "completed"
+              obj2["ProductImprintData"] = Prod_data
+            }
+            if(response.data.hasOwnProperty("ProductImage")){
+              let Prod_images = response.data["ProductImage"]
+              delete obj2["ProductImage"]
+              Prod_images.validateStatus = "completed"
+              obj2["ProductImage"] = Prod_images
+            }
+            if(response.data.hasOwnProperty("ProductShipping")){
+              let Prod_shipping = response.data["ProductShipping"]
+              delete obj2["ProductShipping"]
+              Prod_shipping.validateStatus = "completed"
+              obj2["ProductShipping"] = Prod_shipping
+            }
+            if(response.data.hasOwnProperty("ProductAdditionalCharges")){
+              let Prod_charges = response.data["ProductAdditionalCharges"]
+              delete obj2["ProductAdditionalCharges"]
+              Prod_charges.validateStatus = "completed"
+              obj2["ProductAdditionalCharges"] = Prod_charges
+            }
+            if(response.data.hasOwnProperty("ProductVariationPrice")){
+              let Prod_var_price = response.data["ProductVariationPrice"]
               delete obj2["ProductVariationPrice"]
-            Prod_var_prices.validateStatus = "completed"
-            obj2["ProductVariationPrice"] = Prod_var_price
-          }
+              Prod_var_prices.validateStatus = "completed"
+              obj2["ProductVariationPrice"] = Prod_var_price
+            }
 
-          obj2.stepStatus = "validation_completed"
-          api.request('put', '/uploader/'+ id,obj2).then(res => {
-            self.validating = false
+            obj2.stepStatus = "validation_completed"
+            api.request('put', '/uploader/'+ id,obj2).then(res => {
+              self.validating = false
+            })
           })
-
-        })
+        }
       },
       importToPDM(){
         this.currentStep = 2
@@ -952,6 +993,8 @@ export default {
           if(flag == false){
              this.mObj[tab].poptip_display = false
              this.schemaList.push({"value" : schema,"label": schema})
+             let new_index = lodash.findIndex(this.schemaList, function(o) { return o.value == '--Add new--'; });
+             this.schemaList.splice(this.schemaList.length-1,0,this.schemaList.splice(new_index,1)[0]);
              this.mObj[tab].selected_schema = schema
              this.mObj[tab].new_flag = 1
           }
@@ -1540,7 +1583,7 @@ export default {
                 });
 
                 self.loading = false
-                self.mObj[tab].preview = true
+                // self.mObj[tab].savePreviewDisplay = true
                 self.mObj[tab].previewDisplay = true
                 self.validate = false
 
@@ -1601,6 +1644,7 @@ export default {
           });
           self.loading = false
           self.mObj[tab].previewDisplay = true
+          // self.mObj[tab].savePreviewDisplay = true
           self.validate = false
           let obj= {
             "activetab" : tab,
@@ -1774,6 +1818,15 @@ export default {
 }
 </script>
 <style>
+.close {
+  padding: 0px 9px !important;
+  float: right;
+  border: 0;
+}
+.savePreview {
+  border: 1px solid #bbbec4;
+  padding: 26px;
+}
 .uploadSteps{
   margin-left: 13% !important;
 }
@@ -2087,5 +2140,14 @@ export default {
    border: 1px solid #bbbec4 !important;
    padding: 25px !important;
  }
+ .close {
+    float: right;
+    border: 0;
+    margin-top: -5%;
+    font-size: 22px;
+}
+.redIcon {
+  color: red;
+}
 
 </style>
