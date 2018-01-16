@@ -8,14 +8,10 @@ let shell = require('shelljs');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const _ = require('lodash');
-if (process.env.mongodb_host)
-    config1.mongodb_host = process.env.mongodb_host
-if (process.env.mongodb_port)
-    config1.mongodb_port = process.env.mongodb_port
-if (process.env.username)
-    config1.username = process.env.username
-if (process.env.password)
-    config1.password = process.env.password
+config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
+config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
+config1.username = process.env.username ? process.env.username : null
+config1.password = process.env.password ? process.env.password : null
 
 
 module.exports = function () {

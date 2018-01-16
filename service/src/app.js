@@ -37,7 +37,6 @@ app.configure(hooks());
 app.configure(rethinkdb);
 app.configure(rest());
 // app.configure(socketio());
-let socketport =  process.env.socket_port ? '4040' : process.env.socket_port
 
 // app.configure(socketio(socketport,{
 //   wsEngine: 'uws',

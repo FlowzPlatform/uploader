@@ -3,12 +3,14 @@ const fs = require('fs');
 
 let ssl = process.env.cert ? { ca: fs.readFileSync(__dirname + process.env.cert) } : null
 let rauth = process.env.rauth ? process.env.rauth : null
+let host = process.env.RDB_HOST ? config.get('rdb_host').trim() : 'localhost'
+let port = process.env.RDB_PORT ? config.get('rdb_port').trim() : '28015'
 var rethinkdb = {
   rethinkdb: {
     db: 'FlowzDBETL',
     servers: [{
-      host: config.get('rdb_host').trim(),
-      port: config.get('rdb_port').trim(),
+      host: host,
+      port: port,
       authKey: rauth,
       ssl: ssl
     }]

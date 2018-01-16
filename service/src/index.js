@@ -3,7 +3,6 @@ const logger = require('winston');
 const http = require('http');
 const app = require('./app');
 const port = app.get('port');
-// const server = app.listen(port);
 const wsPort = process.env.socket_port || 4040
 
 
