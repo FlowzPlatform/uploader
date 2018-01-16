@@ -1,0 +1,75 @@
+sudo: required
+
+language: node
+
+services:
+  - docker
+
+branches:
+  only:
+  - master
+  - develop
+  - QA
+
+jobs:
+  include:
+    - stage: Uploader-Backend-Flowz
+      script:
+      - 'if [ ${TRAVIS_BRANCH} = "master" ]; then
+            docker login -u="$DOCKER_USERNAME_FLOWZ" -p="$DOCKER_PASSWORD_FLOWZ";
+            docker build -t uploader_backend_flowz:latest ./service/;
+            docker images;
+            docker tag uploader_backend_flowz:latest $DOCKER_USERNAME_FLOWZ/uploader_backend_flowz:latest;
+            docker push $DOCKER_USERNAME_FLOWZ/uploader_backend_flowz:latest;
+        elif [ ${TRAVIS_BRANCH} = "develop" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t uploader_backend_flowz:dev ./service/;
+            docker images;
+            docker tag uploader_backend_flowz:dev $DOCKER_USERNAME/uploader_backend_flowz:dev;
+            docker push $DOCKER_USERNAME/uploader_backend_flowz:dev;
+        else
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t uploader_backend_flowz:qa ./service/;
+            docker images;
+            docker tag uploader_backend_flowz:qa $DOCKER_USERNAME/uploader_backend_flowz:qa;
+            docker push $DOCKER_USERNAME/uploader_backend_flowz:qa;
+        fi'
+    - stage: Uploader-Frontend-Flowz
+      script:
+      - 'if [ ${TRAVIS_BRANCH} = "master" ]; then
+            docker login -u="$DOCKER_USERNAME_FLOWZ" -p="$DOCKER_PASSWORD_FLOWZ";
+            docker build -t uploader_frontend_flowz:latest --build-arg domainkey="$DOMAINKEY_MASTER" ./client/;
+            docker images;
+            docker tag uploader_frontend_flowz:latest $DOCKER_USERNAME_FLOWZ/uploader_frontend_flowz:latest;
+            docker push $DOCKER_USERNAME_FLOWZ/uploader_frontend_flowz:latest;
+        elif [ ${TRAVIS_BRANCH} = "develop" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t uploader_frontend_flowz:dev --build-arg domainkey="$DOMAINKEY_DEVELOP" ./client/;
+            docker images;
+            docker tag uploader_frontend_flowz:dev $DOCKER_USERNAME/uploader_frontend_flowz:dev;
+            docker push $DOCKER_USERNAME/uploader_frontend_flowz:dev;
+        else
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t uploader_frontend_flowz:qa --build-arg domainkey="$DOMAINKEY_QA" ./client/;
+            docker images;
+            docker tag uploader_frontend_flowz:qa $DOCKER_USERNAME/uploader_frontend_flowz:qa;
+            docker push $DOCKER_USERNAME/uploader_frontend_flowz:qa;
+        fi'
+    - stage: Upgrade Rancher Service
+      script:
+      - bash ./upgrade.sh
+    - stage: Finish Rancher Service
+      script:
+      - bash ./finish.sh
+
+notifications:
+  email:
+    recipients:
+      - arpitap@officebeacon.com
+      - kaushalm@officebrain.com
+      - anuj@officebrain.com
+      - naveeng@officebrain.com
+      - rbajaniya@officebrain.com
+      - chirag@officebrain.com
+    on_success: always
+    on_failure: always
