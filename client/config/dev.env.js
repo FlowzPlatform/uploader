@@ -8,4 +8,5 @@ module.exports = merge(prodEnv, {
   domainkey: JSON.stringify(process.env.domainkey),
   server_port:  JSON.stringify(process.env.server_port),
   socket_port: JSON.stringify(process.env.socket_port),
+  is_ssl: JSON.stringify(process.env.is_ssl)
 })
