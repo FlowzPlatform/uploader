@@ -75,14 +75,11 @@ export default {
       'uploader': {
         updated (message) {
             let self = this
-
             if(message.user_id == self.$store.state.user._id){
               for(var i=0;i<self.data2.length;i++){
-
                 if(self.data2[i].id == message.id){
                   index = i
                 }
-
               }
 
               self.data2.splice(index, 1);
@@ -98,11 +95,9 @@ export default {
             }
 
 
-
         },
         created (data) {
           let self = this
-
           if(data.user_id == self.$store.state.user._id){
             for(var key in data){
               if(key == "createdAt"){
@@ -114,7 +109,6 @@ export default {
             self.data2.push(data)
             self.data2 = _.sortBy(self.data2, 'createdAt');
           }
-
         },
         removed (data) {
           this.init()
@@ -124,7 +118,6 @@ export default {
     mounted(){
       var self = this
       socket.emit('uploader::find', {user_id : this.$store.state.user._id}, (e, data) => {
-
         if(data.data.length != 0){
           for(var i=0;i<data.data.length;i++){
             for(var key in data.data[i]){
@@ -141,7 +134,6 @@ export default {
           self.$Notice.info({
                    title: 'No Data Available',
            });
-
         }
       })
 
