@@ -1,6 +1,7 @@
 <template>
   <div id="landingPageStatusReport" class="clearfix" style="overflow:auto;border: 3px solid #7c7e86;color: black;text-align: center;padding-top: 4px;margin: 50px;padding-bottom: 26px;">
-    <h2 style="text-transform:uppercase;margin-top: 18px;">Welcome back,{{job[0].username}}</h2>
+    <h2 style="text-transform:uppercase;margin-top: 18px;" v-if="job[0].username">Welcome back, {{job[0].username}}</h2>
+    <h2 style="text-transform:uppercase;margin-top: 18px;" v-else>Welcome back</h2>
     <p style="margin-top: 10px;margin-bottom: 10px;font-size: 15px;">Following is the latest status of your file upload process.You can continue with your current status or abort the whole process to start again</p>
 
       <div class="ivu-tabs-tabpane">
@@ -185,7 +186,7 @@ export default {
         let self = this
         api.request('delete', '/uploader/' + this.$route.params.id).then(res => {
           self.$Notice.error({
-                     title: 'Your files has been deleted'
+                     title: 'Your files have been deleted'
                  });
            self.$router.push('/uploader')
           })

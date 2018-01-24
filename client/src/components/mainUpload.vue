@@ -73,14 +73,14 @@
                        <thead>
                          <tr>
                            <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map">
-                             <div>
+                             <div v-if="header != '_id'">
                                <span>{{header}}</span>
                              </div>
                            </th>
                          </tr>
                          <tr>
                            <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0]) " v-if="map">
-                             <div>
+                             <div v-if="header != '_id'">
                                <span>{{header}}</span>
                              </div>
                            </th>
@@ -88,7 +88,9 @@
                        </thead>
                        <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
                          <tr class="ivu-table-row" v-if="(index<5)">
-                           <td class="" v-if="index <= mObj[activeTab].newUploadCSV.length-2" v-for="data in item" style="overflow:hidden;">{{data}}</td>
+                           <td class="" v-for="data in getwithoutid(item)" style="overflow:hidden;">
+                             {{data}}
+                           </td>
                          </tr>
 
                        </tbody>
@@ -97,7 +99,7 @@
                  </div>
              </div>
              <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:7%" @click="ProceedToValidate(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Proceed</Button>
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:7%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Proceed</Button>
            </div>
 
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
@@ -106,29 +108,25 @@
              <Button type="ghost" class="close"><Icon type="close-circled" class="redIcon"></Icon></Button>
             </div>
              <Button type="error" class="delete"><Icon type="trash-b"></Icon> Delete</Button>
-             <!-- <Row>
-               <Col span="20">&nbsp;</Col>
-               <Col span="4"> -->
                  <Input type="text" size="medium" class="filter" style="" placeholder="Filter">
                    <Icon type="funnel" slot="prepend" class="funnel"></Icon>
                  </Input>
-               <!-- </Col>
-             </Row> -->
+
             <div class="schema-form ivu-table-wrapper previewtable">
               <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
                 <div class="ivu-table-body">
                   <table style="min-width:1077px;overflow-x: auto;">
                     <thead>
                       <tr>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map">
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " >
                           <div>
                             <span>{{header}}</span>
                           </div>
                         </th>
                       </tr>
                       <tr>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0]) " v-if="map">
-                          <div>
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0]) " >
+                          <div >
                             <span>{{header}}</span>
                           </div>
                         </th>
@@ -166,16 +164,16 @@
                        </tr>
                      </thead>
                      <tbody class="ivu-table-tbody">
-                       <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping">
+                       <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                          <td>
-                           <div class="ivu-table-cell">
+                           <div class="ivu-table-cell" >
                              <span>{{item.sysHeader}}</span>
                            </div>
                          </td>
                          <td>
                            <div class="ivu-table-cell">
                              <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
-                                 <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header">{{ header}}</Option>
+                                 <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header" >{{ header}}</Option>
                              </Select>
                            </div>
                          </td>
@@ -219,7 +217,7 @@
                    </tr>
                  </thead>
                  <tbody class="ivu-table-tbody">
-                   <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping">
+                   <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                      <th>
                        <div class="ivu-table-cell headercolor">
                          <span>{{item.sysHeader}}</span>
@@ -299,6 +297,9 @@
          <div id="hot-preview" v-if="mObj[activeTab].showHandson">
            <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
          </div>
+         <div id="hot-preview" v-if="mObj[activeTab].showHandson">
+           <Button type="error" @click="AbortValidation(activeTab)" style="float:right;margin-right:10px;">Abort Data</Button>
+         </div>
 
          <Modal  v-model="model" title="Transform" @on-ok="handleModalOk" width="900px" :mask-closable="false ">
            <Row style="padding: 10px;">
@@ -321,7 +322,7 @@
                      <a href="javascript:void(0)" data-method="rtrim()" @click="transform">Left Trim</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="concate()" @click="transform">Concate</a>
+                     <a href="javascript:void(0)" data-method="concate()" @click="transform">Concat</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="capitalize()" @click="transform" >Capitalize</a>
@@ -347,6 +348,21 @@
            </Row>
          </Modal>
 
+         <Modal v-model="modal1" width="500">
+          <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+              <Icon type="information-circled"></Icon>
+              <span>Some of your headers are not mapped ...</span>
+          </p>
+          <div style="text-align:center">
+              <p style="font-size:15px">Want to map headers or Continue as it is ?</p>
+              <p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p>
+          </div>
+          <div slot="footer">
+              <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
+              <Button type="primary"  @click="continuee(activeTab)">Continue</Button>
+          </div>
+       </Modal>
+
         </div>
       </Col>
     </Row>
@@ -357,16 +373,106 @@
                 <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
                 <div>Loading</div>
             </Spin></div>
-      <div v-if="!validating"><p style="font-size:18px">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p></div>
-      <Button type="primary" @click="importToPDM()" v-if="!validating" style="font-size:15px;margin-top:25px;float:right">Import</Button>
+
+        <div>
+        <h2 style="margin-bottom:1%;text-transform: capitalize;" v-if="showValidationTable">Validation Status</h2>
+         <div class="schema-form ivu-table-wrapper" >
+           <div class="ivu-table ivu-table-border customtable border" >
+             <div class="ivu-table-body">
+               <table class="mapping-table" style="width:100%;overflow-y:auto;" id="valid_err">
+                 <colgroup>
+                   <col width="20">
+                   <col width="20">
+                   <col width="20">
+                   <col width="20">
+                   <col width="20">
+                 </colgroup>
+                 <thead v-if="showValidationTable">
+                   <tr>
+                     <th class="">Validation File Type</th>
+                     <th class="">File Uploaded On</th>
+                     <th class="">Validation Status</th>
+                     <th class="">Total No of Records</th>
+                     <th class="">Validation Progress</th>
+                   </tr>
+                 </thead>
+                 <tbody class="ivu-table-tbody" v-if="!validation_completed">
+                   <tr class="ivu-table-row" v-for="(item,index) in val_data" :id="item.name">
+                     <td>
+                       <div class="ivu-table-cell">
+                         <span>{{convert(item.name)}}</span>
+                       </div>
+                     </td>
+                     <td>
+                       <div class="ivu-table-cell">
+                        <span>{{moment(item.data.uploadedAt).fromNow()}}</span>
+                       </div>
+                     </td>
+                     <td>
+                       <div class="ivu-table-cell">
+                         <span>{{item.data.validateStatus}}</span>
+                       </div>
+                     </td>
+                     <td>
+                       <div class="ivu-table-cell">
+                         <span>{{item.data.totalNoOfRecords}}</span>
+                       </div>
+                     </td>
+                     <td>
+                       <div class="ivu-table-cell">
+                         <span>
+                           <div class="ivu-table-cell">
+                             <i-circle :percent="item.progress" style="width:45px;height:45px;">
+                               <!-- <Icon v-if="item.progress == 100" type="ios-checkmark-empty" size="20" style="color:#5cb85c"></Icon> -->
+                               <span style="font-size:12px">{{item.progress}}%</span>
+                                 <!-- <span class="demo-Circle-inner" style="font-size:12px">{{item.progress}}%</span> -->
+                             </i-circle>
+                           </div>
+                         </span>
+                       </div>
+                     </td>
+                   </tr>
+                   <!-- <tr>
+                    <td colspan="5">
+                       <div id="validation_err" class="hot handsontable htColumnHeaders"></div>
+                    </td> -->
+                     <!-- <table> -->
+                       <!-- <tr>
+                       <td class="ivu-table-row"  style="color:red;font-size:14px;" v-if="validation_err_fields != ''">{{validation_err_fields}}</td>
+                     </tr> -->
+                     <!-- </table> -->
+                     <!-- <div id="hot-preview" v-if="proceedNext">
+                       <Button type="primary" @click="proceedToNext()" style="float: right;margin-right: 20px;">Proceed To Next</Button>
+                     </div> -->
+                   <!-- </tr> -->
+                 </tbody>
+               </table>
+               <!-- <div id="validation_err" class="hot handsontable htColumnHeaders"></div> -->
+             </div>
+           </div>
+       </div>
+      </div>
+
+      <!-- <div id="validation_err" class="hot handsontable htColumnHeaders"></div> -->
+      <!-- <table>
+        <tr>
+        <td class="ivu-table-row"  style="color:red;font-size:14px;" v-if="validation_err_fields != ''">{{validation_err_fields}}</td>
+      </tr>
+      </table>
+      <div id="hot-preview" v-if="proceedNext">
+        <Button type="primary" @click="proceedToNext()" style="float: right;margin-right: 20px;">Proceed To Next</Button>
+      </div> -->
+
+      <div v-if="validation_completed"><p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p></div>
+      <Button type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right">Import</Button>
       </Card>
     </template>
     <template v-if="currentStep == 2">
       <Card :bordered=false style="margin-top:30px">
-        <div v-if="!import1" class="demo-spin-col"> <Spin fix>
-                <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                <div>Loading</div>
-            </Spin></div>
+        <div v-if="!import1">
+          <h2>Import in progress</h2>
+          <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
+        </div>
       <div v-if="import1"><h3>Import Completed</h3></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Please confirm to go for Live</p></div>
       <Button type="primary" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right">Import to Confirm</Button>
@@ -383,8 +489,8 @@ import schema from '../api/schema'
 import config from '@/config'
 import config1 from '../../config'
 import io from 'socket.io-client'
-import feathers from 'feathers/client'
-import socketio from 'feathers-socketio/client'
+import feathers from 'feathers/client';
+import socketio from 'feathers-socketio/client';
 import {VueTabs, VTab} from 'vue-nav-tabs'
 import InputTag from 'vue-input-tag'
 import Papa from 'papaparse'
@@ -393,6 +499,7 @@ import _ from 'underscore'
 import lodash from 'lodash'
 import Vue from 'vue'
 import VueCodeMirror from 'vue-codemirror'
+var moment = require('moment');
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
@@ -400,7 +507,9 @@ import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
+
 Vue.use(VueCodeMirror)
+moment().format();
 var Schema = require('simpleschema')
 const uuidV1 = require('uuid/v1');
 let finalModifiedDataArray = []
@@ -412,6 +521,10 @@ let schema_id = ''
 let CSVFile_id = ''
 let new_flag = 0
 let err_length = 0
+let prop_keys = []
+let uploader_obj = {}
+let validation_obj = {}
+let continue_flag = false
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -437,10 +550,12 @@ export default {
     components: { VueTabs,VTab,'input-tag': InputTag,},
     data () {
         return {
+          moment : moment,
           currentStep:0,
           map : false,
           fileTypes: ["Product Variation Price","Product Information","Product Price","Product Imprint Data","Product Image","Product Shipping","Product Additional Charges"],
           activeTab: 'Product Information',
+          fileNames : ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"],
           validate:true,
           types: ["string","number","boolean","date","url","phone","pin-code"],
           existingSchemaData :[],
@@ -466,6 +581,13 @@ export default {
             autofocus: true
           },
           model: false,
+          showValidationTable: false,
+          proceedNext: false,
+          validation_err_fields: '',
+          error_data: [],
+          val_data: [],
+          modal1: false,
+          validation_completed: false,
           schemaList: [
                     {
                         value: '--Add new--',
@@ -642,6 +764,10 @@ export default {
     }
   },
     methods:{
+      getwithoutid (obj) {
+         let pObj = lodash.cloneDeep(obj)
+         return lodash.omit(pObj, '_id')
+      },
       changeIndex(files){
         let newIndex = files.replace(/ /g,"_");
         return newIndex
@@ -650,10 +776,14 @@ export default {
         let self = this
           if(err_length != 0){
             if(self.mObj[self.activeTab].errDisplay == false ){
-              document.getElementById('example1').style.display = 'none'
+              if(document.getElementById('example1') != null || document.getElementById('example1') != undefined ){
+                document.getElementById('example1').style.display = 'none'
+              }
             }
             else if(self.mObj[self.activeTab].errDisplay == true ){
-              document.getElementById('example1').style.display = 'block'
+              if(document.getElementById('example1') != null || document.getElementById('example1') != undefined ){
+               document.getElementById('example1').style.display = 'block'
+             }
             }
 
           }
@@ -732,6 +862,7 @@ export default {
 
       },
       startValidation(){
+
         let self = this
         if(self.mObj["Product Information"].newUploadCSV.length == 0){
           self.$Notice.info({
@@ -740,58 +871,206 @@ export default {
         }
         else{
           self.currentStep = 1
-          let obj2
-          api.request('get', '/uploader/'+ id).then(response => {
-            obj2 = response.data
-            if(response.data.hasOwnProperty("ProductInformation")){
-              let Prod_info = response.data["ProductInformation"]
-              delete obj2["ProductInformation"]
-              Prod_info.validateStatus = "completed"
-              obj2["ProductInformation"] = Prod_info
-            }
-            if(response.data.hasOwnProperty("ProductPrice")){
-              let Prod_pricing = response.data["ProductPrice"]
-              delete obj2["ProductPrice"]
-              Prod_pricing.validateStatus = "completed"
-              obj2["ProductPrice"] = Prod_pricing
-            }
-            if(response.data.hasOwnProperty("ProductImprintData")){
-              let Prod_data = response.data["ProductImprintData"]
-              delete obj2["ProductImprintData"]
-              Prod_data.validateStatus = "completed"
-              obj2["ProductImprintData"] = Prod_data
-            }
-            if(response.data.hasOwnProperty("ProductImage")){
-              let Prod_images = response.data["ProductImage"]
-              delete obj2["ProductImage"]
-              Prod_images.validateStatus = "completed"
-              obj2["ProductImage"] = Prod_images
-            }
-            if(response.data.hasOwnProperty("ProductShipping")){
-              let Prod_shipping = response.data["ProductShipping"]
-              delete obj2["ProductShipping"]
-              Prod_shipping.validateStatus = "completed"
-              obj2["ProductShipping"] = Prod_shipping
-            }
-            if(response.data.hasOwnProperty("ProductAdditionalCharges")){
-              let Prod_charges = response.data["ProductAdditionalCharges"]
-              delete obj2["ProductAdditionalCharges"]
-              Prod_charges.validateStatus = "completed"
-              obj2["ProductAdditionalCharges"] = Prod_charges
-            }
-            if(response.data.hasOwnProperty("ProductVariationPrice")){
-              let Prod_var_price = response.data["ProductVariationPrice"]
-              delete obj2["ProductVariationPrice"]
-              Prod_var_prices.validateStatus = "completed"
-              obj2["ProductVariationPrice"] = Prod_var_price
-            }
+          let obj2 = {
+            "stepStatus": "validation_running"
+          }
 
-            obj2.stepStatus = "validation_completed"
-            api.request('put', '/uploader/'+ id,obj2).then(res => {
-              self.validating = false
+          api.request('get', '/uploader/'+ id).then(response => {
+            uploader_obj = response.data
+            api.request('patch', '/uploader/'+ id,obj2).then(res => {
+
+                uploader_obj = res.data
+
+              let properties = Object.keys(response.data)
+              prop_keys = []
+              for(let i=0;i<properties.length;i++){
+                if(properties[i] == "ProductInformation" || properties[i] == "ProductPrice" ||  properties[i] == "ProductImage" || properties[i] == "ProductImprintData" ||  properties[i] == "ProductShipping" || properties[i] == "ProductAdditionalCharges" ||  properties[i] == "ProductVariationPrice"){
+                  self.validating = false
+                  self.showValidationTable = true
+                  prop_keys.push(properties[i])
+                  self.val_data.push({"name":properties[i],"data":uploader_obj[properties[i]],"progress": 0})
+
+                  self.$store.state.data = self.val_data
+
+                }
+              }
+
+              self.sheetwiseValidation(prop_keys[0],uploader_obj)
             })
           })
         }
+      },
+      sheetwiseValidation(key,data){
+          let self = this
+          let sheet_name = key.replace(/([A-Z])/g, ' $1').trim()
+           validation_obj = {
+            id: id,
+            username: self.$store.state.user.fullname,
+            user_id: self.$store.state.user._id,
+            sheet_name: sheet_name,
+            key: key,
+            data: data
+          }
+          api.request('post', '/uploader-validation/',validation_obj).then(result => {
+
+            if(result.data.length > 0){
+
+               self.showValidationHandson(result.data,sheet_name)
+
+            }
+            else{
+
+              let changed_obj = _.filter(self.val_data, { 'name':prop_keys[0] });
+              changed_obj[0].data.validateStatus = "completed"
+              uploader_obj = result.data
+              prop_keys.splice(0,1)
+              if(prop_keys.length != 0){
+                self.sheetwiseValidation(prop_keys[0],uploader_obj)
+              }
+              else{
+
+                let updated_obj = {
+                  stepStatus : "validation_completed"
+                }
+                api.request('patch', '/uploader/'+ id,updated_obj).then(res => {
+                  this.showValidationTable = false
+                  this.validation_completed = true
+                })
+
+              }
+            }
+          })
+      },
+      showValidationHandson(data,sheet_name){
+        let self = this
+          let errcols = []
+          self.error_data = []
+          self.validation_err_fields = ''
+          let name = sheet_name.replace(/\s/g, "")
+          if(data.length != 0){
+            for(let i=0;i<data[0].err_data.length;i++){
+              self.error_data.push(data[0].err_data[i])
+            }
+          }
+          self.validation_err_fields = data[0].err_fields[0].errorString
+          var table = document.getElementById("valid_err")
+
+          var validation_err = document.getElementById(name)
+           var row = table.insertRow(validation_err.rowIndex + 1)
+           var cell1 = row.insertCell(0);
+            cell1.id = name+ "err"
+            cell1.colSpan = 5
+            cell1.class = "hot handsontable htColumnHeaders"
+
+
+           var row1 = table.insertRow(validation_err.rowIndex + 2)
+           var cell2 = row1.insertCell(0);
+           cell2.id = name+ "err_msg"
+           cell2.colSpan = 3
+           cell2.innerHTML =  self.validation_err_fields
+          if(cell2 != "" || cell2 != null || cell2 != undefined){
+             cell2.style = "color:red;font-size:14px;padding-left:10px;border:0px;"
+          }
+
+           var cell3 = row1.insertCell(1);
+           cell3.colSpan = 2
+           cell3.innerHTML = '<button type="button" id="proceed-to-next"  style="float: right;margin-right: 20px;background-color: #13ce66;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color: #13ce66;">Proceed To Next</Button>'
+
+           document.getElementById('proceed-to-next').onclick = function(){
+             self.proceedToNext()
+           }
+
+          _.forEach(data[0].err_data, (item,key) => {
+            errcols.push({
+              cols: _.indexOf(Object.keys(self.error_data[0]), data[0].err_fields[0].columnName),
+              rows: key
+            })
+          })
+
+          new Handsontable(cell1, { // eslint-disable-line
+            data: self.error_data,
+            colHeaders:Object.keys(self.error_data[0]),
+            height: 200,
+            cells: (row, col) => {
+              var cellProp = {}
+              _.forEach(errcols, (value, key) => {
+                if (col === value.cols && row === key) {
+                  cellProp.className = 'error'
+                }
+              })
+              return cellProp
+            },
+            afterChange: function(changes,source) {
+              if(changes != null){
+                self.updateProductData(changes,source,sheet_name)
+              }
+            }
+          })
+          self.proceedNext = true
+      },
+      updateProductData(changes,source,sheet_name){
+        let rowindex = changes[0][0]
+        let columnname = changes[0][1]
+        let oldvalue = changes[0][2]
+        let newvalue = changes[0][3]
+
+        if (oldvalue != newvalue) {
+        let _id = this.error_data[rowindex]._id ;    //objHandsontable.getDataAtCell(cellChange.rowIndex, 0);
+
+        let update_obj = {
+          _id : _id,
+          row : rowindex,
+          newValue: newvalue,
+          columnname: columnname,
+          sheet_name: sheet_name
+        }
+
+        api.request('patch', '/uploader-validation/'+ id,update_obj).then(res => {
+
+        })
+
+      }
+    },
+      proceedToNext(){
+        let sheet_name = prop_keys[0].replace(/([A-Z])/g, ' $1').trim()
+        let name = sheet_name.replace(/\s/g, "")
+        var table = document.getElementById("valid_err")
+
+        var validation_err = document.getElementById(name)
+        table.deleteRow(validation_err.rowIndex + 1)
+        table.deleteRow(validation_err.rowIndex + 1)
+
+        api.request('post', '/uploader-validation/',validation_obj).then(result => {
+
+          if(result.data[0]){
+            if(result.data[0].hasOwnProperty("err_data")){
+             this.showValidationHandson(result.data,sheet_name)
+           }
+          }
+          else{
+            uploader_obj = result.data
+            let changed_obj = _.filter(this.val_data, {'name':prop_keys[0]});
+            changed_obj[0].data.validateStatus = "completed"
+
+            self.proceedNext = false
+            uploader_obj = result.data
+            prop_keys.splice(0,1)
+            if(prop_keys.length != 0){
+              this.sheetwiseValidation(prop_keys[0],uploader_obj)
+            }
+            else{
+              let updated_obj = {
+                stepStatus : "validation_completed"
+              }
+              api.request('patch', '/uploader/'+ id,updated_obj).then(res => {
+                this.showValidationTable = false
+                this.$store.state.data = []
+                this.validation_completed = true
+              })
+            }
+          }
+        })
+
       },
       importToPDM(){
         this.currentStep = 2
@@ -818,6 +1097,7 @@ export default {
                   stepStatus : "import_in_progress"
                 }
                 api.request('patch', '/uploader/'+ id,importObj).then(res => {
+
                 })
                 .catch(error => {
                     this.$Notice.error({
@@ -832,6 +1112,10 @@ export default {
               })
 
         //
+      },
+      convert(item){
+        item = item.replace(/([A-Z])/g, ' $1').trim()
+        return item
       },
       importToConfirm(){
         let jobQueue_obj = {
@@ -909,7 +1193,7 @@ export default {
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
-            this.existingSchemaData = res.data[0]
+            this.existingSchemaData = res.data
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
             if(currentschema.length != 0){
               schema_id = currentschema[0].id
@@ -1109,8 +1393,42 @@ export default {
       }
       return self.mObj[tab].mapping;
     },
+    mapHeaders(tab){
+      continue_flag = true
+      this.modal1 = false
+    },
+    continuee(tab){
+      this.modal1 = false
+      this.ProceedToValidate(tab)
+    },
+    Proceed(tab){
+      let self = this
+        if(continue_flag == false){
+          let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
+            if(o.sysHeader == 'private' || o.sysHeader == 'supplier' || o.sysHeader == 'company'){
+              return
+            }
+            else {
+            return o.csvHeader == ""; }
+          });
+          if(check_headers.length != 0){
+              self.modal1 = true
+          }
+          else{
+              self.ProceedToValidate(tab)
+          }
+        }
+        else{
+          self.ProceedToValidate(tab)
+        }
+    },
     ProceedToValidate(tab){
       let self = this
+      continue_flag = false
+      if(self.mObj[tab].selected_schema == '--Add new--'){
+        self.$Notice.error({title: 'Please enter a valid schema name',duration: 200})
+      }
+      else {
       let errcols = []
       let dateValidatorFunc = function (obj, value, fieldName) {
               if(value != "" || value != undefined){
@@ -1434,6 +1752,7 @@ export default {
         self.loading = true
         self.saveData(tab)
       }
+    }
     },
     Abort(tab){
       let self = this
@@ -1441,6 +1760,22 @@ export default {
       self.mObj[tab].headerDisplay = false
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
+      self.mObj[tab].uploadDisplay = true
+    },
+    AbortValidation(tab){
+      let self = this
+      self.mObj[tab].errmsg = []
+      self.mObj[tab].uploadCSV = []
+      self.mObj[tab].newUploadCSV = []
+      self.mObj[tab].data1 = []
+      self.mObj[tab].headers1 = []
+      $('table.htCore').each(function () {
+        this.remove()
+      })
+
+      document.getElementById('example1').style.display = 'none'
+      self.mObj[tab].showHandson = false
+      self.mObj[tab].errDisplay = false
       self.mObj[tab].uploadDisplay = true
     },
     showerrmsg (errcols,tab,schema) {
@@ -1460,7 +1795,7 @@ export default {
         }
       })
       document.getElementById('example1').style.display = 'block'
-      document.getElementById('hot-display-license-info').style.display = 'none'
+      // document.getElementById('hot-display-license-info').style.display = 'none'
     },
     modifyData (tab) {
       let schema = this.mObj[tab].schema
@@ -1511,8 +1846,8 @@ export default {
         })
       })
 
-      if (res !== undefined) {
-        this.mObj[tab].newUploadCSV = res
+      if (userUploadedDataArr !== undefined) {
+        self.mObj[tab].newUploadCSV =  userUploadedDataArr
 
       }
 
@@ -1544,6 +1879,26 @@ export default {
     },
     saveData(tab){
       let self = this
+      let CSVFileObj = {
+        name : file.name,
+        size: file.size,
+        totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
+        createdAt: Date(),
+        updatedAt: Date(),
+        deletedAt:'',
+        username: self.$store.state.user.email,
+        user_id: self.$store.state.user._id
+      }
+
+      let name = tab.replace(/\s/g, "")
+      obj1 = {}
+      obj1[name] = {
+        uploadStatus:"completed",
+        validateStatus: "pending",
+        uploadedAt: Date(),
+        totalNoOfRecords: self.mObj[tab].newUploadCSV.length
+      }
+
       if(self.mObj[tab].new_flag == 1){
         let schemaobj = {
           name : self.mObj[tab].selected_schema,
@@ -1556,16 +1911,7 @@ export default {
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
             schema_id = res.data.id
-            let CSVFileObj = {
-              name : file.name,
-              size: file.size,
-              totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
-              createdAt: Date(),
-              updatedAt: Date(),
-              deletedAt:'',
-              username: self.$store.state.user.email,
-              user_id: self.$store.state.user._id
-            }
+
             api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
               CSVFile_id = result.data.id
 
@@ -1580,36 +1926,27 @@ export default {
               }
 
               api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
-
-                let name = tab.replace(/\s/g, "")
-                obj1 = {}
-                obj1[name] = {
-                  id: CSVFile_id,
-                  schema_id : schema_id,
-                  uploadStatus:"completed",
-                  validateStatus: "pending",
-                  uploadedAt: Date(),
-                  totalNoOfRecords: self.mObj[tab].newUploadCSV.length
-                }
+              obj1[name]["id"] = CSVFile_id
+              obj1[name]["schema_id"] = schema_id
 
                 var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
                   return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
                 });
 
-                self.loading = false
-                self.mObj[tab].previewDisplay = true
-                // self.mObj[tab].savePreviewDisplay = true
-                let new_tab = ''
-                let old_tab_index = ''
-                _.forEach(self.fileTypes, function(value,key){
-                  if(value == self.activeTab){
-                    new_tab = self.fileTypes[key + 1]
-                    old_tab_index = value.replace(/ /g,"_");
-                  }
-                })
-                $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
-                self.activeTab = new_tab
-                self.validate = false
+                // self.loading = false
+                // self.mObj[tab].previewDisplay = true
+                // // self.mObj[tab].savePreviewDisplay = true
+                // let new_tab = ''
+                // let old_tab_index = ''
+                // _.forEach(self.fileTypes, function(value,key){
+                //   if(value == self.activeTab){
+                //     new_tab = self.fileTypes[key + 1]
+                //     old_tab_index = value.replace(/ /g,"_");
+                //   }
+                // })
+                // $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
+                // self.activeTab = new_tab
+                // self.validate = false
 
                 let obj= {
                   "activetab" : tab,
@@ -1637,49 +1974,28 @@ export default {
 
       }
       else {
-
-        let CSVFileObj = {
-          name : file.name,
-          size: file.size,
-          totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
-          createdAt: Date(),
-          updatedAt: Date(),
-          deletedAt:'',
-          username: self.$store.state.user.email,
-          user_id: self.$store.state.user._id
-        }
         api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
           CSVFile_id = result.data.id
-
-
-          obj1 = {}
-          let name = tab.replace(/\s/g, "")
-          obj1[name] = {
-            id: CSVFile_id,
-            schema_id : schema_id,
-            uploadStatus:"completed",
-            validateStatus: "pending",
-            uploadedAt: Date(),
-            totalNoOfRecords: self.mObj[tab].newUploadCSV.length
-          }
+          obj1[name]["id"] = CSVFile_id
+          obj1[name]["schema_id"] = schema_id
 
           var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
             return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
           });
-          self.loading = false
-          self.mObj[tab].previewDisplay = true
-          // self.mObj[tab].savePreviewDisplay = true
-          let new_tab = ''
-          let old_tab_index = ''
-          _.forEach(self.fileTypes, function(value,key){
-            if(value == self.activeTab){
-              new_tab = self.fileTypes[key + 1]
-              old_tab_index = value.replace(/ /g,"_");
-            }
-          })
-          $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
-          self.activeTab = new_tab
-          self.validate = false
+          // self.loading = false
+          // self.mObj[tab].previewDisplay = true
+          // // self.mObj[tab].savePreviewDisplay = true
+          // let new_tab = ''
+          // let old_tab_index = ''
+          // _.forEach(self.fileTypes, function(value,key){
+          //   if(value == self.activeTab){
+          //     new_tab = self.fileTypes[key + 1]
+          //     old_tab_index = value.replace(/ /g,"_");
+          //   }
+          // })
+          // $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
+          // self.activeTab = new_tab
+          // self.validate = false
           let obj= {
             "activetab" : tab,
             "newCSV": newCSV
@@ -1697,17 +2013,62 @@ export default {
 
 
     }
+  },
+  setprogress(message){
+
+    let self = this
+
+    if(self.val_data.length == 0){
+
+      self.val_data = self.$store.state.data
+    }
+    let progress_obj = _.filter(self.val_data, {'name':prop_keys[0]});
+
+    progress_obj[0].progress = Math.round(message[prop_keys[0]].currentRuleIndex / message[prop_keys[0]].ruleIndex * 100);
+
   }
   },
   feathers: {
     'uploader': {
       updated (message) {
           let self = this
-          if(message.user_id == this.$store.state.user._id){
-            if(message.stepStatus == "import_to_confirm"){
+
+          if(message.user_id == self.$store.state.user._id){
+
+            self.val_data = []
+
+            if(prop_keys.length != 0){
+
+              if(message[prop_keys[0]] && message[prop_keys[0]]["currentRuleIndex"]){
+                self.setprogress(message)
+              }
+            }
+            else if(message.stepStatus == 'upload_pending'){
+
+              let name = self.activeTab.replace(/\s/g, "")
+              if(message[name] && message[name].uploadStatus == "completed"){
+
+                self.loading = false
+                self.mObj[self.activeTab].previewDisplay = true
+                // self.mObj[tab].savePreviewDisplay = true
+                let new_tab = ''
+                let old_tab_index = ''
+                _.forEach(self.fileTypes, function(value,key){
+                  if(value == self.activeTab){
+                    new_tab = self.fileTypes[key + 1]
+                    old_tab_index = value.replace(/ /g,"_");
+                  }
+                })
+                $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
+                self.activeTab = new_tab
+                self.validate = false
+              }
+            }
+            else if(message.stepStatus == "import_to_confirm"){
               self.import1 = true
             }
           }
+
       }
     }
   },
@@ -1715,92 +2076,136 @@ export default {
       let self = this
       id = self.$route.params.id
       self.loading = true
-      if(this.$store.state.jobData.hasOwnProperty("id")){
-        let jobData = this.$store.state.jobData
-        if(jobData.stepStatus == 'upload_pending'){
-          this.currentStep = 0
-          if(jobData.stepStatus == 'upload_pending'){
-            if(Object.keys(jobData).indexOf("ProductInformation") >= 0){
-              this.$Notice.info({
-                       title: 'Loading your Data...',
-                       desc: 'Please wait...!!!',
-                       duration: 1000
-               });
-              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductinformation').then(res => {
-                self.mObj["Product Information"].newUploadCSV = res.data
-                self.mObj["Product Information"].headers = Object.keys(res.data[0])
-                self.map = true
-                self.mObj["Product Information"].uploadDisplay = false
-                self.mObj["Product Information"].previewDisplay = true
+
+      api.request('get', '/uploader/' + id ).then(response => {
+        if(response.data != null){
+                let keys = Object.keys(response.data)
+                let filtered_keys = _.filter(keys, function(o) {
+                  if(o == 'ProductInformation' || o == 'ProductPrice' || o == 'ProductImprintData' || o == 'ProductShipping' || o == 'ProductImage' || o == 'ProductVariationPrice' || o == "ProductAdditionalCharges"){
+                    return o;
+                  }
+                });
+
+                  if(response.data.stepStatus == 'upload_pending'){
+                    this.currentStep = 0
+                    // for(let i=0;i<filtered_keys.length;i++){
+                    //   let uploaded_tabs = self.convert(filtered_keys[i]).replace(/ /g,"_");
+                    //  
+                    //   $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
+                    // }
+
+                    let diff_keys = _.difference(self.fileNames, filtered_keys);
+                    self.activeTab = self.convert(diff_keys[0])
+
+                      if(Object.keys(response.data).indexOf("ProductInformation") >= 0){
+                        // this.$Notice.info({
+                        //          title: 'Loading your Data...',
+                        //          desc: 'Please wait...!!!',
+                        //          duration: 1000
+                        //  });
+                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductinformation').then(res => {
+                          self.mObj["Product Information"].newUploadCSV = res.data
+                          self.mObj["Product Information"].headers = Object.keys(res.data[0])
+                          self.map = true
+                          self.mObj["Product Information"].uploadDisplay = false
+                          self.mObj["Product Information"].previewDisplay = true
 
 
-              })
-            }
-            if(Object.keys(jobData).indexOf("ProductPrice") >= 0){
-              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductprice').then(res => {
-                self.mObj["Product Price"].newUploadCSV = res.data
-                self.mObj["Product Price"].headers = Object.keys(res.data[0])
-                self.map = true
-                self.mObj["Product Price"].uploadDisplay = false
-                self.mObj["Product Price"].previewDisplay = true
-              })
-            }
-            if(Object.keys(jobData).indexOf("ProductImprintData") >= 0){
-              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimprintdata').then(res => {
-                self.mObj["Product Imprint Data"].newUploadCSV = res.data
-                self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
-                self.map = true
-                self.mObj["Product Imprint Data"].uploadDisplay = false
-                self.mObj["Product Imprint Data"].previewDisplay = true
-              })
-            }
-            if(Object.keys(jobData).indexOf("ProductShipping") >= 0){
-              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductshipping').then(res => {
-                self.mObj["Product Shipping"].newUploadCSV = res.data
-                self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
-                self.map = true
-                self.mObj["Product Shipping"].uploadDisplay = false
-                self.mObj["Product Shipping"].previewDisplay = true
-              })
-            }
-            if(Object.keys(jobData).indexOf("ProductImage") >= 0){
-              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductimage').then(res => {
+                        })
+                      }
+                      if(Object.keys(response.data).indexOf("ProductPrice") >= 0){
+                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductprice').then(res => {
+                          self.mObj["Product Price"].newUploadCSV = res.data
+                          self.mObj["Product Price"].headers = Object.keys(res.data[0])
+                          self.map = true
+                          self.mObj["Product Price"].uploadDisplay = false
+                          self.mObj["Product Price"].previewDisplay = true
+                        })
+                      }
+                      if(Object.keys(response.data).indexOf("ProductImprintData") >= 0){
+                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductimprintdata').then(res => {
+                          self.mObj["Product Imprint Data"].newUploadCSV = res.data
+                          self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
+                          self.map = true
+                          self.mObj["Product Imprint Data"].uploadDisplay = false
+                          self.mObj["Product Imprint Data"].previewDisplay = true
+                        })
+                      }
+                      if(Object.keys(response.data).indexOf("ProductShipping") >= 0){
+                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductshipping').then(res => {
+                          self.mObj["Product Shipping"].newUploadCSV = res.data
+                          self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
+                          self.map = true
+                          self.mObj["Product Shipping"].uploadDisplay = false
+                          self.mObj["Product Shipping"].previewDisplay = true
+                        })
+                      }
+                      if(Object.keys(response.data).indexOf("ProductImage") >= 0){
+                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductimage').then(res => {
 
-                self.mObj["Product Image"].newUploadCSV = res.data
-                self.mObj["Product Image"].headers = Object.keys(res.data[0])
-                self.map = true
-                self.mObj["Product Image"].uploadDisplay = false
-                self.mObj["Product Image"].previewDisplay = true
-              })
-            }
-            if(Object.keys(jobData).indexOf("ProductAdditionalCharges") >= 0){
-              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductadditionalcharges').then(res => {
-                self.mObj["Product Additional Charges"].newUploadCSV = res.data
-                self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
-                self.map = true
-                self.mObj["Product Additional Charges"].uploadDisplay = false
-                self.mObj["Product Additional Charges"].previewDisplay = true
-              })
-            }
-            if(Object.keys(jobData).indexOf("ProductVariationPrice") >= 0){
-              api.request('get', '/pdm-uploader-data/?import_tracker_id=' + jobData.id + '&tables=uploaderProductvariationprice').then(res => {
-                self.mObj["Product Variation Price"].newUploadCSV = res.data
-                self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
-                self.map = true
-                self.mObj["Product Variation Price"].uploadDisplay = false
-                self.mObj["Product Variation Price"].previewDisplay = true
-              })
-            }
-               self.validate = false
-          }
+                          self.mObj["Product Image"].newUploadCSV = res.data
+                          self.mObj["Product Image"].headers = Object.keys(res.data[0])
+                          self.map = true
+                          self.mObj["Product Image"].uploadDisplay = false
+                          self.mObj["Product Image"].previewDisplay = true
+                        })
+                      }
+                      if(Object.keys(response.data).indexOf("ProductAdditionalCharges") >= 0){
+                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductadditionalcharges').then(res => {
+                          self.mObj["Product Additional Charges"].newUploadCSV = res.data
+                          self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
+                          self.map = true
+                          self.mObj["Product Additional Charges"].uploadDisplay = false
+                          self.mObj["Product Additional Charges"].previewDisplay = true
+                        })
+                      }
+                      if(Object.keys(response.data).indexOf("ProductVariationPrice") >= 0){
+                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductvariationprice').then(res => {
+                          self.mObj["Product Variation Price"].newUploadCSV = res.data
+                          self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
+                          self.map = true
+                          self.mObj["Product Variation Price"].uploadDisplay = false
+                          self.mObj["Product Variation Price"].previewDisplay = true
+                        })
+                      }
+                         self.validate = false
+                  }
+                  else if(response.data.stepStatus == 'validation_running'){
+                    this.currentStep = 1
+                    this.validating = false
+                    this.showValidationTable = true
+                    uploader_obj = response.data
+                    prop_keys = filtered_keys
+                    for(let key in response.data){
+                      for(let i=0 ;i<filtered_keys.length;i++){
+                        if(filtered_keys[i] == key){
+                          if(response.data[filtered_keys[i]].validateStatus == 'pending'){
+                            self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":0})
+                          }
+                          else if(response.data[filtered_keys[i]].validateStatus == 'completed'){
+                            self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
+                            prop_keys.splice(i,1)
+                          }
+                        }
+                      }
+                    }
+
+                    self.$store.state.data = self.val_data
+                    self.sheetwiseValidation(prop_keys[0],uploader_obj)
+                  }
+                  else if(response.data.stepStatus == 'validation_completed'){
+                    this.validating = false
+                    this.currentStep = 1
+                    this.showValidationTable = false
+                    // this.val_data = []
+                    this.validation_completed = true
+                  }
+                  else {
+                    this.currentStep = 2
+                  }
         }
-        else if(jobData.stepStatus == 'validation_completed'){
-          this.currentStep = 1
-        }
-        else {
-          this.currentStep = 2
-        }
-      }
+      })
+
 
       socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
         self.existingSchemaData = res.data[0]
@@ -1848,6 +2253,8 @@ export default {
       })
 
 
+
+
     }
 }
 </script>
@@ -1861,7 +2268,7 @@ export default {
   border: 1px solid #bbbec4 !important;
 }
 .uploadSteps{
-  margin-left: 13% !important;
+  padding-left: 20% !important;
 }
 .ivu-steps-item.ivu-steps-status-process .ivu-steps-content {
     color: #337ab7;
@@ -2141,13 +2548,13 @@ export default {
   font-size: 13px !important;
   /*padding: 9px !important;*/
 }
-.handsontable thead {
+/*.handsontable thead {
     box-sizing: content-box;
     -webkit-box-sizing: content-box;
-    background-color: black;
+    background-color: #eee;
     color: #fff;
     font-size: 14px;
-}
+}*/
 #example1 {
   width: 100%!important;
 }
@@ -2214,6 +2621,29 @@ export default {
 
 .funnel{
   font-size: large;
+}
+
+#hot-display-license-info{
+  display: none;
+}
+
+.handsontable{
+  margin: 5px !important;
+}
+
+.ht_master{
+  width: 100% !important;
+}
+
+.redClass{
+  color:red;
+  font-size:14px;
+  padding-left:10px;
+  border:0px;
+}
+
+.border:before{
+  background-color: #fff !important;
 }
 
 </style>
