@@ -128,7 +128,7 @@ export default {
            user_id:this.$store.state.user._id
          }
          if(this.$store.state.user.fullname){
-           username: this.$store.state.user.fullname
+           obj["username"] = this.$store.state.user.fullname
          }
          api.request('post', '/uploader', obj).then(res => {
            id = res.data.id

@@ -76,20 +76,6 @@
    qryMongo : {$and:[{$or:[{"carton_weight": null},{"carton_weight": ""}]},{$or:[{"product_weight": null},{"product_weight": ""}]}]}
  },
  {
-   columnName : 'qty_1_min',
-   errorString: "Qty_1_min field found blank",
-   errorCode: 'qty_1_minblankCheck400',
-   qryMongo : {$or:[{"qty_1_min":null},{"qty_1_min":""}]},
-   qryES : {}
- },
- {
-   columnName : 'qty_1_max',
-   errorString: "qty_1_max field found blank",
-   errorCode: 'qty_1_maxblankCheck400',
-   qryMongo : {$or:[{"qty_1_max":null},{"qty_1_max":""}]},
-   qryES : {}
- },
- {
      columnName : 'qty_1_max',
      errorString: "`qty_1_max` should be greater than `qty_1_min`",
      errorCode: 'qty_1_maxValueCheck400',

@@ -99,7 +99,7 @@
                  </div>
              </div>
              <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:7%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Proceed</Button>
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:9%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn">Proceed</Button>
            </div>
 
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
@@ -291,7 +291,7 @@
          <div id="example1" class="hot handsontable htColumnHeaders"></div>
          <table>
            <tr>
-           <td class="ivu-table-row" v-for="(item, index) in mObj[activeTab].errmsg[0]"style="color:red;font-size:14px;">{{item}}</td>
+           <td class="ivu-table-row" style="color:red;font-size:14px;">{{mObj[activeTab].errmsg[0]}}</td>
          </tr>
          </table>
          <div id="hot-preview" v-if="mObj[activeTab].showHandson">
@@ -423,9 +423,7 @@
                          <span>
                            <div class="ivu-table-cell">
                              <i-circle :percent="item.progress" style="width:45px;height:45px;">
-                               <!-- <Icon v-if="item.progress == 100" type="ios-checkmark-empty" size="20" style="color:#5cb85c"></Icon> -->
                                <span style="font-size:12px">{{item.progress}}%</span>
-                                 <!-- <span class="demo-Circle-inner" style="font-size:12px">{{item.progress}}%</span> -->
                              </i-circle>
                            </div>
                          </span>
@@ -465,6 +463,7 @@
 
       <div v-if="validation_completed"><p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p></div>
       <Button type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right">Import</Button>
+      <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Abort</Button>
       </Card>
     </template>
     <template v-if="currentStep == 2">
@@ -588,6 +587,7 @@ export default {
           val_data: [],
           modal1: false,
           validation_completed: false,
+          proceedBtn: true,
           schemaList: [
                     {
                         value: '--Add new--',
@@ -865,7 +865,7 @@ export default {
 
         let self = this
         if(self.mObj["Product Information"].newUploadCSV.length == 0){
-          self.$Notice.info({
+          self.$Notice.error({
                    title: 'Please upload Product Information file...'
            });
         }
@@ -974,10 +974,14 @@ export default {
 
            var cell3 = row1.insertCell(1);
            cell3.colSpan = 2
-           cell3.innerHTML = '<button type="button" id="proceed-to-next"  style="float: right;margin-right: 20px;background-color: #13ce66;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color: #13ce66;">Proceed To Next</Button>'
+           cell3.innerHTML = '<button type="button" id="proceed-to-next"  style="float: right;margin-right: 20px;background-color: #13ce66;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color: #13ce66;">Proceed To Next</Button><button type="button" id="abortServerSide"  style="float: right;margin-right: 20px;background-color: #ed3f14;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color:#ed3f14;width:15%;">Abort</Button>'
 
            document.getElementById('proceed-to-next').onclick = function(){
              self.proceedToNext()
+           }
+
+           document.getElementById('abortServerSide').onclick = function(){
+             self.AbortServerSideValidation()
            }
 
           _.forEach(data[0].err_data, (item,key) => {
@@ -1093,11 +1097,11 @@ export default {
               }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
+              
                 let importObj = {
                   stepStatus : "import_in_progress"
                 }
-                api.request('patch', '/uploader/'+ id,importObj).then(res => {
-
+                api.request('patch', '/uploader/'+ id,importObj).then(result => {
                 })
                 .catch(error => {
                     this.$Notice.error({
@@ -1137,7 +1141,6 @@ export default {
               }
 
               api.request('post', '/import-to-confirm/',jobQueue_obj).then(res => {
-
               })
               .catch(error => {
                   this.$Notice.error({
@@ -1403,6 +1406,7 @@ export default {
     },
     Proceed(tab){
       let self = this
+      self.proceedBtn = false
         if(continue_flag == false){
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
             if(o.sysHeader == 'private' || o.sysHeader == 'supplier' || o.sysHeader == 'company'){
@@ -1722,7 +1726,7 @@ export default {
                   let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
                   _.forEach(errors, (item) => {
                     errcols.push({
-                      cols: _.indexOf(oldHeaders, item.field),
+                      cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
                       rows: key
                     })
                     self.mObj[tab].errmsg.push('* ' + item.message + ' at column: ' + item.field)
@@ -1777,6 +1781,47 @@ export default {
       self.mObj[tab].showHandson = false
       self.mObj[tab].errDisplay = false
       self.mObj[tab].uploadDisplay = true
+    },
+    abortImport(){
+       let self = this
+       self.validation_completed = false
+       api.request('get', '/uploader/' + id).then(response => {
+         let obj = self.ModifyObj(response.data)
+         api.request('put','/uploader/' + id,obj[0]).then(result =>{
+            self.setPage(obj[1],obj[2],result.data)
+         })
+
+       })
+    },
+    ModifyObj(data){
+      let keys = Object.keys(data)
+      let filtered_keys = _.filter(keys, function(o) {
+        if(o == 'ProductInformation' || o == 'ProductPrice' || o == 'ProductImprintData' || o == 'ProductShipping' || o == 'ProductImage' || o == 'ProductVariationPrice' || o == "ProductAdditionalCharges"){
+          return o;
+        }
+      });
+
+      for(let i=0; i<filtered_keys.length; i++){
+        if(lodash.includes(keys, filtered_keys[i]) == true){
+          let new_obj = data[filtered_keys[i]]
+          new_obj["validateStatus"] = "pending"
+          delete data[filtered_keys[i]]
+          delete new_obj["currentRuleIndex"]
+          delete new_obj["ruleIndex"]
+          data[filtered_keys[i]] = new_obj
+        }
+      }
+       data["stepStatus"] = "upload_pending"
+       return [data,keys,filtered_keys]
+    },
+    AbortServerSideValidation(){
+      let self = this
+      self.showValidationTable = false
+      self.val_data = []
+      let obj1 = self.ModifyObj(uploader_obj)
+      api.request('put','/uploader/' + id,obj1[0]).then(result =>{
+         self.setPage(obj1[1],obj1[2],result.data)
+      })
     },
     showerrmsg (errcols,tab,schema) {
       var example1 = document.getElementById('example1')
@@ -1933,20 +1978,6 @@ export default {
                   return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
                 });
 
-                // self.loading = false
-                // self.mObj[tab].previewDisplay = true
-                // // self.mObj[tab].savePreviewDisplay = true
-                // let new_tab = ''
-                // let old_tab_index = ''
-                // _.forEach(self.fileTypes, function(value,key){
-                //   if(value == self.activeTab){
-                //     new_tab = self.fileTypes[key + 1]
-                //     old_tab_index = value.replace(/ /g,"_");
-                //   }
-                // })
-                // $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
-                // self.activeTab = new_tab
-                // self.validate = false
 
                 let obj= {
                   "activetab" : tab,
@@ -1982,20 +2013,7 @@ export default {
           var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
             return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
           });
-          // self.loading = false
-          // self.mObj[tab].previewDisplay = true
-          // // self.mObj[tab].savePreviewDisplay = true
-          // let new_tab = ''
-          // let old_tab_index = ''
-          // _.forEach(self.fileTypes, function(value,key){
-          //   if(value == self.activeTab){
-          //     new_tab = self.fileTypes[key + 1]
-          //     old_tab_index = value.replace(/ /g,"_");
-          //   }
-          // })
-          // $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
-          // self.activeTab = new_tab
-          // self.validate = false
+
           let obj= {
             "activetab" : tab,
             "newCSV": newCSV
@@ -2013,19 +2031,97 @@ export default {
 
 
     }
+    self.proceedBtn = true
   },
   setprogress(message){
 
     let self = this
-
     if(self.val_data.length == 0){
-
       self.val_data = self.$store.state.data
     }
     let progress_obj = _.filter(self.val_data, {'name':prop_keys[0]});
-
     progress_obj[0].progress = Math.round(message[prop_keys[0]].currentRuleIndex / message[prop_keys[0]].ruleIndex * 100);
+  },
 
+  setPage(keys,filtered_keys,response){
+    let self = this
+    self.currentStep = 0
+
+    for(let i=0;i<filtered_keys.length;i++){
+      let uploaded_tabs = self.convert(filtered_keys[i]).replace(/ /g,"_");
+      $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
+    }
+
+    let diff_keys = _.difference(self.fileNames, filtered_keys);
+    self.activeTab = self.convert(diff_keys[0])
+
+      if(Object.keys(response).indexOf("ProductInformation") >= 0){
+        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductinformation').then(res => {
+          self.mObj["Product Information"].newUploadCSV = res.data
+          self.mObj["Product Information"].headers = Object.keys(res.data[0])
+          self.map = true
+          self.mObj["Product Information"].uploadDisplay = false
+          self.mObj["Product Information"].previewDisplay = true
+
+
+        })
+      }
+      if(Object.keys(response).indexOf("ProductPrice") >= 0){
+        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductprice').then(res => {
+          self.mObj["Product Price"].newUploadCSV = res.data
+          self.mObj["Product Price"].headers = Object.keys(res.data[0])
+          self.map = true
+          self.mObj["Product Price"].uploadDisplay = false
+          self.mObj["Product Price"].previewDisplay = true
+        })
+      }
+      if(Object.keys(response).indexOf("ProductImprintData") >= 0){
+        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductimprintdata').then(res => {
+          self.mObj["Product Imprint Data"].newUploadCSV = res.data
+          self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
+          self.map = true
+          self.mObj["Product Imprint Data"].uploadDisplay = false
+          self.mObj["Product Imprint Data"].previewDisplay = true
+        })
+      }
+      if(Object.keys(response).indexOf("ProductShipping") >= 0){
+        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductshipping').then(res => {
+          self.mObj["Product Shipping"].newUploadCSV = res.data
+          self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
+          self.map = true
+          self.mObj["Product Shipping"].uploadDisplay = false
+          self.mObj["Product Shipping"].previewDisplay = true
+        })
+      }
+      if(Object.keys(response).indexOf("ProductImage") >= 0){
+        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductimage').then(res => {
+
+          self.mObj["Product Image"].newUploadCSV = res.data
+          self.mObj["Product Image"].headers = Object.keys(res.data[0])
+          self.map = true
+          self.mObj["Product Image"].uploadDisplay = false
+          self.mObj["Product Image"].previewDisplay = true
+        })
+      }
+      if(Object.keys(response).indexOf("ProductAdditionalCharges") >= 0){
+        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductadditionalcharges').then(res => {
+          self.mObj["Product Additional Charges"].newUploadCSV = res.data
+          self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
+          self.map = true
+          self.mObj["Product Additional Charges"].uploadDisplay = false
+          self.mObj["Product Additional Charges"].previewDisplay = true
+        })
+      }
+      if(Object.keys(response).indexOf("ProductVariationPrice") >= 0){
+        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductvariationprice').then(res => {
+          self.mObj["Product Variation Price"].newUploadCSV = res.data
+          self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
+          self.map = true
+          self.mObj["Product Variation Price"].uploadDisplay = false
+          self.mObj["Product Variation Price"].previewDisplay = true
+        })
+      }
+         self.validate = false
   }
   },
   feathers: {
@@ -2034,11 +2130,8 @@ export default {
           let self = this
 
           if(message.user_id == self.$store.state.user._id){
-
             self.val_data = []
-
             if(prop_keys.length != 0){
-
               if(message[prop_keys[0]] && message[prop_keys[0]]["currentRuleIndex"]){
                 self.setprogress(message)
               }
@@ -2087,88 +2180,7 @@ export default {
                 });
 
                   if(response.data.stepStatus == 'upload_pending'){
-                    this.currentStep = 0
-                    // for(let i=0;i<filtered_keys.length;i++){
-                    //   let uploaded_tabs = self.convert(filtered_keys[i]).replace(/ /g,"_");
-                    //  
-                    //   $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
-                    // }
-
-                    let diff_keys = _.difference(self.fileNames, filtered_keys);
-                    self.activeTab = self.convert(diff_keys[0])
-
-                      if(Object.keys(response.data).indexOf("ProductInformation") >= 0){
-                        // this.$Notice.info({
-                        //          title: 'Loading your Data...',
-                        //          desc: 'Please wait...!!!',
-                        //          duration: 1000
-                        //  });
-                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductinformation').then(res => {
-                          self.mObj["Product Information"].newUploadCSV = res.data
-                          self.mObj["Product Information"].headers = Object.keys(res.data[0])
-                          self.map = true
-                          self.mObj["Product Information"].uploadDisplay = false
-                          self.mObj["Product Information"].previewDisplay = true
-
-
-                        })
-                      }
-                      if(Object.keys(response.data).indexOf("ProductPrice") >= 0){
-                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductprice').then(res => {
-                          self.mObj["Product Price"].newUploadCSV = res.data
-                          self.mObj["Product Price"].headers = Object.keys(res.data[0])
-                          self.map = true
-                          self.mObj["Product Price"].uploadDisplay = false
-                          self.mObj["Product Price"].previewDisplay = true
-                        })
-                      }
-                      if(Object.keys(response.data).indexOf("ProductImprintData") >= 0){
-                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductimprintdata').then(res => {
-                          self.mObj["Product Imprint Data"].newUploadCSV = res.data
-                          self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
-                          self.map = true
-                          self.mObj["Product Imprint Data"].uploadDisplay = false
-                          self.mObj["Product Imprint Data"].previewDisplay = true
-                        })
-                      }
-                      if(Object.keys(response.data).indexOf("ProductShipping") >= 0){
-                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductshipping').then(res => {
-                          self.mObj["Product Shipping"].newUploadCSV = res.data
-                          self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
-                          self.map = true
-                          self.mObj["Product Shipping"].uploadDisplay = false
-                          self.mObj["Product Shipping"].previewDisplay = true
-                        })
-                      }
-                      if(Object.keys(response.data).indexOf("ProductImage") >= 0){
-                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductimage').then(res => {
-
-                          self.mObj["Product Image"].newUploadCSV = res.data
-                          self.mObj["Product Image"].headers = Object.keys(res.data[0])
-                          self.map = true
-                          self.mObj["Product Image"].uploadDisplay = false
-                          self.mObj["Product Image"].previewDisplay = true
-                        })
-                      }
-                      if(Object.keys(response.data).indexOf("ProductAdditionalCharges") >= 0){
-                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductadditionalcharges').then(res => {
-                          self.mObj["Product Additional Charges"].newUploadCSV = res.data
-                          self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
-                          self.map = true
-                          self.mObj["Product Additional Charges"].uploadDisplay = false
-                          self.mObj["Product Additional Charges"].previewDisplay = true
-                        })
-                      }
-                      if(Object.keys(response.data).indexOf("ProductVariationPrice") >= 0){
-                        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.data.id + '&tables=uploaderProductvariationprice').then(res => {
-                          self.mObj["Product Variation Price"].newUploadCSV = res.data
-                          self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
-                          self.map = true
-                          self.mObj["Product Variation Price"].uploadDisplay = false
-                          self.mObj["Product Variation Price"].previewDisplay = true
-                        })
-                      }
-                         self.validate = false
+                    self.setPage(keys,filtered_keys,response.data)
                   }
                   else if(response.data.stepStatus == 'validation_running'){
                     this.currentStep = 1
@@ -2197,7 +2209,6 @@ export default {
                     this.validating = false
                     this.currentStep = 1
                     this.showValidationTable = false
-                    // this.val_data = []
                     this.validation_completed = true
                   }
                   else {
@@ -2644,6 +2655,10 @@ export default {
 
 .border:before{
   background-color: #fff !important;
+}
+
+#valid_err{
+  border-bottom: solid 2px #ccc;
 }
 
 </style>

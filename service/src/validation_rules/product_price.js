@@ -50,11 +50,11 @@ const ProductPriceRules = [
       qryES : {}
     },
     {
-        columnName : 'qty_1_max',
-        errorString: "`qty_1_max` should be greater than `qty_1_min`",
-        errorCode: 'qty_1_maxValueCheck400',
-        qryMongo : {$where : "this.qty_1_min > this.qty_1_max"},
-        qryES : {}
+      columnName : 'qty_1_max',
+      errorString: "`qty_1_max` should be greater than `qty_1_min`",
+      errorCode: 'qty_1_maxValueCheck400',
+      qryMongo : {$where : "this.qty_1_min > this.qty_1_max"},
+      qryES : {}
     },
     {
         columnName : 'qty_2_min',
