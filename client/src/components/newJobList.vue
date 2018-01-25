@@ -1,5 +1,5 @@
 <template>
-    <Table :columns="columns1" :data="data2"></Table>
+    <Table :columns="columns1" :data="data2" class="jobtable"></Table>
 </template>
 <script>
 /*eslint-disable*/
@@ -12,6 +12,7 @@ import feathers from 'feathers/client';
 import socketio from 'feathers-socketio/client';
 import Emitter from '@/mixins/emitter'
 import config from '@/config'
+var lodash = require('lodash');
 var _ = require("underscore");
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -69,7 +70,10 @@ export default {
         }
     },
     methods:{
-
+      getStatus(status){
+        var res = lodash.capitalize(status.replace(/_/g," "))
+        return res
+      }
     },
     feathers: {
       'uploader': {
@@ -126,6 +130,11 @@ export default {
                 delete data.data[i][key]
                 data.data[i]["createdAt"] = created_at
               }
+              else if(key == "stepStatus"){
+                let stepStatus = self.getStatus(data.data[i][key])
+                delete data.data[i][key]
+                data.data[i]["stepStatus"] = stepStatus
+              }
             }
             self.data2.push(data.data[i])
           }
@@ -141,4 +150,7 @@ export default {
 }
 </script>
 <style scoped>
+.jobtable{
+  text-align: center !important;
+}
 </style>

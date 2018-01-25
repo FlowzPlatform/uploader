@@ -52,10 +52,17 @@ async function beforeCreate(hook) {
     "db": app.get("rdb_db")
   }
   try {
-    await axios.post(base_url, hook.data)
+     axios.post(base_url, hook.data).then(res => {
+
+     })
+     .catch(error => {
+
+     })
+
+  
+
   } catch (err) {
     //
   }
-  console.log(hook.data)
   hook.result = { "data": hook.data, code: 200 }
 }

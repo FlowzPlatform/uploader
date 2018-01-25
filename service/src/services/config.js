@@ -5,6 +5,7 @@ let ssl = process.env.cert ? { ca: fs.readFileSync(__dirname + process.env.cert)
 let rauth = process.env.rauth ? process.env.rauth : null
 let host = process.env.RDB_HOST ? config.get('rdb_host').trim() : 'localhost'
 let port = process.env.RDB_PORT ? config.get('rdb_port').trim() : '28015'
+
 var rethinkdb = {
   rethinkdb: {
     db: 'FlowzDBETL',

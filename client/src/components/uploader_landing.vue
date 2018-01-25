@@ -1,5 +1,5 @@
 <template>
-  <div id="landingPageStatusReport" class="clearfix" style="overflow:auto;border: 3px solid #7c7e86;color: black;text-align: center;padding-top: 4px;margin: 50px;padding-bottom: 26px;">
+  <div id="landingPageStatusReport" class="clearfix" style="overflow:auto;border: 3px solid #7c7e86;color: black;text-align: center;padding-top: 4px;margin: 50px;padding-bottom: 26px;" v-if="show_table">
     <h2 style="text-transform:uppercase;margin-top: 18px;" v-if="job[0].username">Welcome back, {{job[0].username}}</h2>
     <h2 style="text-transform:uppercase;margin-top: 18px;" v-else>Welcome back</h2>
     <p style="margin-top: 10px;margin-bottom: 10px;font-size: 15px;">Following is the latest status of your file upload process.You can continue with your current status or abort the whole process to start again</p>
@@ -176,6 +176,7 @@ export default {
             modal1:false,
             keys: [],
             show: false,
+            show_table: false,
             moment : moment
         }
     },
@@ -218,6 +219,7 @@ export default {
         if(data.data.length != 0){
           this.$store.state.jobData = data.data[0]
           this.job.push(data.data[0])
+          this.show_table = true
           this.keys = Object.keys(this.job[0])
           for(let i=0 ;i<this.keys.length;i++){
             if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||

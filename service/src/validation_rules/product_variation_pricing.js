@@ -30,13 +30,6 @@ const ProductVariationPriceRules = [
     qryES : {}
   },
   {
-      columnName : 'qty_1_min',
-      errorString: "Product qty field found blank",
-      errorCode: 'Product_QtyblankCheck400',
-      qryMongo : {$or:[{"qty_1_min":null},{"qty_1_min":""}]},
-      qryES : {}
-  },
-  {
       columnName : 'qty_1_max',
       errorString: "`qty_1_max` should be greater than `qty_1_min`",
       errorCode: 'qty_1_maxValueCheck400',

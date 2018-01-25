@@ -46,17 +46,22 @@ function beforeHook (hook) {
 }
 
 async function beforeCreate(hook) {
-  let base_url = app.get("importToConfirmUrl")
+  let base_url = app.get("jobqueueUrl")
   hook.data.connection = {
 	  "host":app.get("rdb_host"),
     "port": app.get("rdb_port"),
     "db": app.get("rdb_db")
   }
   try {
-    await axios.post(base_url, hook.data)
+    axios.post(base_url, hook.data).then(res => {
+
+    })
+    .catch(error => {
+      
+    })
   } catch (err) {
     //
   }
-  console.log(hook.data)
+
   hook.result = { "data": hook.data, code: 200 }
 }
