@@ -8,6 +8,15 @@ let shell = require('shelljs');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const _ = require('lodash');
+const ProductInformationSchema = require('../../schema/product_information');
+const ProductPriceSchema = require('../../schema/product_price');
+const ProductImprintDataSchema = require('../../schema/product_imprint_data');
+const ProductShippingSchema = require('../../schema/product_shipping');
+const ProductImageSchema = require('../../schema/product_images');
+const ProductVariationPriceSchema = require('../../schema/product_variation_pricing');
+const ProductAdditionalChargeSchema = require('../../schema/product_additional_charge');
+
+
 config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
 config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
 config1.username = process.env.username ? process.env.username : null
@@ -57,11 +66,52 @@ var connectToMongo = async function(url,data){
     let collection_name = data.activetab.split(" ")
     collection_name = data.activetab.split(" ")
     let prod_name = collection_name[0]
+    let name = ''
+    let schemarules = {}
     collection_name.splice(0,1)
     for(let i=0 ;i<collection_name.length;i++){
-      name = collection_name[i].toLowerCase()
+      name = name + collection_name[i].toLowerCase()
     }
     collection_name = "uploader" + prod_name + name
+
+
+    if(data.activetab == "Product Information"){
+      schemarules = ProductInformationSchema
+    }
+    else if(data.activetab == "Product Price"){
+      schemarules = ProductPriceSchema
+    }
+    else if(data.activetab == "Product Imprint Data"){
+      schemarules = ProductImprintDataSchema
+    }
+    else if(data.activetab == "Product Image"){
+      schemarules = ProductImageSchema
+    }
+    else if(data.activetab == "Product Shipping"){
+      schemarules = ProductShippingSchema
+    }
+    else if(data.activetab == "Product Variation Price"){
+      schemarules = ProductVariationPriceSchema
+    }
+    else if(data.activetab == "Product Additional Charges"){
+      schemarules = ProductAdditionalChargesSchema
+    }
+
+
+    for(let i=0;i<data.newCSV.length;i++){
+      for(key in data.newCSV[i]){
+        for(let schema_key in schemarules){
+          if(key == schema_key && schemarules[schema_key] == "string"){
+            if(typeof(data.newCSV[i][key]) != "string"){
+              data.newCSV[i][key] =  data.newCSV[i][key].toString()
+            }
+          }
+        }
+      }
+    }
+
+    
+
 
     var response = await (db.listCollections().toArray())
        let index = _.findIndex(response, function(o) { return o.name == collection_name; });

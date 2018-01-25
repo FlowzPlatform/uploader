@@ -1,6 +1,6 @@
 let domainkey = process.env.domainkey ? process.env.domainkey : 'flowzcluster.tk'
 let serverPort = process.env.server_port ? process.env.server_port : '3040'
-let socketPort = process.env.server_port ? process.env.socket_port : '4040'
+let socketPort = process.env.socket_port ? process.env.socket_port : '4040'
 let isSSl = process.env.is_ssl ? process.env.is_ssl : false
 let protocol = ''
 

@@ -34,6 +34,9 @@ const importToJobqueue = require('./import-to-jobqueue/import-to-jobqueue.servic
 const importToConfirm = require('./import-to-confirm/import-to-confirm.service.js');
 
 
+const uploaderValidation = require('./uploader-validation/uploader-validation.service.js');
+
+
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -60,4 +63,5 @@ module.exports = function() {
   app.configure(uploaderCsvFileMapping);
   app.configure(importToJobqueue);
   app.configure(importToConfirm);
+  app.configure(uploaderValidation);
 };

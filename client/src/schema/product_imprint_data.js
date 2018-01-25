@@ -95,7 +95,7 @@ export const ProductImprintDataSchema = new Schema({
         regEx:''
     },
     production_days: {
-        type: "number",
+        type: "string",
         label: "Production Days",
         optional: true,
         allowedValues: [],
@@ -141,7 +141,7 @@ export const ProductImprintDataSchema = new Schema({
         regEx:''
     },
     rush_charge: {
-        type: "number",
+        type: "string",
         label: "Rush Charge",
         optional: true,
         allowedValues: [],

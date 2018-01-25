@@ -12,6 +12,7 @@ export default {
   settings: [],
   tabdata: [],
   jobData: {},
+  data: [],
   activetab: '',
   editTemplate: null,
   // viewTemplate: [],
