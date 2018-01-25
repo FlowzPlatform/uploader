@@ -31,7 +31,7 @@ var temp = {
 if (process.env.NODE_ENV !== 'development') {
   temp = {
     serverURI: protocol + '://api.' + domainkey + '/uploader', // 'http://api.' + process.env.domainkey + '/dbetl', // ws.' + process.env.domainkey + ':4034
-    socketURI: 'ws://ws.' + domainkey + ':' + socketPort,
+    socketURI: 'wss://ws.' + domainkey + ':' + socketPort,
     fixedLayout: false,
     hideLogoOnMobile: false,
     microURI: protocol + '://auth.' + domainkey + '/api',
