@@ -5,9 +5,9 @@ let isSSl = process.env.is_ssl ? process.env.is_ssl : false
 let protocol = ''
 
 if (isSSl === true) {
-  protocol = 'https'
-} else {
   protocol = 'http'
+} else {
+  protocol = 'https'
 }
 
 var temp = {
