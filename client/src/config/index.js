@@ -4,7 +4,7 @@ let socketPort = process.env.socket_port ? process.env.socket_port : '4040'
 let isSSl = process.env.is_ssl ? process.env.is_ssl : false
 let protocol = ''
 
-if (isSSl === 'true') {
+if (isSSl === true) {
   protocol = 'https'
 } else {
   protocol = 'http'
