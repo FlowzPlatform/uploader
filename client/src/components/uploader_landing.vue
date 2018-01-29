@@ -141,7 +141,8 @@
        </div>
        <div slot="footer">
            <Button @click="cancel" style="background-color:#ddd">Cancel</Button>
-           <Button type="error"  @click="abort">Abort</Button>
+           <Button type="error"  @click="abort" v-if="!aborting">Abort</Button>
+           <Button type="error" v-if="aborting">Aborting...</Button>
        </div>
    </Modal>
 
@@ -177,6 +178,7 @@ export default {
             keys: [],
             show: false,
             show_table: false,
+            aborting: false,
             moment : moment
         }
     },
@@ -185,17 +187,23 @@ export default {
       //to abort the current running job
       abort(){
         let self = this
-        api.request('delete', '/uploader/' + this.$route.params.id).then(res => {
-          self.$Notice.error({
-                     title: 'Your files have been deleted'
-                 });
-           self.$router.push('/uploader')
+        self.aborting = true
+
+        let patch_obj = {
+           "masterJobStatus": "rejected",
+        }
+
+          api.request('patch', '/uploader/' + this.$route.params.id,patch_obj).then(res => {
+            self.$Notice.error({
+              title: 'Your files have been deleted'
+            });
+            self.$router.push('/uploader')
           })
-        .catch(error => {
-          self.$Notice.error({
-                     title: 'Something bad happened.Please try again later'
-                 });
-        })
+          .catch(error => {
+            self.$Notice.error({
+              title: 'Something bad happened.Please try again later'
+            });
+          })
       },
       //converts into uppercase
       convert(item){

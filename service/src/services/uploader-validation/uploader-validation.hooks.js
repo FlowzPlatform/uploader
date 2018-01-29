@@ -88,7 +88,17 @@ var connectToMongo = async function(hook,url){
   let errors_arr = []
   let flag = 0
   let err_obj = {"err_data":'',"err_fields":[]}
-      for(let j=0 ;j<rules.length;j++){
+  let rule_value
+
+  if(hook.data.ruleIndex == 0){
+    rule_value = hook.data.ruleIndex
+  }
+  else{
+   rule_value = hook.data.ruleIndex - 1
+  }
+
+
+      for(let j=rule_value ;j<rules.length;j++){
           let query = rules[j].qryMongo
           query["import-tracker_id"] = hook.data.id
           var query_result = await (db.collection(collection_name).find(query).toArray())

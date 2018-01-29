@@ -29,10 +29,14 @@
                 <div>
                     <Form>
                       <FormItem label="Select schema">
+                        <Row>
+                        <Col span="5">
                         <Select v-model="mObj[activeTab].selected_schema" style="width:200px" @on-change="changeSchema(activeTab,mObj[activeTab].selected_schema)">
                             <Option v-for="schema in schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
                         </Select>
+                       </Col>
 
+                       <Col span="2">
                         <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
                           <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled schema</a>
                            <div class="api" slot="content">
@@ -46,6 +50,13 @@
                            </Form>
                            </div>
                        </Poptip>
+                     </Col>
+
+                     <Col span="1" v-if="loadingdot">
+                       <Spin></Spin>
+                     </Col>
+
+                     </Row>
                      </FormItem>
                    </Form>
                 </div>
@@ -72,15 +83,15 @@
                      <table style="min-width:1077px;overflow-x: auto;">
                        <thead>
                          <tr>
-                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map">
-                             <div v-if="header != '_id'">
+                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure)" v-if="!map && header != '_id'">
+                             <div>
                                <span>{{header}}</span>
                              </div>
                            </th>
                          </tr>
                          <tr>
-                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0]) " v-if="map">
-                             <div v-if="header != '_id'">
+                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0])" v-if="map && header != '_id'">
+                             <div>
                                <span>{{header}}</span>
                              </div>
                            </th>
@@ -105,7 +116,7 @@
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
              <div class="recordsDisplay">
              <h2 class="hclass">Uploaded Records of {{activeTab}}</h2>
-             <Button type="ghost" class="close"><Icon type="close-circled" class="redIcon"></Icon></Button>
+             <Button type="ghost" class="close" @click="abortUploadedRecords(activeTab)"><Icon type="close-circled" class="redIcon"></Icon></Button>
             </div>
              <Button type="error" class="delete"><Icon type="trash-b"></Icon> Delete</Button>
                  <Input type="text" size="medium" class="filter" style="" placeholder="Filter">
@@ -118,14 +129,14 @@
                   <table style="min-width:1077px;overflow-x: auto;">
                     <thead>
                       <tr>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " >
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map && header != '_id'">
                           <div>
                             <span>{{header}}</span>
                           </div>
                         </th>
                       </tr>
                       <tr>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0]) " >
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0]) " v-if="map && header != '_id'">
                           <div >
                             <span>{{header}}</span>
                           </div>
@@ -134,15 +145,13 @@
                     </thead>
                     <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
                       <tr class="ivu-table-row" v-if="(index<5)">
-                        <td class="" v-if="index <= mObj[activeTab].newUploadCSV.length-2" v-for="data in item" style="overflow:hidden;">{{data}}</td>
+                        <td class=""  v-for="data in getwithoutid(item)" style="overflow:hidden;">{{data}}</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
           </div>
-          <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-          <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:7%" @click="ProceedToValidate(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Proceed</Button>
         </div>
 
             <div v-if="mObj[activeTab].headerDisplay">
@@ -471,10 +480,12 @@
         <div v-if="!import1">
           <h2>Import in progress</h2>
           <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
+          <Button type="error" @click="abortImportConfirm()"  style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
         </div>
-      <div v-if="import1"><h3>Import Completed</h3></div>
+      <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Please confirm to go for Live</p></div>
       <Button type="primary" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right">Import to Confirm</Button>
+      <Button type="error" @click="abortImportConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
       </Card>
     </template>
    </div>
@@ -524,6 +535,7 @@ let prop_keys = []
 let uploader_obj = {}
 let validation_obj = {}
 let continue_flag = false
+let errors_length = 0
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -588,6 +600,7 @@ export default {
           modal1: false,
           validation_completed: false,
           proceedBtn: true,
+          loadingdot: false,
           schemaList: [
                     {
                         value: '--Add new--',
@@ -642,6 +655,7 @@ export default {
                   newUploadCSV : [],
                   new_flag : 0,
                   csv_arr : [],
+                  savePreviewDisplay :false
 
 
           },
@@ -666,7 +680,8 @@ export default {
                   newSchemaDisplay : false,
                   newUploadCSV : [],
                   new_flag : 0,
-                  csv_arr: []
+                  csv_arr: [],
+                  savePreviewDisplay :false
           },
           'Product Image':{
                   selected_schema: '',
@@ -689,7 +704,8 @@ export default {
                   newSchemaDisplay : false,
                   newUploadCSV : [],
                   new_flag : 0,
-                  csv_arr: []
+                  csv_arr: [],
+                  savePreviewDisplay :false
           },
           'Product Shipping':{
                   selected_schema: '',
@@ -712,7 +728,8 @@ export default {
                   newSchemaDisplay : false,
                   newUploadCSV : [],
                   new_flag : 0,
-                  csv_arr: []
+                  csv_arr: [],
+                  savePreviewDisplay :false
           },
           'Product Additional Charges':{
                   selected_schema: '',
@@ -735,7 +752,8 @@ export default {
                   newSchemaDisplay : false,
                   newUploadCSV : [],
                   new_flag : 0,
-                  csv_arr: []
+                  csv_arr: [],
+                  savePreviewDisplay :false
           },
           'Product Variation Price':{
                   selected_schema: '',
@@ -758,7 +776,8 @@ export default {
                   newSchemaDisplay : false,
                   newUploadCSV : [],
                   new_flag : 0,
-                  csv_arr: []
+                  csv_arr: [],
+                  savePreviewDisplay :false
           }
         }
     }
@@ -909,7 +928,8 @@ export default {
             user_id: self.$store.state.user._id,
             sheet_name: sheet_name,
             key: key,
-            data: data
+            data: data,
+            ruleIndex: 0
           }
           api.request('post', '/uploader-validation/',validation_obj).then(result => {
 
@@ -936,9 +956,15 @@ export default {
                   this.showValidationTable = false
                   this.validation_completed = true
                 })
+                .catch(error =>{
+
+                })
 
               }
             }
+          })
+          .catch(error =>{
+            self.sheetwiseValidation(key,data)
           })
       },
       showValidationHandson(data,sheet_name){
@@ -1032,6 +1058,9 @@ export default {
         api.request('patch', '/uploader-validation/'+ id,update_obj).then(res => {
 
         })
+        .catch(error => {
+
+        })
 
       }
     },
@@ -1043,6 +1072,8 @@ export default {
         var validation_err = document.getElementById(name)
         table.deleteRow(validation_err.rowIndex + 1)
         table.deleteRow(validation_err.rowIndex + 1)
+
+        validation_obj["ruleIndex"] = uploader_obj[prop_keys[0]]["currentRuleIndex"]
 
         api.request('post', '/uploader-validation/',validation_obj).then(result => {
 
@@ -1074,10 +1105,12 @@ export default {
             }
           }
         })
+        .catch(error => {
+           this.proceedToNext()
+        })
 
       },
       importToPDM(){
-        this.currentStep = 2
         let jobQueue_obj = {
                 "queue" : {
                   "name": "uploaderJobQue"
@@ -1097,17 +1130,20 @@ export default {
               }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
-              
-                let importObj = {
-                  stepStatus : "import_in_progress"
+                if(res.status == '201'){
+                  let importObj = {
+                    stepStatus : "import_in_progress"
+                  }
+                  api.request('patch', '/uploader/'+ id,importObj).then(result => {
+                    this.currentStep = 2
+                  })
+                  .catch(error => {
+                      this.$Notice.error({
+                       title: 'Error'
+                     });
+                  })
                 }
-                api.request('patch', '/uploader/'+ id,importObj).then(result => {
-                })
-                .catch(error => {
-                    this.$Notice.error({
-                     title: 'Error'
-                   });
-                })
+
               })
               .catch(error => {
                   this.$Notice.error({
@@ -1153,7 +1189,7 @@ export default {
       },
       changeSchema(tab,value){
         if(value == "--Add new--"){
-
+          this.loadingdot = true
           this.mObj[tab].display = true
           this.mObj[tab].new_flag = 1
           if(this.mObj[tab].uploadDisplay){
@@ -1193,6 +1229,7 @@ export default {
 
         }
         else{
+          this.loadingdot = true
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
@@ -1251,6 +1288,7 @@ export default {
                   }
                   obj["_id"] = uuidV1()
                   this.mObj[tab].newUploadCSV.push(obj)
+                  this.loadingdot = false
                }
 
 
@@ -1265,6 +1303,9 @@ export default {
                    this.handleModalOk()
                  }
                }
+              }
+              else{
+                this.loadingdot = false
               }
 
            })
@@ -1361,47 +1402,56 @@ export default {
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
 
       self.mObj[tab].newUploadCSV = []
-      for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
-        let obj = {}
-         for(let key in self.mObj[tab].uploadCSV[i]){
 
-           for(let j=0;j<schema_keys.length;j++){
-             if(schema_keys[j] == key.toLowerCase()){
-                 obj[schema_keys[j]] = self.mObj[tab].uploadCSV[i][key]
+      if(self.mObj[tab].uploadCSV.length != 0){
+          for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
+            let obj = {}
+             for(let key in self.mObj[tab].uploadCSV[i]){
+
+               for(let j=0;j<schema_keys.length;j++){
+                 if(schema_keys[j] == key.toLowerCase()){
+                     obj[schema_keys[j]] = self.mObj[tab].uploadCSV[i][key]
+                 }
+                 else if(!obj.hasOwnProperty(schema_keys[j])){
+                      obj[schema_keys[j]] = ''
+                 }
+               }
              }
-             else if(!obj.hasOwnProperty(schema_keys[j])){
-                  obj[schema_keys[j]] = ''
-             }
-           }
-         }
-         obj["_id"] = uuidV1()
-         self.mObj[tab].newUploadCSV.push(obj)
-      }
-      let index = self.mObj[tab].newUploadCSV.length - 1
-      self.mObj[tab].newUploadCSV.splice(index,1)
-      self.mObj[tab].csv_arr = self.mObj[tab].newUploadCSV
+             obj["_id"] = uuidV1()
+             self.mObj[tab].newUploadCSV.push(obj)
+             self.loadingdot = false
+          }
+            let index = self.mObj[tab].newUploadCSV.length - 1
+            self.mObj[tab].newUploadCSV.splice(index,1)
+            self.mObj[tab].csv_arr = self.mObj[tab].newUploadCSV
 
-      self.mObj[tab].mapping =[]
-      for(let key in self.mObj[tab].schema.structure){
-        self.mObj[tab].mapping.push({'sysHeader':key,"schemaObj": self.mObj[tab].schema.structure[key],"csvHeader":"","transform":"","transformMethod":""})
-      }
+            self.mObj[tab].mapping =[]
+            for(let key in self.mObj[tab].schema.structure){
+              self.mObj[tab].mapping.push({'sysHeader':key,"schemaObj": self.mObj[tab].schema.structure[key],"csvHeader":"","transform":"","transformMethod":""})
+            }
 
-      for(var i=0;i<self.mObj[tab].headers.length;i++){
+            for(var i=0;i<self.mObj[tab].headers.length;i++){
 
-         if(_.findIndex(self.mObj[tab].mapping, {'sysHeader': self.mObj[tab].headers[i].toLowerCase()}) != -1){
-           let index =_.findIndex(self.mObj[tab].mapping, {'sysHeader':  self.mObj[tab].headers[i].toLowerCase()})
+               if(_.findIndex(self.mObj[tab].mapping, {'sysHeader': self.mObj[tab].headers[i].toLowerCase()}) != -1){
+                 let index =_.findIndex(self.mObj[tab].mapping, {'sysHeader':  self.mObj[tab].headers[i].toLowerCase()})
 
-           self.mObj[tab].mapping[index]['csvHeader'] = self.mObj[tab].headers[i]
-         }
-      }
-      return self.mObj[tab].mapping;
+                 self.mObj[tab].mapping[index]['csvHeader'] = self.mObj[tab].headers[i]
+               }
+            }
+            return self.mObj[tab].mapping;
+        }
+        else{
+           self.loadingdot = false
+        }
     },
     mapHeaders(tab){
       continue_flag = true
+      this.proceedBtn = true
       this.modal1 = false
     },
     continuee(tab){
       this.modal1 = false
+      this.proceedBtn = true
       this.ProceedToValidate(tab)
     },
     Proceed(tab){
@@ -1711,7 +1761,12 @@ export default {
         self.mObj[tab].schema = new Schema(schema_Obj)
 
          err_length = 0
+         self.mObj[tab].data1 = []
+         self.mObj[tab].headers1 = []
         _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
+          if(err_length > 0){
+            return false
+          }
           self.mObj[tab].schema.validate(value, function (err, newP, errors) {
             if (err) {
               throw err
@@ -1722,7 +1777,6 @@ export default {
 
                   self.mObj[tab].data1.push(Object.values(value))
                   self.mObj[tab].headers1.push(Object.keys(value))
-
                   let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
                   _.forEach(errors, (item) => {
                     errcols.push({
@@ -1748,11 +1802,11 @@ export default {
         })
 
       if(err_length == 0){
-
         self.mObj[tab].headerDisplay = false
         self.mObj[tab].newSchemaDisplay = false
         self.mObj[tab].previewDisplay = false
         self.mObj[tab].uploadDisplay = false
+        self.mObj[tab].showHandson = false
         self.loading = true
         self.saveData(tab)
       }
@@ -1760,11 +1814,30 @@ export default {
     },
     Abort(tab){
       let self = this
+      self.proceedBtn = true
       self.mObj[tab].uploadCSV = []
       self.mObj[tab].headerDisplay = false
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
+    },
+    abortUploadedRecords(tab){
+      // api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab).then(res => {
+      //   console.log("res.......",res)
+      //   if(res.data.length != 0){
+      //       api.request('delete', '/uploader/' + this.$route.params.id).then(res => {
+      //         self.$Notice.error({
+      //           title: 'Your files have been deleted'
+      //         });
+      //         self.$router.push('/uploader')
+      //       })
+      //       .catch(error => {
+      //         self.$Notice.error({
+      //           title: 'Something bad happened.Please try again later'
+      //         });
+      //       })
+      //   }
+      // })
     },
     AbortValidation(tab){
       let self = this
@@ -1785,6 +1858,7 @@ export default {
     abortImport(){
        let self = this
        self.validation_completed = false
+       self.val_data = []
        api.request('get', '/uploader/' + id).then(response => {
          let obj = self.ModifyObj(response.data)
          api.request('put','/uploader/' + id,obj[0]).then(result =>{
@@ -1792,6 +1866,34 @@ export default {
          })
 
        })
+    },
+    abortImportConfirm(){
+      let self = this
+       let patch_obj = {
+         "stepStatus": "validation_completed"
+       }
+       api.request('patch', '/uploader/' + id,patch_obj).then(res => {
+         self.import1 = false
+         self.validating = false
+         self.validation_completed = true
+         self.currentStep = 1
+       })
+       .catch(error => {
+       })
+    },
+    abortImportInProgress(){
+      let self = this
+      let patch_obj = {
+        "stepStatus": "validation_completed"
+      }
+      api.request('patch', '/uploader/' + id,patch_obj).then(res => {
+        self.validating = false
+        self.validation_completed = true
+        self.currentStep = 1
+      })
+      .catch(error => {
+      })
+
     },
     ModifyObj(data){
       let keys = Object.keys(data)
@@ -1857,18 +1959,22 @@ export default {
         let valueToBeValidated = _.object(colHeaders, value)
         schema.validate(valueToBeValidated, (err, newP, errors) => {
           if (err) {} else {
-            if (errors.length) {
-              newHotSettingsData.push(Object.values(value))
-              self.mObj[tab].data1 = newHotSettingsData
-              _.forEach(errors, (item) => {
-                errcols.push({
-                  cols: _.indexOf(colHeaders, item.field),
-                  rows: key
-                })
-                errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
-              })
-              self.mObj[tab].errmsg = errMsgArray
-            } else {
+            // if (errors.length) {
+            //     // errors_length = errors.length
+            //   newHotSettingsData.push(Object.values(value))
+            //   console.log("new...........",newHotSettingsData)
+            //   self.mObj[tab].data1 = newHotSettingsData
+            //   _.forEach(errors, (item) => {
+            //     errcols.push({
+            //       cols: _.indexOf(colHeaders, item.field),
+            //       rows: key
+            //     })
+            //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
+            //   })
+            //   self.mObj[tab].errmsg = errMsgArray
+            // }
+            // else {
+
               let modified_field = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(":") + 1);
               modified_field = modified_field.trim()
 
@@ -1886,40 +1992,60 @@ export default {
               userUploadedDataArr = []
               userUploadedDataArr = new_arr
 
-            }
+            // }
           }
         })
       })
 
       if (userUploadedDataArr !== undefined) {
+
         self.mObj[tab].newUploadCSV =  userUploadedDataArr
+        if(errcols.length > 0){
+          $('table.htCore').each(function () {
+            this.remove()
+          })
+          document.getElementsByClassName('ht_master handsontable')[0].remove()
+          self.showerrmsg(errcols,tab)
+        }
+        else{
+          self.mObj[tab].errmsg = []
+          self.mObj[tab].showHandson = false
+          self.mObj[tab].errDisplay = false
+          $('table.htCore').each(function () {
+            this.remove()
+          })
+          document.getElementsByClassName('ht_master handsontable')[0].remove()
+          self.ProceedToValidate(tab)
+        }
 
       }
 
 
-      if (newHotSettingsData.length == 0) {
-
-        self.mObj[tab].errmsg = []
-        $('table.htCore').each(function () {
-          this.remove()
-        })
-
-        document.getElementById('example1').style.display = 'none'
-
-        self.mObj[tab].showHandson = false
-        self.mObj[tab].errDisplay = false
-        self.loading = true
-        self.saveData(tab)
-
-      } else {
-
-        $('table.htCore').each(function () {
-          this.remove()
-        })
-        document.getElementsByClassName('ht_master handsontable')[0].remove()
-        self.showerrmsg(errcols,tab)
-
-      }
+      // if (newHotSettingsData.length == 0) {
+      //   console.log("callled if.........")
+      //
+      //   self.mObj[tab].errmsg = []
+      //   $('table.htCore').each(function () {
+      //     this.remove()
+      //   })
+      //
+      //   document.getElementById('example1').style.display = 'none'
+      //
+      //   self.mObj[tab].showHandson = false
+      //   self.mObj[tab].errDisplay = false
+      //   self.loading = true
+      //   self.saveData(tab)
+      //
+      // } else {
+      //       console.log("callled eslse.........")
+      //   $('table.htCore').each(function () {
+      //     this.remove()
+      //   })
+      //   document.getElementsByClassName('ht_master handsontable')[0].remove()
+      //   self.showerrmsg(errcols,tab)
+      //   // self.ProceedToValidate(tab)
+      //
+      // }
       document.getElementById('hot-display-license-info').style.display = 'none'
     },
     saveData(tab){
@@ -2036,9 +2162,8 @@ export default {
   setprogress(message){
 
     let self = this
-    if(self.val_data.length == 0){
-      self.val_data = self.$store.state.data
-    }
+    self.val_data = []
+    self.val_data = self.$store.state.data
     let progress_obj = _.filter(self.val_data, {'name':prop_keys[0]});
     progress_obj[0].progress = Math.round(message[prop_keys[0]].currentRuleIndex / message[prop_keys[0]].ruleIndex * 100);
   },
@@ -2049,7 +2174,9 @@ export default {
 
     for(let i=0;i<filtered_keys.length;i++){
       let uploaded_tabs = self.convert(filtered_keys[i]).replace(/ /g,"_");
-      $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
+      setTimeout(function(){
+        $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
+      },0)
     }
 
     let diff_keys = _.difference(self.fileNames, filtered_keys);
@@ -2062,6 +2189,7 @@ export default {
           self.map = true
           self.mObj["Product Information"].uploadDisplay = false
           self.mObj["Product Information"].previewDisplay = true
+          // self.mObj["Product Information"].savePreviewDisplay = true
 
 
         })
@@ -2073,6 +2201,7 @@ export default {
           self.map = true
           self.mObj["Product Price"].uploadDisplay = false
           self.mObj["Product Price"].previewDisplay = true
+          // self.mObj["Product Price"].savePreviewDisplay = true
         })
       }
       if(Object.keys(response).indexOf("ProductImprintData") >= 0){
@@ -2082,6 +2211,7 @@ export default {
           self.map = true
           self.mObj["Product Imprint Data"].uploadDisplay = false
           self.mObj["Product Imprint Data"].previewDisplay = true
+          // self.mObj["Product Imprint Data"].savePreviewDisplay = true
         })
       }
       if(Object.keys(response).indexOf("ProductShipping") >= 0){
@@ -2091,6 +2221,7 @@ export default {
           self.map = true
           self.mObj["Product Shipping"].uploadDisplay = false
           self.mObj["Product Shipping"].previewDisplay = true
+          // self.mObj["Product Shipping"].savePreviewDisplay = true
         })
       }
       if(Object.keys(response).indexOf("ProductImage") >= 0){
@@ -2101,6 +2232,7 @@ export default {
           self.map = true
           self.mObj["Product Image"].uploadDisplay = false
           self.mObj["Product Image"].previewDisplay = true
+          // self.mObj["Product Image"].savePreviewDisplay = true
         })
       }
       if(Object.keys(response).indexOf("ProductAdditionalCharges") >= 0){
@@ -2110,6 +2242,7 @@ export default {
           self.map = true
           self.mObj["Product Additional Charges"].uploadDisplay = false
           self.mObj["Product Additional Charges"].previewDisplay = true
+          // self.mObj["Product Additional Charges"].savePreviewDisplay = true
         })
       }
       if(Object.keys(response).indexOf("ProductVariationPrice") >= 0){
@@ -2119,6 +2252,7 @@ export default {
           self.map = true
           self.mObj["Product Variation Price"].uploadDisplay = false
           self.mObj["Product Variation Price"].previewDisplay = true
+          // self.mObj["Product Variation Price"].savePreviewDisplay = true
         })
       }
          self.validate = false
@@ -2130,8 +2264,9 @@ export default {
           let self = this
 
           if(message.user_id == self.$store.state.user._id){
-            self.val_data = []
+            // self.val_data = []
             if(prop_keys.length != 0){
+              uploader_obj = message
               if(message[prop_keys[0]] && message[prop_keys[0]]["currentRuleIndex"]){
                 self.setprogress(message)
               }
@@ -2143,7 +2278,9 @@ export default {
 
                 self.loading = false
                 self.mObj[self.activeTab].previewDisplay = true
-                // self.mObj[tab].savePreviewDisplay = true
+                // console.log("self=====================>",self.mObj[self.activeTab].headerDisplay)
+                // self.mObj[self.activeTab].savePreviewDisplay = true
+
                 let new_tab = ''
                 let old_tab_index = ''
                 _.forEach(self.fileTypes, function(value,key){
@@ -2159,6 +2296,10 @@ export default {
             }
             else if(message.stepStatus == "import_to_confirm"){
               self.import1 = true
+            }
+            else if(message.stepStatus == "import_completed"){
+              self.$Notice.success({title: 'Import Completed', desc: 'Your data has gone Live...'})
+              self.$router.push('/uploader')
             }
           }
 
@@ -2211,8 +2352,15 @@ export default {
                     this.showValidationTable = false
                     this.validation_completed = true
                   }
-                  else {
+                  else if(response.data.stepStatus == 'import_in_progress'){
                     this.currentStep = 2
+                  }
+                  else if(response.data.stepStatus == 'import_to_confirm'){
+                    this.currentStep = 2
+                    this.import1 = true
+                  }
+                  else if(response.data.stepStatus == "import_completed"){
+                    this.$router.push('/uploader')
                   }
         }
       })
@@ -2315,6 +2463,11 @@ export default {
     width: 40px;
     height: 40px;
     border-color: #777;
+}
+.ivu-steps {
+  font-size: 0;
+  width: inherit !important;
+  line-height: 1.5;
 }
 .vue-tabs .nav-stacked > li{
     border: 1px solid #ddd !important;
@@ -2659,6 +2812,11 @@ export default {
 
 #valid_err{
   border-bottom: solid 2px #ccc;
+}
+
+.ivu-card:hover {
+    box-shadow: 0 0px;
+    border-color: #fff;
 }
 
 </style>

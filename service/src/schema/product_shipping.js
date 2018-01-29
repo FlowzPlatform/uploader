@@ -19,27 +19,27 @@
 
     carton_length:"number",
 
-    carton_width:"number",
+    carton_width:"string",
 
-    carton_height: "number",
+    carton_height: "string",
 
-    carton_weight:"number",
+    carton_weight:"string",
 
-    product_length: "number",
+    product_length: "string",
 
-    product_width:"number",
+    product_width:"string",
 
-    product_height:"number",
+    product_height:"string",
 
-    product_weight:"number",
+    product_weight:"string",
 
-    carton_size_unit: "number",
+    carton_size_unit: "string",
 
-    carton_weight_unit: "number",
+    carton_weight_unit: "string",
 
-    product_size_unit:  "number",
+    product_size_unit:  "string",
 
-    product_weight_unit: "number",
+    product_weight_unit: "string",
 
     qty_1_min:"number",
 
