@@ -1,6 +1,7 @@
 FROM whiledo/letsencrypt-apache-ubuntu
 
 ARG domainkey
+ARG is_ssl
 
 #FROM ubuntu:16.04
 
