@@ -74,7 +74,7 @@ export const ProductShippingSchema = new Schema({
       maxLength : '',
       regEx:''
         },
-        carton_length: {
+      carton_length: {
     	type: "number",
     	label: "Carton Length",
       optional: true,
@@ -84,7 +84,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         carton_width: {
-    	type: "number",
+    	type: "string",
     	label: "Carton Width",
       optional: true,
       allowedValues: [],
@@ -93,7 +93,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         carton_height: {
-    	type: "number",
+    	type: "string",
     	label: "Carton Height",
       optional: true,
       allowedValues: [],
@@ -102,7 +102,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         carton_weight: {
-    	type: "number",
+    	type: "string",
     	label: "Carton Weight",
       optional: true,
       allowedValues: [],
@@ -111,7 +111,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         product_length: {
-    	type: "number",
+    	type: "string",
     	label: "Product Length",
       optional: true,
       allowedValues: [],
@@ -120,7 +120,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         product_width: {
-    	type: "number",
+    	type: "string",
     	label: "Product Width",
     	max: 200,
       optional: true,
@@ -130,7 +130,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         product_height: {
-    	type: "number",
+    	type: "string",
     	label: "Product Height",
       optional: true,
       allowedValues: [],
@@ -139,7 +139,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         product_weight: {
-    	type: "number",
+    	type: "string",
     	label: "Product Weight",
       optional: true,
       allowedValues: [],
@@ -148,7 +148,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         carton_size_unit: {
-    	type: "number",
+    	type: "string",
     	label: "Carton Size Unit",
       optional: true,
       allowedValues: [],
@@ -157,7 +157,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         carton_weight_unit: {
-    	type: "number",
+    	type: "string",
     	label: "Carton Weight Unit",
     	max: 200,
       optional: true,
@@ -167,7 +167,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         product_size_unit: {
-    	type: "number",
+    	type: "string",
     	label: "Product Size Unit",
       optional: true,
       allowedValues: [],
@@ -176,7 +176,7 @@ export const ProductShippingSchema = new Schema({
       regEx:''
         },
         product_weight_unit: {
-      type: "number",
+      type: "string",
       label: "Product weight Unit",
       optional: true,
       allowedValues: [],

@@ -7,7 +7,9 @@ let axios = require('axios');
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
     create: [
       hook => beforeHook(hook)
@@ -26,7 +28,9 @@ module.exports = {
     ],
     update: [],
     patch: [],
-    remove: []
+    remove: [
+      hook => beforeRemove(hook)
+    ]
   },
 
   error: {
@@ -44,6 +48,23 @@ function beforeHook (hook) {
     hook.result = hook.data
 }
 
+function beforeFind(hook){
+
+}
+
+async function beforeRemove(hook){
+
+  let base_url = app.get("jobqueueUrl")
+  try {
+       var data_to_be_del = await(hook.app.service('/import-to-jobqueue').find({"import_tracker_id":hook.id}))
+      
+
+   } catch (err) {
+     //
+   }
+  //  hook.result = res
+}
+
 async function beforeCreate(hook) {
   let base_url = app.get("jobqueueUrl")
   hook.data.connection = {
@@ -53,16 +74,15 @@ async function beforeCreate(hook) {
   }
   try {
      axios.post(base_url, hook.data).then(res => {
-
+       hook.result = res
      })
      .catch(error => {
 
      })
 
-  
+
 
   } catch (err) {
     //
   }
-  hook.result = { "data": hook.data, code: 200 }
 }

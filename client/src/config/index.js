@@ -10,6 +10,7 @@ if (isSSl === true) {
   protocol = 'https'
 }
 
+console.log('protocol.................', protocol)
 var temp = {
   serverURI: protocol + '://localhost:' + serverPort,
   socketURI: protocol + '://localhost:' + socketPort,
@@ -29,6 +30,7 @@ var temp = {
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create'
 }
 if (process.env.NODE_ENV !== 'development') {
+  console.log('protocol.................', protocol)
   temp = {
     serverURI: protocol + '://api.' + domainkey + '/uploader', // 'http://api.' + process.env.domainkey + '/dbetl', // ws.' + process.env.domainkey + ':4034
     socketURI: 'wss://ws.' + domainkey + ':' + socketPort,
