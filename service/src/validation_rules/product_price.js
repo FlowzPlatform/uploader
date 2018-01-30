@@ -46,7 +46,11 @@ const ProductPriceRules = [
       columnName : 'qty_1_max',
       errorString: "qty_1_max field found blank",
       errorCode: 'qty_1_maxblankCheck400',
-      qryMongo : {$or:[{"qty_1_max":null},{"qty_1_max":""}]},
+      qryMongo : {$and:
+      [{"qty_2_min": {$exists: true,$ne:""}},
+       {$or:[{"qty_1_max":null},{"qty_1_max":""}]}
+     ]
+    },
       qryES : {}
     },
     {

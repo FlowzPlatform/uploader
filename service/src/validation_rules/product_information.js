@@ -71,6 +71,26 @@
      ]
      }
    },
+     {
+         columnName : 'valid_up_to',
+         errorString: "Valid upto field invalid, please input proper date",
+         errorCode: 'Valid_Up_ToRegEx400',
+         qryMongo : {$and:
+         [{ "valid_up_to": { $exists: true, $ne: "" } },
+          {$or:[{"valid_up_to":"0000-00-00"},{"valid_up_to":"00-00-0000"}]}
+      ]
+      }
+    },
+    {
+        columnName : 'special_price_valid_up_to',
+        errorString: "Special Price Valid Upto field invalid, please input proper date",
+        errorCode: 'Special_Price_Valid_Up_ToRegEx400',
+        qryMongo : {$and:
+        [{ "special_price_valid_up_to": { $exists: true, $ne: "" } },
+         {$or:[{"special_price_valid_up_to":"0000-00-00"},{"special_price_valid_up_to":"00-00-0000"}]}
+     ]
+     }
+   },
     {
         columnName : 'matrix_frieght',
         errorString: "Matrix_Freight field invalid, please input numeric value",

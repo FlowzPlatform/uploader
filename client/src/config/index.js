@@ -4,13 +4,12 @@ let socketPort = process.env.socket_port ? process.env.socket_port : '4040'
 let isSSl = process.env.is_ssl ? process.env.is_ssl : false
 let protocol = ''
 
-if (isSSl === true) {
+if (isSSl === 'true') {
   protocol = 'http'
 } else {
   protocol = 'https'
 }
 
-console.log('protocol.................', protocol)
 var temp = {
   serverURI: protocol + '://localhost:' + serverPort,
   socketURI: protocol + '://localhost:' + socketPort,
@@ -30,7 +29,6 @@ var temp = {
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create'
 }
 if (process.env.NODE_ENV !== 'development') {
-  console.log('protocol.................', protocol)
   temp = {
     serverURI: protocol + '://api.' + domainkey + '/uploader', // 'http://api.' + process.env.domainkey + '/dbetl', // ws.' + process.env.domainkey + ':4034
     socketURI: 'wss://ws.' + domainkey + ':' + socketPort,
