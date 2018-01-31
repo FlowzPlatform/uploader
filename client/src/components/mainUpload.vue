@@ -99,7 +99,7 @@
                        </thead>
                        <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
                          <tr class="ivu-table-row" v-if="(index<5)">
-                           <td class="" v-for="data in getwithoutid(item)" style="overflow:hidden;">
+                           <td class="" v-for="data in getwithoutid(item,4)" style="overflow:hidden;">
                              {{data}}
                            </td>
                          </tr>
@@ -116,17 +116,34 @@
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
              <div class="recordsDisplay">
              <h2 class="hclass">Uploaded Records of {{activeTab}}</h2>
-             <Button type="ghost" class="close" @click="abortUploadedRecords(activeTab)"><Icon type="close-circled" class="redIcon"></Icon></Button>
+             <Button type="ghost" class="close" @click="deleteRecModal = true"><Icon type="close-circled" class="redIcon"></Icon></Button>
             </div>
-             <Button type="error" class="delete" @click="RemoveRecords(activeTab)"><Icon type="trash-b"></Icon> Delete</Button>
-                 <!-- <Input type="text" size="medium" class="filter" style="" placeholder="Filter">
-                   <Icon type="funnel" slot="prepend" class="funnel"></Icon>
-                 </Input> -->
+            <Row>
+              <Col :span="12">
+                <Button type="error" class="delete" @click="deleteSelModal = true"><Icon type="trash-b"></Icon> Delete</Button>
+              </Col>
+              <Col :span="12" style="margin-top:5px">
+                <!-- <div> -->
+                  <Row>
+                    <Col :span="20">
+                      <Input type="text" size="medium" class="" style="" placeholder="Filter" v-model="filterValue">
+                        <Icon type="funnel" slot="prepend" class="funnel"></Icon>
+                      </Input>
+                    </Col>
+                    <Col :span="4" style="margin-top:5px">
+                      <Button type="ghost" class="close" @click="reset()"><Icon type="refresh"></Icon></Button>
+                      <Button type="ghost" class="close" @click = "filter(filterValue,activeTab)"><Icon type="ios-checkmark"></Icon></Button>
+                    </Col>
+                  </Row>
+                <!-- </div> -->
+              </Col>
+            </Row>
+
 
             <div class="schema-form ivu-table-wrapper previewtable">
               <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
                 <div class="ivu-table-body">
-                  <table style="min-width:1077px;overflow-x: auto;">
+                  <table style="min-width:1077px;overflow-x: auto;" v-if="mObj[activeTab].main_arr.length != 0">
                     <thead>
                       <tr>
                         <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map && header != '_id'">
@@ -162,6 +179,36 @@
               </div>
           </div>
         </div>
+
+          <Modal v-model="deleteRecModal" width="500">
+           <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+               <Icon type="information-circled"></Icon>
+               <span>Delete confirmation</span>
+           </p>
+           <div style="text-align:center">
+               <p style="font-size:15px">Are you sure you want to delete?</p>
+               <p style="font-size:15px">All your records will be deleted...</p>
+           </div>
+           <div slot="footer">
+               <Button type="error" @click="abortUploadedRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Delete</Button>
+               <Button type="primary"  @click="deleteRecModal = false">No</Button>
+           </div>
+        </Modal>
+
+        <Modal v-model="deleteSelModal" width="500">
+         <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+             <Icon type="information-circled"></Icon>
+             <span>Delete confirmation</span>
+         </p>
+         <div style="text-align:center">
+             <p style="font-size:15px">Are you sure you want to delete?</p>
+             <p style="font-size:15px">All your selected records will be deleted...</p>
+         </div>
+         <div slot="footer">
+             <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Delete</Button>
+             <Button type="primary"  @click="deleteSelModal = false">No</Button>
+         </div>
+      </Modal>
 
             <div v-if="mObj[activeTab].headerDisplay">
             <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
@@ -493,7 +540,7 @@
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Please confirm to go for Live</p></div>
-      <Button type="primary" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right">Import to Confirm</Button>
+      <Button type="primary" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right" :disabled="!importBtn">Import to Confirm</Button>
       <Button type="error" @click="abortImportConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
       </Card>
     </template>
@@ -545,6 +592,7 @@ let uploader_obj = {}
 let validation_obj = {}
 let continue_flag = false
 let errors_length = 0
+
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -618,6 +666,10 @@ export default {
                 ],
           deletedValues: [],
           cpage: 1,
+          importBtn: true,
+          deleteRecModal: false,
+          deleteSelModal: false,
+          filterValue: '',
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -642,7 +694,9 @@ export default {
                   new_flag : 0,
                   csv_arr: [],
                   savePreviewDisplay :false,
-                  main_arr: []
+                  main_arr: [],
+                  csv: [],
+                  filter_flag: []
 
           },
           'Product Price':{
@@ -668,7 +722,9 @@ export default {
                   new_flag : 0,
                   csv_arr : [],
                   savePreviewDisplay :false,
-                  main_arr: []
+                  main_arr: [],
+                  csv: [],
+                  filter_flag: []
 
 
           },
@@ -695,7 +751,9 @@ export default {
                   new_flag : 0,
                   csv_arr: [],
                   savePreviewDisplay :false,
-                  main_arr: []
+                  main_arr: [],
+                  csv: [],
+                  filter_flag: []
           },
           'Product Image':{
                   selected_schema: '',
@@ -720,7 +778,9 @@ export default {
                   new_flag : 0,
                   csv_arr: [],
                   savePreviewDisplay :false,
-                  main_arr: []
+                  main_arr: [],
+                  csv: [],
+                  filter_flag: []
           },
           'Product Shipping':{
                   selected_schema: '',
@@ -745,7 +805,9 @@ export default {
                   new_flag : 0,
                   csv_arr: [],
                   savePreviewDisplay :false,
-                  main_arr: []
+                  main_arr: [],
+                  csv: [],
+                  filter_flag: []
           },
           'Product Additional Charges':{
                   selected_schema: '',
@@ -770,7 +832,9 @@ export default {
                   new_flag : 0,
                   csv_arr: [],
                   savePreviewDisplay :false,
-                  main_arr: []
+                  main_arr: [],
+                  csv: [],
+                  filter_flag: []
           },
           'Product Variation Price':{
                   selected_schema: '',
@@ -795,43 +859,128 @@ export default {
                   new_flag : 0,
                   csv_arr: [],
                   savePreviewDisplay :false,
-                  main_arr: []
+                  main_arr: [],
+                  csv: [],
+                  filter_flag: []
           }
         }
     }
   },
     methods:{
+      reset(){
+          this.filterValue = ''
+          console.log("null filter called.......")
+          this.mObj[this.activeTab].newUploadCSV = this.mObj[this.activeTab].csv
+          console.log("this====================>",this.mObj[this.activeTab].newUploadCSV,this.mObj[this.activeTab].csv)
+          this.mObj[this.activeTab].main_arr = lodash.chunk(this.mObj[this.activeTab].newUploadCSV, 5);
+
+      },
+      filter(filterValue,tab){
+        console.log("filter value called ==================>",filterValue)
+        this.mObj[tab].filter_flag = true
+        let main_array = []
+        if(filterValue != ''){
+          this.mObj[tab].csv = this.mObj[tab].newUploadCSV
+          for(let i=0 ;i < this.mObj[tab].newUploadCSV.length; i++){
+            for(let key in this.mObj[tab].newUploadCSV[i]){
+              if(this.mObj[tab].newUploadCSV[i][key] == filterValue){
+               main_array.push(this.mObj[tab].newUploadCSV[i])
+              }
+            }
+          }
+
+          console.log("***************main_array*****************",main_array)
+          this.mObj[tab].newUploadCSV = []
+          this.mObj[tab].newUploadCSV = main_array
+          this.mObj[tab].main_arr = lodash.chunk(this.mObj[tab].newUploadCSV, 5);
+        }
+        // else if(filterValue == ''){
+        //   console.log("null filter called.......")
+        //   this.mObj[tab].newUploadCSV = csv
+        //   console.log("this====================>",this.mObj[tab].newUploadCSV,csv)
+        //   this.mObj[tab].main_arr = lodash.chunk(this.mObj[tab].newUploadCSV, 5);
+        // }
+      },
       changePage(page) {
         this.cpage = page
       },
       PushToArray(item){
+        this.mObj[this.activeTab].newUploadCSV = []
+        console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",this.mObj[this.activeTab].main_arr)
+        for(let i=0 ;i < this.mObj[this.activeTab].main_arr.length;i++){
+          for(let key in this.mObj[this.activeTab].main_arr[i]){
+            this.mObj[this.activeTab].newUploadCSV = lodash.unionBy(this.mObj[this.activeTab].newUploadCSV,this.mObj[this.activeTab].main_arr[i])
+          }
+        }
+
+        console.log("22222222222222222222222222222",this.mObj[this.activeTab].newUploadCSV)
+
         if(item.is_checked == true){
           this.deletedValues.push(item)
         }
         else if(item.is_checked == false){
-          let findidx = _.findIndex(this.deletedValues, function(o) { return o._id == item._id; });
+          let findidx = lodash.findIndex(this.deletedValues, function(o) { return o._id == item._id; });
           if(findidx > -1){
               this.deletedValues.splice(findidx,1)
           }
         }
       },
       RemoveRecords(tab){
+        console.log("RemoveRecords called.....")
         let self = this
+        self.deleteSelModal = false
         let del_ids = []
-        for(let i=0; i<self.deletedValues.length ;i++){
-          console.log("newUpldcsv...........................",self.mObj[tab].newUploadCSV,self.deletedValues[i])
-          let findidx = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
-          console.log("findinx...............",findidx)
 
-          if(findidx !== -1){
-            self.mObj[tab].newUploadCSV.splice(findidx,1)
+        if(self.mObj[tab].filter_flag == true){
+          console.log("csv......",self.mObj[tab].csv)
+          for(let i=0; i<self.deletedValues.length ;i++){
+            let findidx = lodash.findIndex(self.mObj[tab].csv, function(o) { return o._id == self.deletedValues[i]._id; });
+            console.log("+++++++++++++++++++++++++++++++",findidx)
+            if(findidx !== -1){
+              self.mObj[tab].csv.splice(findidx,1)
+            }
           }
-        }
 
-        self.mObj[tab].main_arr = []
-        self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
-       console.log("newUploadCSV.............", self.mObj[tab].newUploadCSV[0].sku)
-        console.log("main_arr.............", self.mObj[tab].main_arr[0][0].sku)
+          for(let i=0; i<self.deletedValues.length ;i++){
+            let findidx2 = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
+            console.log("+++++++++++++++++++++++++++++++",findidx2)
+            if(findidx2 !== -1){
+              self.mObj[tab].newUploadCSV.splice(findidx2,1)
+            }
+          }
+
+          if(self.mObj[tab].newUploadCSV.length == 0){
+            console.log("inside else if =========>",self.mObj[tab].newUploadCSV,  self.mObj[tab].main_arr)
+            self.mObj[tab].main_arr = []
+          }
+
+
+        }
+        else{
+          for(let i=0; i<self.deletedValues.length ;i++){
+            let findidx = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
+            console.log("+++++++++++++++++++++++++++++++",findidx)
+            if(findidx !== -1){
+              self.mObj[tab].newUploadCSV.splice(findidx,1)
+            }
+            // if(csv.length != 0){
+            //   console.log("splicing csv")
+            //   csv.splice(findidx,1)
+            //   console.log("csv........",csv)
+            // }
+          }
+
+          if(self.mObj[tab].newUploadCSV.length != 0){
+            console.log("++++++++++++++++++++++++++++ csv after deleting records",self.mObj[tab].csv)
+            self.mObj[tab].main_arr = []
+            self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
+          }
+          // else if(self.mObj[tab].newUploadCSV.length == 0){
+          //   console.log("inside else if =========>",self.mObj[tab].newUploadCSV,  self.mObj[tab].main_arr)
+          //   self.mObj[tab].main_arr = []
+          // }
+
+        }
 
         for(let value in self.deletedValues){
           del_ids.push(self.deletedValues[value]._id)
@@ -843,7 +992,7 @@ export default {
 
 
       },
-      getwithoutid (obj) {
+      getwithoutid (obj,value) {
          let pObj = lodash.cloneDeep(obj)
          return lodash.omit(pObj, '_id')
       },
@@ -866,6 +1015,12 @@ export default {
             }
 
           }
+          // if(filter_flag == true){
+          //   filter_flag == false
+          // }
+          // if(csv.length != 0){
+          //   csv = []
+          // }
       },
       setTransForm: function () {
         this.transformData = this.modelData
@@ -1237,6 +1392,14 @@ export default {
               }
 
               api.request('post', '/import-to-confirm/',jobQueue_obj).then(res => {
+              })
+
+              let importobj = {
+                'stepStatus': "import_to_confirm_in_progress"
+              }
+
+              api.request('patch', '/uploader/' + id,importobj).then(result => {
+                this.importBtn = false
               })
               .catch(error => {
                   this.$Notice.error({
@@ -1882,6 +2045,7 @@ export default {
       self.mObj[tab].uploadDisplay = true
     },
     abortUploadedRecords(tab){
+      this.deleteRecModal = false
       let tab_name = tab.replace(/ /g,"")
       api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab).then(res => {
 
@@ -1939,6 +2103,7 @@ export default {
     },
     abortImportConfirm(){
       let self = this
+      self.importBtn = true
        let patch_obj = {
          "stepStatus": "validation_completed"
        }
@@ -2396,8 +2561,6 @@ export default {
                 });
 
                 self.mObj[self.activeTab].main_arr = lodash.chunk(self.mObj[self.activeTab].newUploadCSV, 5);
-
-
                 self.mObj[self.activeTab].savePreviewDisplay = true
 
                 let new_tab = ''
@@ -2413,8 +2576,11 @@ export default {
                 self.validate = false
               }
             }
-            else if(message.stepStatus == "import_to_confirm"){
+            else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
               self.import1 = true
+              if(message.stepStatus == "import_to_confirm_in_progress"){
+                self.importBtn = false
+              }
             }
             else if(message.stepStatus == "import_completed"){
               self.$Notice.success({title: 'Import Completed', desc: 'Your data has gone Live...'})
@@ -2474,9 +2640,12 @@ export default {
                   else if(response.data.stepStatus == 'import_in_progress'){
                     this.currentStep = 2
                   }
-                  else if(response.data.stepStatus == 'import_to_confirm'){
+                  else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
                     this.currentStep = 2
                     this.import1 = true
+                    if(response.data.stepStatus == 'import_to_confirm_in_progress'){
+                      this.importBtn = false
+                    }
                   }
                   else if(response.data.stepStatus == "import_completed"){
                     this.$router.push('/uploader')
@@ -2950,6 +3119,12 @@ export default {
 
 .ivu-page {
   float: right;
+}
+
+#importBtn[disabled] {
+  color: #fff;
+  background-color: #20a0ff;
+  border-color: #20a0ff;
 }
 
 </style>

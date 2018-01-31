@@ -47,20 +47,24 @@ function beforeHook (hook) {
 
 async function beforeCreate(hook) {
   let base_url = app.get("jobqueueUrl")
+  let id = hook.data.jobs[0].importTrackerId
   hook.data.connection = {
 	  "host":app.get("rdb_host"),
     "port": app.get("rdb_port"),
     "db": app.get("rdb_db")
   }
   try {
-    axios.post(base_url, hook.data).then(res => {
+    let tdata = await(hook.app.service('/uploader').get(id))
+    if(tdata.stepStatus == 'import_to_confirm'){
+      axios.post(base_url, hook.data).then(res => {
 
-    })
-    .catch(error => {
-      
-    })
+      })
+      .catch(error => {
+
+      })
+   }
   } catch (err) {
-    //
+    
   }
 
   hook.result = { "data": hook.data, code: 200 }
