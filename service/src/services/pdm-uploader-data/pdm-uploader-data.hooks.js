@@ -68,32 +68,19 @@ var beforeRemove = async function(hook) {
 
 var deleteFromMongo = async function(url,hook){
   var db = await (MongoClient.connect(url))
-  var tdata = await(hook.app.service('/uploader').get(hook.id))
-  var result_array = []
+  let sheet_name = hook.params.query.sheet_name
+  sheet_name = sheet_name.replace(/ /g,"");
+  collection_name = "uploader" + sheet_name.charAt(0).toUpperCase() + sheet_name.substr(1).toLowerCase()
 
-  let sheets = []
-  let keys = Object.keys(tdata)
-  let filtered_keys = _.filter(keys, function(o) {
-    if(o == 'ProductInformation' || o == 'ProductPrice' || o == 'ProductImprintData' || o == 'ProductShipping' || o == 'ProductImage' || o == 'ProductVariationPrice' || o == "ProductAdditionalCharges"){
-      return o;
-    }
-  });
-
- if(filtered_keys.length != 0){
-  for(let i=0;i<filtered_keys.length ;i++){
-    for(let key in tdata){
-      if(key == filtered_keys[i] && tdata[key].uploadStatus == "completed"){
-        sheets.push(key)
-      }
-    }
-  }
-
-  for(let i=0;i<sheets.length;i++){
-    collection_name = "uploader" + sheets[i].charAt(0).toUpperCase() + sheets[i].substr(1).toLowerCase()
+  if(!hook.params.query.deletedIds){
     var result = await(db.collection(collection_name).remove({"import-tracker_id":hook.id}))
-    result_array.push(result)
+    hook.result = result
   }
-}
+  else if(hook.params.query.deletedIds && hook.params.query.deletedIds.length != 0){
+    let del_ids = hook.params.query.deletedIds.split(",")
+    var result = await(db.collection(collection_name).remove({'_id':{'$in':del_ids}}))
+    hook.result = result
+  }
 
-  hook.result = result_array
+
 }
