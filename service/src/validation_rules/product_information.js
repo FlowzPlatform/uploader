@@ -1,4 +1,5 @@
 /*eslint-disable*/
+let currentDate = new Date().toISOString().slice(0,10);
  const ProductInformationRules = [
   {
         columnName: 'sku',
@@ -77,9 +78,7 @@
          errorCode: 'Valid_Up_ToRegEx400',
          qryMongo : {$and:
          [{ "valid_up_to": { $exists: true, $ne: "" } },
-          {$or:[{"valid_up_to":"0000-00-00"},{"valid_up_to":"00-00-0000"}]}
-      ]
-      }
+          {"valid_up_to" : { "$lt" : currentDate}}]}
     },
     {
         columnName : 'special_price_valid_up_to',
@@ -87,9 +86,7 @@
         errorCode: 'Special_Price_Valid_Up_ToRegEx400',
         qryMongo : {$and:
         [{ "special_price_valid_up_to": { $exists: true, $ne: "" } },
-         {$or:[{"special_price_valid_up_to":"0000-00-00"},{"special_price_valid_up_to":"00-00-0000"}]}
-     ]
-     }
+         {"special_price_valid_up_to" : { "$lt" :  currentDate}}]}
    },
     {
         columnName : 'matrix_frieght',

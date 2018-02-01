@@ -99,13 +99,11 @@ router.beforeEach((to, from, next) => {
     delete axios.defaults.headers.common['authorization']
   }
   if (to.matched.some(record => record.meta.requiresAuth) && obId) {
-    window.console.log('ob_id obtained')
     next({
       path: '/email-verification',
       query: { ob_id: obId }
     })
   } else if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
-    window.console.log('Not authenticated')
     next({
       path: '/login',
       query: { redirect: to.fullPath }

@@ -25,7 +25,9 @@ const ProductImprintDataRules = [
       columnName : 'qty_1_max',
       errorString: "`qty_1_max` should be greater than `qty_1_min`",
       errorCode: 'qty_1_maxValueCheck400',
-      qryMongo : {$where : "this.qty_1_min > this.qty_1_max"},
+      qryMongo : {qty_1_max: {$exists: true,$ne:""},
+                  qty_1_min: {$exists: true,$ne:""},
+                  $where : "this.qty_1_min > this.qty_1_max"},
       qryES : {}
   },
   {
