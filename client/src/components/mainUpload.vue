@@ -5,7 +5,7 @@
        <Step content="Validate"></Step>
        <Step content="Import"></Step>
    </Steps>
-   <template v-if="currentStep == 0">
+   <template v-if="currentStep == 0 && uploadStep">
      <Row>
           <Col span="6">
                 <vue-tabs active-tab-color="#494e6b"
@@ -75,7 +75,7 @@
                         <div>Loading</div>
                     </Spin></div>
 
-              <div v-if="mObj[activeTab].previewDisplay">
+              <div v-if="mObj[activeTab].previewDisplay && mObj[activeTab].newUploadCSV.length != 0 ">
               <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
                <div class="schema-form ivu-table-wrapper">
                  <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
@@ -125,14 +125,14 @@
               <Col :span="12" style="margin-top:5px">
                 <!-- <div> -->
                   <Row>
-                    <Col :span="20">
-                      <Input type="text" size="medium" class="" style="" placeholder="Filter" v-model="filterValue">
+                    <Col :span="19">
+                      <Input type="text"  class="" style="" placeholder="Filter" v-model="filterValue">
                         <Icon type="funnel" slot="prepend" class="funnel"></Icon>
                       </Input>
                     </Col>
-                    <Col :span="4" style="margin-top:5px">
-                      <Button type="ghost" class="close" @click="reset()"><Icon type="refresh"></Icon></Button>
-                      <Button type="ghost" class="close" @click = "filter(filterValue,activeTab)"><Icon type="ios-checkmark"></Icon></Button>
+                    <Col :span="5">
+                      <Button type="ghost" class="apply" @click = "filter(filterValue,activeTab)"><Icon type="ios-checkmark"></Icon></Button>
+                      <Button type="ghost" class="reset" @click="reset()"><Icon type="refresh"></Icon></Button>
                     </Col>
                   </Row>
                 <!-- </div> -->
@@ -156,7 +156,7 @@
                         <th>
 
                         </th>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[cpage - 1][0]) " v-if="map && header != '_id'">
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[cpage - 1][0]) " v-if="map && header != '_id' && header != 'is_checked'">
                           <div>
                             <span>{{header}}</span>
                           </div>
@@ -190,7 +190,7 @@
                <p style="font-size:15px">All your records will be deleted...</p>
            </div>
            <div slot="footer">
-               <Button type="error" @click="abortUploadedRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Delete</Button>
+               <Button type="error" @click="abortUploadedRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
                <Button type="primary"  @click="deleteRecModal = false">No</Button>
            </div>
         </Modal>
@@ -205,12 +205,12 @@
              <p style="font-size:15px">All your selected records will be deleted...</p>
          </div>
          <div slot="footer">
-             <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Delete</Button>
+             <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
              <Button type="primary"  @click="deleteSelModal = false">No</Button>
          </div>
       </Modal>
 
-            <div v-if="mObj[activeTab].headerDisplay">
+            <div v-if="mObj[activeTab].headerDisplay && mObj[activeTab].mapping.length != 0">
             <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
              <div class="schema-form ivu-table-wrapper" >
                <div class="ivu-table ivu-table-border customtable" >
@@ -432,7 +432,7 @@
       </Col>
     </Row>
     </template>
-    <template v-if="currentStep == 1">
+    <template v-if="currentStep == 1 && validateStep">
       <Card :bordered=false style="margin-top:30px">
       <div v-if="validating" class="demo-spin-col">  <Spin fix>
                 <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
@@ -531,7 +531,7 @@
       <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Abort</Button>
       </Card>
     </template>
-    <template v-if="currentStep == 2">
+    <template v-if="currentStep == 2 && importStep">
       <Card :bordered=false style="margin-top:30px">
         <div v-if="!import1">
           <h2>Import in progress</h2>
@@ -592,6 +592,7 @@ let uploader_obj = {}
 let validation_obj = {}
 let continue_flag = false
 let errors_length = 0
+let prod_info_upld = false
 
 
 let socket
@@ -670,6 +671,9 @@ export default {
           deleteRecModal: false,
           deleteSelModal: false,
           filterValue: '',
+          uploadStep: false,
+          validateStep: false,
+          importStep: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -868,15 +872,15 @@ export default {
   },
     methods:{
       reset(){
-          this.filterValue = ''
-          console.log("null filter called.......")
-          this.mObj[this.activeTab].newUploadCSV = this.mObj[this.activeTab].csv
-          console.log("this====================>",this.mObj[this.activeTab].newUploadCSV,this.mObj[this.activeTab].csv)
-          this.mObj[this.activeTab].main_arr = lodash.chunk(this.mObj[this.activeTab].newUploadCSV, 5);
+          if(this.mObj[this.activeTab].filter_flag == true){
+            this.filterValue = ''
+            this.mObj[this.activeTab].newUploadCSV = []
+            this.mObj[this.activeTab].newUploadCSV = this.mObj[this.activeTab].csv
+            this.mObj[this.activeTab].main_arr = lodash.chunk(this.mObj[this.activeTab].newUploadCSV, 5);
+          }
 
       },
       filter(filterValue,tab){
-        console.log("filter value called ==================>",filterValue)
         this.mObj[tab].filter_flag = true
         let main_array = []
         if(filterValue != ''){
@@ -889,31 +893,25 @@ export default {
             }
           }
 
-          console.log("***************main_array*****************",main_array)
           this.mObj[tab].newUploadCSV = []
           this.mObj[tab].newUploadCSV = main_array
-          this.mObj[tab].main_arr = lodash.chunk(this.mObj[tab].newUploadCSV, 5);
+          if(this.mObj[tab].newUploadCSV.length > 0){
+            this.mObj[tab].main_arr = lodash.chunk(this.mObj[tab].newUploadCSV, 5);
+          }
         }
-        // else if(filterValue == ''){
-        //   console.log("null filter called.......")
-        //   this.mObj[tab].newUploadCSV = csv
-        //   console.log("this====================>",this.mObj[tab].newUploadCSV,csv)
-        //   this.mObj[tab].main_arr = lodash.chunk(this.mObj[tab].newUploadCSV, 5);
-        // }
+
       },
       changePage(page) {
         this.cpage = page
       },
       PushToArray(item){
         this.mObj[this.activeTab].newUploadCSV = []
-        console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",this.mObj[this.activeTab].main_arr)
         for(let i=0 ;i < this.mObj[this.activeTab].main_arr.length;i++){
           for(let key in this.mObj[this.activeTab].main_arr[i]){
             this.mObj[this.activeTab].newUploadCSV = lodash.unionBy(this.mObj[this.activeTab].newUploadCSV,this.mObj[this.activeTab].main_arr[i])
           }
         }
 
-        console.log("22222222222222222222222222222",this.mObj[this.activeTab].newUploadCSV)
 
         if(item.is_checked == true){
           this.deletedValues.push(item)
@@ -926,16 +924,13 @@ export default {
         }
       },
       RemoveRecords(tab){
-        console.log("RemoveRecords called.....")
         let self = this
         self.deleteSelModal = false
         let del_ids = []
 
         if(self.mObj[tab].filter_flag == true){
-          console.log("csv......",self.mObj[tab].csv)
           for(let i=0; i<self.deletedValues.length ;i++){
             let findidx = lodash.findIndex(self.mObj[tab].csv, function(o) { return o._id == self.deletedValues[i]._id; });
-            console.log("+++++++++++++++++++++++++++++++",findidx)
             if(findidx !== -1){
               self.mObj[tab].csv.splice(findidx,1)
             }
@@ -943,15 +938,17 @@ export default {
 
           for(let i=0; i<self.deletedValues.length ;i++){
             let findidx2 = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
-            console.log("+++++++++++++++++++++++++++++++",findidx2)
             if(findidx2 !== -1){
               self.mObj[tab].newUploadCSV.splice(findidx2,1)
             }
           }
 
           if(self.mObj[tab].newUploadCSV.length == 0){
-            console.log("inside else if =========>",self.mObj[tab].newUploadCSV,  self.mObj[tab].main_arr)
             self.mObj[tab].main_arr = []
+          }
+          else if(self.mObj[tab].newUploadCSV.length > 0){
+            self.mObj[tab].main_arr = []
+            self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
           }
 
 
@@ -959,7 +956,6 @@ export default {
         else{
           for(let i=0; i<self.deletedValues.length ;i++){
             let findidx = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
-            console.log("+++++++++++++++++++++++++++++++",findidx)
             if(findidx !== -1){
               self.mObj[tab].newUploadCSV.splice(findidx,1)
             }
@@ -971,7 +967,6 @@ export default {
           }
 
           if(self.mObj[tab].newUploadCSV.length != 0){
-            console.log("++++++++++++++++++++++++++++ csv after deleting records",self.mObj[tab].csv)
             self.mObj[tab].main_arr = []
             self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
           }
@@ -993,8 +988,14 @@ export default {
 
       },
       getwithoutid (obj,value) {
-         let pObj = lodash.cloneDeep(obj)
-         return lodash.omit(pObj, '_id')
+        if(obj.hasOwnProperty("is_checked")){
+          let pObj = lodash.cloneDeep(obj)
+          return lodash.omit(pObj, '_id','is_checked')
+        }
+        else{
+          let pObj = lodash.cloneDeep(obj)
+          return lodash.omit(pObj, '_id')
+        }
       },
       changeIndex(files){
         let newIndex = files.replace(/ /g,"_");
@@ -1015,12 +1016,6 @@ export default {
             }
 
           }
-          // if(filter_flag == true){
-          //   filter_flag == false
-          // }
-          // if(csv.length != 0){
-          //   csv = []
-          // }
       },
       setTransForm: function () {
         this.transformData = this.modelData
@@ -1098,12 +1093,14 @@ export default {
       startValidation(){
 
         let self = this
-        if(self.mObj["Product Information"].newUploadCSV.length == 0){
+        if(prod_info_upld == false){
           self.$Notice.error({
                    title: 'Please upload Product Information file...'
            });
         }
         else{
+          self.uploadStep = false
+          self.validateStep = true
           self.currentStep = 1
           let obj2 = {
             "stepStatus": "validation_running"
@@ -1350,6 +1347,8 @@ export default {
                     stepStatus : "import_in_progress"
                   }
                   api.request('patch', '/uploader/'+ id,importObj).then(result => {
+                    this.validateStep = true
+                    this.importStep = true
                     this.currentStep = 2
                   })
                   .catch(error => {
@@ -1487,11 +1486,9 @@ export default {
       },
       getMapping(tab){
          if(this.mObj[tab].selected_schema != '--Add new--'){
-
-           this.map = true
-           this.mObj[tab].mapping = []
+          this.map = true
+          this.mObj[tab].mapping = []
            socket.emit('uploader-csv-file-mapping::find', {fileTypeId : this.mObj[tab].selected_schema,user_id:this.$store.state.user._id}, (e, data) => {
-
              this.mObj[tab].mapping = data.data[0].mapping
              let schema_keys = _.keys(this.mObj[tab].schema.structure);
 
@@ -1511,6 +1508,7 @@ export default {
                   }
                   obj["_id"] = uuidV1()
                   this.mObj[tab].newUploadCSV.push(obj)
+                  this.loading = false
                   this.loadingdot = false
                }
 
@@ -1594,25 +1592,18 @@ export default {
                     self.loading = false
                   }
                   else{
-
                       self.mObj[tab].headerDisplay = true
                       self.mObj[tab].previewDisplay = true
 
-                      if(self.mObj[tab].newSchemaDisplay){
+                      if(self.mObj[tab].newSchemaDisplay == true){
                         self.mObj[tab].newSchemaDisplay = false
                       }
-                        self.loading = false
+
 
                     self.mObj[tab].mapping = []
 
                     self.getMapping(tab)
-
-
                   }
-
-
-
-
                 }
               })
             }
@@ -2056,18 +2047,18 @@ export default {
             api.request('put','/uploader/' + this.$route.params.id,obj).then(result => {
               this.mObj[tab].uploadCSV = []
               this.mObj[tab].newUploadCSV = []
+              this.mObj[tab].csv = []
+              this.mObj[tab].filter_flag = false
               this.mObj[tab].main_arr = []
               this.mObj[tab].headers = []
               this.mObj[tab].savePreviewDisplay = false
               this.mObj[tab].headerDisplay = false
               this.mObj[tab].uploadDisplay = true
+              prod_info_upld = false
+              this.validate = true
             })
           }
         })
-
-
-
-
       })
       .catch(error => {
         console.log("error............",error)
@@ -2111,6 +2102,8 @@ export default {
          self.import1 = false
          self.validating = false
          self.validation_completed = true
+         self.uploadStep = false
+         self.validateStep = true
          self.currentStep = 1
        })
        .catch(error => {
@@ -2124,6 +2117,8 @@ export default {
       api.request('patch', '/uploader/' + id,patch_obj).then(res => {
         self.validating = false
         self.validation_completed = true
+        self.uploadStep = false
+        self.validateStep = true
         self.currentStep = 1
       })
       .catch(error => {
@@ -2395,8 +2390,6 @@ export default {
       .catch(error => {
           self.$Notice.error({title: 'Error!'})
       })
-
-
     }
     self.proceedBtn = true
   },
@@ -2411,6 +2404,7 @@ export default {
 
   setPage(keys,filtered_keys,response){
     let self = this
+    self.uploadStep = true
     self.currentStep = 0
 
     for(let i=0;i<filtered_keys.length;i++){
@@ -2436,6 +2430,8 @@ export default {
           self.mObj["Product Information"].uploadDisplay = false
           // self.mObj["Product Information"].previewDisplay = true
           self.mObj["Product Information"].savePreviewDisplay = true
+          prod_info_upld = true
+          self.validate = false
 
 
         })
@@ -2531,7 +2527,7 @@ export default {
           self.mObj["Product Variation Price"].savePreviewDisplay = true
         })
       }
-         self.validate = false
+
   }
   },
   feathers: {
@@ -2548,10 +2544,8 @@ export default {
               }
             }
             else if(message.stepStatus == 'upload_pending'){
-
               let name = self.activeTab.replace(/\s/g, "")
-              if(message[name] && message[name].uploadStatus == "completed"){
-
+              if(message[name] && message[name].uploadStatus == "completed" && self.loading == true){
                 self.loading = false
                 // self.mObj[self.activeTab].previewDisplay = true
 
@@ -2563,6 +2557,11 @@ export default {
                 self.mObj[self.activeTab].main_arr = lodash.chunk(self.mObj[self.activeTab].newUploadCSV, 5);
                 self.mObj[self.activeTab].savePreviewDisplay = true
 
+                if(self.activeTab == 'Product Information'){
+                  prod_info_upld = true
+                  self.validate = false
+                }
+
                 let new_tab = ''
                 let old_tab_index = ''
                 _.forEach(self.fileTypes, function(value,key){
@@ -2573,7 +2572,7 @@ export default {
                 })
                 $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
                 self.activeTab = new_tab
-                self.validate = false
+
               }
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
@@ -2606,9 +2605,12 @@ export default {
                 });
 
                   if(response.data.stepStatus == 'upload_pending'){
+                    self.uploadStep = true
                     self.setPage(keys,filtered_keys,response.data)
                   }
                   else if(response.data.stepStatus == 'validation_running'){
+                    this.uploadStep = false
+                    this.validateStep = true
                     this.currentStep = 1
                     this.validating = false
                     this.showValidationTable = true
@@ -2633,14 +2635,22 @@ export default {
                   }
                   else if(response.data.stepStatus == 'validation_completed'){
                     this.validating = false
+                    this.uploadStep = false
+                    this.validateStep = true
                     this.currentStep = 1
                     this.showValidationTable = false
                     this.validation_completed = true
                   }
                   else if(response.data.stepStatus == 'import_in_progress'){
+                    this.uploadStep = false
+                    this.validateStep = false
+                    this.importStep = true
                     this.currentStep = 2
                   }
                   else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
+                    this.uploadStep = false
+                    this.validateStep = false
+                    this.importStep = true
                     this.currentStep = 2
                     this.import1 = true
                     if(response.data.stepStatus == 'import_to_confirm_in_progress'){
@@ -2709,7 +2719,7 @@ export default {
 .close {
   padding: 0px 9px !important;
   float: right;
-  border: 0;
+  border: 0 !important;
 }
 .savePreview {
   border: 1px solid #bbbec4 !important;
@@ -2978,7 +2988,7 @@ export default {
 
 .ivu-table-wrapper {
     position: relative;
-    border: 1px solid #dddee1;
+    border: 1px solid #dddee1 !important;
     border-bottom: 0;
     border-right: 0;
     /*margin-left: -3%;*/
@@ -3125,6 +3135,19 @@ export default {
   color: #fff;
   background-color: #20a0ff;
   border-color: #20a0ff;
+}
+
+.apply {
+  margin-top: -5px !important;
+  font-size: 24px !important;
+  border: 0 !important;
+}
+
+.reset{
+  margin-top: -5px !important;
+  font-size: 24px !important;
+  border: 0 !important;
+  margin-left: -10px !important;
 }
 
 </style>

@@ -5,7 +5,7 @@
     <p style="margin-top: 10px;margin-bottom: 10px;font-size: 15px;">Following is the latest status of your file upload process.You can continue with your current status or abort the whole process to start again</p>
 
       <div class="ivu-tabs-tabpane">
-      <div class="ivu-table-wrapper">
+      <div class="ivu-table-wrapper upld_land">
       <div class="ivu-table">
       <div class="ivu-table-header">
         <table cellspacing="0" cellpadding="0" border='1' style="width:80%" >
@@ -336,9 +336,13 @@ button, html input[type="button"], input[type="reset"], input[type="submit"] {
     outline: 0;
     top: 284px;
 }
-.ivu-table-wrapper {
-    position: relative !important;
-    border: 0px !important;
+/*.ivu-table-wrapper {
+
+}*/
+
+.upld_land{
+  position: relative !important;
+  border: 0px !important;
 }
 
 </style>
