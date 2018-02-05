@@ -93,6 +93,16 @@ export default {
                   delete message[key]
                   message["createdAt"] = created_at
                 }
+                else if(key == "stepStatus"){
+                  let stepStatus = self.getStatus(message[key])
+                  delete message[key]
+                  message["stepStatus"] = stepStatus
+                }
+                else if(key == 'uploadType' || key == 'masterJobStatus'){
+                  let value = lodash.capitalize(message[key])
+                  delete message[key]
+                  message[key] = value
+                }
               }
               self.data2.push(message)
               self.data2 = _.sortBy(self.data2, 'createdAt');
@@ -108,6 +118,16 @@ export default {
                 let created_at = moment(data[key]).fromNow()
                 delete data[key]
                 data["createdAt"] = created_at
+              }
+              else if(key == "stepStatus"){
+                let stepStatus = self.getStatus(data[key])
+                delete data[key]
+                data["stepStatus"] = stepStatus
+              }
+              else if(key == 'uploadType' || key == 'masterJobStatus'){
+                let value = lodash.capitalize(data[key])
+                delete data[key]
+                data[key] = value
               }
             }
             self.data2.push(data)
@@ -134,6 +154,11 @@ export default {
                 let stepStatus = self.getStatus(data.data[i][key])
                 delete data.data[i][key]
                 data.data[i]["stepStatus"] = stepStatus
+              }
+              else if(key == 'uploadType' || key == 'masterJobStatus'){
+                let value = lodash.capitalize(data.data[i][key])
+                delete data.data[i][key]
+                data.data[i][key] = value
               }
             }
             self.data2.push(data.data[i])

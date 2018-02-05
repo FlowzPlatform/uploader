@@ -188,6 +188,7 @@ export default {
       abort(){
         let self = this
         self.aborting = true
+        self.$store.state.data = []
 
         let patch_obj = {
            "masterJobStatus": "rejected",
