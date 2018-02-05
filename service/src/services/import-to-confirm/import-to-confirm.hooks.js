@@ -53,6 +53,7 @@ async function beforeCreate(hook) {
     "port": app.get("rdb_port"),
     "db": app.get("rdb_db")
   }
+  
   try {
     let tdata = await(hook.app.service('/uploader').get(id))
     if(tdata.stepStatus == 'import_to_confirm'){
@@ -64,7 +65,7 @@ async function beforeCreate(hook) {
       })
    }
   } catch (err) {
-    
+
   }
 
   hook.result = { "data": hook.data, code: 200 }

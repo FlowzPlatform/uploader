@@ -15,6 +15,8 @@ const middleware = require('./middleware');
 const services = require('./services');
 const appHooks = require('./app.hooks');
 const rethinkdb = require('./rethinkdb');
+const subscription = require('flowz-subscription');
+
 // const mongodb = require('./mongodb');
 const app = feathers();
 
@@ -31,6 +33,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(favicon(path.join(app.get('public'), 'favicon.ico')));
 // Host the public folder
 app.use('/', feathers.static(app.get('public')));
+
+
+app.use(function(req, res, next) {
+ this.subscriptionId = req.headers['subscriptionid'];
+ module.exports.subscriptionId = this.subscriptionId;
+ next();
+});
 // Set up Plugins and providers
 app.configure(hooks());
 // app.configure(mongodb);
@@ -42,10 +51,12 @@ app.configure(rest());
 //   wsEngine: 'uws',
 //   origin: '*.' + (process.env.domainkey ? 'localhost' : process.env.domainkey) + ':*'
 // }));
-// Configure other middleware (see `middleware/index.js`)
-app.configure(middleware);
+app.use(subscription.featherSubscription)
 // Set up our services (see `services/index.js`)
 app.configure(services);
+// Configure other middleware (see `middleware/index.js`)
+app.configure(middleware);
+
 // Configure a middleware for 404s and the error handler
 app.use(notFound());
 app.use(handler());

@@ -46,5 +46,19 @@ export default {
     }).catch(error => {
       throw error
     })
+  },
+  userdetail: (params) => {
+    return axios({
+      method: 'get',
+      url: config.microURI + '/userdetails'
+    }).then(response => {
+      if (response) {
+        return response.data
+      } else {
+        throw new Error('Network error!')
+      }
+    }).catch(error => {
+      throw error
+    })
   }
 }

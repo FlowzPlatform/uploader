@@ -28,6 +28,7 @@ var temp = {
   loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create'
 }
+
 if (process.env.NODE_ENV !== 'development') {
   temp = {
     serverURI: protocol + '://api.' + domainkey + '/uploader', // 'http://api.' + process.env.domainkey + '/dbetl', // ws.' + process.env.domainkey + ':4034

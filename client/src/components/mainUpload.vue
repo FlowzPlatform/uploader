@@ -126,7 +126,7 @@
             </div>
             <Row>
               <Col :span="12">
-                <Button type="error" class="delete" @click="deleteSelModal = true"><Icon type="trash-b"></Icon> Delete</Button>
+                <Button type="error" class="delete" @click="deleteSelModal = true" :disabled="delete1"><Icon type="trash-b"></Icon> Delete</Button>
               </Col>
               <Col :span="12" style="margin-top:5px">
                   <Row>
@@ -139,7 +139,7 @@
                       <!-- <Button type="ghost" class="apply" @click = "filter(filterValue,activeTab)" icon="ios-checkmark"></Button>
                       <Button type="ghost" class="reset" @click="reset()" icon="refresh"></Button> -->
                       <button type="submit" class="apply" @click = "filter(filterValue,activeTab)"><Icon type="ios-checkmark"></Icon></button>
-                      <button type="submit" class="reset" @click="reset()" ><Icon type="refresh"></Icon></button>
+                      <button type="submit" class="reset" @click="reset()" :disabled="disableReset"><Icon type="refresh"></Icon></button>
                     </Col>
                   </Row>
               </Col>
@@ -666,6 +666,7 @@ export default {
           validation_completed: false,
           proceedBtn: true,
           loadingdot: false,
+          delete1: true,
           schemaList: [
                     {
                         value: '--Add new--',
@@ -681,6 +682,7 @@ export default {
           uploadStep: false,
           validateStep: false,
           importStep: false,
+          disableReset: true,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -885,18 +887,22 @@ export default {
     }
   },
     methods:{
+      //to reset the filter
       reset(){
           if(this.mObj[this.activeTab].filter_flag == true){
             this.filterValue = ''
             this.mObj[this.activeTab].newUploadCSV = []
             this.mObj[this.activeTab].newUploadCSV = this.mObj[this.activeTab].csv
             this.mObj[this.activeTab].main_arr = lodash.chunk(this.mObj[this.activeTab].newUploadCSV, 5);
+            this.disableReset = true
           }
-
       },
+
+      //filter data according to the selected value
       filter(filterValue,tab){
         this.mObj[tab].filter_flag = true
         let main_array = []
+        this.disableReset = false
         if(filterValue != ''){
           this.mObj[tab].csv = this.mObj[tab].newUploadCSV
           for(let i=0 ;i < this.mObj[tab].newUploadCSV.length; i++){
@@ -915,10 +921,15 @@ export default {
         }
 
       },
+
+      //pagination
       changePage(page) {
         this.cpage = page
       },
+
+      // Pushes the selected values required to be deleted in an array
       PushToArray(item){
+        this.delete1 = false
         this.mObj[this.activeTab].newUploadCSV = []
         for(let i=0 ;i < this.mObj[this.activeTab].main_arr.length;i++){
           for(let key in this.mObj[this.activeTab].main_arr[i]){
@@ -937,6 +948,8 @@ export default {
           }
         }
       },
+
+      // Deletes the selected records
       RemoveRecords(tab){
         let self = this
         self.deleteSelModal = false
@@ -992,10 +1005,13 @@ export default {
 
         api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab + '&deletedIds=' + del_ids).then(res => {
           self.deletedValues = []
+          self.delete1 = true
         })
 
 
       },
+
+      //Removes id from the data to be displayed
       getwithoutid (obj,value) {
         if(obj.hasOwnProperty("is_checked")){
           let pObj = lodash.cloneDeep(obj)
@@ -1010,6 +1026,8 @@ export default {
         let newIndex = files.replace(/ /g,"_");
         return newIndex
       },
+
+      //Manages the client side validation handson table in different tabs
       hideHandson(){
         let self = this
           if(err_length != 0){
@@ -1026,6 +1044,8 @@ export default {
 
           }
       },
+
+      // Transform functions..........
       setTransForm: function () {
         this.transformData = this.modelData
         if (this.mObj[this.activeTab].mapping[this.modelIndex].tranformMethod) {
@@ -1081,6 +1101,8 @@ export default {
         }
         return this.transformData
       },
+
+      // ......Transform functions
       getSelectedHeaders(header,data){
         return data.filter((el) => {
           if(header == el)
@@ -1099,6 +1121,8 @@ export default {
          }
 
       },
+
+      // Starts server side validation
       startValidation(){
 
         let self = this
@@ -1139,6 +1163,8 @@ export default {
           })
         }
       },
+
+      // Validates all the sheets one by one
       sheetwiseValidation(key,data){
           let self = this
           let sheet_name = key.replace(/([A-Z])/g, ' $1').trim()
@@ -1181,6 +1207,8 @@ export default {
 
           })
       },
+
+      // To show the server side validation handson
       showValidationHandson(data,sheet_name){
         let self = this
           let errcols = []
@@ -1253,6 +1281,8 @@ export default {
           })
           self.proceedNext = true
       },
+
+      // Updates the errors of server side validation on change
       updateProductData(changes,source,sheet_name){
         let rowindex = changes[0][0]
         let columnname = changes[0][1]
@@ -1279,6 +1309,8 @@ export default {
 
       }
     },
+
+    // Hides the server side validation handson and checks for the next error if any
       proceedToNext(){
         let sheet_name = prop_keys[0].replace(/([A-Z])/g, ' $1').trim()
         let name = sheet_name.replace(/\s/g, "")
@@ -1325,6 +1357,8 @@ export default {
         })
 
       },
+
+      // Puts a entry in the jobqueue
       importToPDM(){
         let jobQueue_obj = {
                 "queue" : {
@@ -2406,8 +2440,6 @@ export default {
     self.val_data = self.$store.state.data
     let progress_obj = _.filter(self.val_data, {'name':prop_keys[0]});
     progress_obj[0].progress = Math.round(message[prop_keys[0]].currentRuleIndex / message[prop_keys[0]].ruleIndex * 100);
-    // self.$store.state.data = []
-    // self.$store.state.data =   self.val_data
   },
 
   setPage(keys,filtered_keys,response){
@@ -2427,128 +2459,98 @@ export default {
     self.activeTab = self.convert(diff_keys[0])
 
       if(Object.keys(response).indexOf("ProductInformation") >= 0){
-          self.mObj["Product Information"].uploadDisplay = false
-          self.mObj["Product Information"].load = true
-
-        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductinformation').then(res => {
-          self.mObj["Product Information"].newUploadCSV = res.data
-          self.mObj["Product Information"].newUploadCSV = _.map(self.mObj["Product Information"].newUploadCSV, function(element) {
-            return _.extend({}, element, {is_checked: false});
-          });
-
-          self.mObj["Product Information"].main_arr = lodash.chunk(self.mObj["Product Information"].newUploadCSV, 5);
-          self.mObj["Product Information"].headers = Object.keys(res.data[0])
-          self.map = true
-          self.mObj["Product Information"].load =  false
-          self.mObj["Product Information"].savePreviewDisplay = true
-          prod_info_upld = true
-          self.validate = false
-        })
+        self.arrangeTab("ProductInformation",response.id)
+        prod_info_upld = true
+        self.validate = false
+      }
+      else{
+        self.mObj["Product Information"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductPrice") >= 0){
-        self.mObj["Product Price"].uploadDisplay = false
-        self.mObj["Product Price"].load = true
-
-        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductprice').then(res => {
-          self.mObj["Product Price"].newUploadCSV = res.data
-          self.mObj["Product Price"].newUploadCSV = _.map(self.mObj["Product Price"].newUploadCSV, function(element) {
-            return _.extend({}, element, {is_checked: false});
-          });
-
-          self.mObj["Product Price"].main_arr = lodash.chunk(self.mObj["Product Price"].newUploadCSV, 5);
-          self.mObj["Product Price"].headers = Object.keys(res.data[0])
-          self.map = true
-          self.mObj["Product Price"].load  = false
-          self.mObj["Product Price"].savePreviewDisplay = true
-        })
+        self.arrangeTab("ProductPrice",response.id)
+      }
+      else{
+        self.mObj["Product Price"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductImprintData") >= 0){
-        self.mObj["Product Imprint Data"].uploadDisplay = false
-        self.mObj["Product Imprint Data"].load = true
-
-        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductimprintdata').then(res => {
-          self.mObj["Product Imprint Data"].newUploadCSV = res.data
-          self.mObj["Product Imprint Data"].newUploadCSV = _.map(self.mObj["Product Imprint Data"].newUploadCSV, function(element) {
-            return _.extend({}, element, {is_checked: false});
-          });
-
-          self.mObj["Product Imprint Data"].main_arr = lodash.chunk(self.mObj["Product Imprint Data"].newUploadCSV, 5);
-          self.mObj["Product Imprint Data"].headers = Object.keys(res.data[0])
-          self.map = true
-          self.mObj["Product Imprint Data"].load  = false
-          self.mObj["Product Imprint Data"].savePreviewDisplay = true
-        })
+        self.arrangeTab("ProductImprintData",response.id)
+      }
+      else{
+        self.mObj["Product Imprint Data"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductShipping") >= 0){
-        self.mObj["Product Shipping"].uploadDisplay = false
-        self.mObj["Product Shipping"].load = true
-
-        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductshipping').then(res => {
-          self.mObj["Product Shipping"].newUploadCSV = res.data
-          self.mObj["Product Shipping"].newUploadCSV = _.map(self.mObj["Product Shipping"].newUploadCSV, function(element) {
-            return _.extend({}, element, {is_checked: false});
-          });
-
-          self.mObj["Product Shipping"].main_arr = lodash.chunk(self.mObj["Product Shipping"].newUploadCSV, 5);
-          self.mObj["Product Shipping"].headers = Object.keys(res.data[0])
-          self.map = true
-          self.mObj["Product Shipping"].load  = false
-          self.mObj["Product Shipping"].savePreviewDisplay = true
-        })
+        self.arrangeTab("ProductShipping",response.id)
+      }
+      else{
+        self.mObj["Product Shipping"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductImage") >= 0){
-        self.mObj["Product Image"].uploadDisplay = false
-        self.mObj["Product Image"].load = true
-
-        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductimage').then(res => {
-
-          self.mObj["Product Image"].newUploadCSV = res.data
-          self.mObj["Product Image"].newUploadCSV = _.map(self.mObj["Product Image"].newUploadCSV, function(element) {
-            return _.extend({}, element, {is_checked: false});
-          });
-
-          self.mObj["Product Image"].main_arr = lodash.chunk(self.mObj["Product Image"].newUploadCSV, 5);
-          self.mObj["Product Image"].headers = Object.keys(res.data[0])
-          self.map = true
-          self.mObj["Product Image"].load  = false
-          self.mObj["Product Image"].savePreviewDisplay = true
-        })
+        self.arrangeTab("ProductImage",response.id)
+      }
+      else{
+        self.mObj["Product Image"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductAdditionalCharges") >= 0){
-        self.mObj["Product Additional Charges"].uploadDisplay = false
-        self.mObj["Product Additional Charges"].load = true
-
-        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductadditionalcharges').then(res => {
-          self.mObj["Product Additional Charges"].newUploadCSV = res.data
-          self.mObj["Product Additional Charges"].newUploadCSV = _.map(self.mObj["Product Additional Charges"].newUploadCSV, function(element) {
-            return _.extend({}, element, {is_checked: false});
-          });
-
-          self.mObj["Product Additional Charges"].main_arr = lodash.chunk(self.mObj["Product Additional Charges"].newUploadCSV, 5);
-          self.mObj["Product Additional Charges"].headers = Object.keys(res.data[0])
-          self.map = true
-          self.mObj["Product Additional Charges"].load  = false
-          self.mObj["Product Additional Charges"].savePreviewDisplay = true
-        })
+        self.arrangeTab("ProductAdditionalCharges",response.id)
+      }
+      else{
+        self.mObj["Product Additional Charges"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductVariationPrice") >= 0){
-        self.mObj["Product Variation Price"].uploadDisplay = false
-        self.mObj["Product Variation Price"].load = true
-
-        api.request('get', '/pdm-uploader-data/?import_tracker_id=' + response.id + '&tables=uploaderProductvariationprice').then(res => {
-          self.mObj["Product Variation Price"].newUploadCSV = res.data
-          self.mObj["Product Variation Price"].newUploadCSV = _.map(self.mObj["Product Variation Price"].newUploadCSV, function(element) {
-            return _.extend({}, element, {is_checked: false});
-          });
-
-          self.mObj["Product Variation Price"].main_arr = lodash.chunk(self.mObj["Product Variation Price"].newUploadCSV, 5);
-          self.mObj["Product Variation Price"].headers = Object.keys(res.data[0])
-          self.map = true
-          self.mObj["Product Variation Price"].load  = false
-          self.mObj["Product Variation Price"].savePreviewDisplay = true
-        })
+        self.arrangeTab("ProductVariationPrice",response.id)
+      }
+      else{
+        self.mObj["Product Variation Price"].uploadDisplay = true
       }
 
+  },
+  arrangeTab(tabname,id){
+    let self = this
+    let tab = tabname.replace(/([A-Z])/g, ' $1').trim()
+    self.mObj[tab].uploadDisplay = false
+    self.mObj[tab].load = true
+    let table_name = "uploader" + tabname.charAt(0).toUpperCase() + tabname.substr(1).toLowerCase()
+     api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name).then(res => {
+       self.mObj[tab].newUploadCSV = res.data
+       self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
+         return _.extend({}, element, {is_checked: false});
+       });
+
+       self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
+       self.mObj[tab].headers = Object.keys(res.data[0])
+       self.map = true
+       self.mObj[tab].load =  false
+       self.mObj[tab].savePreviewDisplay = true
+       return;
+    })
+},
+  setValData(data,filtered_keys){
+      uploader_obj = data
+      prop_keys = filtered_keys
+      this.val_data = []
+      this.$store.state.data = []
+      let self = this
+
+      for(let key in data){
+        for(let i=0 ;i<filtered_keys.length;i++){
+          if(filtered_keys[i] == key){
+            if(data[filtered_keys[i]].validateStatus == 'pending' && data[filtered_keys[i]].currentRuleIndex){
+              self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
+            }
+            else if(data[filtered_keys[i]].validateStatus == 'pending' && !data[filtered_keys[i]].currentRuleIndex){
+              self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":0})
+            }
+            else if(data[filtered_keys[i]].validateStatus == 'completed'){
+              self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
+              prop_keys.splice(i,1)
+            }
+          }
+        }
+      }
+
+      self.$store.state.data = self.val_data
+      self.sheetwiseValidation(prop_keys[0],uploader_obj)
+      return;
   }
   },
   feathers: {
@@ -2640,65 +2642,14 @@ export default {
 
                     if(response.data.validate_flag == 'running' || response.data.validate_flag == 'completed'){
                       if(self.val_data.length == 0){
-
-                        uploader_obj = response.data
-                        prop_keys = filtered_keys
-                        this.val_data = []
-                        // this.val_data = this.$store.state.data
-                        this.$store.state.data = []
-                        for(let key in response.data){
-                          for(let i=0 ;i<filtered_keys.length;i++){
-                            if(filtered_keys[i] == key){
-                              if(response.data[filtered_keys[i]].validateStatus == 'pending' && response.data[filtered_keys[i]].currentRuleIndex){
-                                self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
-                              }
-                              else if(response.data[filtered_keys[i]].validateStatus == 'pending' && !response.data[filtered_keys[i]].currentRuleIndex){
-                                self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":0})
-                              }
-                              else if(response.data[filtered_keys[i]].validateStatus == 'completed'){
-                                self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
-                                prop_keys.splice(i,1)
-                              }
-                            }
-                          }
-                        }
-
-                        self.$store.state.data = self.val_data
-                        self.sheetwiseValidation(prop_keys[0],uploader_obj)
-
+                        self.setValData(response.data,filtered_keys)
                       }
                       else if(self.val_data.length > 0){
                       }
 
                     }
                     else if(!response.data.validate_flag){
-                      uploader_obj = response.data
-                      prop_keys = filtered_keys
-
-                      this.val_data = []
-                      this.$store.state.data = []
-                      // this.val_data = this.$store.state.data
-                      for(let key in response.data){
-                        for(let i=0 ;i<filtered_keys.length;i++){
-                          if(filtered_keys[i] == key){
-                            if(response.data[filtered_keys[i]].validateStatus == 'pending' && response.data[filtered_keys[i]].currentRuleIndex){
-                              self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
-                            }
-                            else if(response.data[filtered_keys[i]].validateStatus == 'pending' && !response.data[filtered_keys[i]].currentRuleIndex){
-                              self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":0})
-                            }
-                            else if(response.data[filtered_keys[i]].validateStatus == 'completed'){
-                              self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
-                              prop_keys.splice(i,1)
-                            }
-                          }
-                        }
-                      }
-
-                      self.$store.state.data = self.val_data
-                      self.sheetwiseValidation(prop_keys[0],uploader_obj)
-
-
+                      self.setValData(response.data,filtered_keys)
                     }
 
                   }
@@ -2743,46 +2694,23 @@ export default {
         let new_index = lodash.findIndex(self.schemaList, function(o) { return o.value == '--Add new--'; });
         self.schemaList.splice(self.schemaList.length-1,0,self.schemaList.splice(new_index,1)[0]);
         if(schemaNames.length == 0){
-          self.mObj["Product Information"].selected_schema = "--Add new--"
-          self.mObj["Product Price"].selected_schema = "--Add new--"
-          self.mObj["Product Imprint Data"].selected_schema = "--Add new--"
-          self.mObj["Product Image"].selected_schema = "--Add new--"
-          self.mObj["Product Shipping"].selected_schema = "--Add new--"
-          self.mObj["Product Additional Charges"].selected_schema = "--Add new--"
-          self.mObj["Product Variation Price"].selected_schema = "--Add new--"
+          for(let i=0;i<self.fileTypes.length;i++){
+            self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
+            self.mObj[self.fileTypes[i]].display = true
+          }
           self.loading = false
-          self.mObj["Product Information"].uploadDisplay = true
-          self.mObj["Product Price"].uploadDisplay = true
-          self.mObj["Product Imprint Data"].uploadDisplay = true
-          self.mObj["Product Image"].uploadDisplay = true
-          self.mObj["Product Shipping"].uploadDisplay = true
-          self.mObj["Product Additional Charges"].uploadDisplay = true
-          self.mObj["Product Variation Price"].uploadDisplay = true
+          for(let i=0;i<self.fileTypes.length;i++){
+            self.mObj[self.fileTypes[i]].uploadDisplay = true
+          }
         }
         else{
-          self.mObj["Product Information"].selected_schema = self.schemaList[0].value
-          self.mObj["Product Price"].selected_schema = self.schemaList[0].value
-          self.mObj["Product Imprint Data"].selected_schema = self.schemaList[0].value
-          self.mObj["Product Image"].selected_schema = self.schemaList[0].value
-          self.mObj["Product Shipping"].selected_schema = self.schemaList[0].value
-          self.mObj["Product Additional Charges"].selected_schema = self.schemaList[0].value
-          self.mObj["Product Variation Price"].selected_schema = self.schemaList[0].value
+          for(let i=0;i<self.fileTypes.length;i++){
+            self.mObj[self.fileTypes[i]].selected_schema = self.schemaList[0].value
+          }
           self.loading = false
-          self.mObj["Product Information"].uploadDisplay = true
-          self.mObj["Product Price"].uploadDisplay = true
-          self.mObj["Product Imprint Data"].uploadDisplay = true
-          self.mObj["Product Image"].uploadDisplay = true
-          self.mObj["Product Shipping"].uploadDisplay = true
-          self.mObj["Product Additional Charges"].uploadDisplay = true
-          self.mObj["Product Variation Price"].uploadDisplay = true
-
         }
 
       })
-
-
-
-
     }
 }
 </script>

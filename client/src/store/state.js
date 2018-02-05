@@ -15,6 +15,7 @@ export default {
   data: [],
   activetab: '',
   editTemplate: null,
+  subscription_id: '',
   // viewTemplate: [],
   // upload: '',
   // filename: '',

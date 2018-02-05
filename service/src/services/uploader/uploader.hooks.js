@@ -5,7 +5,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
+    create: [
+      hook => beforeCreate(hook)
+    ],
     update: [],
     patch: [],
     remove: []
@@ -31,3 +33,7 @@ module.exports = {
     remove: []
   }
 };
+var beforeCreate = async function(hook){
+  module.exports.subscriptionId = this.subscriptionId;
+  hook.data["subscriptionId"] = module.exports.subscriptionId
+}

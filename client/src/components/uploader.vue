@@ -138,6 +138,7 @@ export default {
      }
     },
     mounted(){
+
       socket.emit('uploader::find', {user_id:this.$store.state.user._id,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
         if (data.data.length !== 0) {
           this.showDiv = false
@@ -146,7 +147,7 @@ export default {
         else {
           this.showDiv = true
           this.$store.state.jobData = {}
-
+          this.$store.state.subscription_id = ''
         }
       })
     }
