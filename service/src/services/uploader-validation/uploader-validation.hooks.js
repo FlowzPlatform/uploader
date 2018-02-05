@@ -89,12 +89,12 @@ var connectToMongo = async function(hook,url){
   let flag = 0
   let err_obj = {"err_data":'',"err_fields":[]}
   let rule_value
-
-  if(hook.data.ruleIndex == 0){
-    rule_value = hook.data.ruleIndex
+  let uploader_obj = await(hook.app.service('/uploader').get(hook.data.id))
+  if(uploader_obj[hook.data.key].hasOwnProperty("currentRuleIndex")){
+    rule_value = uploader_obj[hook.data.key]["currentRuleIndex"] - 1
   }
   else{
-   rule_value = hook.data.ruleIndex - 1
+    rule_value = 0
   }
 
 
@@ -102,13 +102,14 @@ var connectToMongo = async function(hook,url){
           let query = rules[j].qryMongo
           query["import-tracker_id"] = hook.data.id
           var query_result = await (db.collection(collection_name).find(query).toArray())
-
-          let uploader_obj = hook.data.data
+          // uploader_obj = await(hook.app.service('/uploader').get(hook.data.id))
           let obj = uploader_obj[hook.data.key]
           delete uploader_obj[hook.data.key]
           obj["ruleIndex"] = rules.length
           obj["currentRuleIndex"] = j + 1
+          // obj["validate_flag"] = 'running'
           uploader_obj[hook.data.key] = obj
+          uploader_obj["validate_flag"] = 'running'
           var update_ruleindx = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
           if(query_result.length > 0){
             err_obj["err_data"] = query_result
@@ -118,14 +119,21 @@ var connectToMongo = async function(hook,url){
     }
     errors_arr.push(err_obj)
     if(errors_arr[0].err_data.length != 0){
-       hook.result = errors_arr
+      let obj = uploader_obj[hook.data.key]
+      delete uploader_obj[hook.data.key]
+      // delete obj["validate_flag"]
+      uploader_obj[hook.data.key] = obj
+      delete uploader_obj["validate_flag"]
+      var update_val_flag = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
+      hook.result = errors_arr
     }
     else{
-      let uploader_obj = hook.data.data
+      // let uploader_obj = await(hook.app.service('/uploader').get(hook.data.id))
       let obj = uploader_obj[hook.data.key]
       delete uploader_obj[hook.data.key]
       obj.validateStatus = "completed"
       uploader_obj[hook.data.key] = obj
+      uploader_obj["validate_flag"] = "completed"
       var tdata = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
       hook.result = tdata
     }

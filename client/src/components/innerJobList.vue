@@ -42,19 +42,19 @@
                            <span>{{convert(item.name)}}</span>
                          </div>
                        </td>
-                       <td class="">
+                       <td class="rightAlign">
                          <div class="ivu-table-cell">
                            <span>{{item.totalNoOfRecords}}</span>
                          </div>
                        </td>
                        <td class="">
                          <div class="ivu-table-cell">
-                           <span>{{item.uploadstatus}}</span>
+                           <span>{{capitalize(item.uploadstatus)}}</span>
                          </div>
                        </td>
                        <td class="">
                          <div class="ivu-table-cell">
-                           <span>{{item.validatestatus}}</span>
+                           <span>{{capitalize(item.validatestatus)}}</span>
                          </div>
                        </td>
                      </tr>
@@ -86,6 +86,7 @@
 </template>
 <script>
 /*eslint-disable*/
+import lodash from 'lodash'
     export default {
         name: 'innerJoblist',
         props: {
@@ -101,6 +102,10 @@
           convert(item){
             item = item.replace(/([A-Z])/g, ' $1').trim()
             return item
+          },
+          capitalize(item){
+            item = lodash.capitalize(item)
+            return item
           }
         },
         mounted(){
@@ -115,5 +120,9 @@
 <style scoped>
     .expand-row{
         margin-bottom: 16px;
+    }
+    .rightAlign{
+      text-align:right !important;
+      padding-right: 190px !important;
     }
 </style>
