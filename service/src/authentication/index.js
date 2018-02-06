@@ -1,5 +1,5 @@
 const axios = require('axios');
-let domainkey = process.env.domainkey ? process.env.domainkey : 'flowzcluster.tk'
+let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk'
 
 var checkAuth = (authToken) => {
   return axios({

@@ -17,6 +17,7 @@
 
                      <div v-for="(files,fIndex) in fileTypes">
                            <v-tab :title=files :id="changeIndex(files)">
+                              <!-- <img src="../assets/images/green_tick.jpg" alt="" style="width:20px;height:20px;"></img> -->
                            </v-tab>
                     </div>
                 </vue-tabs>
@@ -28,7 +29,7 @@
             <div id="uploadCsv" style="margin-top:5%;" v-model="mObj[activeTab]">
                 <div>
                     <Form>
-                      <FormItem label="Select schema">
+                      <FormItem label="Field Mapping">
                         <Row>
                         <Col span="5">
                         <Select v-model="mObj[activeTab].selected_schema" style="width:200px" @on-change="changeSchema(activeTab,mObj[activeTab].selected_schema)">
@@ -38,7 +39,7 @@
 
                        <Col span="3">
                         <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
-                          <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled schema</a>
+                          <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled mapping</a>
                            <div class="api" slot="content">
                              <Form inline>
                                <FormItem>
@@ -208,7 +209,7 @@
          </p>
          <div style="text-align:center">
              <p style="font-size:15px">Are you sure you want to delete?</p>
-             <p style="font-size:15px">All your selected records will be deleted...</p>
+             <p style="font-size:15px">Your selected {{deletedValues.length}} records will be deleted...</p>
          </div>
          <div slot="footer">
              <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
@@ -218,6 +219,7 @@
 
             <div v-if="mObj[activeTab].headerDisplay && mObj[activeTab].mapping.length != 0">
             <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
+            <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are compulsory to map</h3>
              <div class="schema-form ivu-table-wrapper" >
                <div class="ivu-table ivu-table-border customtable" >
                  <div class="ivu-table-body">
@@ -238,7 +240,8 @@
                        <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                          <td>
                            <div class="ivu-table-cell" >
-                             <span>{{item.sysHeader}}</span>
+                             <span v-if="item.schemaObj.optional == true"> * {{item.sysHeader}}</span>
+                              <span v-else>{{item.sysHeader}}</span>
                            </div>
                          </td>
                          <td>
@@ -267,6 +270,7 @@
 
          <div v-if="mObj[activeTab].newSchemaDisplay">
          <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
+         <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are compulsory to map</h3>
          <div class="schema-form ivu-table-wrapper">
            <div class="ivu-table ivu-table-border customtable" >
              <div class="ivu-table-body">
@@ -291,7 +295,8 @@
                    <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                      <th>
                        <div class="ivu-table-cell headercolor">
-                         <span>{{item.sysHeader}}</span>
+                         <span v-if="item.schemaObj.optional == true"> * {{item.sysHeader}}</span>
+                          <span v-else>{{item.sysHeader}}</span>
                        </div>
                      </th>
                      <td>
@@ -467,7 +472,7 @@
                      <th class="">Validation Progress</th>
                    </tr>
                  </thead>
-                 <tbody class="ivu-table-tbody" v-if="!validation_completed">
+                 <tbody class="ivu-table-tbody" v-if="!validation_data">
                    <tr class="ivu-table-row" v-for="(item,index) in val_data" :id="item.name">
                      <td>
                        <div class="ivu-table-cell">
@@ -636,6 +641,7 @@ export default {
           types: ["string","number","boolean","date","url","phone","pin-code"],
           existingSchemaData :[],
           validating : true,
+          validation_data: false,
           validation_completed: false,
           import1 :false,
           loading: false,
@@ -687,7 +693,7 @@ export default {
           'Product Information':{
                   selected_schema: '',
                   display: false,
-                  new_schema: 'Untitled schema',
+                  new_schema: 'Untitled mapping',
                   poptip_display:false,
                   allowedFileType: ['text/csv'],
                   uploadCSV:[],
@@ -716,7 +722,7 @@ export default {
           'Product Price':{
                   selected_schema: '',
                   display: false,
-                  new_schema: 'Untitled schema',
+                  new_schema: 'Untitled mapping',
                   poptip_display:false,
                   allowedFileType: ['text/csv'],
                   uploadCSV:[],
@@ -746,7 +752,7 @@ export default {
           'Product Imprint Data':{
                   selected_schema: '',
                   display: false,
-                  new_schema: 'Untitled schema',
+                  new_schema: 'Untitled mapping',
                   poptip_display:false,
                   allowedFileType: ['text/csv'],
                   uploadCSV:[],
@@ -774,7 +780,7 @@ export default {
           'Product Image':{
                   selected_schema: '',
                   display: false,
-                  new_schema: 'Untitled schema',
+                  new_schema: 'Untitled mapping',
                   poptip_display:false,
                   allowedFileType: ['text/csv'],
                   uploadCSV:[],
@@ -802,7 +808,7 @@ export default {
           'Product Shipping':{
                   selected_schema: '',
                   display: false,
-                  new_schema: 'Untitled schema',
+                  new_schema: 'Untitled mapping',
                   poptip_display:false,
                   allowedFileType: ['text/csv'],
                   uploadCSV:[],
@@ -830,7 +836,7 @@ export default {
           'Product Additional Charges':{
                   selected_schema: '',
                   display: false,
-                  new_schema: 'Untitled schema',
+                  new_schema: 'Untitled mapping',
                   poptip_display:false,
                   allowedFileType: ['text/csv'],
                   uploadCSV:[],
@@ -858,7 +864,7 @@ export default {
           'Product Variation Price':{
                   selected_schema: '',
                   display: false,
-                  new_schema: 'Untitled schema',
+                  new_schema: 'Untitled mapping',
                   poptip_display:false,
                   allowedFileType: ['text/csv'],
                   uploadCSV:[],
@@ -1171,7 +1177,7 @@ export default {
            validation_obj = {
             id: id,
             username: self.$store.state.user.fullname,
-            user_id: self.$store.state.user._id,
+            user_id: self.$store.state.userId,
             sheet_name: sheet_name,
             key: key
           }
@@ -1193,7 +1199,7 @@ export default {
                   stepStatus : "validation_completed"
                 }
                 api.request('patch', '/uploader/'+ id,updated_obj).then(res => {
-                    this.showValidationTable = false
+                    // this.showValidationTable = false
                     this.validation_completed = true
                 })
                 .catch(error =>{
@@ -1345,8 +1351,9 @@ export default {
                 stepStatus : "validation_completed"
               }
               api.request('patch', '/uploader/'+ id,updated_obj).then(res => {
-                this.showValidationTable = false
-                this.$store.state.data = []
+
+                // this.showValidationTable = false
+                // this.$store.state.data = []
                 this.validation_completed = true
               })
             }
@@ -1360,6 +1367,11 @@ export default {
 
       // Puts a entry in the jobqueue
       importToPDM(){
+
+        // let jobQueue_obj = {
+        //   "importTrackerId":id,
+        //   "id": this.$store.state.userId
+        // }
         let jobQueue_obj = {
                 "queue" : {
                   "name": "uploaderJobQue"
@@ -1368,7 +1380,7 @@ export default {
               		{
               			"importTrackerId":id,
               			"userdetails":{
-              				    "id": this.$store.state.user._id,
+              				    "id": this.$store.state.userId,
               		        "username": this.$store.state.user.username,
               		        "fullname": this.$store.state.user.fullname,
               		        "email": this.$store.state.user.email,
@@ -1379,11 +1391,15 @@ export default {
               }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
+                console.log("import res......",res)
                 if(res.status == '201'){
                   let importObj = {
                     stepStatus : "import_in_progress"
                   }
                   api.request('patch', '/uploader/'+ id,importObj).then(result => {
+                    this.showValidationTable = false
+                    this.validation_completed = false
+                    this.validation_data = true
                     this.validateStep = true
                     this.importStep = true
                     this.currentStep = 2
@@ -1408,6 +1424,8 @@ export default {
         item = item.replace(/([A-Z])/g, ' $1').trim()
         return item
       },
+
+      // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
       importToConfirm(){
         let jobQueue_obj = {
                 "queue" : {
@@ -1417,7 +1435,7 @@ export default {
               		{
               			"importTrackerId":id,
               			"userdetails":{
-              				    "id": this.$store.state.user._id,
+              				    "id": this.$store.state.userId,
               		        "username": this.$store.state.user.username,
               		        "fullname": this.$store.state.user.fullname,
               		        "email": this.$store.state.user.email,
@@ -1491,7 +1509,7 @@ export default {
           this.loadingdot = true
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
-          socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
+          socket.emit('uploader-schema::find', {user_id:this.$store.state.userId}, (e, res) => {
             this.existingSchemaData = res.data
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
             if(currentschema.length != 0){
@@ -1525,7 +1543,7 @@ export default {
          if(this.mObj[tab].selected_schema != '--Add new--'){
           this.map = true
           this.mObj[tab].mapping = []
-           socket.emit('uploader-csv-file-mapping::find', {fileTypeId : this.mObj[tab].selected_schema,user_id:this.$store.state.user._id}, (e, data) => {
+           socket.emit('uploader-csv-file-mapping::find', {fileTypeId : this.mObj[tab].selected_schema,user_id:this.$store.state.userId}, (e, data) => {
              this.mObj[tab].mapping = data.data[0].mapping
              let schema_keys = _.keys(this.mObj[tab].schema.structure);
 
@@ -1575,7 +1593,7 @@ export default {
                  title: 'Empty values not allowed'
              });
         }
-        else if(schema == 'Untitled schema' || schema == '--Add new--'){
+        else if(schema == 'Untitled mapping' || schema == '--Add new--'){
           this.$Notice.error({
                  title: 'Please write new schema name'
              });
@@ -1608,28 +1626,34 @@ export default {
           $('#csv-file').change(function () {
             let fileChooser = document.getElementById('csv-file')
             file = fileChooser.files[0]
-            self.mObj[tab].load = true
-            self.mObj[tab].uploadDisplay = false
-            if (_.contains(self.mObj[tab].allowedFileType, file.type)) {
-              Papa.parse(file, {
 
-                header: true,
-                dynamicTyping: true,
-                encoding: "UTF-8",
-                skipEmptyLines: false,
-                chunk: function(results, streamer) {
+            let file_ext = file.name.split('.').pop()
+            if(file_ext != 'csv'){
+              self.$Notice.error({title: 'Only CSV files are allowed',duration: 200})
+            }
+            else{
+              self.mObj[tab].load = true
+              self.mObj[tab].uploadDisplay = false
+              if (_.contains(self.mObj[tab].allowedFileType, file.type)) {
+                Papa.parse(file, {
 
-                  self.mObj[tab].uploadCSV = results.data
-                  self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
-                  self.mObj[tab].headers.push("_id")
-                  if(self.mObj[tab].new_flag == 1){
-                    self.mObj[tab].mapping = []
-                    self.generateHeadersandMapping(tab)
-                    self.mObj[tab].newSchemaDisplay = true
-                    self.mObj[tab].previewDisplay = true
-                    self.mObj[tab].load = false
-                  }
-                  else{
+                  header: true,
+                  dynamicTyping: true,
+                  encoding: "UTF-8",
+                  skipEmptyLines: false,
+                  chunk: function(results, streamer) {
+
+                    self.mObj[tab].uploadCSV = results.data
+                    self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
+                    self.mObj[tab].headers.push("_id")
+                    if(self.mObj[tab].new_flag == 1){
+                      self.mObj[tab].mapping = []
+                      self.generateHeadersandMapping(tab)
+                      self.mObj[tab].newSchemaDisplay = true
+                      self.mObj[tab].previewDisplay = true
+                      self.mObj[tab].load = false
+                    }
+                    else{
                       self.mObj[tab].headerDisplay = true
                       self.mObj[tab].previewDisplay = true
 
@@ -1638,12 +1662,13 @@ export default {
                       }
 
 
-                    self.mObj[tab].mapping = []
+                      self.mObj[tab].mapping = []
 
-                    self.getMapping(tab)
+                      self.getMapping(tab)
+                    }
                   }
-                }
-              })
+                })
+              }
             }
 
             })
@@ -2123,6 +2148,8 @@ export default {
     },
     abortImport(){
        let self = this
+       self.showValidationTable = false
+       self.validation_data = true
        self.validation_completed = false
        self.val_data = []
        api.request('get', '/uploader/' + id).then(response => {
@@ -2198,7 +2225,7 @@ export default {
     },
     showerrmsg (errcols,tab,schema) {
       var example1 = document.getElementById('example1')
-      new Handsontable(example1, { // eslint-disable-line
+      var ht = new Handsontable(example1, { // eslint-disable-line
         data: [this.mObj[tab].data1[0]],
         colHeaders:this.mObj[tab].headers1[0],
         height: 60,
@@ -2335,7 +2362,7 @@ export default {
         updatedAt: Date(),
         deletedAt:'',
         username: self.$store.state.user.email,
-        user_id: self.$store.state.user._id
+        user_id: self.$store.state.userId
       }
 
       let name = tab.replace(/\s/g, "")
@@ -2354,7 +2381,7 @@ export default {
           createdAt: Date(),
           updatedAt: Date(),
           username: self.$store.state.user.email,
-          user_id: self.$store.state.user._id
+          user_id: self.$store.state.userId
         }
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
@@ -2370,7 +2397,7 @@ export default {
                 updatedAt : Date(),
                 deletedAt : '',
                 username : self.$store.state.user.email,
-                user_id: self.$store.state.user._id
+                user_id: self.$store.state.userId
               }
 
               api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
@@ -2452,7 +2479,9 @@ export default {
       let uploaded_tabs = self.convert(filtered_keys[i]).replace(/ /g,"_");
       setTimeout(function(){
         $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
+        $("#t-" + uploaded_tabs).addClass('ivu-icon ivu-icon-checkmark')
       },0)
+        // setTimeout(function(){ },10)
     }
 
     let diff_keys = _.difference(self.fileNames, filtered_keys);
@@ -2557,7 +2586,7 @@ export default {
     'uploader': {
       updated (message) {
           let self = this
-          if(message.user_id == self.$store.state.user._id){
+          if(message.user_id == self.$store.state.userId){
             if(prop_keys.length != 0){
               uploader_obj = message
               if(message[prop_keys[0]] && message[prop_keys[0]]["currentRuleIndex"]){
@@ -2592,12 +2621,15 @@ export default {
                   }
                 })
                 $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
+                //  $("#t-" + old_tab_index).addClass('ivu-icon ivu-icon-checkmark')
+                setTimeout(function(){  $("#t-" + old_tab_index).addClass('ivu-icon ivu-icon-checkmark')},0)
                 self.activeTab = new_tab
 
               }
             }
             else if(message.stepStatus == "validation_completed" ){
-              this.showValidationTable = false
+              console.log("called validation_completed......",self.val_data)
+              // this.showValidationTable = false
               this.validation_completed = true
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
@@ -2658,7 +2690,7 @@ export default {
                     this.uploadStep = false
                     this.validateStep = true
                     this.currentStep = 1
-                    this.showValidationTable = false
+                    // this.showValidationTable = false
                     this.validation_completed = true
                   }
                   else if(response.data.stepStatus == 'import_in_progress'){
@@ -2684,7 +2716,7 @@ export default {
       })
 
 
-      socket.emit('uploader-schema::find', {user_id:this.$store.state.user._id}, (e, res) => {
+      socket.emit('uploader-schema::find', {user_id:this.$store.state.userId}, (e, res) => {
         self.existingSchemaData = res.data[0]
         let schemaNames = _.map(res.data, 'name');
         _.forEach(schemaNames,(value,key) => {
@@ -2715,6 +2747,17 @@ export default {
 }
 </script>
 <style>
+.vue-tabs .nav-stacked > li:before {
+    position: absolute;
+    background-color: #494E6B;
+    color: #fff;
+    text-align: center;
+    height: 20px;
+    padding: 4px 0;
+    width: 20px;
+    margin: 7px;
+    border-radius: 11px;
+}
 .close {
   padding: 0px 9px !important;
   float: right;
@@ -3177,6 +3220,12 @@ export default {
  /*background: #FFFFAD;*/
  outline: none;
 }
+/*.tick{*/
+  /*content: url("../assets/images/green_tick.jpg");
+  width:20px;
+  height:10px;
+  float:left;
+}*/
 
 
 

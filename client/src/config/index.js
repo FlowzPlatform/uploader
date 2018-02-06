@@ -26,7 +26,8 @@ var temp = {
   loginWithLinkedinUrl: protocol + '://auth.' + domainkey + '/auth/linkedin',
   githubSuccessCallbackUrl: protocol + '://localhost:8000',
   loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
-  jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create'
+  jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
+  subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription'
 }
 
 if (process.env.NODE_ENV !== 'development') {
@@ -44,7 +45,8 @@ if (process.env.NODE_ENV !== 'development') {
     loginWithLinkedinUrl: protocol + '://auth.' + domainkey + '/auth/linkedin',
     githubSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
     loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
-    jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create'
+    jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
+    subscriptionUri: protocol + '://api.' + domainkey + '/subscription/user-subscription'
   }
 }
 

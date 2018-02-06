@@ -51,7 +51,7 @@ app.configure(rest());
 //   wsEngine: 'uws',
 //   origin: '*.' + (process.env.domainkey ? 'localhost' : process.env.domainkey) + ':*'
 // }));
-app.use(subscription.featherSubscription)
+// app.use(subscription.featherSubscription)
 // Set up our services (see `services/index.js`)
 app.configure(services);
 // Configure other middleware (see `middleware/index.js`)
@@ -64,6 +64,6 @@ app.hooks(appHooks);
 
 app.configure(socketio({
   wsEngine: 'uws',
-  origin: '*.' + (process.env.domainkey ? 'localhost' : process.env.domainkey) + ':*'
+  origin: '*.' + (process.env.domainKey ? 'localhost' : process.env.domainKey) + ':*'
 }));
 module.exports = app;
