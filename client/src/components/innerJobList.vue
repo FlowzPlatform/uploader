@@ -2,7 +2,7 @@
     <div>
       <div class="ivu-tabs-tabpane">
               <div class="ivu-table-wrapper">
-                <div class="ivu-table ivu-table-small">
+                <div class="ivu-table ivu-table-small innertable">
                   <div class="ivu-table-header">
                     <table cellspacing="0" cellpadding="0" border="0" style="width:100%;">
                       <colgroup>
@@ -123,6 +123,19 @@ import lodash from 'lodash'
     }
     .rightAlign{
       text-align:right !important;
-      padding-right: 190px !important;
+      /*padding-right: 190px !important;*/
+    }
+    .innertable th{
+      min-width: 0;
+      height: 48px;
+      box-sizing: border-box;
+      text-align: center;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+      border-bottom: 1px solid #e9eaec;
+      border-right: 1px solid #eee;
+    }
+    .innertable td{
+      border-right: 1px solid #eee;
     }
 </style>
