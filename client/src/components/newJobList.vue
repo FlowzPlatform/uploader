@@ -1,5 +1,8 @@
 <template>
+  <div>
+    <h2 class="listUpld">List of Uploads</h2><br>
     <Table :columns="columns1" :data="data2" class="jobtable"></Table>
+  </div>
 </template>
 <script>
 /*eslint-disable*/
@@ -79,7 +82,7 @@ export default {
       'uploader': {
         updated (message) {
             let self = this
-            if(message.user_id == self.$store.state.user._id){
+            if(message.user_id == self.$store.state.userId){
               for(var i=0;i<self.data2.length;i++){
                 if(self.data2[i].id == message.id){
                   index = i
@@ -103,6 +106,18 @@ export default {
                   delete message[key]
                   message[key] = value
                 }
+                else if(key == 'masterJobStatus'){
+                  if(data.data[i][key] == "rejected"){
+                    let value = "User cancelled"
+                    delete data.data[i][key]
+                    data.data[i][key] = value
+                  }
+                  else{
+                    let value = lodash.capitalize(data.data[i][key])
+                    delete data.data[i][key]
+                    data.data[i][key] = value
+                  }
+                }
               }
               self.data2.push(message)
               self.data2 = _.sortBy(self.data2, 'createdAt');
@@ -112,7 +127,7 @@ export default {
         },
         created (data) {
           let self = this
-          if(data.user_id == self.$store.state.user._id){
+          if(data.user_id == self.$store.state.userId){
             for(var key in data){
               if(key == "createdAt"){
                 let created_at = moment(data[key]).fromNow()
@@ -124,10 +139,22 @@ export default {
                 delete data[key]
                 data["stepStatus"] = stepStatus
               }
-              else if(key == 'uploadType' || key == 'masterJobStatus'){
+              else if(key == 'uploadType'){
                 let value = lodash.capitalize(data[key])
                 delete data[key]
                 data[key] = value
+              }
+              else if(key == 'masterJobStatus'){
+                if(data.data[i][key] == "rejected"){
+                  let value = "User cancelled"
+                  delete data.data[i][key]
+                  data.data[i][key] = value
+                }
+                else{
+                  let value = lodash.capitalize(data.data[i][key])
+                  delete data.data[i][key]
+                  data.data[i][key] = value
+                }
               }
             }
             self.data2.push(data)
@@ -141,7 +168,8 @@ export default {
     },
     mounted(){
       var self = this
-      socket.emit('uploader::find', {user_id : this.$store.state.user._id}, (e, data) => {
+      console.log("+++++++++++++++ userId +++++++++++++++++++++",this.$store.state.userId)
+      socket.emit('uploader::find', {user_id : this.$store.state.userId}, (e, data) => {
         if(data.data.length != 0){
           for(var i=0;i<data.data.length;i++){
             for(var key in data.data[i]){
@@ -155,13 +183,26 @@ export default {
                 delete data.data[i][key]
                 data.data[i]["stepStatus"] = stepStatus
               }
-              else if(key == 'uploadType' || key == 'masterJobStatus'){
+              else if(key == 'uploadType'){
                 let value = lodash.capitalize(data.data[i][key])
                 delete data.data[i][key]
                 data.data[i][key] = value
               }
+              else if(key == 'masterJobStatus'){
+                if(data.data[i][key] == "rejected"){
+                  let value = "User cancelled"
+                  delete data.data[i][key]
+                  data.data[i][key] = value
+                }
+                else{
+                  let value = lodash.capitalize(data.data[i][key])
+                  delete data.data[i][key]
+                  data.data[i][key] = value
+                }
+              }
             }
             self.data2.push(data.data[i])
+            self.data2 = _.sortBy(self.data2, 'createdAt');
           }
         }
         else{
@@ -176,6 +217,9 @@ export default {
 </script>
 <style scoped>
 .jobtable{
+  text-align: center !important;
+}
+.listUpld{
   text-align: center !important;
 }
 </style>

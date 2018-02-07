@@ -125,7 +125,7 @@ export default {
            uploadType:this.selectedMethod.toLowerCase(),
            key:'pdm_uploader',
            masterJobStatus: "running",
-           user_id:this.$store.state.user._id
+           user_id:this.$store.state.userId
          }
          if(this.$store.state.user.fullname){
            obj["username"] = this.$store.state.user.fullname
@@ -134,12 +134,19 @@ export default {
            id = res.data.id
            this.$router.push('/upload/' + id)
          })
+         .catch(error =>{
+           if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
+             this.$Notice.error({
+              title: error.response.data.message
+            });
+           }
+         })
        }
      }
     },
     mounted(){
 
-      socket.emit('uploader::find', {user_id:this.$store.state.user._id,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
+      socket.emit('uploader::find', {user_id:this.$store.state.userId,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
         if (data.data.length !== 0) {
           this.showDiv = false
           this.$router.push('/landing/' + data.data[0].id)
@@ -148,6 +155,7 @@ export default {
           this.showDiv = true
           this.$store.state.jobData = {}
           this.$store.state.subscription_id = ''
+          this.$store.state.userId = ''
         }
       })
     }

@@ -60,5 +60,20 @@ export default {
     }).catch(error => {
       throw error
     })
+  },
+  subscriptionUser: (params) => {
+    console.log('params.....', params)
+    return axios({
+      method: 'get',
+      url: config.subscriptionUri + '/' + params
+    }).then(response => {
+      if (response) {
+        return response
+      } else {
+        throw new Error('Network error!')
+      }
+    }).catch(error => {
+      throw error
+    })
   }
 }

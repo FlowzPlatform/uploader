@@ -29,7 +29,6 @@ module.exports = {
     update: [],
     patch: [],
     remove: [
-      hook => beforeRemove(hook)
     ]
   },
 
@@ -52,18 +51,6 @@ function beforeFind(hook){
 
 }
 
-async function beforeRemove(hook){
-
-  let base_url = app.get("jobqueueUrl")
-  try {
-       var data_to_be_del = await(hook.app.service('/import-to-jobqueue').find({"import_tracker_id":hook.id}))
-      
-
-   } catch (err) {
-     //
-   }
-  //  hook.result = res
-}
 
 async function beforeCreate(hook) {
   let base_url = app.get("jobqueueUrl")
@@ -72,17 +59,23 @@ async function beforeCreate(hook) {
     "port": app.get("rdb_port"),
     "db": app.get("rdb_db")
   }
-  try {
-     axios.post(base_url, hook.data).then(res => {
-       hook.result = res
-     })
-     .catch(error => {
+  hook.data.options = {
+    "timeout": 10000000
+  }
+  console.log("hook.data........",hook.data)
 
-     })
+    try {
+      setTimeout(function() {
+        axios.post(base_url, hook.data).then(res => {
+          console.log("res.....",res)
+          hook.result = res
+        })
+        .catch(error => {
 
-
-
+        })
+      },10000)
   } catch (err) {
     //
   }
+
 }
