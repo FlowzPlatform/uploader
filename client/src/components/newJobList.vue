@@ -50,19 +50,43 @@ export default {
                 },
                 {
                     title: 'Created At',
-                    key: 'createdAt'
+                    key: 'createdAt',
+                    render: (h, params) => {
+                      let mydate = moment(params.row.createdAt).fromNow()
+                      return h('div', mydate)
+                    }
                 },
                 {
                     title: 'MasterJobStatus',
-                    key: 'masterJobStatus'
+                    key: 'masterJobStatus',
+                    render: (h, params) => {
+                      let masterJobStatus = params.row.masterJobStatus
+                      if(masterJobStatus == 'rejected'){
+                        return h('div', 'User cancelled')
+                      }
+                      else{
+                        let masterJobStatus = lodash.capitalize( params.row.masterJobStatus)
+                        return h('div', masterJobStatus)
+                      }
+
+                    }
+
                 },
                 {
                     title: 'StepStatus',
-                    key: 'stepStatus'
+                    key: 'stepStatus',
+                    render: (h, params) => {
+                      let StepStatus = this.getStatus(params.row.stepStatus)
+                      return h('div', StepStatus)
+                    }
                 },
                 {
                     title: 'Upload Type',
-                    key: 'uploadType'
+                    key: 'uploadType',
+                    render: (h, params) => {
+                      let uploadType = lodash.capitalize(params.row.uploadType)
+                      return h('div', uploadType)
+                    }
                 },
                 {
                     title: 'Username',
@@ -90,37 +114,7 @@ export default {
               }
 
               self.data2.splice(index, 1);
-              for(var key in message){
-                if(key == "createdAt"){
-                  let created_at = moment(message[key]).fromNow()
-                  delete message[key]
-                  message["createdAt"] = created_at
-                }
-                else if(key == "stepStatus"){
-                  let stepStatus = self.getStatus(message[key])
-                  delete message[key]
-                  message["stepStatus"] = stepStatus
-                }
-                else if(key == 'uploadType' || key == 'masterJobStatus'){
-                  let value = lodash.capitalize(message[key])
-                  delete message[key]
-                  message[key] = value
-                }
-                else if(key == 'masterJobStatus'){
-                  if(data.data[i][key] == "rejected"){
-                    let value = "User cancelled"
-                    delete data.data[i][key]
-                    data.data[i][key] = value
-                  }
-                  else{
-                    let value = lodash.capitalize(data.data[i][key])
-                    delete data.data[i][key]
-                    data.data[i][key] = value
-                  }
-                }
-              }
-              self.data2.push(message)
-              self.data2 = _.sortBy(self.data2, 'createdAt');
+              self.data2.splice( index,0,message );
             }
 
 
@@ -128,37 +122,8 @@ export default {
         created (data) {
           let self = this
           if(data.user_id == self.$store.state.userId){
-            for(var key in data){
-              if(key == "createdAt"){
-                let created_at = moment(data[key]).fromNow()
-                delete data[key]
-                data["createdAt"] = created_at
-              }
-              else if(key == "stepStatus"){
-                let stepStatus = self.getStatus(data[key])
-                delete data[key]
-                data["stepStatus"] = stepStatus
-              }
-              else if(key == 'uploadType'){
-                let value = lodash.capitalize(data[key])
-                delete data[key]
-                data[key] = value
-              }
-              else if(key == 'masterJobStatus'){
-                if(data.data[i][key] == "rejected"){
-                  let value = "User cancelled"
-                  delete data.data[i][key]
-                  data.data[i][key] = value
-                }
-                else{
-                  let value = lodash.capitalize(data.data[i][key])
-                  delete data.data[i][key]
-                  data.data[i][key] = value
-                }
-              }
-            }
-            self.data2.push(data)
-            self.data2 = _.sortBy(self.data2, 'createdAt');
+            self.data2.splice( 0,0,data );
+
           }
         },
         removed (data) {
@@ -168,42 +133,10 @@ export default {
     },
     mounted(){
       var self = this
-      console.log("+++++++++++++++ userId +++++++++++++++++++++",this.$store.state.userId)
-      socket.emit('uploader::find', {user_id : this.$store.state.userId}, (e, data) => {
+      self.data2 = []
+      socket.emit('uploader::find', {user_id : this.$store.state.userId , $sort: {createdAt: -1}}, (e, data) => {
         if(data.data.length != 0){
-          for(var i=0;i<data.data.length;i++){
-            for(var key in data.data[i]){
-              if(key == "createdAt"){
-                let created_at = moment(data.data[i][key]).fromNow()
-                delete data.data[i][key]
-                data.data[i]["createdAt"] = created_at
-              }
-              else if(key == "stepStatus"){
-                let stepStatus = self.getStatus(data.data[i][key])
-                delete data.data[i][key]
-                data.data[i]["stepStatus"] = stepStatus
-              }
-              else if(key == 'uploadType'){
-                let value = lodash.capitalize(data.data[i][key])
-                delete data.data[i][key]
-                data.data[i][key] = value
-              }
-              else if(key == 'masterJobStatus'){
-                if(data.data[i][key] == "rejected"){
-                  let value = "User cancelled"
-                  delete data.data[i][key]
-                  data.data[i][key] = value
-                }
-                else{
-                  let value = lodash.capitalize(data.data[i][key])
-                  delete data.data[i][key]
-                  data.data[i][key] = value
-                }
-              }
-            }
-            self.data2.push(data.data[i])
-            self.data2 = _.sortBy(self.data2, 'createdAt');
-          }
+          self.data2 = data.data
         }
         else{
           self.$Notice.info({
@@ -217,6 +150,9 @@ export default {
 </script>
 <style scoped>
 .jobtable{
+  text-align: center !important;
+}
+.jobtable th{
   text-align: center !important;
 }
 .listUpld{

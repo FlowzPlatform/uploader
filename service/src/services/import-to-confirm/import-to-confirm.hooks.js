@@ -47,15 +47,33 @@ function beforeHook (hook) {
 
 async function beforeCreate(hook) {
   let base_url = app.get("jobqueueUrl")
-  let id = hook.data.jobs[0].importTrackerId
-  hook.data.connection = {
-	  "host":app.get("rdb_host"),
-    "port": app.get("rdb_port"),
-    "db": app.get("rdb_db")
+  module.exports.authorization = this.authorization
+  let user_data = await(axios.get(user_detail_url,{'headers':{'Authorization':module.exports.authorization}}))
+  let import_tracker_id = hook.data.importTrackerId
+  hook.data = {
+    "queue": {
+      "name":"uploaderJobQue"
+    },
+    "jobs":[
+      {
+        "importTrackerId":import_tracker_id,
+        "userdetails":{
+          "id":user_data.data.data._id,
+          "email":user_data.data.data.email,
+          "password":user_data.data.data.password
+        }
+      }
+    ],
+    "connection":{
+      "host":app.get("rdb_host"),
+      "port": app.get("rdb_port"),
+      "db": app.get("rdb_db")
+    }
+
   }
-  
+
   try {
-    let tdata = await(hook.app.service('/uploader').get(id))
+    let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
     if(tdata.stepStatus == 'import_to_confirm'){
       axios.post(base_url, hook.data).then(res => {
 

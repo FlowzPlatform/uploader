@@ -120,7 +120,7 @@ export default {
        }
        else{
          var obj = {
-           createdAt: Date(),
+           createdAt: new Date(),
            stepStatus: 'upload_pending',
            uploadType:this.selectedMethod.toLowerCase(),
            key:'pdm_uploader',
@@ -154,8 +154,8 @@ export default {
         else {
           this.showDiv = true
           this.$store.state.jobData = {}
-          this.$store.state.subscription_id = ''
-          this.$store.state.userId = ''
+          // this.$store.state.subscription_id = ''
+          // this.$store.state.userId = ''
         }
       })
     }

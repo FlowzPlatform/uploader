@@ -153,6 +153,9 @@
                   <table style="min-width:1077px;overflow-x: auto;" v-if="mObj[activeTab].main_arr.length != 0">
                     <thead>
                       <tr>
+                        <!-- <th>
+                           <Checkbox ></Checkbox>
+                        </th> -->
                         <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map && header != '_id'">
                           <div>
                             <span>{{header}}</span>
@@ -161,16 +164,16 @@
                       </tr>
                       <tr>
                         <th>
-
+                         <Checkbox v-model="mObj[activeTab].mPage[mObj[activeTab].cpage - 1].mCheck" @on-change="selectAllChunk()"></Checkbox>
                         </th>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[cpage - 1][0]) " v-if="map && header != '_id' && header != 'is_checked'">
+                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[mObj[activeTab].cpage - 1][0]) " v-if="map && header != '_id' && header != 'is_checked'">
                           <div>
                             <span>{{header}}</span>
                           </div>
                         </th>
                       </tr>
                     </thead>
-                    <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].main_arr[cpage - 1]">
+                    <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].main_arr[mObj[activeTab].cpage - 1]">
                       <tr class="ivu-table-row">
                         <td>
                            <Checkbox v-model="item['is_checked']" @on-change="PushToArray(item)"></Checkbox>
@@ -181,7 +184,7 @@
                   </table>
                 </div>
                 <div class="pagination">
-                  <Page :total="mObj[activeTab].newUploadCSV.length" :current="cpage" @on-change="changePage"></Page>
+                  <Page :total="mObj[activeTab].newUploadCSV.length" :current="mObj[activeTab].cpage" @on-change="changePage" :page-size=5></Page>
                 </div>
               </div>
           </div>
@@ -604,6 +607,7 @@ let validation_obj = {}
 let continue_flag = false
 let errors_length = 0
 let prod_info_upld = false
+let cpage_array = []
 
 
 
@@ -680,7 +684,6 @@ export default {
                     }
                 ],
           deletedValues: [],
-          cpage: 1,
           importBtn: true,
           deleteRecModal: false,
           deleteSelModal: false,
@@ -716,7 +719,9 @@ export default {
                   main_arr: [],
                   csv: [],
                   filter_flag: [],
-                  load: false
+                  load: false,
+                  mPage:[],
+                  cpage:1
 
           },
           'Product Price':{
@@ -745,7 +750,9 @@ export default {
                   main_arr: [],
                   csv: [],
                   filter_flag: [],
-                  load: false
+                  load: false,
+                  mPage:[],
+                  cpage:1
 
 
           },
@@ -775,7 +782,9 @@ export default {
                   main_arr: [],
                   csv: [],
                   filter_flag: [],
-                  load: false
+                  load: false,
+                  mPage:[],
+                  cpage:1
           },
           'Product Image':{
                   selected_schema: '',
@@ -803,7 +812,9 @@ export default {
                   main_arr: [],
                   csv: [],
                   filter_flag: [],
-                  load: false
+                  load: false,
+                  mPage:[],
+                  cpage:1
           },
           'Product Shipping':{
                   selected_schema: '',
@@ -831,7 +842,9 @@ export default {
                   main_arr: [],
                   csv: [],
                   filter_flag: [],
-                  load: false
+                  load: false,
+                  mPage:[],
+                  cpage:1
           },
           'Product Additional Charges':{
                   selected_schema: '',
@@ -859,7 +872,9 @@ export default {
                   main_arr: [],
                   csv: [],
                   filter_flag: [],
-                  load: false
+                  load: false,
+                  mPage:[],
+                  cpage:1
           },
           'Product Variation Price':{
                   selected_schema: '',
@@ -887,7 +902,9 @@ export default {
                   main_arr: [],
                   csv: [],
                   filter_flag: [],
-                  load: false
+                  load: false,
+                  mPage:[],
+                  cpage:1
           }
         }
     }
@@ -921,8 +938,10 @@ export default {
 
           this.mObj[tab].newUploadCSV = []
           this.mObj[tab].newUploadCSV = main_array
+
           if(this.mObj[tab].newUploadCSV.length > 0){
             this.mObj[tab].main_arr = lodash.chunk(this.mObj[tab].newUploadCSV, 5);
+
           }
         }
 
@@ -930,7 +949,35 @@ export default {
 
       //pagination
       changePage(page) {
-        this.cpage = page
+        this.mObj[this.activeTab].cpage = page
+      },
+
+      selectAllChunk(){
+        let page = this.mObj[this.activeTab].cpage
+        let mCheck = this.mObj[this.activeTab].mPage[page-1].mCheck
+        cpage_array.push(page)
+        if(mCheck == true){
+          for(let i=0 ;i < this.mObj[this.activeTab].main_arr[page-1].length;i++){
+            for(let key in this.mObj[this.activeTab].main_arr[page-1][i]){
+              if(key == 'is_checked'){
+                this.mObj[this.activeTab].main_arr[page-1][i][key] = true
+              }
+            }
+            this.deletedValues.push(this.mObj[this.activeTab].main_arr[page-1][i])
+          }
+          this.delete1 = false
+
+        }
+        else if(mCheck == false){
+          for(let i=0 ;i < this.mObj[this.activeTab].main_arr[page-1].length;i++){
+            for(let key in this.mObj[this.activeTab].main_arr[page-1][i]){
+              if(key == 'is_checked'){
+                this.mObj[this.activeTab].main_arr[page-1][i][key] = false
+              }
+            }
+          }
+        }
+
       },
 
       // Pushes the selected values required to be deleted in an array
@@ -962,7 +1009,9 @@ export default {
         let del_ids = []
 
         if(self.mObj[tab].filter_flag == true){
+
           for(let i=0; i<self.deletedValues.length ;i++){
+
             let findidx = lodash.findIndex(self.mObj[tab].csv, function(o) { return o._id == self.deletedValues[i]._id; });
             if(findidx !== -1){
               self.mObj[tab].csv.splice(findidx,1)
@@ -970,27 +1019,50 @@ export default {
           }
 
           for(let i=0; i<self.deletedValues.length ;i++){
+
             let findidx2 = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
             if(findidx2 !== -1){
               self.mObj[tab].newUploadCSV.splice(findidx2,1)
             }
+
           }
 
           if(self.mObj[tab].newUploadCSV.length == 0){
+
             self.mObj[tab].main_arr = []
+            if(cpage_array.length > 0){
+              for(let i=0;i<cpage_array.length;i++){
+                if(self.mObj[tab].mPage[cpage_array[i]-1].mCheck == true){
+                  self.mObj[tab].mPage[cpage_array[i]-1].mCheck = false
+                }
+              }
+              cpage_array = []
+            }
           }
           else if(self.mObj[tab].newUploadCSV.length > 0){
+
             self.mObj[tab].main_arr = []
             self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
+            if(cpage_array.length > 0){
+              for(let i=0;i<cpage_array.length;i++){
+                if(self.mObj[tab].mPage[cpage_array[i]-1].mCheck == true){
+                  self.mObj[tab].mPage[cpage_array[i]-1].mCheck = false
+                }
+              }
+              cpage_array = []
+            }
           }
 
 
         }
         else{
+
           for(let i=0; i<self.deletedValues.length ;i++){
             let findidx = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
             if(findidx !== -1){
+
               self.mObj[tab].newUploadCSV.splice(findidx,1)
+
             }
           }
 
@@ -998,10 +1070,14 @@ export default {
             self.mObj[tab].main_arr = []
             self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
           }
-          // else if(self.mObj[tab].newUploadCSV.length == 0){
-          //   console.log("inside else if =========>",self.mObj[tab].newUploadCSV,  self.mObj[tab].main_arr)
-          //   self.mObj[tab].main_arr = []
-          // }
+          if(cpage_array.length > 0){
+            for(let i=0;i<cpage_array.length;i++){
+              if(self.mObj[tab].mPage[cpage_array[i]-1].mCheck == true){
+                self.mObj[tab].mPage[cpage_array[i]-1].mCheck = false
+              }
+            }
+            cpage_array = []
+          }
 
         }
 
@@ -1011,6 +1087,14 @@ export default {
 
         api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab + '&deletedIds=' + del_ids).then(res => {
           self.deletedValues = []
+
+          if(self.mObj[tab].csv.length == 0 && self.mObj[tab].newUploadCSV.length  == 0){
+
+            this.mObj[tab].savePreviewDisplay = false
+            this.mObj[tab].uploadDisplay = true
+            self.mObj[tab].uploadCSV = []
+            this.mObj[tab].newUploadCSV = []
+          }
           self.delete1 = true
         })
 
@@ -1368,30 +1452,11 @@ export default {
       // Puts a entry in the jobqueue
       importToPDM(){
 
-        // let jobQueue_obj = {
-        //   "importTrackerId":id,
-        //   "id": this.$store.state.userId
-        // }
         let jobQueue_obj = {
-                "queue" : {
-                  "name": "uploaderJobQue"
-                },
-                "jobs" : [
-              		{
-              			"importTrackerId":id,
-              			"userdetails":{
-              				    "id": this.$store.state.userId,
-              		        "username": this.$store.state.user.username,
-              		        "fullname": this.$store.state.user.fullname,
-              		        "email": this.$store.state.user.email,
-              		        "password": this.$store.state.user.password
-              			}
-              		}
-              	]
-              }
+          "importTrackerId":id
+        }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
-                console.log("import res......",res)
                 if(res.status == '201'){
                   let importObj = {
                     stepStatus : "import_in_progress"
@@ -1427,39 +1492,26 @@ export default {
 
       // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
       importToConfirm(){
+
         let jobQueue_obj = {
-                "queue" : {
-                  "name": "uploaderJobQueConfirm"
-                },
-                "jobs" : [
-              		{
-              			"importTrackerId":id,
-              			"userdetails":{
-              				    "id": this.$store.state.userId,
-              		        "username": this.$store.state.user.username,
-              		        "fullname": this.$store.state.user.fullname,
-              		        "email": this.$store.state.user.email,
-              		        "password": this.$store.state.user.password
-              			}
-              		}
-              	]
-              }
+          "importTrackerId":id
+        }
 
-              api.request('post', '/import-to-confirm/',jobQueue_obj).then(res => {
-              })
+        api.request('post', '/import-to-confirm/',jobQueue_obj).then(res => {
+        })
 
-              let importobj = {
-                'stepStatus': "import_to_confirm_in_progress"
-              }
+        let importobj = {
+          'stepStatus': "import_to_confirm_in_progress"
+        }
 
-              api.request('patch', '/uploader/' + id,importobj).then(result => {
-                this.importBtn = false
-              })
-              .catch(error => {
-                  this.$Notice.error({
-                   title: 'Error'
-                 });
-              })
+        api.request('patch', '/uploader/' + id,importobj).then(result => {
+          this.importBtn = false
+        })
+        .catch(error => {
+            this.$Notice.error({
+             title: 'Error'
+           });
+        })
       },
       mapType(sysHeader,type){
 
@@ -2225,20 +2277,32 @@ export default {
     },
     showerrmsg (errcols,tab,schema) {
       var example1 = document.getElementById('example1')
+      let row1
+      let col1
+      let prop = {}
       var ht = new Handsontable(example1, { // eslint-disable-line
         data: [this.mObj[tab].data1[0]],
         colHeaders:this.mObj[tab].headers1[0],
+        rowHeaders: true,
         height: 60,
+        stretchH: "all",
         cells: (row, col) => {
           var cellProp = {}
           _.forEach([errcols[0]], (value, key) => {
             if (col === value.cols && row === key) {
+              row1 = key
+              col1 = value.cols
               cellProp.className = 'error'
+              prop = cellProp
+
+              // cellProp.selectCell(row, col, 0, 0, true)
             }
           })
+          // selectCellByProp(row1, cellProp, true)
           return cellProp
         }
       })
+      // ht.selectCell(row1,col1,0,0,true,true)
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'block'
       }
@@ -2358,8 +2422,8 @@ export default {
         name : file.name,
         size: file.size,
         totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
-        createdAt: Date(),
-        updatedAt: Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         deletedAt:'',
         username: self.$store.state.user.email,
         user_id: self.$store.state.userId
@@ -2370,7 +2434,7 @@ export default {
       obj1[name] = {
         uploadStatus:"completed",
         validateStatus: "pending",
-        uploadedAt: Date(),
+        uploadedAt: new Date(),
         totalNoOfRecords: self.mObj[tab].newUploadCSV.length
       }
 
@@ -2378,8 +2442,8 @@ export default {
         let schemaobj = {
           name : self.mObj[tab].selected_schema,
           schema: self.mObj[tab].schema.structure,
-          createdAt: Date(),
-          updatedAt: Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
           username: self.$store.state.user.email,
           user_id: self.$store.state.userId
         }
@@ -2393,8 +2457,8 @@ export default {
               let mappingObj = {
                 mapping : self.mObj[tab].mapping,
                 fileTypeId : self.mObj[tab].selected_schema,
-                createdAt : Date(),
-                updatedAt : Date(),
+                createdAt : new Date(),
+                updatedAt : new Date(),
                 deletedAt : '',
                 username : self.$store.state.user.email,
                 user_id: self.$store.state.userId
@@ -2546,6 +2610,11 @@ export default {
        });
 
        self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
+       let loop = self.mObj[tab].newUploadCSV.length/5
+       for(let i=0;i<=loop;i++){
+         self.mObj[tab].mPage.push({'mCheck':false})
+       }
+
        self.mObj[tab].headers = Object.keys(res.data[0])
        self.map = true
        self.mObj[tab].load =  false
@@ -2605,6 +2674,11 @@ export default {
                 });
 
                 self.mObj[self.activeTab].main_arr = lodash.chunk(self.mObj[self.activeTab].newUploadCSV, 5);
+                let loop = self.mObj[self.activeTab].newUploadCSV.length/5
+                for(let i=0;i<=loop;i++){
+                  self.mObj[self.activeTab].mPage.push({'mCheck':false})
+                }
+
                 self.mObj[self.activeTab].savePreviewDisplay = true
 
                 if(self.activeTab == 'Product Information'){
@@ -2628,7 +2702,7 @@ export default {
               }
             }
             else if(message.stepStatus == "validation_completed" ){
-              console.log("called validation_completed......",self.val_data)
+
               // this.showValidationTable = false
               this.validation_completed = true
             }
