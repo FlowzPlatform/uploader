@@ -12,16 +12,16 @@ module.exports = function () {
   // check authentication
   app.use(authentication)
 
- //  subscription.moduleResource.moduleName = 'uploader'
- // let registerAppModule = {
- //   'uploader': ['create']
- // }
- //
- // subscription.moduleResource.registerAppModule = registerAppModule
- // subscription.moduleResource.appRoles = ['Admin', 'CSR']
- // subscription.registeredAppModulesRole()
- //
- // subscription.registerDynamicHooks(app, registerAppModule)
+  subscription.moduleResource.moduleName = 'uploader'
+ let registerAppModule = {
+   'uploader': ['create']
+ }
+
+ subscription.moduleResource.registerAppModule = registerAppModule
+ subscription.moduleResource.appRoles = ['Admin', 'CSR']
+ subscription.registeredAppModulesRole()
+
+ subscription.registerDynamicHooks(app, registerAppModule)
 
 
   // Check subscription

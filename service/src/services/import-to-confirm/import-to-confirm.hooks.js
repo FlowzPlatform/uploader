@@ -3,6 +3,8 @@ let await = require('asyncawait/await');
 const app = require('config');
 const config = require('../config')
 let axios = require('axios');
+let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk'
+let user_detail_url = 'http://auth.' + domainkey + '/api/userdetails'
 
 
 module.exports = {

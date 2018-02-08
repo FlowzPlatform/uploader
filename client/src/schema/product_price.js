@@ -53,7 +53,7 @@ export const ProductPriceSchema = new Schema({
         type: "string",
         label: "Currency",
         allowedValues: ['USD', 'CAD'],
-        optional: false,
+        optional: true,
         defaultValue: '',
         maxLength : '',
         regEx:''

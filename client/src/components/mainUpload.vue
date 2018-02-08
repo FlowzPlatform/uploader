@@ -243,7 +243,7 @@
                        <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                          <td>
                            <div class="ivu-table-cell" >
-                             <span v-if="item.schemaObj.optional == true"> * {{item.sysHeader}}</span>
+                             <span v-if="item.schemaObj.optional == false"> * {{item.sysHeader}}</span>
                               <span v-else>{{item.sysHeader}}</span>
                            </div>
                          </td>
@@ -298,7 +298,7 @@
                    <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                      <th>
                        <div class="ivu-table-cell headercolor">
-                         <span v-if="item.schemaObj.optional == true"> * {{item.sysHeader}}</span>
+                         <span v-if="item.schemaObj.optional == false"> * {{item.sysHeader}}</span>
                           <span v-else>{{item.sysHeader}}</span>
                        </div>
                      </th>
@@ -608,6 +608,7 @@ let continue_flag = false
 let errors_length = 0
 let prod_info_upld = false
 let cpage_array = []
+let mounted_flag = false
 
 
 
@@ -956,6 +957,16 @@ export default {
         let page = this.mObj[this.activeTab].cpage
         let mCheck = this.mObj[this.activeTab].mPage[page-1].mCheck
         cpage_array.push(page)
+        let self = this
+
+        this.mObj[this.activeTab].newUploadCSV = []
+        for(let i=0 ;i < this.mObj[this.activeTab].main_arr.length;i++){
+          for(let key in this.mObj[this.activeTab].main_arr[i]){
+            this.mObj[this.activeTab].newUploadCSV = lodash.unionBy(this.mObj[this.activeTab].newUploadCSV,this.mObj[this.activeTab].main_arr[i])
+          }
+        }
+
+
         if(mCheck == true){
           for(let i=0 ;i < this.mObj[this.activeTab].main_arr[page-1].length;i++){
             for(let key in this.mObj[this.activeTab].main_arr[page-1][i]){
@@ -974,9 +985,28 @@ export default {
               if(key == 'is_checked'){
                 this.mObj[this.activeTab].main_arr[page-1][i][key] = false
               }
+              let findidx = lodash.findIndex(this.deletedValues, function(o) { return o._id == self.mObj[self.activeTab].main_arr[page-1][i]._id; });
+
+              if(findidx > -1){
+                  this.deletedValues.splice(findidx,1)
+              }
             }
           }
+
+          // for(let i=0;i<this.deletedValues.length;i++){
+          // for(let j=0 ;j < this.mObj[this.activeTab].main_arr[page-1].length;j++){
+          //     for(let key in this.mObj[this.activeTab].main_arr[page-1][j]){
+          //       console.log(this.mObj[this.activeTab].main_arr[page-1][j]["_id"],this.deletedValues[i]._id)
+          //       if(this.deletedValues[i]._id == this.mObj[this.activeTab].main_arr[page-1][j]["_id"]){
+          //           this.deletedValues.splice(i,1)
+          //       }
+          //     }
+          //   }
+          // }
+
         }
+
+
 
       },
 
@@ -1059,10 +1089,9 @@ export default {
 
           for(let i=0; i<self.deletedValues.length ;i++){
             let findidx = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
+
             if(findidx !== -1){
-
               self.mObj[tab].newUploadCSV.splice(findidx,1)
-
             }
           }
 
@@ -1241,10 +1270,12 @@ export default {
                 if(properties[i] == "ProductInformation" || properties[i] == "ProductPrice" ||  properties[i] == "ProductImage" || properties[i] == "ProductImprintData" ||  properties[i] == "ProductShipping" || properties[i] == "ProductAdditionalCharges" ||  properties[i] == "ProductVariationPrice"){
                   self.validating = false
                   self.showValidationTable = true
+
                   prop_keys.push(properties[i])
                   self.val_data.push({"name":properties[i],"data":uploader_obj[properties[i]],"progress": 0})
 
                   self.$store.state.data = self.val_data
+                  self.validation_data = false
 
                 }
               }
@@ -1257,6 +1288,8 @@ export default {
       // Validates all the sheets one by one
       sheetwiseValidation(key,data){
           let self = this
+          this.$store.state.validationStatus = false
+          this.$store.state.calledFromContinue = false
           let sheet_name = key.replace(/([A-Z])/g, ' $1').trim()
            validation_obj = {
             id: id,
@@ -1518,6 +1551,7 @@ export default {
       },
       changeSchema(tab,value){
         if(value == "--Add new--"){
+          this.proceedBtn = true
           this.loadingdot = true
           this.mObj[tab].display = true
           this.mObj[tab].new_flag = 1
@@ -1843,6 +1877,15 @@ export default {
         }
       }
 
+      let optionalValidatorFunc = function (obj, value, fieldName) {
+        if(value == '')
+          return  fieldName + ' cannot be left blank'
+          else
+          return
+
+      }
+
+
       let phoneValidatorFunc = function (obj, value, fieldName) {
         let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
         if (value !== undefined || value !== "") {
@@ -1868,6 +1911,7 @@ export default {
         var func2 = regExValidatorFunc(obj, value, fieldName)
         var func3 = dateValidatorFunc(obj, value, fieldName)
         var func4 =  defaultValidatorFunc(obj, value, fieldName)
+        var func5 = optionalValidatorFunc(obj,value,fieldName)
         if (func1 !== undefined) {
           return func1
         } else if (func2 !== undefined) {
@@ -1876,7 +1920,9 @@ export default {
           return func3
         } else if(func4 !== undefined){
           return func4
-        } else {
+        }else if(func5 !== undefined){
+          return func5
+        }else {
           return
         }
       }
@@ -1886,6 +1932,7 @@ export default {
         var func2 = regExValidatorFunc(obj, value, fieldName)
         var func3 = urlValidatorFunc(obj, value, fieldName)
         var func4 = defaultValidatorFunc(obj, value, fieldName)
+        var func5 = optionalValidatorFunc(obj,value,fieldName)
         if (func1 !== undefined) {
           return func1
         } else if (func2 !== undefined) {
@@ -1894,6 +1941,8 @@ export default {
           return func3
         } else if(func4 !== undefined){
           return func4
+        }else if(func5 !== undefined){
+          return func5
         }else {
           return
         }
@@ -1904,6 +1953,7 @@ export default {
         var func2 = regExValidatorFunc(obj, value, fieldName)
         var func3 = emailValidatorFunc(obj, value, fieldName)
         var func4 = defaultValidatorFunc(obj, value, fieldName)
+        var func5 = optionalValidatorFunc(obj,value,fieldName)
         if (func1 !== undefined) {
           return func1
         } else if (func2 !== undefined) {
@@ -1912,6 +1962,8 @@ export default {
           return func3
         } else if(func4 !== undefined){
           return func4
+        }else if(func5 !== undefined){
+          return func5
         }else {
           return
         }
@@ -1922,6 +1974,7 @@ export default {
         var func2 = regExValidatorFunc(obj, value, fieldName)
         var func3 = phoneValidatorFunc(obj, value, fieldName)
         var func4 = defaultValidatorFunc(obj, value, fieldName)
+        var func5 = optionalValidatorFunc(obj,value,fieldName)
         if (func1 !== undefined) {
           return func1
         } else if (func2 !== undefined) {
@@ -1930,6 +1983,8 @@ export default {
           return func3
         } else if(func4 !== undefined){
           return func4
+        }else if(func5 !== undefined){
+          return func5
         }else {
           return
         }
@@ -1940,6 +1995,7 @@ export default {
         var func2 = regExValidatorFunc(obj, value, fieldName)
         var func3 = getFunctionPincode(obj, value, fieldName)
         var func4 = defaultValidatorFunc(obj, value, fieldName)
+        var func5 = optionalValidatorFunc(obj,value,fieldName)
         if (func1 !== undefined) {
           return func1
         } else if (func2 !== undefined) {
@@ -1948,6 +2004,8 @@ export default {
           return func3
         } else if(func4 !== undefined){
           return func4
+        }else if(func5 !== undefined){
+          return func5
         }else {
           return
         }
@@ -1958,6 +2016,7 @@ export default {
         var func2 = regExValidatorFunc(obj, value, fieldName)
         var func3 = defaultValidatorFunc(obj, value, fieldName)
         var func4 = maxLengthValidatorFunc(obj, value, fieldName)
+        var func5 = optionalValidatorFunc(obj,value,fieldName)
         if (func1 !== undefined) {
           return func1
         } else if (func2 !== undefined) {
@@ -1966,6 +2025,8 @@ export default {
             return func3
         } else if(func4 !== undefined){
            return func4
+        }else if(func5 !== undefined){
+           return func5
         }else {
           return
         }
@@ -2184,6 +2245,7 @@ export default {
     },
     AbortValidation(tab){
       let self = this
+      self.proceedBtn = true
       self.mObj[tab].errmsg = []
       self.mObj[tab].uploadCSV = []
       self.mObj[tab].newUploadCSV = []
@@ -2204,6 +2266,7 @@ export default {
        self.validation_data = true
        self.validation_completed = false
        self.val_data = []
+       self.$store.state.data = []
        api.request('get', '/uploader/' + id).then(response => {
          let obj = self.ModifyObj(response.data)
          api.request('put','/uploader/' + id,obj[0]).then(result =>{
@@ -2531,6 +2594,7 @@ export default {
     self.val_data = self.$store.state.data
     let progress_obj = _.filter(self.val_data, {'name':prop_keys[0]});
     progress_obj[0].progress = Math.round(message[prop_keys[0]].currentRuleIndex / message[prop_keys[0]].ruleIndex * 100);
+
   },
 
   setPage(keys,filtered_keys,response){
@@ -2623,6 +2687,7 @@ export default {
     })
 },
   setValData(data,filtered_keys){
+
       uploader_obj = data
       prop_keys = filtered_keys
       this.val_data = []
@@ -2647,7 +2712,7 @@ export default {
       }
 
       self.$store.state.data = self.val_data
-      self.sheetwiseValidation(prop_keys[0],uploader_obj)
+     self.sheetwiseValidation(prop_keys[0],uploader_obj)
       return;
   }
   },
@@ -2657,16 +2722,52 @@ export default {
           let self = this
           if(message.user_id == self.$store.state.userId){
             if(prop_keys.length != 0){
+
               uploader_obj = message
               if(message[prop_keys[0]] && message[prop_keys[0]]["currentRuleIndex"]){
+
                 self.setprogress(message)
+                if(message[prop_keys[0]]["validateStatus"] == 'completed'){
+                  let changed_obj = _.filter(self.val_data, { 'name':prop_keys[0] });
+                  changed_obj[0].data.validateStatus = "completed"
+
+                  if(message.stepStatus == "validation_completed"){
+                      self.validation_completed = true
+                  }
+                  if(self.$store.state.validationStatus == true){
+
+                    prop_keys.splice(0,1)
+                    if(prop_keys.length != 0){
+                      self.sheetwiseValidation(prop_keys[0],uploader_obj)
+                    }
+                  }
+                }
               }
+
             }
             else if(message.stepStatus == 'upload_pending'){
               let name = self.activeTab.replace(/\s/g, "")
+              if(self.showValidationTable == true){
+                self.showValidationTable = false
+              }
+              if(self.validation_data == false){
+                self.validation_data = true
+              }
+              if(self.validation_completed == true){
+                self.val_data = []
+                self.$store.state.data = []
+                self.validation_completed = false
+                api.request('get', '/uploader/' + id).then(response => {
+                  let obj = self.ModifyObj(response.data)
+                  api.request('put','/uploader/' + id,obj[0]).then(result =>{
+                     self.setPage(obj[1],obj[2],result.data)
+                  })
+
+                })
+              }
+
               if(message[name] && message[name].uploadStatus == "completed"){
                 self.mObj[self.activeTab].load = false
-                // self.mObj[self.activeTab].previewDisplay = true
 
 
                 self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].newUploadCSV, function(element) {
@@ -2703,11 +2804,63 @@ export default {
             }
             else if(message.stepStatus == "validation_completed" ){
 
-              // this.showValidationTable = false
-              this.validation_completed = true
+
+               if(self.validating == true){
+                 self.validating = false
+               }
+               if(self.validation_completed == false){
+                 self.validation_completed = true
+               }
+               if(self.uploadStep == true){
+                 self.uploadStep = false
+               }
+               if(self.validateStep == false){
+                 self.validateStep = true
+               }
+                self.currentStep = 1
+
+              self.validation_completed = true
+            }
+            else if(message.stepStatus == "import_in_progress" ){
+
+               if(self.showValidationTable == true){
+                 self.showValidationTable = false
+               }
+               if(self.validation_completed == true){
+                 self.validation_completed = false
+               }
+               if(self.validation_data == false){
+                 self.validation_data = true
+               }
+               if(self.importStep == false){
+                 self.importStep = true
+                 self.currentStep = 2
+               }
+
+                self.import1 = false
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
+
+              if(self.showValidationTable == true){
+                self.showValidationTable = false
+              }
+              if(self.validation_completed == true){
+                self.validation_completed = false
+              }
+              if(self.validation_data == false){
+                self.validation_data = true
+              }
+              if(self.validateStep == false){
+                self.validateStep = true
+              }
+              if(self.importStep == false){
+                self.importStep = true
+                self.currentStep = 2
+              }
+
+
               self.import1 = true
+              self.importBtn = true
               if(message.stepStatus == "import_to_confirm_in_progress"){
                 self.importBtn = false
               }
@@ -2746,16 +2899,58 @@ export default {
                     this.validating = false
                     this.showValidationTable = true
 
+
+
+                    uploader_obj = response.data
+                    prop_keys = filtered_keys
+                    this.val_data = []
+                    this.$store.state.data = []
+                    let self = this
+
+                    if(self.$store.state.calledFromContinue == false){
+                    for(let key in response.data){
+                      for(let i=0 ;i<filtered_keys.length;i++){
+                        if(filtered_keys[i] == key){
+                          if(response.data[filtered_keys[i]].validateStatus == 'pending' && response.data[filtered_keys[i]].currentRuleIndex){
+                            self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
+                          }
+                          else if(response.data[filtered_keys[i]].validateStatus == 'pending' && !response.data[filtered_keys[i]].currentRuleIndex){
+                            self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":0})
+                          }
+                          else if(response.data[filtered_keys[i]].validateStatus == 'completed'){
+                            self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
+                            prop_keys.splice(i,1)
+                          }
+                        }
+                      }
+                    }
+                    self.$store.state.data = self.val_data
+
+                  }
+
+
+
                     if(response.data.validate_flag == 'running' || response.data.validate_flag == 'completed'){
+
                       if(self.val_data.length == 0){
+                        self.$store.state.calledFromContinue = false
+
                         self.setValData(response.data,filtered_keys)
                       }
                       else if(self.val_data.length > 0){
+                        self.$store.state.validationStatus = true
+                        // }
+                        // else if(self.$store.state.calledFromContinue == true){
+                        //   console.log("from continue......")
+                        //   self.setValData(response.data,filtered_keys)
+                        // }
                       }
 
                     }
                     else if(!response.data.validate_flag){
+
                       self.setValData(response.data,filtered_keys)
+
                     }
 
                   }

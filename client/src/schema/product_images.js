@@ -509,7 +509,7 @@ export const ProductImagesSchema = new Schema({
     _id: {
         type: "string",
         label: "_id",
-        optional: false,
+        optional: true,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',

@@ -218,12 +218,14 @@ export default {
       },
       //takes to the main upload page
       continue1(){
+        this.$store.state.calledFromContinue = true
         this.$router.push('/upload/' + this.$route.params.id)
       }
 
     },
 
     mounted(){
+        this.$store.state.validationStatus = false
       socket.emit('uploader::find', {id: this.$route.params.id}, (e, data) => {
         if(data.data.length != 0){
           this.$store.state.jobData = data.data[0]
