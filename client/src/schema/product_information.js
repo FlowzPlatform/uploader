@@ -4,7 +4,7 @@ export const ProductInformationSchema = new Schema({
     product_id: {
         type: "string",
         label: "Product Id",
-        optional: true,
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -32,7 +32,7 @@ export const ProductInformationSchema = new Schema({
     available_currencies:{
       type: "string",
       label: "Available Currency",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -41,7 +41,7 @@ export const ProductInformationSchema = new Schema({
     available_regions:{
       type: "string",
       label: "Available Regions",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -50,7 +50,7 @@ export const ProductInformationSchema = new Schema({
     nonavailable_regions:{
       type: "string",
       label: "Non-Available Regions",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -59,7 +59,7 @@ export const ProductInformationSchema = new Schema({
     price_1:{
       type: "number",
       label: "Price 1",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -68,7 +68,7 @@ export const ProductInformationSchema = new Schema({
     default_color:{
       type: "string",
       label: "Default Color",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -77,7 +77,7 @@ export const ProductInformationSchema = new Schema({
     attr_colors:{
       type: "string",
       label: "Attribute Color",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -86,7 +86,7 @@ export const ProductInformationSchema = new Schema({
     attr_colors:{
       type: "string",
       label: "Attribute Color",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -95,7 +95,7 @@ export const ProductInformationSchema = new Schema({
     attr_imprint_color:{
       type: "string",
       label: "Attribute Imprint Color",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -104,7 +104,7 @@ export const ProductInformationSchema = new Schema({
     attr_shape:{
       type: "string",
       label: "Attribute Shape",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -113,7 +113,7 @@ export const ProductInformationSchema = new Schema({
     attr_decimal:{
       type: "string",
       label: "Attribute Decimal",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -663,7 +663,7 @@ export const ProductInformationSchema = new Schema({
   _id: {
       type: "string",
       label: "_id",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',

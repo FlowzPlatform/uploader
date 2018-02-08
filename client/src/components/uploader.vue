@@ -135,6 +135,7 @@ export default {
            this.$router.push('/upload/' + id)
          })
          .catch(error =>{
+            this.loadingBtn = false
            if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
              this.$Notice.error({
               title: error.response.data.message
@@ -145,7 +146,7 @@ export default {
      }
     },
     mounted(){
-
+      this.$store.state.validationStatus = false
       socket.emit('uploader::find', {user_id:this.$store.state.userId,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
         if (data.data.length !== 0) {
           this.showDiv = false

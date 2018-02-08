@@ -38,6 +38,8 @@ app.use('/', feathers.static(app.get('public')));
 app.use(function(req, res, next) {
  this.subscriptionId = req.headers['subscriptionid'];
  module.exports.subscriptionId = this.subscriptionId;
+ this.authorization = req.headers['authorization'];
+ module.exports.authorization = this.authorization;
  next();
 });
 // Set up Plugins and providers
@@ -51,7 +53,7 @@ app.configure(rest());
 //   wsEngine: 'uws',
 //   origin: '*.' + (process.env.domainkey ? 'localhost' : process.env.domainkey) + ':*'
 // }));
-// app.use(subscription.featherSubscription)
+app.use(subscription.featherSubscription)
 // Set up our services (see `services/index.js`)
 app.configure(services);
 // Configure other middleware (see `middleware/index.js`)

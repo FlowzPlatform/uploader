@@ -62,6 +62,14 @@ async function beforeCreate(hook) {
   let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
   console.log("tdata.....",tdata)
   let timeout = 400 * tdata["ProductInformation"].totalNoOfRecords
+  let  fullname = ''
+  let company = ''
+  if(user_data.data.data.firstname){
+    fullname = user_data.data.data.firstname
+  }
+  if(user_data.data.data.company){
+    company = user_data.data.data.company
+  }
   hook.data = {
     "queue": {
       "name":"uploaderJobQue"
@@ -72,7 +80,9 @@ async function beforeCreate(hook) {
         "userdetails":{
           "id":user_data.data.data._id,
           "email":user_data.data.data.email,
-          "password":user_data.data.data.password
+          "password":user_data.data.data.password,
+          "fullname":fullname,
+          "company":company
         }
       }
     ],

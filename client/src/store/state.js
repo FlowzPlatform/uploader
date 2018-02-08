@@ -17,6 +17,8 @@ export default {
   editTemplate: null,
   subscription_id: '',
   userId: '',
+  validationStatus: false,
+  calledFromContinue: false,
   // viewTemplate: [],
   // upload: '',
   // filename: '',
