@@ -1162,6 +1162,8 @@ export default {
             }
 
           }
+          //  $("#t-" + "Product_Information").addClass('ivu-icon ivu-icon-checkmark')
+
       },
 
       // Transform functions..........
@@ -2607,7 +2609,7 @@ export default {
       let uploaded_tabs = self.convert(filtered_keys[i]).replace(/ /g,"_");
       setTimeout(function(){
         $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
-        $("#t-" + uploaded_tabs).addClass('ivu-icon ivu-icon-checkmark')
+          $("#t-" + uploaded_tabs).append(' <style>' + '#t-' +  uploaded_tabs + '{font-size: 16px;list-style-type: none; position: relative; }' + '#t-' + uploaded_tabs + ':before{content: " ";display: block;border: solid 0.8em rgb(73,78,107); border-radius: .8em; top: 35%; margin-top: -0.5em;}' + '#t-' + uploaded_tabs + ':after {content: " ";display: block;width: 0.3em; height: 0.6em;border: solid white;border-width: 0 0.2em 0.2em 0; position: absolute;left: 1em;top: 40%;margin-top: -0.2em;-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg);-o-transform: rotate(45deg);transform: rotate(45deg);}</style>')
       },0)
         // setTimeout(function(){ },10)
     }
@@ -2796,8 +2798,9 @@ export default {
                   }
                 })
                 $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
+                $("#t-" + old_tab_index).append(' <style>' + '#t-' +  old_tab_index + '{font-size: 16px;list-style-type: none; position: relative; }' + '#t-' + old_tab_index + ':before{content: " ";display: block;border: solid 0.8em rgb(73,78,107); border-radius: .8em; top: 35%; margin-top: -0.5em;}' + '#t-' + old_tab_index + ':after {content: " ";display: block;width: 0.3em; height: 0.6em;border: solid white;border-width: 0 0.2em 0.2em 0; position: absolute;left: 1em;top: 40%;margin-top: -0.2em;-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg);-o-transform: rotate(45deg);transform: rotate(45deg);}</style>')
                 //  $("#t-" + old_tab_index).addClass('ivu-icon ivu-icon-checkmark')
-                setTimeout(function(){  $("#t-" + old_tab_index).addClass('ivu-icon ivu-icon-checkmark')},0)
+                // setTimeout(function(){  $("#t-" + old_tab_index).addClass('ivu-icon ivu-icon-checkmark')},0)
                 self.activeTab = new_tab
 
               }
@@ -3019,13 +3022,7 @@ export default {
 .vue-tabs .nav-stacked > li:before {
     position: absolute;
     background-color: #494E6B;
-    color: #fff;
-    text-align: center;
-    height: 20px;
-    padding: 4px 0;
-    width: 20px;
-    margin: 7px;
-    border-radius: 11px;
+    margin: 6px;
 }
 .close {
   padding: 0px 9px !important;
