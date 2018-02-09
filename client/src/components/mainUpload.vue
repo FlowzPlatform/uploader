@@ -2611,7 +2611,6 @@ export default {
         $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
           $("#t-" + uploaded_tabs).append(' <style>' + '#t-' +  uploaded_tabs + '{font-size: 16px;list-style-type: none; position: relative; }' + '#t-' + uploaded_tabs + ':before{content: " ";display: block;border: solid 0.8em rgb(73,78,107); border-radius: .8em; top: 35%; margin-top: -0.5em;}' + '#t-' + uploaded_tabs + ':after {content: " ";display: block;width: 0.3em; height: 0.6em;border: solid white;border-width: 0 0.2em 0.2em 0; position: absolute;left: 1em;top: 40%;margin-top: -0.2em;-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg);-o-transform: rotate(45deg);transform: rotate(45deg);}</style>')
       },0)
-        // setTimeout(function(){ },10)
     }
 
     let diff_keys = _.difference(self.fileNames, filtered_keys);
