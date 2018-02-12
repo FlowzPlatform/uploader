@@ -148,6 +148,7 @@ export default {
     mounted(){
       this.$store.state.validationStatus = false
       socket.emit('uploader::find', {user_id:this.$store.state.userId,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
+        console.log("data......",data)
         if (data.data.length !== 0) {
           this.showDiv = false
           this.$router.push('/landing/' + data.data[0].id)

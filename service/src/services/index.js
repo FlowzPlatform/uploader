@@ -37,6 +37,9 @@ const importToConfirm = require('./import-to-confirm/import-to-confirm.service.j
 const uploaderValidation = require('./uploader-validation/uploader-validation.service.js');
 
 
+const saveImages = require('./save-images/save-images.service.js');
+
+
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -64,4 +67,5 @@ module.exports = function() {
   app.configure(importToJobqueue);
   app.configure(importToConfirm);
   app.configure(uploaderValidation);
+  app.configure(saveImages);
 };
