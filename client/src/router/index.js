@@ -23,6 +23,7 @@ import Uploader from '@/components/uploader'
 import uploaderLanding from '@/components/uploader_landing'
 import mainUpload from '@/components/mainUpload'
 import newJoblist from '@/components/newJobList'
+// import example from '@/components/example'
 
 // import FlowzList from '@/components/FlowList'
 // import Instance from '@/components/instance'

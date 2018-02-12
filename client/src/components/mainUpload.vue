@@ -37,6 +37,7 @@
                         </Select>
                        </Col>
 
+
                        <Col span="3">
                         <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
                           <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled mapping</a>
@@ -52,6 +53,10 @@
                            </div>
                        </Poptip>
                      </Col>
+
+                     <!-- <Col span="3">
+                     <a @click="showUpload()" v-if="activeTab == 'Product Image'">Upload Image</a>
+                     </Col> -->
 
                      <Col span="1" v-if="loadingdot">
                        <Spin></Spin>
@@ -70,6 +75,33 @@
                       <input type="file" id="csv-file" name="files" accept=".csv"/>
                   </div>
               </div>
+
+              <div v-if="showWebImage">
+                <div id="upload-csv-zone">
+                  <div class="file-zone" @click="upldImage()">
+                      <span class="dz-message">Drop images here<br/>
+                          <small>(only jpg,png and gif files are valid.)</small>
+                      </span>
+                      <input type="file" id="image-file" name="images" multiple accept='image/*'/>
+                  </div>
+              </div>
+              <div class="demo-upload-list" v-for="item in uploadList">
+                <template>
+                    <img :src="item.Location">
+                    <div class="demo-upload-list-cover">
+                        <Icon type="ios-eye-outline"></Icon>
+                        <Icon type="ios-trash-outline"></Icon>
+                    </div>
+                </template>
+            </div>
+            </div>
+            <!-- <div v-if="showWebImage">
+          <form action="/">
+            <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions" @vdropzone-file-added="upldImage"></vue-dropzone>
+          </form>
+            </div> -->
+
+
 
               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
                         <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
@@ -367,7 +399,7 @@
        </div>
      </div>
 
-         <div id="example1" class="hot handsontable htColumnHeaders"></div>
+         <div id="example1" class="hot handsontable htColumnHeaders" style="overflow-x: auto"></div>
          <table>
            <tr>
            <td class="ivu-table-row" style="color:red;font-size:14px;">{{mObj[activeTab].errmsg[0]}}</td>
@@ -561,6 +593,7 @@
    </div>
 </template>
 
+<!-- <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script> -->
 <script>
 /*eslint-disable*/
 let axios = require("axios")
@@ -578,6 +611,8 @@ import 'vue-nav-tabs/themes/vue-tabs.css'
 import _ from 'underscore'
 import lodash from 'lodash'
 import Vue from 'vue'
+import vue2Dropzone from 'vue2-dropzone'
+import 'vue2-dropzone/dist/vue2Dropzone.css'
 import VueCodeMirror from 'vue-codemirror'
 var moment = require('moment');
 import ProductInformationSchema from '@/schema/product_information'
@@ -633,7 +668,7 @@ socket.on('response', (response) => {
 
 export default {
     name: 'mainUpload',
-    components: { VueTabs,VTab,'input-tag': InputTag,},
+    components: { VueTabs,VTab,'input-tag': InputTag,vueDropzone: vue2Dropzone},
     data () {
         return {
           moment : moment,
@@ -693,6 +728,15 @@ export default {
           validateStep: false,
           importStep: false,
           disableReset: true,
+          showWebImage: false,
+          defaultList: [],
+          imgName: '',
+          visible: false,
+          uploadList: [],
+          dropzoneOptions: {
+             dictDefaultMessage: 'Drag and drop file here to upload ',
+             parallelUploads: 5
+         },
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -911,6 +955,50 @@ export default {
     }
   },
     methods:{
+
+      upldImage(file){
+        let self = this
+        console.log('...............', file)
+        $(document).ready(function () {
+          $('#image-file').change(function () {
+            let fileChooser = document.getElementById('image-file')
+            let file1 = fileChooser.files[0]
+            console.log("file....", file1)
+            let obj = {
+              id: id
+            }
+            obj["file_name"] = file1
+            // let obj1 = JSON.parse(obj.toString())
+            // console.log("obj1.....",obj1)
+            socket.emit('image', obj, (err, data) => {
+              if (err) {
+                self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
+              }
+
+            })
+            // api.request('post', '/save-images/',obj).then(response => {
+            //   console.log("save-image response ========>",response)
+            // // cloudinary.uploader.upload(file.name, function(result) {
+            // //   console.log(result)
+            // });
+          })
+        })
+    },
+      showUpload(){
+        let self = this
+        self.mObj[self.activeTab].uploadDisplay = false
+        if(self.mObj[self.activeTab].previewDisplay == true){
+          self.mObj[self.activeTab].previewDisplay = false
+        }
+        if(self.mObj[self.activeTab].headerDisplay == true){
+          self.mObj[self.activeTab].headerDisplay = false
+        }
+        if(self.mObj[self.activeTab].newSchemaDisplay == true){
+          self.mObj[self.activeTab].newSchemaDisplay = false
+        }
+        self.showWebImage = true
+      },
+
       //to reset the filter
       reset(){
           if(this.mObj[this.activeTab].filter_flag == true){
@@ -1385,7 +1473,10 @@ export default {
             })
           })
 
-          new Handsontable(cell1, { // eslint-disable-line
+
+          let err_row = ''
+          let err_col = ''
+          var ht1 =  new Handsontable(cell1, { // eslint-disable-line
             data: self.error_data,
             colHeaders:Object.keys(self.error_data[0]),
             height: 200,
@@ -1393,6 +1484,8 @@ export default {
               var cellProp = {}
               _.forEach(errcols, (value, key) => {
                 if (col === value.cols && row === key) {
+                  err_row = key
+                  err_col = col
                   cellProp.className = 'error'
                 }
               })
@@ -1404,6 +1497,7 @@ export default {
               }
             }
           })
+          ht1.selectCell(err_row,err_col,err_row,err_col,true)
           self.proceedNext = true
       },
 
@@ -2257,7 +2351,9 @@ export default {
         this.remove()
       })
 
-      document.getElementById('example1').style.display = 'none'
+      if(document.getElementById('example1')){
+        document.getElementById('example1').style.display = 'none'
+      }
       self.mObj[tab].showHandson = false
       self.mObj[tab].errDisplay = false
       self.mObj[tab].uploadDisplay = true
@@ -2367,7 +2463,7 @@ export default {
           return cellProp
         }
       })
-      // ht.selectCell(row1,col1,0,0,true,true)
+      ht.selectCell(row1,col1,row1,col1,true)
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'block'
       }
@@ -2479,7 +2575,9 @@ export default {
       //   // self.ProceedToValidate(tab)
       //
       // }
-      document.getElementById('hot-display-license-info').style.display = 'none'
+      if(document.getElementById('hot-display-license-info')){
+        document.getElementById('hot-display-license-info').style.display = 'none'
+      }
     },
     saveData(tab){
       let self = this
@@ -2611,7 +2709,6 @@ export default {
         $("#t-" + uploaded_tabs).css("background-color","#ccc","border-color","#ccc");
           $("#t-" + uploaded_tabs).append(' <style>' + '#t-' +  uploaded_tabs + '{font-size: 16px;list-style-type: none; position: relative; }' + '#t-' + uploaded_tabs + ':before{content: " ";display: block;border: solid 0.8em rgb(73,78,107); border-radius: .8em; top: 35%; margin-top: -0.5em;}' + '#t-' + uploaded_tabs + ':after {content: " ";display: block;width: 0.3em; height: 0.6em;border: solid white;border-width: 0 0.2em 0.2em 0; position: absolute;left: 1em;top: 40%;margin-top: -0.2em;-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg);-o-transform: rotate(45deg);transform: rotate(45deg);}</style>')
       },0)
-        // setTimeout(function(){ },10)
     }
 
     let diff_keys = _.difference(self.fileNames, filtered_keys);
@@ -2881,6 +2978,7 @@ export default {
       let self = this
       id = self.$route.params.id
       self.loading = true
+
 
       api.request('get', '/uploader/' + id ).then(response => {
         if(response.data != null){
@@ -3493,6 +3591,42 @@ export default {
   float:left;
 }*/
 
+.demo-upload-list{
+        display: inline-block;
+        width: 60px;
+        height: 60px;
+        text-align: center;
+        line-height: 60px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+        position: relative;
+        box-shadow: 0 1px 1px rgba(0,0,0,.2);
+        margin-right: 4px;
+    }
+    .demo-upload-list img{
+        width: 100%;
+        height: 100%;
+    }
+    .demo-upload-list-cover{
+        display: none;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,.6);
+    }
+    .demo-upload-list:hover .demo-upload-list-cover{
+        display: block;
+    }
+    .demo-upload-list-cover i{
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 0 2px;
+    }
 
 
 </style>
