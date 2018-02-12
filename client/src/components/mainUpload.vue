@@ -54,9 +54,9 @@
                        </Poptip>
                      </Col>
 
-                     <!-- <Col span="3">
+                     <Col span="3">
                      <a @click="showUpload()" v-if="activeTab == 'Product Image'">Upload Image</a>
-                     </Col> -->
+                     </Col>
 
                      <Col span="1" v-if="loadingdot">
                        <Spin></Spin>
@@ -597,6 +597,7 @@
 <script>
 /*eslint-disable*/
 let axios = require("axios")
+let atob = require('atob');
 import api from '../api'
 import schema from '../api/schema'
 import config from '@/config'
@@ -961,21 +962,31 @@ export default {
         console.log('...............', file)
         $(document).ready(function () {
           $('#image-file').change(function () {
-            let fileChooser = document.getElementById('image-file')
-            let file1 = fileChooser.files[0]
-            console.log("file....", file1)
-            let obj = {
-              id: id
-            }
-            obj["file_name"] = file1
-            // let obj1 = JSON.parse(obj.toString())
-            // console.log("obj1.....",obj1)
-            socket.emit('image', obj, (err, data) => {
-              if (err) {
-                self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-              }
+            let fileChooser = document.getElementById('image-file').value;
+            // let file1 = fileChooser.files[0]
+            console.log("file....",fileChooser)
+            // var reader = new FileReader();
+            // reader.readAsDataURL(file1);
+            // let fileContent = reader;
+            // console.log(fileContent);
+            // var me = this;
+            //  reader.onload = function () {
+            //    var fileContent = reader.result;
+            //    console.log(fileContent);
+            //    var bin = atob(fileContent);
+            //      console.log("*********************",bin);
+            //  }
 
-            })
+            // let obj = {
+            //   id: id
+            // }
+            // obj["file_name"] = file1
+            // socket.emit('image', obj, (err, data) => {
+            //   if (err) {
+            //     self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
+            //   }
+            //
+            // })
             // api.request('post', '/save-images/',obj).then(response => {
             //   console.log("save-image response ========>",response)
             // // cloudinary.uploader.upload(file.name, function(result) {
