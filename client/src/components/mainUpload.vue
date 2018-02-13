@@ -89,12 +89,17 @@
                 <template>
                     <img :src="item.file_path">
                     <div class="demo-upload-list-cover">
-                        <Icon type="ios-eye-outline"></Icon>
+                        <Icon type="ios-eye-outline" @click.native="handleView(item)"></Icon>
                         <Icon type="ios-trash-outline"></Icon>
                     </div>
                 </template>
             </div>
             </div>
+
+            <Modal title="View Image" v-model="visible">
+              <img :src="imgpath" v-if="visible" style="width: 100%">
+           </Modal>
+
             <!-- <div v-if="showWebImage">
           <form action="/">
             <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions" @vdropzone-file-added="upldImage"></vue-dropzone>
@@ -731,13 +736,13 @@ export default {
           disableReset: true,
           showWebImage: false,
           defaultList: [],
-          imgName: '',
+          imgpath: '',
           visible: false,
           uploadList: [],
-          dropzoneOptions: {
-             dictDefaultMessage: 'Drag and drop file here to upload ',
-             parallelUploads: 5
-         },
+        //   dropzoneOptions: {
+        //      dictDefaultMessage: 'Drag and drop file here to upload ',
+        //      parallelUploads: 5
+        //  },
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -956,27 +961,38 @@ export default {
     }
   },
     methods:{
-
+      handleView (item) {
+        let self = this
+        self.imgpath = item.file_path;
+        self.visible = true;
+      },
       upldImage(file){
         let self = this
-        console.log('...............', file)
-        const reader  = new FileReader();
-        $(document).ready(function () {
-          $('#image-file').change(function () {
-            let fileChooser = document.getElementById('image-file');
-            let file1 = fileChooser.files[0]
-            reader.readAsDataURL(file1);
+          const reader  = new FileReader();
+          $(document).ready(function () {
+            $('#image-file').change(function () {
+              let fileChooser = document.getElementById('image-file');
+              let file1 = fileChooser.files[0]
+              let file_ext = file1.name.split('.').pop()
+              let ext = ['jpg','jpeg','gif','png']
+              let ext_idx = lodash.findIndex(ext, function(o) { return o == file_ext; });
+              if(ext_idx == -1){
+                self.$Notice.error({title: 'Only jpg,png and gif files are allowed',duration: 200})
+              }
+              else{
+                reader.readAsDataURL(file1);
 
-            reader.addEventListener('load', function () {
+                reader.addEventListener('load', function () {
                   console.log('encoded file: ', reader.result);
-                   api.request('post', '/upload-image/',{uri: reader.result,file_name:file1.name}).then(response => {
+                  api.request('post', '/upload-image/',{uri: reader.result,file_name:file1.name}).then(response => {
                     console.log("save-image response ========>",response)
                     self.uploadList.push(response.data)
                   });
-              }, false);
+                }, false);
+              }
 
+            })
           })
-        })
     },
       showUpload(){
         let self = this
