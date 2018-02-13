@@ -4,7 +4,7 @@ const app = require('config');
 const config = require('../config')
 let axios = require('axios');
 let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk'
-let user_detail_url = 'https://api.' + domainkey + 'auth/api/userdetails'
+let user_detail_url = 'http://api.' + domainkey + '/auth/api/userdetails'
 
 module.exports = {
   before: {
