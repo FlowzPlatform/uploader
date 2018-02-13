@@ -15,7 +15,7 @@ var temp = {
   socketURI: protocol + '://localhost:' + socketPort,
   fixedLayout: false,
   hideLogoOnMobile: false,
-  microURI: protocol + '://auth.' + domainkey + '/api',
+  microURI: 'https://api.' + domainkey + '/auth/api',
   facebookSuccessCallbackUrl: protocol + '://localhost:8000',
   loginWithFacebookUrl: protocol + '://auth.' + domainkey + '/auth/facebook',
   googleSuccessCallbackUrl: protocol + '://localhost:8000',
@@ -29,14 +29,13 @@ var temp = {
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
   subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription'
 }
-
-if (process.env.NODE_ENV !== 'development') {
+if (process.env.MYENV !== 'development') {
   temp = {
     serverURI: protocol + '://api.' + domainkey + '/uploader', // 'http://api.' + process.env.domainkey + '/dbetl', // ws.' + process.env.domainkey + ':4034
     socketURI: 'wss://ws.' + domainkey + ':' + socketPort,
     fixedLayout: false,
     hideLogoOnMobile: false,
-    microURI: protocol + '://auth.' + domainkey + '/api',
+    microURI: 'https://api.' + domainkey + '/auth/api',
     facebookSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
     loginWithFacebookUrl: protocol + '://auth.' + domainkey + '/auth/facebook',
     googleSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
@@ -46,7 +45,7 @@ if (process.env.NODE_ENV !== 'development') {
     githubSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
     loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
     jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
-    subscriptionUri: protocol + '://api.' + domainkey + '/subscription/user-subscription'
+    subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription'
   }
 }
 
