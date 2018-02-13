@@ -54,9 +54,9 @@
                        </Poptip>
                      </Col>
 
-                     <Col span="3">
+                     <!-- <Col span="3">
                      <a @click="showUpload()" v-if="activeTab == 'Product Image'">Upload Image</a>
-                     </Col>
+                     </Col> -->
 
                      <Col span="1" v-if="loadingdot">
                        <Spin></Spin>
@@ -87,7 +87,7 @@
               </div>
               <div class="demo-upload-list" v-for="item in uploadList">
                 <template>
-                    <img :src="item.Location">
+                    <img :src="item.file_path">
                     <div class="demo-upload-list-cover">
                         <Icon type="ios-eye-outline"></Icon>
                         <Icon type="ios-trash-outline"></Icon>
@@ -960,38 +960,21 @@ export default {
       upldImage(file){
         let self = this
         console.log('...............', file)
+        const reader  = new FileReader();
         $(document).ready(function () {
           $('#image-file').change(function () {
-            let fileChooser = document.getElementById('image-file').value;
-            // let file1 = fileChooser.files[0]
-            console.log("file....",fileChooser)
-            // var reader = new FileReader();
-            // reader.readAsDataURL(file1);
-            // let fileContent = reader;
-            // console.log(fileContent);
-            // var me = this;
-            //  reader.onload = function () {
-            //    var fileContent = reader.result;
-            //    console.log(fileContent);
-            //    var bin = atob(fileContent);
-            //      console.log("*********************",bin);
-            //  }
+            let fileChooser = document.getElementById('image-file');
+            let file1 = fileChooser.files[0]
+            reader.readAsDataURL(file1);
 
-            // let obj = {
-            //   id: id
-            // }
-            // obj["file_name"] = file1
-            // socket.emit('image', obj, (err, data) => {
-            //   if (err) {
-            //     self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-            //   }
-            //
-            // })
-            // api.request('post', '/save-images/',obj).then(response => {
-            //   console.log("save-image response ========>",response)
-            // // cloudinary.uploader.upload(file.name, function(result) {
-            // //   console.log(result)
-            // });
+            reader.addEventListener('load', function () {
+                  console.log('encoded file: ', reader.result);
+                   api.request('post', '/upload-image/',{uri: reader.result,file_name:file1.name}).then(response => {
+                    console.log("save-image response ========>",response)
+                    self.uploadList.push(response.data)
+                  });
+              }, false);
+
           })
         })
     },
@@ -2464,7 +2447,7 @@ export default {
             if (col === value.cols && row === key) {
               row1 = key
               col1 = value.cols
-              cellProp.className = 'error'
+              // cellProp.className = 'error'
               prop = cellProp
 
               // cellProp.selectCell(row, col, 0, 0, true)
