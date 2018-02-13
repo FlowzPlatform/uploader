@@ -37,7 +37,10 @@ const importToConfirm = require('./import-to-confirm/import-to-confirm.service.j
 const uploaderValidation = require('./uploader-validation/uploader-validation.service.js');
 
 
-const saveImages = require('./save-images/save-images.service.js');
+const uploadImage = require('./upload-image/upload-image.service.js');
+
+
+const saveImage = require('./save-image/save-image.service.js');
 
 
 module.exports = function() {
@@ -67,5 +70,6 @@ module.exports = function() {
   app.configure(importToJobqueue);
   app.configure(importToConfirm);
   app.configure(uploaderValidation);
-  app.configure(saveImages);
+  app.configure(uploadImage);
+  app.configure(saveImage);
 };
