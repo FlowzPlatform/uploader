@@ -14,3 +14,16 @@
 2018-01-26T19:09:49.812203055 0.198724s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
 2018-01-26T19:09:49.812207441 0.198728s notice: Server ready, "OBLAP_75_y5j" 3b8cc626-d111-4c11-aaf7-a0d2a6f20b1a
 2018-01-26T19:09:52.047177336 2.433698s notice: A newer version of the RethinkDB server is available: 2.3.6. You can read the changelog at <https://github.com/rethinkdb/rethinkdb/releases>.
+2018-02-12T15:32:49.360200860 0.075491s notice: Running rethinkdb 2.3.5 (GCC 5.4.0)...
+2018-02-12T15:32:49.363265292 0.078555s notice: Running on Linux 4.4.0-112-generic x86_64
+2018-02-12T15:32:49.363324624 0.078612s notice: Loading data from directory /home/software/New_Uploader/uploader/rethinkdb_data
+2018-02-12T15:32:49.461465720 0.176755s info: Automatically using cache size of 5073 MB
+2018-02-12T15:32:49.462015737 0.177303s notice: Listening for intracluster connections on port 29015
+2018-02-12T15:32:49.469528188 0.184815s notice: Listening for client driver connections on port 28015
+2018-02-12T15:32:49.470350505 0.185638s notice: Listening for administrative HTTP connections on port 8080
+2018-02-12T15:32:49.470354230 0.185641s notice: Listening on cluster addresses: 127.0.0.1, 127.0.1.1, ::1
+2018-02-12T15:32:49.470358695 0.185646s notice: Listening on driver addresses: 127.0.0.1, 127.0.1.1, ::1
+2018-02-12T15:32:49.470361065 0.185648s notice: Listening on http addresses: 127.0.0.1, 127.0.1.1, ::1
+2018-02-12T15:32:49.470365215 0.185652s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
+2018-02-12T15:32:49.470369452 0.185656s notice: Server ready, "OBLAP_75_y5j" 3b8cc626-d111-4c11-aaf7-a0d2a6f20b1a
+2018-02-12T15:32:50.807541215 1.522828s notice: A newer version of the RethinkDB server is available: 2.3.6. You can read the changelog at <https://github.com/rethinkdb/rethinkdb/releases>.
