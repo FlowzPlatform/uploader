@@ -40,8 +40,6 @@ const uploaderValidation = require('./uploader-validation/uploader-validation.se
 const uploadImage = require('./upload-image/upload-image.service.js');
 
 
-const saveImage = require('./save-image/save-image.service.js');
-
 
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
@@ -71,5 +69,4 @@ module.exports = function() {
   app.configure(importToConfirm);
   app.configure(uploaderValidation);
   app.configure(uploadImage);
-  app.configure(saveImage);
 };

@@ -4,7 +4,7 @@ let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk
 var checkAuth = (authToken) => {
   return axios({
     method: 'get',
-    url: 'http://auth.' + domainkey + '/api/userdetails', // 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/userdetails',
+    url: 'http://api.' + domainkey + '/auth/api/userdetails', // 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/userdetails',
     headers: {
       'authorization': authToken
     }
