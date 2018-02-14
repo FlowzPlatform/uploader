@@ -587,7 +587,7 @@
         <div v-if="!import1">
           <h2>Import in progress</h2>
           <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
-          <Button type="error" @click="abortImportConfirm()"  style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
+          <Button type="error" @click="abortImportInProgress()"  style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Please confirm to go for Live</p></div>
@@ -650,6 +650,7 @@ let errors_length = 0
 let prod_info_upld = false
 let cpage_array = []
 let mounted_flag = false
+let no_of_uplds = 0
 
 
 
@@ -980,6 +981,16 @@ export default {
                 self.$Notice.error({title: 'Only jpg,png and gif files are allowed',duration: 200})
               }
               else{
+                // console.log("max.....",$(this).attr(max))
+                // if(no_of_uplds > 5)
+                //  {
+                //  alert('Your Message');
+                //  }
+                //  else
+                //  {
+                //   no_of_uplds =  no_of_uplds + 1;
+                //   alert(no_of_uplds)
+                //  }
                 reader.readAsDataURL(file1);
 
                 reader.addEventListener('load', function () {
@@ -999,6 +1010,9 @@ export default {
         self.mObj[self.activeTab].uploadDisplay = false
         if(self.mObj[self.activeTab].previewDisplay == true){
           self.mObj[self.activeTab].previewDisplay = false
+        }
+        if(self.mObj[self.activeTab].savePreviewDisplay == true){
+          self.mObj[self.activeTab].savePreviewDisplay = false
         }
         if(self.mObj[self.activeTab].headerDisplay == true){
           self.mObj[self.activeTab].headerDisplay = false
@@ -1405,7 +1419,9 @@ export default {
             }
             else{
               let changed_obj = _.filter(self.val_data, { 'name':prop_keys[0] });
+              changed_obj[0].progress = 100
               changed_obj[0].data.validateStatus = "completed"
+
               uploader_obj = result.data
               prop_keys.splice(0,1)
               if(prop_keys.length != 0){
@@ -1561,7 +1577,9 @@ export default {
           else{
             uploader_obj = result.data
             let changed_obj = _.filter(this.val_data, {'name':prop_keys[0]});
+            changed_obj[0].progress = 100
             changed_obj[0].data.validateStatus = "completed"
+
 
             self.proceedNext = false
             uploader_obj = result.data
@@ -1826,15 +1844,12 @@ export default {
             else{
               self.mObj[tab].load = true
               self.mObj[tab].uploadDisplay = false
-              if (_.contains(self.mObj[tab].allowedFileType, file.type)) {
                 Papa.parse(file, {
-
                   header: true,
                   dynamicTyping: true,
                   encoding: "UTF-8",
                   skipEmptyLines: false,
-                  chunk: function(results, streamer) {
-
+                  chunk: function(results, streamer){
                     self.mObj[tab].uploadCSV = results.data
                     self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                     self.mObj[tab].headers.push("_id")
@@ -1860,7 +1875,7 @@ export default {
                     }
                   }
                 })
-              }
+
             }
 
             })
@@ -2387,7 +2402,8 @@ export default {
       let self = this
       self.importBtn = true
        let patch_obj = {
-         "stepStatus": "validation_completed"
+         "stepStatus": "validation_completed",
+         "abort": true
        }
        api.request('patch', '/uploader/' + id,patch_obj).then(res => {
          self.import1 = false
@@ -2403,9 +2419,11 @@ export default {
     abortImportInProgress(){
       let self = this
       let patch_obj = {
-        "stepStatus": "validation_completed"
+        "stepStatus": "validation_completed",
+        "abort_from_import" : true
       }
       api.request('patch', '/uploader/' + id,patch_obj).then(res => {
+        self.import1 = false
         self.validating = false
         self.validation_completed = true
         self.uploadStep = false
@@ -2838,7 +2856,9 @@ export default {
                 self.setprogress(message)
                 if(message[prop_keys[0]]["validateStatus"] == 'completed'){
                   let changed_obj = _.filter(self.val_data, { 'name':prop_keys[0] });
+                  changed_obj[0].progress = 100
                   changed_obj[0].data.validateStatus = "completed"
+
 
                   if(message.stepStatus == "validation_completed"){
                       self.validation_completed = true

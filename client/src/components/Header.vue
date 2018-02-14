@@ -76,9 +76,7 @@ import lodash from 'lodash'
         let self = this
         self.$store.state.subscription_id = self.selected_subscription_id
         modelAuthentication.subscriptionUser(self.selected_subscription_id).then(function (response){
-          console.log("**************response****************",response)
           self.$store.state.userId = response.data.userId
-          console.log("&&&&&&&&&&&&&&&&&",self.$store.state.userId)
         })
         .catch(function(error){
          console.log(error);
