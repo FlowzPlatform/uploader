@@ -740,10 +740,11 @@ export default {
           imgpath: '',
           visible: false,
           uploadList: [],
-        //   dropzoneOptions: {
-        //      dictDefaultMessage: 'Drag and drop file here to upload ',
-        //      parallelUploads: 5
-        //  },
+          dropzoneOptions: {
+             url:'',
+             dictDefaultMessage: 'Drag and drop file here to upload ',
+             parallelUploads: 5
+         },
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -967,13 +968,26 @@ export default {
         self.imgpath = item.file_path;
         self.visible = true;
       },
+      retResult(reader){
+        console.log('...........1111 ')
+        let _promise = new Promise((resolve, reject) => {
+            reader.addEventListener('load',function () {
+              // console.log('encoded file: ', reader.result);
+              let result = reader.result
+              resolve(result)
+              // return result
+            }, false);
+        })
+        return Promise.resolve(_promise)
+      },
       upldImage(file){
         let self = this
           const reader  = new FileReader();
           $(document).ready(function () {
-            $('#image-file').change(function () {
+            $('#image-file').change(async function () {
               let fileChooser = document.getElementById('image-file');
               let file1 = fileChooser.files[0]
+              console.log("file1.....",file1)
               let file_ext = file1.name.split('.').pop()
               let ext = ['jpg','jpeg','gif','png']
               let ext_idx = lodash.findIndex(ext, function(o) { return o == file_ext; });
@@ -982,24 +996,21 @@ export default {
               }
               else{
                 // console.log("max.....",$(this).attr(max))
-                // if(no_of_uplds > 5)
-                //  {
-                //  alert('Your Message');
-                //  }
-                //  else
-                //  {
-                //   no_of_uplds =  no_of_uplds + 1;
-                //   alert(no_of_uplds)
-                //  }
-                reader.readAsDataURL(file1);
-
-                reader.addEventListener('load', function () {
-                  console.log('encoded file: ', reader.result);
-                  api.request('post', '/upload-image/',{uri: reader.result,file_name:file1.name}).then(response => {
-                    console.log("save-image response ========>",response)
-                    self.uploadList.push(response.data)
-                  });
-                }, false);
+                if(no_of_uplds > 5)
+                 {
+                 self.$Notice.error({title: 'Only 5 images can be uploaded',duration: 200})
+                 }
+                 else
+                 {
+                  no_of_uplds =  no_of_uplds + 1;
+                  // reader.readAsDataURL(file1);
+                  // let uri = await self.retResult(reader)
+                  // console.log("uri....",uri)
+                  // api.request('post', '/upload-image/',{uri:uri,file_name:file1.name}).then(response => {
+                  //   console.log("save-image response ========>",response)
+                  //   self.uploadList.push(response.data)
+                  // });
+                 }
               }
 
             })
@@ -1635,9 +1646,17 @@ export default {
 
               })
               .catch(error => {
+                if(error.response.data.code == 404){
                   this.$Notice.error({
-                   title: 'Error'
+                   title: error.response.data.message
                  });
+               }
+               else {
+                 this.$Notice.error({
+                  title: 'Error in importing data'
+                });
+               }
+
               })
 
         //
@@ -1655,6 +1674,19 @@ export default {
         }
 
         api.request('post', '/import-to-confirm/',jobQueue_obj).then(res => {
+        })
+        .catch(error => {
+          if(error.response.data.code == 404){
+            this.$Notice.error({
+             title: error.response.data.message
+           });
+         }
+         else{
+           this.$Notice.error({
+            title: 'Error in import to confirm'
+          });
+         }
+
         })
 
         let importobj = {
@@ -1719,7 +1751,7 @@ export default {
           this.loadingdot = true
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
-          socket.emit('uploader-schema::find', {user_id:this.$store.state.userId}, (e, res) => {
+          socket.emit('uploader-schema::find', {"user_id":this.$store.state.userId}, (e, res) => {
             this.existingSchemaData = res.data
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
             if(currentschema.length != 0){
@@ -1753,7 +1785,7 @@ export default {
          if(this.mObj[tab].selected_schema != '--Add new--'){
           this.map = true
           this.mObj[tab].mapping = []
-           socket.emit('uploader-csv-file-mapping::find', {fileTypeId : this.mObj[tab].selected_schema,user_id:this.$store.state.userId}, (e, data) => {
+           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"user_id":this.$store.state.userId}, (e, data) => {
              this.mObj[tab].mapping = data.data[0].mapping
              let schema_keys = _.keys(this.mObj[tab].schema.structure);
 
@@ -2613,9 +2645,6 @@ export default {
         name : file.name,
         size: file.size,
         totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt:'',
         username: self.$store.state.user.email,
         user_id: self.$store.state.userId
       }
@@ -2633,8 +2662,6 @@ export default {
         let schemaobj = {
           name : self.mObj[tab].selected_schema,
           schema: self.mObj[tab].schema.structure,
-          createdAt: new Date(),
-          updatedAt: new Date(),
           username: self.$store.state.user.email,
           user_id: self.$store.state.userId
         }
@@ -2648,9 +2675,6 @@ export default {
               let mappingObj = {
                 mapping : self.mObj[tab].mapping,
                 fileTypeId : self.mObj[tab].selected_schema,
-                createdAt : new Date(),
-                updatedAt : new Date(),
-                deletedAt : '',
                 username : self.$store.state.user.email,
                 user_id: self.$store.state.userId
               }
@@ -2685,8 +2709,10 @@ export default {
             })
         })
         .catch(error => {
-          self.$Notice.error({title: 'Error!'})
-        })
+          console.log("error in schema.....",error.response.data)
+          if(error.response.data.className == 'general-error' && error.response.data.code == 500)
+            self.$Notice.error({title: error.response.data.message })
+           })
 
       }
       else {
@@ -3116,7 +3142,7 @@ export default {
       })
 
 
-      socket.emit('uploader-schema::find', {user_id:this.$store.state.userId}, (e, res) => {
+      socket.emit('uploader-schema::find', {"user_id":this.$store.state.userId}, (e, res) => {
         self.existingSchemaData = res.data[0]
         let schemaNames = _.map(res.data, 'name');
         _.forEach(schemaNames,(value,key) => {

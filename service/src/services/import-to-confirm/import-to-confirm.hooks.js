@@ -53,7 +53,7 @@ async function beforeCreate(hook) {
   let import_tracker_id = hook.data.importTrackerId
   hook.data = {
     "queue": {
-      "name":"uploaderJobQue"
+      "name":"uploaderJobQueConfirm"
     },
     "jobs":[
       {

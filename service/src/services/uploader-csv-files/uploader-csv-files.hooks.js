@@ -5,7 +5,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
+    create: [
+      hook => beforeCreate(hook)
+    ],
     update: [],
     patch: [],
     remove: []
@@ -31,3 +33,9 @@ module.exports = {
     remove: []
   }
 };
+
+var beforeCreate = async function(hook){
+    hook.data["createdAt"] = new Date()
+    hook.data["updatedAt"] = new Date()
+    hook.data["deletedAt"] = ''
+}
