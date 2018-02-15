@@ -22,8 +22,8 @@
                         </router-link>
                     </Menu-item>
                     <Menu-item name="3">
-                      <Select v-model="selected_subscription_id" style="width:250px" @on-change="getSubscriptionId()">
-                         <Option v-for="item in subscription_list" :value="item.value" :key="item.value" >{{ item.label }}</Option>
+                      <Select v-model="selected_subscription_name" style="width:250px" @on-change="getSubscriptionId()">
+                         <Option v-for="item in subscription_list" :value="item.label" :key="item.label" >{{ item.label }}</Option>
                      </Select>
                     </Menu-item>
                     <Menu-item name="4">
@@ -54,6 +54,7 @@ import lodash from 'lodash'
   export default {
     data () {
         return {
+          selected_subscription_name: '',
           selected_subscription_id: '',
           subscription_list: []
         }
@@ -74,8 +75,17 @@ import lodash from 'lodash'
       },
       getSubscriptionId(){
         let self = this
-        self.$store.state.subscription_id = self.selected_subscription_id
-        modelAuthentication.subscriptionUser(self.selected_subscription_id).then(function (response){
+        let subscription_obj
+        self.$store.state.subscription_name = self.selected_subscription_name
+        subscription_obj = lodash.filter(self.subscription_list, function(o) {
+           if(o.label == self.$store.state.subscription_name){
+             return o
+           }
+         });
+         if(subscription_obj.length != 0){
+           self.$store.state.subscription_id = subscription_obj[0].value
+         }
+        modelAuthentication.subscriptionUser(self.$store.state.subscription_id).then(function (response){
           self.$store.state.userId = response.data.userId
         })
         .catch(function(error){
@@ -84,23 +94,28 @@ import lodash from 'lodash'
       }
     },
     watch:{
-      '$store.state.subscription_id': function (id) {
-        this.selected_subscription_id =  id
+      '$store.state.subscription_name': function (name) {
+        let self = this
+        let subscription_obj1
+        self.selected_subscription_name =  name
+        subscription_obj1 = lodash.filter(self.subscription_list, function(o) {
+           if(o.label == self.selected_subscription_name ){
+             return o
+           }
+         });
+         if(subscription_obj1.length != 0){
+           self.$store.state.subscription_id = subscription_obj1[0].value
+         }
        }
     },
     mounted(){
       let self = this
-      if(this.$store.state.subscription_id != ''){
-        self.selected_subscription_id =  this.$store.state.subscription_id
+      if(this.$store.state.subscription_name != ''){
+        self.selected_subscription_name =  this.$store.state.subscription_name
       }
-       modelAuthentication.userdetail().then(function (response){
-         for(let key in response.data.package){
-           self.subscription_list.push({"value":key,"label":key})
-         }
-       })
-       .catch(function(error){
-        console.log(error);
-      })
+
+      self.subscription_list = self.$store.state.subscription_list
+      self.selected_subscription_name = self.subscription_list[0].label
     }
   }
 </script>

@@ -2,6 +2,8 @@ import api from '../api'
 import _ from 'lodash'
 import axios from 'axios'
 import config from '@/config'
+// import state from './state'
+/*eslint-disable*/
 export default {
   getSchema ({ commit }) {
     commit('SET_SCHEMA', [])
@@ -46,6 +48,7 @@ export default {
     })
     .then(response => {
       if (response) {
+        commit('SET_USER_DETAIL', response)
         return response.data.data
       } else {
         return

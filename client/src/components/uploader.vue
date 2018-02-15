@@ -114,41 +114,48 @@ export default {
      },
      // creates a job in uploader service
      Proceed(){
-       this.loadingBtn = true
-       if(this.selectedMethod == ''){
-         $('#display-error').fadeIn().delay(4000).fadeOut();
+       if(this.$store.state.subscription_name == ''){
+         this.loadingBtn = false
+         this.$Notice.error({
+            title: "Please select a subscription to proceed"
+         });
        }
        else{
-         var obj = {
-           createdAt: new Date(),
-           stepStatus: 'upload_pending',
-           uploadType:this.selectedMethod.toLowerCase(),
-           key:'pdm_uploader',
-           masterJobStatus: "running",
-           user_id:this.$store.state.userId
-         }
-         if(this.$store.state.user.fullname){
-           obj["username"] = this.$store.state.user.fullname
-         }
-         api.request('post', '/uploader', obj).then(res => {
-           id = res.data.id
-           this.$router.push('/upload/' + id)
-         })
-         .catch(error =>{
-            this.loadingBtn = false
-           if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
-             this.$Notice.error({
-              title: error.response.data.message
-            });
-           }
-         })
+          this.loadingBtn = true
+          if(this.selectedMethod == ''){
+            $('#display-error').fadeIn().delay(4000).fadeOut();
+          }
+          else{
+            var obj = {
+              createdAt: new Date(),
+              stepStatus: 'upload_pending',
+              uploadType:this.selectedMethod.toLowerCase(),
+              key:'pdm_uploader',
+              masterJobStatus: "running",
+              user_id:this.$store.state.userId
+            }
+            if(this.$store.state.user.fullname){
+              obj["username"] = this.$store.state.user.fullname
+            }
+            api.request('post', '/uploader', obj).then(res => {
+              id = res.data.id
+              this.$router.push('/upload/' + id)
+            })
+            .catch(error =>{
+               this.loadingBtn = false
+              if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
+                this.$Notice.error({
+                 title: error.response.data.message
+               });
+              }
+            })
+          }
        }
      }
     },
     mounted(){
       this.$store.state.validationStatus = false
-      socket.emit('uploader::find', {user_id:this.$store.state.userId,masterJobStatus:"running",key:'pdm_uploader'}, (e, data) => {
-        console.log("data......",data)
+      socket.emit('uploader::find', {"user_id":this.$store.state.userId,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
         if (data.data.length !== 0) {
           this.showDiv = false
           this.$router.push('/landing/' + data.data[0].id)

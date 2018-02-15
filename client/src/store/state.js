@@ -1,3 +1,4 @@
+/*eslint-disable*/
 export default {
   callingAPI: false,
   serverURI: 'http://10.110.1.136:8080',
@@ -16,6 +17,8 @@ export default {
   activetab: '',
   editTemplate: null,
   subscription_id: '',
+  subscription_name: '',
+  subscription_list: [],
   userId: '',
   validationStatus: false,
   calledFromContinue: false,

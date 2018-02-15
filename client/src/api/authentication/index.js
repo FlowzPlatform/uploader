@@ -62,7 +62,6 @@ export default {
     })
   },
   subscriptionUser: (params) => {
-    console.log('params.....', params)
     return axios({
       method: 'get',
       url: config.subscriptionUri + '/' + params
