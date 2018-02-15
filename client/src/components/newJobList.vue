@@ -98,8 +98,10 @@ export default {
     },
     methods:{
       getStatus(status){
-        var res = lodash.capitalize(status.replace(/_/g," "))
-        return res
+        if(status != ""){
+          var res = lodash.capitalize(status.replace(/_/g," "))
+          return res
+        }
       }
     },
     feathers: {
@@ -134,7 +136,7 @@ export default {
     mounted(){
       var self = this
       self.data2 = []
-      socket.emit('uploader::find', {user_id : this.$store.state.userId , $sort: {createdAt: -1}}, (e, data) => {
+      socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id , $sort: {createdAt: -1}}, (e, data) => {
         if(data.data.length != 0){
           self.data2 = data.data
         }

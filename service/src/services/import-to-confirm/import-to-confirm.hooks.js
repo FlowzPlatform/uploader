@@ -12,7 +12,7 @@ module.exports = {
     find: [],
     get: [],
     create: [
-        hook => beforeHook(hook)
+        hook => beforeCreate(hook)
     ],
     update: [],
     patch: [],
@@ -24,7 +24,7 @@ module.exports = {
     find: [],
     get: [],
     create: [
-        hook => beforeCreate(hook)
+        // hook => beforeCreate(hook)
     ],
     update: [],
     patch: [],
@@ -53,7 +53,7 @@ async function beforeCreate(hook) {
   let import_tracker_id = hook.data.importTrackerId
   hook.data = {
     "queue": {
-      "name":"uploaderJobQue"
+      "name":"uploaderJobQueConfirm"
     },
     "jobs":[
       {
@@ -77,10 +77,9 @@ async function beforeCreate(hook) {
     let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
     if(tdata.stepStatus == 'import_to_confirm'){
       axios.post(base_url, hook.data).then(res => {
-
       })
       .catch(error => {
-
+       console.log(error)
       })
    }
   } catch (err) {

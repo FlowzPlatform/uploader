@@ -8,25 +8,27 @@ const blobService = require('feathers-blob');
 const fs = require('fs-blob-store');
 const blobStorage = fs(__dirname + '/upload-image');
 
+
 module.exports = function () {
   const app = this;
   const paginate = app.get('paginate');
 
   const options = {
     name: 'upload-image',
-    paginate
+    paginate,
+    app: app
   };
 
-
-  // Initialize our service with any options it requires
   app.use('/upload-image',multipartMiddleware.single('uri'),function(req,res,next){
         req.feathers.file = req.file;
         next();
     },
   blobService({Model: blobStorage})
 );
-  // createService(options));
 
+
+  // Initialize our service with any options it requires
+  // app.use('/upload-image', createService(options));
 
   // Get our initialized service so that we can register hooks and filters
   const service = app.service('upload-image');
@@ -36,6 +38,4 @@ module.exports = function () {
   if (service.filter) {
     service.filter(filters);
   }
-
-
 };

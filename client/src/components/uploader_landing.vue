@@ -225,8 +225,8 @@ export default {
     },
 
     mounted(){
-        this.$store.state.validationStatus = false
-      socket.emit('uploader::find', {id: this.$route.params.id}, (e, data) => {
+      this.$store.state.validationStatus = false
+      socket.emit('uploader::find',{"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
         if(data.data.length != 0){
           this.$store.state.jobData = data.data[0]
           this.job.push(data.data[0])
