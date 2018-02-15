@@ -1674,6 +1674,7 @@ export default {
         }
 
         api.request('post', '/import-to-confirm/',jobQueue_obj).then(res => {
+          console.log(res)
         })
         .catch(error => {
           if(error.response.data.code == 404){

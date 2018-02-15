@@ -25,7 +25,7 @@ module.exports = function () {
     },
   blobService({Model: blobStorage})
 );
-console.log("blob_storage.....",blobStorage)
+
 
   // Initialize our service with any options it requires
   // app.use('/upload-image', createService(options));
