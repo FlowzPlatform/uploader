@@ -2,6 +2,10 @@
   <div>
     <h2 class="listUpld">List of Uploads</h2><br>
     <Table :columns="columns1" :data="data2" class="jobtable"></Table>
+    <Spin fix v-if="loading">
+       <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+       <div>Loading</div>
+   </Spin>
   </div>
 </template>
 <script>
@@ -93,7 +97,8 @@ export default {
                     key: 'username'
                 }
             ],
-            data2: []
+            data2: [],
+            loading: true
         }
     },
     methods:{
@@ -101,6 +106,37 @@ export default {
         if(status != ""){
           var res = lodash.capitalize(status.replace(/_/g," "))
           return res
+        }
+      },
+      getJobDetails(){
+        let self = this
+        let current_user = lodash.filter(self.$store.state.user_detail_list, function(o) { if(o.subscription_id == self.$store.state.subscription_id){ return o.role} });
+        let role = current_user[0].role
+        if(role == 'admin'){
+          socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id,$sort: {createdAt: -1}}, (e, data) => {
+            if(data.data.length != 0){
+              self.loading = false
+              self.data2 = data.data
+            }
+            else{
+              self.$Notice.info({
+                       title: 'No Data Available',
+               });
+            }
+          })
+        }
+        else{
+          socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id ,"role":"other", $sort: {createdAt: -1}}, (e, data) => {
+            if(data.data.length != 0){
+              self.loading = false
+              self.data2 = data.data
+            }
+            else{
+              self.$Notice.info({
+                       title: 'No Data Available',
+               });
+            }
+          })
         }
       }
     },
@@ -133,19 +169,17 @@ export default {
         }
       }
     },
+    watch:{
+      '$store.state.subscription_id': function (id) {
+        let self = this
+        self.data2 = []
+        self.getJobDetails()
+       }
+    },
     mounted(){
       var self = this
       self.data2 = []
-      socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id , $sort: {createdAt: -1}}, (e, data) => {
-        if(data.data.length != 0){
-          self.data2 = data.data
-        }
-        else{
-          self.$Notice.info({
-                   title: 'No Data Available',
-           });
-        }
-      })
+      self.getJobDetails()
 
     }
 }
@@ -159,5 +193,18 @@ export default {
 }
 .listUpld{
   text-align: center !important;
+}
+.demo-spin-icon-load{
+       animation: ani-demo-spin 1s linear infinite;
+   }
+@keyframes ani-demo-spin {
+   from { transform: rotate(0deg);}
+   50%  { transform: rotate(180deg);}
+   to   { transform: rotate(360deg);}
+}
+.demo-spin-col{
+   height: 100px;
+   position: relative;
+   border: 1px solid #eee;
 }
 </style>

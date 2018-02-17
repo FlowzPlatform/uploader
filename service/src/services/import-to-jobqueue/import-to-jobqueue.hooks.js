@@ -3,6 +3,7 @@ let await = require('asyncawait/await');
 const app = require('config');
 const config = require('../config')
 let axios = require('axios');
+let errors = require('@feathersjs/errors') ;
 let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk'
 let user_detail_url = 'http://api.' + domainkey + '/auth/api/userdetails'
 
@@ -10,11 +11,11 @@ module.exports = {
   before: {
     all: [],
     find: [
-      hook => beforeFind(hook)
+
     ],
     get: [],
     create: [
-      hook => beforeHook(hook)
+        hook => beforeCreate(hook)
     ],
     update: [],
     patch: [],
@@ -26,7 +27,6 @@ module.exports = {
     find: [],
     get: [],
     create: [
-        hook => beforeCreate(hook)
     ],
     update: [],
     patch: [],
@@ -45,13 +45,7 @@ module.exports = {
   }
 };
 
-function beforeHook (hook) {
-    hook.result = hook.data
-}
 
-function beforeFind(hook){
-
-}
 
 
 async function beforeCreate(hook) {
@@ -60,8 +54,7 @@ async function beforeCreate(hook) {
   let import_tracker_id = hook.data.importTrackerId
   let user_data = await(axios.get(user_detail_url,{'headers':{'Authorization':module.exports.authorization}}))
   let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
-  console.log("tdata.....",tdata)
-  let timeout = 400 * tdata["ProductInformation"].totalNoOfRecords
+  let timeout = 10000000
   let  fullname = ''
   let company = ''
   if(user_data.data.data.firstname){
@@ -99,12 +92,22 @@ async function beforeCreate(hook) {
 
     try {
         axios.post(base_url,hook.data).then(res => {
+          if(res.status == 200){
+            let import_obj = {
+              stepStatus : "import_in_progress"
+            }
+            hook.app.service('/uploader').patch(import_tracker_id,import_obj).then(result => {
+            })
+            .catch(error => {
+              throw new errors.GeneralError('Status not updated');
+            })
+          }
         })
         .catch(error => {
-          console.log('Error:: ', error)
+          throw new errors.GeneralError('Import not completed');
         })
   } catch (err) {
-    console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', err)
+      throw new errors.GeneralError('Import not completed');
   }
 
 }

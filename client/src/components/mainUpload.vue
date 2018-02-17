@@ -1625,39 +1625,29 @@ export default {
         }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
-                if(res.status == '201'){
-                  let importObj = {
-                    stepStatus : "import_in_progress"
-                  }
-                  api.request('patch', '/uploader/'+ id,importObj).then(result => {
-                    this.showValidationTable = false
-                    this.validation_completed = false
-                    this.validation_data = true
-                    this.validateStep = true
-                    this.importStep = true
-                    this.currentStep = 2
-                  })
-                  .catch(error => {
-                      this.$Notice.error({
-                       title: 'Error'
-                     });
-                  })
+                if(res.data){
+                     this.showValidationTable = false
+                     this.validation_completed = false
+                     this.validation_data = true
+                     this.validateStep = true
+                     this.importStep = true
+                     this.currentStep = 2
                 }
 
               })
               .catch(error => {
-                if(error.response.data.code == 404){
-                  this.$Notice.error({
-                   title: error.response.data.message
-                 });
-               }
+                if(error.response.data.className == 'general-error'){
+                  self.$Notice.error({
+                    title: error.response.data.message,
+                    desc: "Please try again..."
+                  })
+                }
                else {
                  this.$Notice.error({
                   title: 'Error in importing data'
                 });
                }
-
-              })
+               })
 
         //
       },
@@ -1674,14 +1664,18 @@ export default {
         }
 
         api.request('post', '/import-to-confirm/',jobQueue_obj).then(res => {
-          console.log(res)
+          if(res.data){
+            self.importBtn = false
+          }
         })
         .catch(error => {
-          if(error.response.data.code == 404){
-            this.$Notice.error({
-             title: error.response.data.message
-           });
-         }
+          if(error.response.data.className == 'general-error'){
+            self.importBtn = true
+            self.$Notice.error({
+              title: error.response.data.message,
+              desc: "Please try again..."
+            })
+          }
          else{
            this.$Notice.error({
             title: 'Error in import to confirm'
@@ -1690,18 +1684,18 @@ export default {
 
         })
 
-        let importobj = {
-          'stepStatus': "import_to_confirm_in_progress"
-        }
-
-        api.request('patch', '/uploader/' + id,importobj).then(result => {
-          this.importBtn = false
-        })
-        .catch(error => {
-            this.$Notice.error({
-             title: 'Error'
-           });
-        })
+        // let importobj = {
+        //   'stepStatus': "import_to_confirm_in_progress"
+        // }
+        //
+        // api.request('patch', '/uploader/' + id,importobj).then(result => {
+        //   this.importBtn = false
+        // })
+        // .catch(error => {
+        //     this.$Notice.error({
+        //      title: 'Error'
+        //    });
+        // })
       },
       mapType(sysHeader,type){
 
@@ -1752,7 +1746,7 @@ export default {
           this.loadingdot = true
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
-          socket.emit('uploader-schema::find', {"user_id":this.$store.state.userId}, (e, res) => {
+          socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
             this.existingSchemaData = res.data
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
             if(currentschema.length != 0){
@@ -1786,7 +1780,7 @@ export default {
          if(this.mObj[tab].selected_schema != '--Add new--'){
           this.map = true
           this.mObj[tab].mapping = []
-           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"user_id":this.$store.state.userId}, (e, data) => {
+           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"subscriptionId":this.$store.state.subscription_id}, (e, data) => {
              this.mObj[tab].mapping = data.data[0].mapping
              let schema_keys = _.keys(this.mObj[tab].schema.structure);
 
@@ -2710,7 +2704,6 @@ export default {
             })
         })
         .catch(error => {
-          console.log("error in schema.....",error.response.data)
           if(error.response.data.className == 'general-error' && error.response.data.code == 500)
             self.$Notice.error({title: error.response.data.message })
            })
@@ -3143,7 +3136,7 @@ export default {
       })
 
 
-      socket.emit('uploader-schema::find', {"user_id":this.$store.state.userId}, (e, res) => {
+      socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
         self.existingSchemaData = res.data[0]
         let schemaNames = _.map(res.data, 'name');
         _.forEach(schemaNames,(value,key) => {

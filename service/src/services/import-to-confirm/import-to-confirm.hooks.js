@@ -3,6 +3,7 @@ let await = require('asyncawait/await');
 const app = require('config');
 const config = require('../config')
 let axios = require('axios');
+let errors = require('@feathersjs/errors') ;
 let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk'
 let user_detail_url = 'http://api.' + domainkey + '/auth/api/userdetails'
 
@@ -42,9 +43,9 @@ module.exports = {
   }
 };
 
-function beforeHook (hook) {
-    hook.result = hook.data
-}
+// function beforeHook (hook) {
+//     hook.result = hook.data
+// }
 
 async function beforeCreate(hook) {
   let base_url = app.get("jobqueueUrl")
@@ -77,14 +78,23 @@ async function beforeCreate(hook) {
     let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
     if(tdata.stepStatus == 'import_to_confirm'){
       axios.post(base_url, hook.data).then(res => {
+        if(res.status == 200){
+          let confirm_obj = {
+            stepStatus : "import_to_confirm_in_progress"
+          }
+          hook.app.service('/uploader').patch(import_tracker_id,confirm_obj,{ query: { "id":import_tracker_id,"masterJobStatus":"running" }}).then(result => {
+          })
+          .catch(error => {
+            throw new errors.GeneralError('Status not updated');
+          })
+        }
       })
       .catch(error => {
-       console.log(error)
+        throw new errors.GeneralError('Import not completed');
       })
    }
   } catch (err) {
-
+       throw new errors.GeneralError('Import not completed');
   }
 
-  hook.result = { "data": hook.data, code: 200 }
 }
