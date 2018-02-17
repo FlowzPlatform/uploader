@@ -96,7 +96,7 @@ async function beforeCreate(hook) {
             let import_obj = {
               stepStatus : "import_in_progress"
             }
-            hook.app.service('/uploader').patch(import_tracker_id,import_obj).then(result => {
+            hook.app.service('/uploader').patch(import_tracker_id,import_obj,{ query: { "id":import_tracker_id,"stepStatus":"validation_completed","masterJobStatus":"running" }}).then(result => {
             })
             .catch(error => {
               throw new errors.GeneralError('Status not updated');
