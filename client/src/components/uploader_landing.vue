@@ -4,6 +4,12 @@
     <h2 style="text-transform:uppercase;margin-top: 18px;" v-else>Welcome back</h2>
     <p style="margin-top: 10px;margin-bottom: 10px;font-size: 15px;">Following is the latest status of your file upload process.You can continue with your current status or abort the whole process to start again</p>
 
+      <Spin fix v-if="loading">
+         <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+         <div>Loading</div>
+     </Spin>
+
+
       <div class="ivu-tabs-tabpane">
       <div class="ivu-table-wrapper upld_land">
       <div class="ivu-table">
@@ -179,7 +185,8 @@ export default {
             show: false,
             show_table: false,
             aborting: false,
-            moment : moment
+            moment : moment,
+            loading:true
         }
     },
     methods:{
@@ -226,10 +233,11 @@ export default {
 
     mounted(){
       this.$store.state.validationStatus = false
-      socket.emit('uploader::find',{"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
+      socket.emit('uploader::find',{"subscriptionId":this.$store.state.subscription_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
         if(data.data.length != 0){
           this.$store.state.jobData = data.data[0]
           this.job.push(data.data[0])
+          this.loading = false
           this.show_table = true
           this.keys = Object.keys(this.job[0])
           for(let i=0 ;i<this.keys.length;i++){

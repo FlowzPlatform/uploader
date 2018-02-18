@@ -85,12 +85,7 @@ import lodash from 'lodash'
          if(subscription_obj.length != 0){
            self.$store.state.subscription_id = subscription_obj[0].value
          }
-        modelAuthentication.subscriptionUser(self.$store.state.subscription_id).then(function (response){
-          self.$store.state.userId = response.data.userId
-        })
-        .catch(function(error){
-         console.log(error);
-       })
+
       }
     },
     watch:{
@@ -114,7 +109,9 @@ import lodash from 'lodash'
         self.selected_subscription_name =  this.$store.state.subscription_name
       }
 
-      self.subscription_list = self.$store.state.subscription_list
+      for(let i=0 ;i<self.$store.state.user_detail_list.length;i++){
+          self.subscription_list.push({"value":self.$store.state.user_detail_list[i].subscription_id,"label":self.$store.state.user_detail_list[i].name})
+      }
       self.selected_subscription_name = self.subscription_list[0].label
     }
   }

@@ -154,7 +154,7 @@ export default {
 						location = location.domain === null ? location.input : location.domain
 						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
 
-						this.$router.push({path: '/'}) // Redirect to dashbord
+						this.$router.push({path: '/uploader-joblist'}) // Redirect to joblist
           }
           this.loading = false
         } else {
