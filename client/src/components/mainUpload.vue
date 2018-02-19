@@ -2867,7 +2867,7 @@ export default {
     'uploader': {
       updated (message) {
           let self = this
-          if(message.user_id == self.$store.state.userId){
+          if(message.id == this.$route.params.id){
             if(prop_keys.length != 0){
 
               uploader_obj = message
@@ -2993,7 +2993,7 @@ export default {
                 self.import1 = false
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
-              console.log("called import to confirm........")
+
 
               if(self.showValidationTable == true){
                 self.showValidationTable = false
@@ -3016,7 +3016,7 @@ export default {
 
 
               if(message.stepStatus == "import_to_confirm_in_progress"){
-                  console.log("called import to confirm in  progress........")
+
                 self.import1 = true
                 self.importBtn = false
               }
@@ -3126,7 +3126,7 @@ export default {
                     this.currentStep = 2
                   }
                   else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
-                    console.log("called from mounted")
+                    
                     this.uploadStep = false
                     this.validateStep = false
                     this.importStep = true
