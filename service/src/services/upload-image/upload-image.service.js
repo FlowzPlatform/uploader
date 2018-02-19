@@ -19,16 +19,16 @@ module.exports = function () {
     app: app
   };
 
-  app.use('/upload-image',multipartMiddleware.single('uri'),function(req,res,next){
-        req.feathers.file = req.file;
-        next();
-    },
-  blobService({Model: blobStorage})
-);
+//   app.use('/upload-image',multipartMiddleware.single('uri'),function(req,res,next){
+//         req.feathers.file = req.file;
+//         next();
+//     },
+//   blobService({Model: blobStorage})
+// );
 
 
   // Initialize our service with any options it requires
-  // app.use('/upload-image', createService(options));
+  app.use('/upload-image', createService(options));
 
   // Get our initialized service so that we can register hooks and filters
   const service = app.service('upload-image');

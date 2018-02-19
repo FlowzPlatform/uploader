@@ -47,21 +47,17 @@ var beforeFind = async function(hook){
   if(hook.params.query["subscriptionId"] && !hook.params.query["role"]){
     let user_data = await(axios.get(subscription_url + '/' + hook.params.query["subscriptionId"]))
     if(hook.params.query["masterJobStatus"] && hook.params.query["key"]){
-      uploaderData = await(hook.app.service('/uploader').find({query:{"user_id":user_data.data.userId,"masterJobStatus":hook.params.query.masterJobStatus,"key":hook.params.query.key}}))
+      let uploaderData = await(hook.app.service('/uploader').find({query:{"user_id":user_data.data.userId,"masterJobStatus":hook.params.query.masterJobStatus,"key":hook.params.query.key}}))
       hook.result = uploaderData
     }
     else if(hook.params.query["id"] && hook.params.query["masterJobStatus"]){
-      uploaderData = await(hook.app.service('/uploader').find({query:{"user_id":user_data.data.userId,"masterJobStatus":hook.params.query.masterJobStatus,"id":hook.params.query.id}}))
-      hook.result = uploaderData
-    }
-    else{
-      uploaderData = await(hook.app.service('/uploader').find({query:{"user_id":user_data.data.userId,$sort: {"createdAt": -1}}}))
+      let uploaderData = await(hook.app.service('/uploader').find({query:{"user_id":user_data.data.userId,"masterJobStatus":hook.params.query.masterJobStatus,"id":hook.params.query.id}}))
       hook.result = uploaderData
     }
   }
   else if(hook.params.query["subscriptionId"] && hook.params.query["role"]){
     delete hook.params.query["role"]
-    uploaderData = await(hook.app.service('/uploader').find({query:{"subscriptionId":hook.params.query["subscriptionId"],$sort: {"createdAt": -1}}}))
+    let uploaderData = await(hook.app.service('/uploader').find({query:{"subscriptionId":hook.params.query["subscriptionId"],$sort: {"id": -1}}}))
     hook.result = uploaderData
   }
 }
