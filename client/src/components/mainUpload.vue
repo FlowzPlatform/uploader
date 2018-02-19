@@ -1003,13 +1003,13 @@ export default {
                  else
                  {
                   no_of_uplds =  no_of_uplds + 1;
-                  // reader.readAsDataURL(file1);
-                  // let uri = await self.retResult(reader)
-                  // console.log("uri....",uri)
-                  // api.request('post', '/upload-image/',{uri:uri,file_name:file1.name}).then(response => {
-                  //   console.log("save-image response ========>",response)
-                  //   self.uploadList.push(response.data)
-                  // });
+                  reader.readAsDataURL(file1);
+                  let uri = await self.retResult(reader)
+                  console.log("uri....",uri)
+                  api.request('post', '/upload-image/',{uri:uri,file_name:file1.name}).then(response => {
+                    console.log("save-image response ========>",response)
+                    self.uploadList.push(response.data)
+                  });
                  }
               }
 
@@ -2982,6 +2982,9 @@ export default {
                if(self.validation_data == false){
                  self.validation_data = true
                }
+               if(self.validateStep == true){
+                   self.validateStep = false
+               }
                if(self.importStep == false){
                  self.importStep = true
                  self.currentStep = 2
@@ -2990,6 +2993,7 @@ export default {
                 self.import1 = false
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
+              console.log("called import to confirm........")
 
               if(self.showValidationTable == true){
                 self.showValidationTable = false
@@ -3000,18 +3004,20 @@ export default {
               if(self.validation_data == false){
                 self.validation_data = true
               }
-              if(self.validateStep == false){
-                self.validateStep = true
+              if(self.validateStep == true){
+                self.validateStep = false
               }
               if(self.importStep == false){
                 self.importStep = true
                 self.currentStep = 2
               }
-
-
               self.import1 = true
               self.importBtn = true
+
+
               if(message.stepStatus == "import_to_confirm_in_progress"){
+                  console.log("called import to confirm in  progress........")
+                self.import1 = true
                 self.importBtn = false
               }
             }
@@ -3120,6 +3126,7 @@ export default {
                     this.currentStep = 2
                   }
                   else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
+                    console.log("called from mounted")
                     this.uploadStep = false
                     this.validateStep = false
                     this.importStep = true

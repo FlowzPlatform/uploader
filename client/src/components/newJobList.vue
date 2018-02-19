@@ -110,10 +110,8 @@ export default {
       },
       getJobDetails(){
         let self = this
-        let current_user = lodash.filter(self.$store.state.user_detail_list, function(o) { if(o.subscription_id == self.$store.state.subscription_id){ return o.role} });
-        let role = current_user[0].role
-        if(role == 'admin'){
-          socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id,$sort: {createdAt: -1}}, (e, data) => {
+
+          socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id,"role":"other",$sort: {"createdAt": -1}}, (e, data) => {
             if(data.data.length != 0){
               self.loading = false
               self.data2 = data.data
@@ -124,20 +122,7 @@ export default {
                });
             }
           })
-        }
-        else{
-          socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id ,"role":"other", $sort: {createdAt: -1}}, (e, data) => {
-            if(data.data.length != 0){
-              self.loading = false
-              self.data2 = data.data
-            }
-            else{
-              self.$Notice.info({
-                       title: 'No Data Available',
-               });
-            }
-          })
-        }
+        // }
       }
     },
     feathers: {
