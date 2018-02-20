@@ -50,7 +50,9 @@ var beforeFind = async function(hook){
 }
 
 var beforeCreate = async function(hook){
+    let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"] ))
     hook.data["createdAt"] = new Date()
     hook.data["updatedAt"] = new Date()
     hook.data["deletedAt"] = ''
+    hook.data["user_id"] = user_data.data.userId
 }

@@ -14,7 +14,7 @@ export const ProductShippingSchema = new Schema({
         type: "string",
         label: "SKU",
         max: 200,
-        optional: true,
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -32,7 +32,7 @@ export const ProductShippingSchema = new Schema({
     fob_city: {
     	type: "string",
     	label: "Free On Board City",
-      optional: true,
+      optional: false,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -41,7 +41,7 @@ export const ProductShippingSchema = new Schema({
     fob_state_code: {
     	type: "string",
     	label: "Free On Board State Code",
-      optional: true,
+      optional: false,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -50,7 +50,7 @@ export const ProductShippingSchema = new Schema({
     fob_country_code: {
     	type: "string",
     	label: "Free On Board Country Code",
-      optional: true,
+      optional: false,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -59,16 +59,16 @@ export const ProductShippingSchema = new Schema({
     fob_zip_code: {
     	type: "string",
     	label: "Free On Board zipcode",
-      optional: true,
+      optional: false,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
       regEx:''
-        },
-        shipping_qty_per_carton: {
+    },
+      shipping_qty_per_carton: {
     	type: "number",
     	label: "Shipping Qty Per Carton",
-      optional: true,
+      optional: false,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -141,7 +141,7 @@ export const ProductShippingSchema = new Schema({
         product_weight: {
     	type: "string",
     	label: "Product Weight",
-      optional: true,
+      optional: false,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
@@ -160,7 +160,7 @@ export const ProductShippingSchema = new Schema({
     	type: "string",
     	label: "Carton Weight Unit",
     	max: 200,
-      optional: true,
+      optional: false,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',

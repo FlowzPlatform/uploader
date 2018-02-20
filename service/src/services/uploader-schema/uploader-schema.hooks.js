@@ -51,10 +51,12 @@ var beforeFind = async function(hook){
 
 var beforeCreate = async function(hook){
   let schemaData = []
-  schemaData = await(hook.app.service('/uploader-schema').find({query:{"name":hook.data.name,"user_id":hook.data.user_id}}))
+  let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"] ))
+  schemaData = await(hook.app.service('/uploader-schema').find({query:{"name":hook.data.name,"user_id":user_data.data.userId}}))
   if(schemaData.data.length == 0){
     hook.data["createdAt"] = new Date()
     hook.data["updatedAt"] = new Date()
+    hook.data["user_id"] = user_data.data.userId
   }
   else if(schemaData.data.length > 0){
     throw new errors.GeneralError('This schema name already exists');

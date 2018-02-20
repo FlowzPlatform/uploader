@@ -14,7 +14,7 @@ export const ProductVariationPricingSchema = new Schema({
         type: "string",
         label: "SKU",
         max: 200,
-        optional : true,
+        optional : false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',

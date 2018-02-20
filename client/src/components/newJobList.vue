@@ -49,7 +49,7 @@ export default {
                     }
                 },
                 {
-                    title: 'Id',
+                    title: 'Import-tracker Id',
                     key: 'id'
                 },
                 {
@@ -94,7 +94,17 @@ export default {
                 },
                 {
                     title: 'Username',
-                    key: 'username'
+                    key: 'username',
+                    render: (h,params) => {
+                      if(params.row.username == null || params.row.username == undefined){
+                        let username = '-'
+                        return h('div', username)
+                      }
+                      else{
+                        let username = lodash.capitalize(params.row.username)
+                        return h('div', username)
+                      }
+                    }
                 }
             ],
             data2: [],
@@ -110,15 +120,17 @@ export default {
       },
       getJobDetails(){
         let self = this
-
+        self.data2 = []
           socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id,"role":"other",$sort: {"createdAt": -1}}, (e, data) => {
             if(data.data.length != 0){
               self.loading = false
               self.data2 = data.data
             }
             else{
+              self.loading = false
               self.$Notice.info({
-                       title: 'No Data Available',
+                 title: 'No Data Available',
+                 duration: 5
                });
             }
           })

@@ -4,7 +4,7 @@ export const ProductInformationSchema = new Schema({
     product_id: {
         type: "string",
         label: "Product Id",
-        optional: false,
+        optional: true,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
