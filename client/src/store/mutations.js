@@ -7,9 +7,10 @@ export default {
     state.user = user
   },
   SET_USER_DETAIL (state, response) {
-    state.subscription_list = []
+    state.user_detail_list = []
     for(let key in response.data.data.package){
-      state.subscription_list.push({"value":response.data.data.package[key].subscriptionId,"label":response.data.data.package[key].name})
+      // state.subscription_list.push({"value":response.data.data.package[key].subscriptionId,"label":response.data.data.package[key].name})
+      state.user_detail_list.push({"subscription_id":response.data.data.package[key].subscriptionId,"name":response.data.data.package[key].name,"role":response.data.data.package[key].role})
     }
   },
   SET_TOKEN (state, token) {

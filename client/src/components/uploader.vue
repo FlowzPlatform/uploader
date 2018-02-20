@@ -1,4 +1,9 @@
 <template>
+  <div>
+    <Spin fix v-if="loading">
+       <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+       <div>Loading</div>
+   </Spin>
   <div class="right" v-if="showDiv">
     <Row>
       <h2 style="margin-top: 12px;">Choose a method to upload the data</h2>
@@ -34,6 +39,7 @@
       </Form>
     </Row>
   </div>
+</div>
 </template>
 
 <script>
@@ -68,7 +74,8 @@ export default {
          selectedMethod:'',
          disabled: true,
          showDiv: false,
-         loadingBtn: false
+         loadingBtn: false,
+         loading: true
         }
     },
     methods:{
@@ -132,11 +139,18 @@ export default {
               uploadType:this.selectedMethod.toLowerCase(),
               key:'pdm_uploader',
               masterJobStatus: "running",
-              user_id:this.$store.state.userId
             }
-            if(this.$store.state.user.fullname){
-              obj["username"] = this.$store.state.user.fullname
+
+            if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
+              obj["username"] = this.$store.state.user.firstname
             }
+            else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
+              obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
+            }
+            else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
+              obj["username"] = this.$store.state.user.lastname
+            }
+
             api.request('post', '/uploader', obj).then(res => {
               id = res.data.id
               this.$router.push('/upload/' + id)
@@ -155,13 +169,15 @@ export default {
     },
     mounted(){
       this.$store.state.validationStatus = false
-      socket.emit('uploader::find', {"user_id":this.$store.state.userId,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
+      socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
         if (data.data.length !== 0) {
           this.showDiv = false
+          this.loading = false
           this.$router.push('/landing/' + data.data[0].id)
         }
         else {
           this.showDiv = true
+          this.loading = false
           this.$store.state.jobData = {}
           // this.$store.state.subscription_id = ''
           // this.$store.state.userId = ''
@@ -280,5 +296,18 @@ ul.mySection label:hover {
   font-size: 1em;
   line-height: 3;
   margin-bottom:10px;
+}
+.demo-spin-icon-load{
+       animation: ani-demo-spin 1s linear infinite;
+   }
+@keyframes ani-demo-spin {
+   from { transform: rotate(0deg);}
+   50%  { transform: rotate(180deg);}
+   to   { transform: rotate(360deg);}
+}
+.demo-spin-col{
+   height: 100px;
+   position: relative;
+   border: 1px solid #eee;
 }
 </style>

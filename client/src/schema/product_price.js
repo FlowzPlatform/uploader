@@ -15,7 +15,7 @@ export const ProductPriceSchema = new Schema({
         type: "string",
         label: "SKU",
         max: 200,
-        optional: true,
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -25,7 +25,7 @@ export const ProductPriceSchema = new Schema({
         type: "string",
         label: "Price Type",
         allowedValues: ['regular', 'piece_wise_price', 'call_for_price'],
-        optional: true,
+        optional: false,
         defaultValue: '',
         maxLength : '',
         regEx:''
@@ -34,7 +34,7 @@ export const ProductPriceSchema = new Schema({
         type: "string",
         label: "Type",
         allowedValues: ['decorative', 'blank', 'special', 'special_blank'],
-        optional: true,
+        optional: false,
         defaultValue: '',
         maxLength : '',
         regEx:''
@@ -44,7 +44,7 @@ export const ProductPriceSchema = new Schema({
         type: "string",
         label: "Global Price Type",
         allowedValues: ['global', 'above_catalog', 'oversease'],
-        optional: true,
+        optional: false,
         defaultValue: '',
         maxLength : '',
         regEx:''
@@ -62,7 +62,7 @@ export const ProductPriceSchema = new Schema({
         type: "string",
         label: "Price Unit",
         allowedValues: ['box', 'dozen', 'each', 'pack', 'pair', 'set'],
-        optional: true,
+        optional: false,
         defaultValue: '',
         maxLength : '',
         regEx:''
@@ -70,7 +70,7 @@ export const ProductPriceSchema = new Schema({
     qty_1_min: {
         type: "number",
         label: "Qty1 Min",
-        optional: true,
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
@@ -89,7 +89,7 @@ export const ProductPriceSchema = new Schema({
         type: "number",
         label: "Price1",
         max: 200,
-        optional: true,
+        optional: false,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',

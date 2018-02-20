@@ -39,7 +39,8 @@ const routes = [{
     component: Dashboard,
     name: 'Dashboard',
     meta: { description: 'Overview of environment', requiresAuth: true }
-  }, {
+  },
+  {
     path: '/uploader',
     name: 'Uploader',
     component: Uploader
