@@ -294,7 +294,11 @@ const ProductAdditionalChargesRules = [
     columnName : 'price_1',
     errorString: "Price_1 field found blank",
     errorCode: 'Price_1blankCheck400',
-    qryMongo : {$or:[{"price_1":null},{"price_1":""}]},
+    qryMongo : {$and:
+    [{"qty_1_min": {$exists: true,$ne:""}},
+     {$or:[{"price_1":null},{"price_1":""}]}
+   ]
+ },
     qryES : {}
   },
   {

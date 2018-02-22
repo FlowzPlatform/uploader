@@ -42,7 +42,9 @@ module.exports = {
 var beforeFind = async function(hook){
   if(!hook.params.query["user_id"]){
     let user_data = await(axios.get(subscription_url + '/' + hook.params.query["subscriptionId"] ))
+
     schemaData = await(hook.app.service('/uploader-schema').find({query:{"user_id":user_data.data.userId}}))
+    
     hook.result = schemaData
   }
 
@@ -59,7 +61,7 @@ var beforeCreate = async function(hook){
     hook.data["user_id"] = user_data.data.userId
   }
   else if(schemaData.data.length > 0){
-    throw new errors.GeneralError('This schema name already exists');
+    throw new errors.GeneralError('This mapping name already exists');
   }
 
 }
