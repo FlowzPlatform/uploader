@@ -48,7 +48,7 @@ export default {
     })
     .then(response => {
       if (response) {
-        commit('SET_USER_DETAIL', response)
+        commit('SET_SUBSCRIPTION_DETAIL', response)
         return response.data.data
       } else {
         return

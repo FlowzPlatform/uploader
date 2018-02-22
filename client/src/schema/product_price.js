@@ -89,7 +89,7 @@ export const ProductPriceSchema = new Schema({
         type: "number",
         label: "Price1",
         max: 200,
-        optional: false,
+        optional: true,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',

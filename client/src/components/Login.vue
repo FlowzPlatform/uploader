@@ -149,6 +149,8 @@ export default {
           })
           if (auth) {
             this.$store.commit('SET_TOKEN', auth.logintoken)
+            this.$store.commit('SET_STORED_SUB_NAME',"")
+            this.$store.commit('SET_STORED_SUB_ID',"")
 						// Token Store in cookie
 						let location = psl.parse(window.location.hostname)    // get parent domain
 						location = location.domain === null ? location.input : location.domain

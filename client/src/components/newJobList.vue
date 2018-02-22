@@ -30,6 +30,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 const app = feathers().configure(socketio(socket))
 let index
+let id1
 export default {
     name: 'newJoblist',
     components: { innerJoblist},
@@ -121,20 +122,53 @@ export default {
       getJobDetails(){
         let self = this
         self.data2 = []
-          socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id,"role":"other",$sort: {"createdAt": -1}}, (e, data) => {
+        let filtered_records
+
+        if(this.$store.state.selectedUserName != "All"){
+          filtered_records = lodash.filter(self.$store.state.user_detail_list, function(o) { if(o.name == self.$store.state.selectedUserName){
+            return o.label
+          } });
+          id1 = filtered_records[0].label
+
+        }
+
+        if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id != "All"){
+          socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id}, (e, data) => {
             if(data.data.length != 0){
               self.loading = false
               self.data2 = data.data
             }
             else{
               self.loading = false
-              self.$Notice.info({
-                 title: 'No Data Available',
-                 duration: 5
-               });
             }
           })
-        // }
+        }
+        else if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id == "All"){
+          socket.emit('uploader::find', {"user_id":id1,"role":"other"}, (e, data) => {
+              if(data.data.length != 0){
+                self.loading = false
+                self.data2 = data.data
+              }
+              else{
+                self.loading = false
+              }
+            })
+        }
+        else {
+
+          socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"}, (e, data) => {
+
+              if(data.data.length != 0){
+                self.loading = false
+                self.data2 = data.data
+              }
+              else{
+                self.loading = false
+              }
+            })
+        }
+
+
       }
     },
     feathers: {
@@ -168,13 +202,32 @@ export default {
     },
     watch:{
       '$store.state.subscription_id': function (id) {
+
+        let self = this
+        self.$store.commit('SET_STORED_SUB_ID',id)
+        self.data2 = []
+          self.getJobDetails()
+      },
+      '$store.state.selectedUserName': function(name) {
         let self = this
         self.data2 = []
         self.getJobDetails()
-       }
+      },
+      '$store.state.subscription_name':function(name){
+
+        let self = this
+        self.$store.commit('SET_STORED_SUB_NAME',name)
+        
+      }
     },
     mounted(){
       var self = this
+      if(this.$store.state.disableuser == true){
+        this.$store.state.disableuser = false
+      }
+      if(this.$store.state.disablesubscription == true){
+        this.$store.state.disablesubscription = false
+      }
       self.data2 = []
       self.getJobDetails()
 
