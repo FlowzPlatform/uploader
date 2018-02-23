@@ -10,6 +10,7 @@ export default {
     state.user = user
   },
   async SET_SUBSCRIPTION_DETAIL (state, response) {
+    console.log("+++++++++++++ set sub detail called mutationjs",response)
     let authToken = response.config.headers.authorization
     state.userid = response.data.data._id
     state.subscription_detail_list = []
@@ -18,6 +19,8 @@ export default {
     for(let key in response.data.data.package){
       state.subscription_detail_list.push({"subscription_id":response.data.data.package[key].subscriptionId,"name":response.data.data.package[key].name,"role":response.data.data.package[key].role})
     }
+
+    console.log("subscription_detail_list.....",state.subscription_detail_list)
 
     for(let key in state.subscription_detail_list){
       let response = await axios({
@@ -28,15 +31,15 @@ export default {
         }
       })
       .then(response => {
-        // console.log("response...",response)
+        console.log("++++++++++++++ response from subscriptionuri......",response)
         return response
-          // list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})
       })
       list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})
     }
 
 
       let uniq_user_id = _.uniqBy(list1, 'label');
+      console.log("uniq_user_id....",uniq_user_id)
       let uniq_user_array = []
     // setTimeout(function(){
       for(let i=0;i<uniq_user_id.length;i++){
@@ -84,11 +87,11 @@ export default {
     state.token = token
   },
   SET_STORED_SUB_NAME(state,name){
-    console.log("name...",name)
+
     state.storedSubscriptionName = name
   },
   SET_STORED_SUB_ID(state,id){
-    console.log("id...",id)
+
     state.storedSubscriptionId = id
   },
   SET_SCHEMA (state, schema) {

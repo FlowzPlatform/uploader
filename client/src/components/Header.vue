@@ -1,12 +1,12 @@
 <template>
     <Menu mode="horizontal" :theme="'primary'">
         <Row type="flex">
-        <Col span="6">
+        <Col span="4">
             <div class="f-logo">
                 <img src="../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
             </div>
         </Col>
-        <Col span="18">
+        <Col span="20">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
                     <router-link to="/uploader-joblist">

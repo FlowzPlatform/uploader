@@ -1827,6 +1827,10 @@ export default {
       getMapping(tab){
         let self = this
          if(this.mObj[tab].selected_schema != '--Add new--'){
+
+           if(this.mObj[tab].headerDisplay == true){
+             this.mObj[tab].headerDisplay = false
+           }
           this.loadingdot = true
           this.map = true
           this.mObj[tab].mapping = []
@@ -1850,8 +1854,9 @@ export default {
                   }
                   obj["_id"] = uuidV1()
                   this.mObj[tab].newUploadCSV.push(obj)
+
                   this.mObj[tab].load = false
-                  if(this.mObj[tab].savePreviewDisplay == false){
+                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false){
                     self.mObj[tab].previewDisplay = true
                     self.mObj[tab].headerDisplay = true
                   }
@@ -1930,7 +1935,7 @@ export default {
               self.$Notice.error({title: 'Only CSV files are allowed',duration: 200})
             }
             else{
-              // self.mObj[tab].load = true
+              self.mObj[tab].load = true
               self.mObj[tab].uploadDisplay = false
                 Papa.parse(file, {
                   header: true,
@@ -1968,6 +1973,7 @@ export default {
             })
     },
     generateHeadersandMapping(tab){
+
       let self = this
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
       // self.loadingdot = true
@@ -2489,6 +2495,10 @@ export default {
         this.remove()
       })
 
+      if(document.getElementsByClassName('ht_master handsontable')[0]){
+        document.getElementsByClassName('ht_master handsontable')[0].remove()
+      }
+
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'none'
       }
@@ -2664,7 +2674,6 @@ export default {
       })
 
       if (userUploadedDataArr !== undefined) {
-
         self.mObj[tab].newUploadCSV =  userUploadedDataArr
         if(errcols.length > 0){
           $('table.htCore').each(function () {
@@ -2675,10 +2684,10 @@ export default {
           }
 
 
+
           self.showerrmsg(errcols,tab)
         }
         else{
-          // console.log("callled errmsg else.......",)
           self.mObj[tab].errmsg = []
           self.mObj[tab].showHandson = false
           self.mObj[tab].errDisplay = false
@@ -2688,6 +2697,7 @@ export default {
           if(document.getElementsByClassName('ht_master handsontable')[0]){
             document.getElementsByClassName('ht_master handsontable')[0].remove()
           }
+
           self.ProceedToValidate(tab)
         }
 

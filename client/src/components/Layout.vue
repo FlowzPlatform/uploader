@@ -32,6 +32,9 @@ export default {
   },
   methods: {
 
+  },
+  mounted () {
+    // this.$router.push('/uploader-joblist')
   }
 }
 </script>
