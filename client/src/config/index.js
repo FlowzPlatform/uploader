@@ -27,7 +27,8 @@ var temp = {
   githubSuccessCallbackUrl: protocol + '://localhost:8000/' + 'uploader-joblist',
   loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
-  subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription'
+  subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
+  getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -47,7 +48,8 @@ if (process.env.MYENV !== 'development') {
     githubSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/uploader-joblist',
     loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
     jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
-    subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription'
+    subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
+    getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/'
   }
 }
 

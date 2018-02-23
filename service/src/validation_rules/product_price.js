@@ -15,6 +15,17 @@ const ProductPriceRules = [
         qryES : {}
     },
     {
+        columnName : 'price_type',
+        errorString: "price_type field invalid, cannot contain numeric value and special characters",
+        errorCode: 'price_TypeRegEx400',
+        qryMongo : {$and:
+        [{ "price_type": { $exists: true, $ne: null}},
+         { "price_type" :  /[^a-zA-Z_]$/}
+     ]
+     },
+        qryES : {}
+    },
+    {
         columnName : 'type',
         errorString: "Type field found blank",
         errorCode: 'TypeblankCheck400',
@@ -29,10 +40,32 @@ const ProductPriceRules = [
         qryES : {}
     },
     {
+        columnName : 'global_price_type',
+        errorString: "global_price_type field invalid, cannot contain numeric value and special characters",
+        errorCode: 'global_price_typeRegEx400',
+        qryMongo : {$and:
+        [{ "global_price_type": { $exists: true, $ne: null}},
+         { "global_price_type" :  /[^a-zA-Z_]$/}
+     ]
+     },
+        qryES : {}
+    },
+    {
         columnName : 'price_unit',
         errorString: "price unit field found blank",
         errorCode: 'Price_UnitblankCheck400',
         qryMongo : {$or:[{"price_unit":null},{"price_unit":""}]},
+        qryES : {}
+    },
+    {
+        columnName : 'price_unit',
+        errorString: "price_unit field invalid, cannot contain numeric value and special characters",
+        errorCode: 'price_unitRegEx400',
+        qryMongo : {$and:
+        [{ "price_unit": { $exists: true, $ne: null}},
+         { "price_unit" :  /[^a-zA-Z]$/}
+     ]
+     },
         qryES : {}
     },
     {
@@ -317,7 +350,11 @@ const ProductPriceRules = [
         columnName : 'price_1',
         errorString: "Price_1 field found blank",
         errorCode: 'price_1blankCheck400',
-        qryMongo : {$or:[{"price_1":null},{"price_1":""}]},
+        qryMongo : {$and:
+        [{"qty_1_min": {$exists: true,$ne:""}},
+         {$or:[{"price_1":null},{"price_1":""}]}
+       ]
+      },
         qryES : {}
     },
     {

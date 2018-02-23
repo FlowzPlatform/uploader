@@ -39,6 +39,7 @@ export default {
     commit('SET_USER', authToken)
   },
   authenticate ({ commit }, authToken) {
+    console.log("++++++++++++++++++ authenticate called")
     return axios({
       method: 'get',
       url: config.microURI + '/userdetails',
@@ -48,7 +49,7 @@ export default {
     })
     .then(response => {
       if (response) {
-        commit('SET_USER_DETAIL', response)
+        commit('SET_SUBSCRIPTION_DETAIL', response)
         return response.data.data
       } else {
         return

@@ -226,34 +226,60 @@ export default {
       //takes to the main upload page
       continue1(){
         this.$store.state.calledFromContinue = true
+        this.$store.state.disableuser = true
+        this.$store.state.disablesubscription = true
         this.$router.push('/upload/' + this.$route.params.id)
-      }
-
-    },
-
-    mounted(){
-      this.$store.state.validationStatus = false
-      socket.emit('uploader::find',{"subscriptionId":this.$store.state.subscription_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
-        if(data.data.length != 0){
-          this.$store.state.jobData = data.data[0]
-          this.job.push(data.data[0])
-          this.loading = false
-          this.show_table = true
-          this.keys = Object.keys(this.job[0])
-          for(let i=0 ;i<this.keys.length;i++){
-            if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
-            this.keys[i] == 'ProductVariationPrice'){
-              this.show = true
+      },
+      findData(sub_id){
+        socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
+          if(data.data.length != 0){
+            this.$store.state.jobData = data.data[0]
+            this.job.push(data.data[0])
+            this.loading = false
+            this.show_table = true
+            this.keys = Object.keys(this.job[0])
+            for(let i=0 ;i<this.keys.length;i++){
+              if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
+              this.keys[i] == 'ProductVariationPrice'){
+                this.show = true
+              }
             }
           }
-        }
-        else{
-          this.$Notice.info({
-                   title: 'No Data Available',
-           });
-        }
-      })
+          else{
+            this.$Notice.info({
+                     title: 'No Data Available',
+             });
+          }
+        })
+      }
+    },
+    mounted(){
+      this.$store.state.validationStatus = false
+
+      if(this.$store.state.subscription_name != "All"){
+        this.findData(this.$store.state.subscription_id)
+      }
+      else if(this.$store.state.subscription_name == "All"){
+        this.loading = false
+        this.$Notice.error({
+         title: 'Please select a proper subscription id...'
+       });
+      }
+    },
+    watch:{
+    '$store.state.subscription_id': function (sub_id) {
+
+      if(sub_id == 'All'){
+        this.loading = false
+        this.$Notice.error({
+         title: 'Please select a proper subscription id...'
+       });
+      }
+      else {
+        this.findData(sub_id)
+      }
     }
+  }
 }
 </script>
 <style>

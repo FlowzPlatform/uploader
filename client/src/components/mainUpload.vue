@@ -33,7 +33,7 @@
                         <Row>
                         <Col span="5">
                         <Select v-model="mObj[activeTab].selected_schema" style="width:200px" @on-change="changeSchema(activeTab,mObj[activeTab].selected_schema)">
-                            <Option v-for="schema in schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
+                            <Option v-for="schema in mObj[activeTab].schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
                         </Select>
                        </Col>
 
@@ -475,7 +475,7 @@
           </div>
           <div slot="footer">
               <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
-              <Button type="primary"  @click="continuee(activeTab)">Continue</Button>
+              <!-- <Button type="primary"  @click="continuee(activeTab)">Continue</Button> -->
           </div>
        </Modal>
 
@@ -592,7 +592,7 @@
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Please confirm to go for Live</p></div>
       <Button type="primary" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right" :disabled="!importBtn">Import to Confirm</Button>
-      <Button type="error" @click="abortImportConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
+      <!-- <Button type="error" @click="abortImportConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button> -->
       </Card>
     </template>
    </div>
@@ -774,7 +774,13 @@ export default {
                   filter_flag: [],
                   load: false,
                   mPage:[],
-                  cpage:1
+                  cpage:1,
+                  schemaList: [
+                            {
+                                value: '--Add new--',
+                                label: '--Add new--'
+                            }
+                        ],
 
           },
           'Product Price':{
@@ -805,7 +811,13 @@ export default {
                   filter_flag: [],
                   load: false,
                   mPage:[],
-                  cpage:1
+                  cpage:1,
+                  schemaList: [
+                            {
+                                value: '--Add new--',
+                                label: '--Add new--'
+                            }
+                        ]
 
 
           },
@@ -837,7 +849,13 @@ export default {
                   filter_flag: [],
                   load: false,
                   mPage:[],
-                  cpage:1
+                  cpage:1,
+                  schemaList: [
+                            {
+                                value: '--Add new--',
+                                label: '--Add new--'
+                            }
+                        ]
           },
           'Product Image':{
                   selected_schema: '',
@@ -867,7 +885,13 @@ export default {
                   filter_flag: [],
                   load: false,
                   mPage:[],
-                  cpage:1
+                  cpage:1,
+                  schemaList: [
+                            {
+                                value: '--Add new--',
+                                label: '--Add new--'
+                            }
+                        ]
           },
           'Product Shipping':{
                   selected_schema: '',
@@ -897,7 +921,13 @@ export default {
                   filter_flag: [],
                   load: false,
                   mPage:[],
-                  cpage:1
+                  cpage:1,
+                  schemaList: [
+                            {
+                                value: '--Add new--',
+                                label: '--Add new--'
+                            }
+                        ]
           },
           'Product Additional Charges':{
                   selected_schema: '',
@@ -927,7 +957,13 @@ export default {
                   filter_flag: [],
                   load: false,
                   mPage:[],
-                  cpage:1
+                  cpage:1,
+                  schemaList: [
+                            {
+                                value: '--Add new--',
+                                label: '--Add new--'
+                            }
+                        ]
           },
           'Product Variation Price':{
                   selected_schema: '',
@@ -957,7 +993,13 @@ export default {
                   filter_flag: [],
                   load: false,
                   mPage:[],
-                  cpage:1
+                  cpage:1,
+                  schemaList: [
+                            {
+                                value: '--Add new--',
+                                label: '--Add new--'
+                            }
+                        ]
           }
         }
     }
@@ -1701,6 +1743,7 @@ export default {
 
       },
       changeSchema(tab,value){
+
         if(value == "--Add new--"){
           this.proceedBtn = true
           // this.loadingdot = true
@@ -1744,26 +1787,31 @@ export default {
         }
         else{
           // this.loadingdot = true
+
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
             this.existingSchemaData = res.data
             let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
             if(currentschema.length != 0){
+
               schema_id = currentschema[0].id
               this.mObj[tab].schema = new Schema(currentschema[0].schema)
 
               this.mObj[tab].display = false
 
               if(this.mObj[tab].uploadDisplay){
+
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
+
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else{
+
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = true
               }
@@ -1777,7 +1825,12 @@ export default {
         }
       },
       getMapping(tab){
+        let self = this
          if(this.mObj[tab].selected_schema != '--Add new--'){
+
+           if(this.mObj[tab].headerDisplay == true){
+             this.mObj[tab].headerDisplay = false
+           }
           this.loadingdot = true
           this.map = true
           this.mObj[tab].mapping = []
@@ -1801,9 +1854,12 @@ export default {
                   }
                   obj["_id"] = uuidV1()
                   this.mObj[tab].newUploadCSV.push(obj)
+
                   this.mObj[tab].load = false
-                  this.mObj[tab].previewDisplay = true
-                  this.mObj[tab].headerDisplay = true
+                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false){
+                    self.mObj[tab].previewDisplay = true
+                    self.mObj[tab].headerDisplay = true
+                  }
                   this.loadingdot = false
                }
 
@@ -1829,31 +1885,38 @@ export default {
       },
       validateSchema(tab,schema){
         if(schema == '' || schema == null){
+          this.proceedBtn = true
           this.$Notice.error({
-                 title: 'Empty values not allowed'
+                 title: 'Empty values not allowed',
+                 duration: 5
              });
         }
         else if(schema == 'Untitled mapping' || schema == '--Add new--'){
+          this.proceedBtn = true
           this.$Notice.error({
-                 title: 'Please write new mapping name'
+                 title: 'Please write new mapping name',
+                 duration: 5
              });
         }
         else{
           let flag = false
-          for(let i=0;i<this.schemaList.length;i++){
-            if(this.schemaList[i].value == schema){
+          for(let i=0;i<this.mObj[tab].schemaList.length;i++){
+            if(this.mObj[tab].schemaList.value == schema){
               this.$Notice.error({
-                     title: 'This mapping name already exists'
+                     title: 'This mapping name already exists',
+                     duration: 5
                  });
+              this.proceedBtn = true
               flag = true
             }
           }
           if(flag == false){
              this.mObj[tab].poptip_display = false
-             this.schemaList.push({"value" : schema,"label": schema})
-             this.schemaList = lodash.orderBy(this.schemaList, 'value', 'asc');
-             let new_index = lodash.findIndex(this.schemaList, function(o) { return o.value == '--Add new--'; });
-             this.schemaList.splice(this.schemaList.length-1,0,this.schemaList.splice(new_index,1)[0]);
+             this.mObj[tab].display = false
+             this.mObj[tab].schemaList.push({"value" : schema,"label": schema})
+             this.mObj[tab].schemaList = lodash.orderBy(this.mObj[tab].schemaList, 'value', 'asc');
+             let new_index = lodash.findIndex(this.mObj[tab].schemaList, function(o) { return o.value == '--Add new--'; });
+             this.mObj[tab].schemaList.splice(this.mObj[tab].schemaList.length-1,0,this.mObj[tab].schemaList.splice(new_index,1)[0]);
              this.mObj[tab].selected_schema = schema
              this.mObj[tab].new_flag = 1
           }
@@ -1884,17 +1947,12 @@ export default {
                     self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                     self.mObj[tab].headers.push("_id")
                     if(self.mObj[tab].new_flag == 1){
-                      self.mObj[tab].mapping = []
                       self.mObj[tab].load = true
+                      self.mObj[tab].mapping = []
                       self.generateHeadersandMapping(tab)
-                      // self.mObj[tab].newSchemaDisplay = true
-                      // self.mObj[tab].previewDisplay = true
-                      // self.mObj[tab].load = false
                     }
                     else{
-                      // self.mObj[tab].headerDisplay = true
-                      // self.mObj[tab].previewDisplay = true
-
+                      self.mObj[tab].load = true
                       if(self.mObj[tab].newSchemaDisplay == true){
                         self.mObj[tab].newSchemaDisplay = false
                       }
@@ -1903,6 +1961,8 @@ export default {
                       self.mObj[tab].mapping = []
 
                       self.getMapping(tab)
+                      // self.mObj[tab].previewDisplay = true
+                      // self.mObj[tab].headerDisplay = true
                     }
                   }
                 })
@@ -1913,14 +1973,15 @@ export default {
             })
     },
     generateHeadersandMapping(tab){
+
       let self = this
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
-      self.loadingdot = true
+      // self.loadingdot = true
 
       self.mObj[tab].newUploadCSV = []
 
       if(self.mObj[tab].uploadCSV.length != 0){
-
+        self.loadingdot = true
           for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
             let obj = {}
              for(let key in self.mObj[tab].uploadCSV[i]){
@@ -1965,19 +2026,15 @@ export default {
         }
     },
     mapHeaders(tab){
-      // continue_flag = true
-      // this.proceedBtn = true
-      // this.modal1 = false
       continue_flag = false
       this.modal1 = false
       this.proceedBtn = true
-      // this.Proceed(this.activeTab)
     },
-    continuee(tab){
-      this.modal1 = false
-      this.proceedBtn = true
-      this.ProceedToValidate(tab)
-    },
+    // continuee(tab){
+    //   this.modal1 = false
+    //   this.proceedBtn = true
+    //   this.ProceedToValidate(tab)
+    // },
     Proceed(tab){
       let self = this
       self.proceedBtn = false
@@ -2002,7 +2059,8 @@ export default {
       let self = this
       continue_flag = false
       if(self.mObj[tab].selected_schema == '--Add new--'){
-        self.$Notice.error({title: 'Please enter a valid mapping name',duration: 200})
+        self.proceedBtn = true
+        self.$Notice.error({title: 'Please enter a valid mapping name',duration: 5})
       }
       else {
       let errcols = []
@@ -2379,6 +2437,7 @@ export default {
     Abort(tab){
       let self = this
       self.proceedBtn = true
+      self.mObj[tab].load = false
       self.mObj[tab].uploadCSV = []
       self.mObj[tab].headerDisplay = false
       self.mObj[tab].newSchemaDisplay = false
@@ -2435,6 +2494,10 @@ export default {
       $('table.htCore').each(function () {
         this.remove()
       })
+
+      if(document.getElementsByClassName('ht_master handsontable')[0]){
+        document.getElementsByClassName('ht_master handsontable')[0].remove()
+      }
 
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'none'
@@ -2611,7 +2674,6 @@ export default {
       })
 
       if (userUploadedDataArr !== undefined) {
-
         self.mObj[tab].newUploadCSV =  userUploadedDataArr
         if(errcols.length > 0){
           $('table.htCore').each(function () {
@@ -2622,10 +2684,10 @@ export default {
           }
 
 
+
           self.showerrmsg(errcols,tab)
         }
         else{
-          // console.log("callled errmsg else.......",)
           self.mObj[tab].errmsg = []
           self.mObj[tab].showHandson = false
           self.mObj[tab].errDisplay = false
@@ -2635,6 +2697,7 @@ export default {
           if(document.getElementsByClassName('ht_master handsontable')[0]){
             document.getElementsByClassName('ht_master handsontable')[0].remove()
           }
+
           self.ProceedToValidate(tab)
         }
 
@@ -2694,7 +2757,8 @@ export default {
           name : self.mObj[tab].selected_schema,
           schema: self.mObj[tab].schema.structure,
           username: self.$store.state.user.email,
-          subscriptionId: self.$store.state.subscription_id
+          subscriptionId: self.$store.state.subscription_id,
+          tabname: tab
         }
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
@@ -2990,7 +3054,6 @@ export default {
             }
             else if(message.stepStatus == "validation_completed" ){
 
-
                if(self.validating == true){
                  self.validating = false
                }
@@ -3008,7 +3071,6 @@ export default {
               self.validation_completed = true
             }
             else if(message.stepStatus == "import_in_progress" ){
-
                if(self.showValidationTable == true){
                  self.showValidationTable = false
                }
@@ -3029,7 +3091,6 @@ export default {
                 self.import1 = false
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
-
 
               if(self.showValidationTable == true){
                 self.showValidationTable = false
@@ -3070,7 +3131,8 @@ export default {
       let self = this
       id = self.$route.params.id
       self.loading = true
-
+      self.$store.state.disableuser = true
+      self.$store.state.disablesubsciption = true
 
       api.request('get', '/uploader/' + id ).then(response => {
         if(response.data != null){
@@ -3173,6 +3235,7 @@ export default {
                     }
                   }
                   else if(response.data.stepStatus == "import_completed"){
+
                     this.$router.push('/uploader')
                   }
         }
@@ -3180,13 +3243,22 @@ export default {
 
       socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
         self.existingSchemaData = res.data[0]
-        let schemaNames = _.map(res.data, 'name');
-        _.forEach(schemaNames,(value,key) => {
-            self.schemaList.push({"value":value,"label":value})
-        })
-        self.schemaList = lodash.orderBy(self.schemaList, 'value', 'asc');
-        let new_index = lodash.findIndex(self.schemaList, function(o) { return o.value == '--Add new--'; });
-        self.schemaList.splice(self.schemaList.length-1,0,self.schemaList.splice(new_index,1)[0]);
+        let schemaNames = _.groupBy(res.data,"tabname");
+
+         if(schemaNames.length != 0){
+           _.forEach(schemaNames,(value,key) => {
+             for(let i=0;i<value.length;i++){
+               self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
+             }
+           })
+           for(let i=0;i<self.fileTypes.length;i++){
+             self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
+             let new_index = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value == '--Add new--'; });
+             self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(new_index,1)[0]);
+           }
+         }
+
+
         if(schemaNames.length == 0){
           for(let i=0;i<self.fileTypes.length;i++){
             self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
@@ -3199,7 +3271,7 @@ export default {
         }
         else{
           for(let i=0;i<self.fileTypes.length;i++){
-            self.mObj[self.fileTypes[i]].selected_schema = self.schemaList[0].value
+            self.mObj[self.fileTypes[i]].selected_schema = self.mObj[self.fileTypes[i]].schemaList[0].value
           }
           self.loading = false
         }

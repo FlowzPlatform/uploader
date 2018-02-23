@@ -189,7 +189,7 @@ export const ProductImprintDataSchema = new Schema({
         type: "number",
         label: "Price_1",
         max: 200,
-        optional: false,
+        optional: true,
         allowedValues: [],
         defaultValue: '',
         maxLength : '',

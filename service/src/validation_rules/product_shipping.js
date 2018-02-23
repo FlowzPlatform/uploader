@@ -36,6 +36,17 @@
     qryES : {}
   },
   {
+    columnName : 'fob_zip_code',
+    errorString: "Free_On_Board_Zip_Code field invalid, cannot contain special characters",
+    errorCode: 'Free_On_Board_Zip_CodeRegEx400',
+    qryMongo : {$and:
+        [{ "fob_zip_code": { $exists: true, $ne: null}},
+         { "fob_zip_code" :  /[^a-zA-Z0-9]$/}
+     ]
+     },
+    qryES : {}
+  },
+  {
     columnName : 'shipping_qty_per_carton',
     errorString: "Shipping_Qty_Per_Carton field found blank",
     errorCode: 'Shipping_Qty_Per_CartonblankCheck400',

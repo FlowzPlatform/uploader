@@ -121,7 +121,7 @@ export default {
      },
      // creates a job in uploader service
      Proceed(){
-       if(this.$store.state.subscription_name == ''){
+       if(this.$store.state.subscription_name == '' || this.$store.state.subscription_name == 'All'){
          this.loadingBtn = false
          this.$Notice.error({
             title: "Please select a subscription to proceed"
@@ -139,6 +139,7 @@ export default {
               uploadType:this.selectedMethod.toLowerCase(),
               key:'pdm_uploader',
               masterJobStatus: "running",
+              subscriptionId: this.$store.state.subscription_id
             }
 
             if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
@@ -153,6 +154,8 @@ export default {
 
             api.request('post', '/uploader', obj).then(res => {
               id = res.data.id
+              this.$store.state.disableuser = true
+              this.$store.state.disablesubscription = true
               this.$router.push('/upload/' + id)
             })
             .catch(error =>{
@@ -165,25 +168,61 @@ export default {
             })
           }
        }
+     },
+     getData(id){
+
+       socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
+
+         if (data.data.length !== 0) {
+           this.showDiv = false
+           this.loading = false
+           this.$router.push('/landing/' + data.data[0].id)
+         }
+         else {
+           this.showDiv = true
+           this.loading = false
+           this.$store.state.jobData = {}
+         }
+       })
      }
     },
     mounted(){
       this.$store.state.validationStatus = false
-      socket.emit('uploader::find', {"subscriptionId":this.$store.state.subscription_id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
-        if (data.data.length !== 0) {
+      if(this.$store.state.disableuser == true){
+        this.$store.state.disableuser = false
+      }
+      if(this.$store.state.disablesubscription == true){
+        this.$store.state.disablesubscription = false
+      }
+      if(this.$store.state.subscription_id == 'All'){
+        this.loading = false
+        this.$Notice.error({
+         title: 'Please select a proper subscription id...'
+       });
+      }
+      else if(this.$store.state.subscription_id != "All"){
+        this.loading = false
+        this.getData(this.$store.state.subscription_id)
+      }
+    },
+    watch:{
+    '$store.state.subscription_id': function (id) {
+    
+      if(id == 'All'){
+        this.loading = false
+        this.$Notice.error({
+         title: 'Please select a proper subscription id...'
+       });
+      }
+      else {
+        if(this.showDiv == true){
           this.showDiv = false
-          this.loading = false
-          this.$router.push('/landing/' + data.data[0].id)
         }
-        else {
-          this.showDiv = true
-          this.loading = false
-          this.$store.state.jobData = {}
-          // this.$store.state.subscription_id = ''
-          // this.$store.state.userId = ''
-        }
-      })
+        this.loading = true
+        this.getData(id)
+      }
     }
+  }
 }
 </script>
 <style scoped>
