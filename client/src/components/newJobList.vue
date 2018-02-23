@@ -125,10 +125,12 @@ export default {
         let filtered_records
 
         if(this.$store.state.selectedUserName != "All"){
-          filtered_records = lodash.filter(self.$store.state.user_detail_list, function(o) { if(o.name == self.$store.state.selectedUserName){
-            return o.label
-          } });
-          id1 = filtered_records[0].label
+          if(self.$store.state.user_detail_list.length != 0){
+            filtered_records = lodash.filter(self.$store.state.user_detail_list, function(o) { if(o.name == self.$store.state.selectedUserName){
+              return o.label
+            } });
+            id1 = filtered_records[0].label
+          }
 
         }
 
@@ -157,7 +159,6 @@ export default {
         else {
 
           socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"}, (e, data) => {
-
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 = data.data
@@ -217,7 +218,7 @@ export default {
 
         let self = this
         self.$store.commit('SET_STORED_SUB_NAME',name)
-        
+
       }
     },
     mounted(){

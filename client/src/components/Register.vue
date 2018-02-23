@@ -7,7 +7,7 @@
       <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
           <Form ref="formRegister" :model="formRegister" :rules="ruleRegister">
-            <FormItem class="animate0 bounceIn">
+            <FormItem >
               <div class="pageheader">
                 <div class="pageicon"><i class="fa fa-hand-o-down"></i></div>
                 <div class="pagetitle">
@@ -20,7 +20,7 @@
               </div> -->
             </FormItem>
             <label class="subtitle animate1 bounceIn"> LOGIN INFORMATION </label>
-            <FormItem prop="email" class="animate1 bounceIn">
+            <FormItem prop="email" >
               <Input type="text" v-model="formRegister.email" placeholder="Email ID">
               </Input>
             </FormItem>
@@ -57,6 +57,7 @@
 </template>
 
 <script>
+/*eslint-disable*/
 import modelAuthentication from '@/api/authentication'
 export default {
   name: 'Register',
@@ -73,18 +74,21 @@ export default {
       },
       ruleRegister: {
         firstname: [
-          { required: true, message: 'Please Fill First Name', trigger: 'blur' }
+          { required: true, message: 'Please fill Firstname', trigger: 'blur'}
         ],
         lastname: [
-          { required: true, message: 'Please Fill Last Name', trigger: 'blur' }
+          {required: true, message: 'Please fill Lastname', trigger: 'blur'}
         ],
         email: [
-          { required: true, message: 'Please Fill Email', trigger: 'blur' },
-          { type: 'email', message: 'Please input correct email address', trigger: 'blur,change' }
+          {required: true, message: 'Please fill Email', trigger: 'blur'},
+          { type: 'email', message: 'Invalid Email..Please enter correct email', trigger: 'blur' }
+        ],
+        password: [
+          {required: true, message: 'Please fill password', trigger: 'blur'}
         ]
-      }
-    }
-  },
+      },
+  }
+},
   methods: {
     handleSubmit (name) {
       this.$refs[name].validate((valid) => {
@@ -94,6 +98,7 @@ export default {
             if (response) {
               this.loading = false
               this.$Message.success('User succesfuly register!')
+              this.$router.push('/Login')
             } else {
               this.loading = false
             }
@@ -103,11 +108,11 @@ export default {
             this.loading = false
           })
         } else {
-          this.$Message.error('Form validation failed!')
+          this.$Message.error('Please fill your details to register!')
         }
       })
     }
-  }
+}
 }
 </script>
 <style>
@@ -158,9 +163,9 @@ export default {
     color: #fff;
     font-size: 32px;
   }
-  .registerpanel .ivu-form-item-error-tip {
+  /*.registerpanel .ivu-form-item-error-tip {
     display:none;
-  }
+  }*/
   .registerpanel .ivu-form-item {
     margin-bottom: 10px;
   }
@@ -301,5 +306,19 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.registerpanel .ivu-form-item-error-tip {
+   display: block
+}
+ .ivu-form-item-error-tip {
+    position: relative !important;
+    top: 100%;
+    left: 0;
+    line-height: 1;
+    padding-top: 0px;
+    margin-top:7px !important;
+    font-size:15px !important;
+    color: #ed3f14;
 }
 </style>
