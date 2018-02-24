@@ -1743,7 +1743,9 @@ export default {
 
       },
       changeSchema(tab,value){
-
+      //   if(this.mObj[tab].new_flag == 1){
+      //    this.mObj[tab].new_flag = 0
+      //  }
         if(value == "--Add new--"){
           console.log("++++++++++++++++++++ add new")
           this.proceedBtn = true
@@ -1789,9 +1791,7 @@ export default {
         else{
           // this.loadingdot = true
           console.log("++++++++++++++++++++ add old")
-          if(this.mObj[tab].new_flag == 1){
-            this.mObj[tab].new_flag = 0
-          }
+          //
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
@@ -1803,19 +1803,16 @@ export default {
               this.mObj[tab].schema = new Schema(currentschema[0].schema)
 
               this.mObj[tab].display = false
-
-              if(this.mObj[tab].uploadDisplay){
-
+               console.log("$$$$$ inside getmapping $$$$$")
+             if(this.mObj[tab].uploadDisplay){
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
-
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else{
-
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = true
               }
@@ -1860,7 +1857,7 @@ export default {
                   this.mObj[tab].newUploadCSV.push(obj)
 
                   this.mObj[tab].load = false
-                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false){
+                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
                     self.mObj[tab].previewDisplay = true
                     self.mObj[tab].headerDisplay = true
                   }
@@ -1915,6 +1912,7 @@ export default {
             }
           }
           if(flag == false){
+            console.log("validate schema +++++++++++++++++")
              this.mObj[tab].poptip_display = false
              this.mObj[tab].display = false
              this.mObj[tab].schemaList.push({"value" : schema,"label": schema})
@@ -1923,6 +1921,7 @@ export default {
              this.mObj[tab].schemaList.splice(this.mObj[tab].schemaList.length-1,0,this.mObj[tab].schemaList.splice(new_index,1)[0]);
              this.mObj[tab].selected_schema = schema
              this.mObj[tab].new_flag = 1
+
           }
         }
       },

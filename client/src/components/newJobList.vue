@@ -149,6 +149,7 @@ export default {
             if(data.data.length != 0){
               self.loading = false
               self.data2 = data.data
+              // self.data2 = self.data2.reverse()
               self.chunkData = lodash.chunk(self.data2, 10);
 
             }
@@ -163,6 +164,7 @@ export default {
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 = data.data
+                // self.data2 = self.data2.reverse()
                 self.chunkData = lodash.chunk(self.data2, 10);
 
               }
@@ -178,8 +180,9 @@ export default {
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 = data.data
+                // self.data2 = self.data2.reverse()
                 self.chunkData = lodash.chunk(self.data2, 10);
-                
+
               }
               else{
                 self.loading = false
