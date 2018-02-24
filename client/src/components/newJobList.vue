@@ -1,7 +1,10 @@
 <template>
   <div>
     <h2 class="listUpld">List of Uploads</h2><br>
-    <Table :columns="columns1" :data="data2" class="jobtable"></Table>
+    <Table :columns="columns1" :data="chunkData[cpage-1]" class="jobtable"></Table>
+    <div class="pagination">
+      <Page :total="data2.length" :current="cpage" @on-change="changePage" :page-size=10></Page>
+    </div>
     <Spin fix v-if="loading">
        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
        <div>Loading</div>
@@ -109,7 +112,9 @@ export default {
                 }
             ],
             data2: [],
-            loading: true
+            chunkData: [],
+            loading: true,
+            cpage: 1
         }
     },
     methods:{
@@ -119,9 +124,13 @@ export default {
           return res
         }
       },
+      changePage(page) {
+        this.cpage = page
+      },
       getJobDetails(){
         let self = this
         self.data2 = []
+        self.chunkData = []
         let filtered_records
 
         if(this.$store.state.selectedUserName != "All"){
@@ -136,9 +145,13 @@ export default {
 
         if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id != "All"){
           socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id}, (e, data) => {
+
             if(data.data.length != 0){
               self.loading = false
               self.data2 = data.data
+              // self.data2 = self.data2.reverse()
+              self.chunkData = lodash.chunk(self.data2, 10);
+
             }
             else{
               self.loading = false
@@ -147,9 +160,13 @@ export default {
         }
         else if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id == "All"){
           socket.emit('uploader::find', {"user_id":id1,"role":"other"}, (e, data) => {
+
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 = data.data
+                // self.data2 = self.data2.reverse()
+                self.chunkData = lodash.chunk(self.data2, 10);
+
               }
               else{
                 self.loading = false
@@ -159,9 +176,13 @@ export default {
         else {
 
           socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"}, (e, data) => {
+
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 = data.data
+                // self.data2 = self.data2.reverse()
+                self.chunkData = lodash.chunk(self.data2, 10);
+
               }
               else{
                 self.loading = false
@@ -207,11 +228,13 @@ export default {
         let self = this
         self.$store.commit('SET_STORED_SUB_ID',id)
         self.data2 = []
+        self.chunkData = []
           self.getJobDetails()
       },
       '$store.state.selectedUserName': function(name) {
         let self = this
         self.data2 = []
+        self.chunkData = []
         self.getJobDetails()
       },
       '$store.state.subscription_name':function(name){
@@ -230,6 +253,7 @@ export default {
         this.$store.state.disablesubscription = false
       }
       self.data2 = []
+      self.chunkData = []
       self.getJobDetails()
 
     }
@@ -257,5 +281,9 @@ export default {
    height: 100px;
    position: relative;
    border: 1px solid #eee;
+}
+.pagination{
+  margin-top: 10px;
+  float:right;
 }
 </style>
