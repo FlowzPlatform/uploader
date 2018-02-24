@@ -1743,8 +1743,11 @@ export default {
 
       },
       changeSchema(tab,value){
-
+      //   if(this.mObj[tab].new_flag == 1){
+      //    this.mObj[tab].new_flag = 0
+      //  }
         if(value == "--Add new--"){
+          console.log("++++++++++++++++++++ add new")
           this.proceedBtn = true
           // this.loadingdot = true
           this.mObj[tab].display = true
@@ -1787,7 +1790,8 @@ export default {
         }
         else{
           // this.loadingdot = true
-
+          console.log("++++++++++++++++++++ add old")
+          //
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
@@ -1799,19 +1803,16 @@ export default {
               this.mObj[tab].schema = new Schema(currentschema[0].schema)
 
               this.mObj[tab].display = false
-
-              if(this.mObj[tab].uploadDisplay){
-
+               console.log("$$$$$ inside getmapping $$$$$")
+             if(this.mObj[tab].uploadDisplay){
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
-
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else{
-
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = true
               }
@@ -1856,7 +1857,7 @@ export default {
                   this.mObj[tab].newUploadCSV.push(obj)
 
                   this.mObj[tab].load = false
-                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false){
+                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
                     self.mObj[tab].previewDisplay = true
                     self.mObj[tab].headerDisplay = true
                   }
@@ -1911,6 +1912,7 @@ export default {
             }
           }
           if(flag == false){
+            console.log("validate schema +++++++++++++++++")
              this.mObj[tab].poptip_display = false
              this.mObj[tab].display = false
              this.mObj[tab].schemaList.push({"value" : schema,"label": schema})
@@ -1919,6 +1921,7 @@ export default {
              this.mObj[tab].schemaList.splice(this.mObj[tab].schemaList.length-1,0,this.mObj[tab].schemaList.splice(new_index,1)[0]);
              this.mObj[tab].selected_schema = schema
              this.mObj[tab].new_flag = 1
+
           }
         }
       },
@@ -1947,11 +1950,13 @@ export default {
                     self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                     self.mObj[tab].headers.push("_id")
                     if(self.mObj[tab].new_flag == 1){
+                      console.log("new called....")
                       self.mObj[tab].load = true
                       self.mObj[tab].mapping = []
                       self.generateHeadersandMapping(tab)
                     }
                     else{
+                      console.log("old called...")
                       self.mObj[tab].load = true
                       if(self.mObj[tab].newSchemaDisplay == true){
                         self.mObj[tab].newSchemaDisplay = false
@@ -2762,6 +2767,7 @@ export default {
         }
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
+          console.log("schema res.....",res)
             schema_id = res.data.id
 
             api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
@@ -2835,6 +2841,9 @@ export default {
       })
     }
     self.proceedBtn = true
+    if(self.mObj[tab].new_flag == 1){
+      self.mObj[tab].new_flag = 0
+    }
   },
   setprogress(message){
     let self = this
