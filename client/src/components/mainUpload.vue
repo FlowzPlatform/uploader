@@ -1011,7 +1011,7 @@ export default {
         self.visible = true;
       },
       retResult(reader){
-        console.log('...........1111 ')
+
         let _promise = new Promise((resolve, reject) => {
             reader.addEventListener('load',function () {
               // console.log('encoded file: ', reader.result);
@@ -1029,7 +1029,7 @@ export default {
             $('#image-file').change(async function () {
               let fileChooser = document.getElementById('image-file');
               let file1 = fileChooser.files[0]
-              console.log("file1.....",file1)
+
               let file_ext = file1.name.split('.').pop()
               let ext = ['jpg','jpeg','gif','png']
               let ext_idx = lodash.findIndex(ext, function(o) { return o == file_ext; });
@@ -1047,9 +1047,9 @@ export default {
                   no_of_uplds =  no_of_uplds + 1;
                   reader.readAsDataURL(file1);
                   let uri = await self.retResult(reader)
-                  console.log("uri....",uri)
+
                   api.request('post', '/upload-image/',{uri:uri,file_name:file1.name}).then(response => {
-                    console.log("save-image response ========>",response)
+
                     self.uploadList.push(response.data)
                   });
                  }
@@ -1743,7 +1743,6 @@ export default {
 
       },
       changeSchema(tab,value){
-
         if(value == "--Add new--"){
           this.proceedBtn = true
           // this.loadingdot = true
@@ -1787,7 +1786,7 @@ export default {
         }
         else{
           // this.loadingdot = true
-
+          //
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
@@ -1800,18 +1799,15 @@ export default {
 
               this.mObj[tab].display = false
 
-              if(this.mObj[tab].uploadDisplay){
-
+             if(this.mObj[tab].uploadDisplay){
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
-
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = false
               }
               else{
-
                 this.mObj[tab].newSchemaDisplay = false
                 this.mObj[tab].headerDisplay = true
               }
@@ -1856,7 +1852,7 @@ export default {
                   this.mObj[tab].newUploadCSV.push(obj)
 
                   this.mObj[tab].load = false
-                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false){
+                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
                     self.mObj[tab].previewDisplay = true
                     self.mObj[tab].headerDisplay = true
                   }
@@ -1911,6 +1907,7 @@ export default {
             }
           }
           if(flag == false){
+
              this.mObj[tab].poptip_display = false
              this.mObj[tab].display = false
              this.mObj[tab].schemaList.push({"value" : schema,"label": schema})
@@ -1919,6 +1916,7 @@ export default {
              this.mObj[tab].schemaList.splice(this.mObj[tab].schemaList.length-1,0,this.mObj[tab].schemaList.splice(new_index,1)[0]);
              this.mObj[tab].selected_schema = schema
              this.mObj[tab].new_flag = 1
+
           }
         }
       },
@@ -1947,11 +1945,13 @@ export default {
                     self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                     self.mObj[tab].headers.push("_id")
                     if(self.mObj[tab].new_flag == 1){
+
                       self.mObj[tab].load = true
                       self.mObj[tab].mapping = []
                       self.generateHeadersandMapping(tab)
                     }
                     else{
+
                       self.mObj[tab].load = true
                       if(self.mObj[tab].newSchemaDisplay == true){
                         self.mObj[tab].newSchemaDisplay = false
@@ -2703,32 +2703,6 @@ export default {
 
       }
 
-
-      // if (newHotSettingsData.length == 0) {
-      //   console.log("callled if.........")
-      //
-      //   self.mObj[tab].errmsg = []
-      //   $('table.htCore').each(function () {
-      //     this.remove()
-      //   })
-      //
-      //   document.getElementById('example1').style.display = 'none'
-      //
-      //   self.mObj[tab].showHandson = false
-      //   self.mObj[tab].errDisplay = false
-      //   self.loading = true
-      //   self.saveData(tab)
-      //
-      // } else {
-      //       console.log("callled eslse.........")
-      //   $('table.htCore').each(function () {
-      //     this.remove()
-      //   })
-      //   document.getElementsByClassName('ht_master handsontable')[0].remove()
-      //   self.showerrmsg(errcols,tab)
-      //   // self.ProceedToValidate(tab)
-      //
-      // }
       if(document.getElementById('hot-display-license-info')){
         document.getElementById('hot-display-license-info').style.display = 'none'
       }
@@ -2762,6 +2736,7 @@ export default {
         }
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
+
             schema_id = res.data.id
 
             api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
@@ -2835,6 +2810,9 @@ export default {
       })
     }
     self.proceedBtn = true
+    if(self.mObj[tab].new_flag == 1){
+      self.mObj[tab].new_flag = 0
+    }
   },
   setprogress(message){
     let self = this
@@ -3194,11 +3172,7 @@ export default {
                       }
                       else if(self.val_data.length > 0){
                         self.$store.state.validationStatus = true
-                        // }
-                        // else if(self.$store.state.calledFromContinue == true){
-                        //   console.log("from continue......")
-                        //   self.setValData(response.data,filtered_keys)
-                        // }
+
                       }
 
                     }

@@ -62,12 +62,12 @@ var beforeFind = async function(hook){
   else if(hook.params.query["user_id"] && hook.params.query["role"]){
 
     delete hook.params.query["role"]
-    let uploaderData = await(hook.app.service('/uploader').find({query:{"user_id":hook.params.query["user_id"],$sort: {"id": -1}}}))
+    let uploaderData = await(hook.app.service('/uploader').find({query:{"user_id":hook.params.query["user_id"],$sort: {"id": -1},$limit: 1000}}))
     hook.result = uploaderData
   }
   else if(hook.params.query["user_id"] && hook.params.query["subscriptionId"] && !hook.params.query["$sort"]){
 
-    let uploaderData = await(hook.app.service('/uploader').find({query:{"subscriptionId":hook.params.query["subscriptionId"],"user_id":hook.params.query["user_id"],$sort: {"id": -1}}}))
+    let uploaderData = await(hook.app.service('/uploader').find({query:{"subscriptionId":hook.params.query["subscriptionId"],"user_id":hook.params.query["user_id"],$sort: {"id": -1},$limit: 1000}}))
     hook.result = uploaderData
   }
 }
