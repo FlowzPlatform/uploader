@@ -70,7 +70,7 @@ export const ProductShippingSchema = new Schema({
     	label: "Shipping Qty Per Carton",
       optional: false,
       allowedValues: [],
-      defaultValue: '',
+      defaultValue: 1,
       maxLength : '',
       regEx:''
         },
