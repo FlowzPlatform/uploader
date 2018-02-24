@@ -10,7 +10,7 @@ export default {
     state.user = user
   },
   async SET_SUBSCRIPTION_DETAIL (state, response) {
-    console.log("+++++++++++++ set sub detail called mutationjs",response)
+
     let authToken = response.config.headers.authorization
     state.userid = response.data.data._id
     state.subscription_detail_list = []
@@ -20,7 +20,7 @@ export default {
       state.subscription_detail_list.push({"subscription_id":response.data.data.package[key].subscriptionId,"name":response.data.data.package[key].name,"role":response.data.data.package[key].role})
     }
 
-    console.log("subscription_detail_list.....",state.subscription_detail_list)
+
 
     for(let key in state.subscription_detail_list){
       let response = await axios({
@@ -31,7 +31,7 @@ export default {
         }
       })
       .then(response => {
-        console.log("++++++++++++++ response from subscriptionuri......",response)
+
         return response
       })
       list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})
@@ -39,7 +39,7 @@ export default {
 
 
       let uniq_user_id = _.uniqBy(list1, 'label');
-      console.log("uniq_user_id....",uniq_user_id)
+
       let uniq_user_array = []
     // setTimeout(function(){
       for(let i=0;i<uniq_user_id.length;i++){
@@ -101,11 +101,11 @@ export default {
     state.settings = settings
   },
   SET_TABDATA (state, tabdata) {
-    // console.log('SET_TABDATA', tabdata)
+
     state.tabdata.push(tabdata)
   },
   DEL_TABINDEX (state, data) {
-    // console.log(data)
+
     state.tabdata.splice(data.index, 1)
   }
 }
