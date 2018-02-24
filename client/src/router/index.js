@@ -23,6 +23,8 @@ import Uploader from '@/components/uploader'
 import uploaderLanding from '@/components/uploader_landing'
 import mainUpload from '@/components/mainUpload'
 import newJoblist from '@/components/newJobList'
+import forgotPassword from '@/components/forgotPassword'
+import resetPassword from '@/components/resetPassword'
 // import example from '@/components/example'
 
 // import FlowzList from '@/components/FlowList'
@@ -78,5 +80,15 @@ const routes = [{
   path: '/Register',
   name: 'Register',
   component: Register
+},
+{
+  path: '/forgot-password',
+  name: 'forgotPassword',
+  component: forgotPassword
+},
+{
+  path: '/reset-password',
+  name: 'resetPassword',
+  component: resetPassword
 }]
 export default routes

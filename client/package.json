@@ -43,6 +43,7 @@
     "jQuery": "^1.7.4",
     "jquery": "^3.2.1",
     "jquery-ui": "^1.12.1",
+    "js-cookie": "^2.2.0",
     "jsdom": "^11.2.0",
     "json-daex": "0.0.13",
     "location": "0.0.1",
