@@ -2260,7 +2260,7 @@ export default {
           if (value !== undefined) {
             let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
             if(check != true)
-            return  'invalid allowedValue'
+            return  'invalid allowedValue, allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
             else {
               return
             }
@@ -2297,7 +2297,7 @@ export default {
             if (value !== undefined && typeof(value) == "string") {
               let check = value.length
               if(check != self.mObj[self.activeTab].mapping[i].schemaObj.maxLength)
-              return  'invalid maxLength'
+              return  'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength
               else {
                 return
               }
@@ -2401,10 +2401,10 @@ export default {
                     }
 
                     if(item.message == "Error during casting"){
-                        self.mObj[tab].errmsg.push('* ' + 'Invalid value at column: ' + item.field)
+                        self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
                     }
                     else {
-                      self.mObj[tab].errmsg.push('* ' + item.message + ' at column: ' + item.field)
+                      self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
                     }
                   })
 
@@ -3217,12 +3217,15 @@ export default {
 
       socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
         self.existingSchemaData = res.data[0]
-        let schemaNames = _.groupBy(res.data,"tabname");
+        let schemaNames = lodash.groupBy(res.data,"tabname");
+        let schemavalue = lodash.isEmpty(schemaNames)
 
-         if(schemaNames.length != 0){
+         if(schemavalue != true){
            _.forEach(schemaNames,(value,key) => {
              for(let i=0;i<value.length;i++){
-               self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
+               if(key != undefined){
+                 self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
+               }
              }
            })
            for(let i=0;i<self.fileTypes.length;i++){
@@ -3233,7 +3236,7 @@ export default {
          }
 
 
-        if(schemaNames.length == 0){
+        if(schemavalue == true){
           for(let i=0;i<self.fileTypes.length;i++){
             self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
             self.mObj[self.fileTypes[i]].display = true
