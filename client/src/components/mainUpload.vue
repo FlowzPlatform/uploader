@@ -2401,7 +2401,7 @@ export default {
                     }
 
                     if(item.message == "Error during casting"){
-                        self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
+                      self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
                     }
                     else {
                       self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)

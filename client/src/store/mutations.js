@@ -12,6 +12,7 @@ export default {
   async SET_SUBSCRIPTION_DETAIL (state, response) {
 
     let authToken = response.config.headers.authorization
+    console.log("response....",response.data.data._id)
     state.userid = response.data.data._id
     state.subscription_detail_list = []
     state.user_detail_list = []
@@ -20,7 +21,7 @@ export default {
       state.subscription_detail_list.push({"subscription_id":response.data.data.package[key].subscriptionId,"name":response.data.data.package[key].name,"role":response.data.data.package[key].role})
     }
 
-
+   console.log("subscription_deatil_list....",state.subscription_detail_list)
 
     for(let key in state.subscription_detail_list){
       let response = await axios({
@@ -31,14 +32,17 @@ export default {
         }
       })
       .then(response => {
-
+        console.log(response)
         return response
       })
-      list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})
+      if(response.data.data.length != 0){
+        list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})  
+      }
     }
 
 
       let uniq_user_id = _.uniqBy(list1, 'label');
+      console.log("uniq_user_id....",uniq_user_id)
 
       let uniq_user_array = []
     // setTimeout(function(){

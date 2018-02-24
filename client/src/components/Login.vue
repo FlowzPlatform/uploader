@@ -82,7 +82,8 @@
                   </Tooltip>
 								</Col>
 								<Col  style="float:right;">
-									Not a member?&nbsp;
+                  <router-link to="/forgot-password" >Forgot Password</router-link>
+									&nbsp;Not a member?&nbsp;
 									<router-link to="/register" >Sign Up</router-link>
 								</Col>
 							</Row>
