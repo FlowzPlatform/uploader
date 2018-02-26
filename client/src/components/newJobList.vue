@@ -265,12 +265,16 @@ export default {
 <style scoped>
 .jobtable{
   text-align: center !important;
+  overflow: inherit !important;
 }
 .jobtable th{
   text-align: center !important;
 }
 .listUpld{
   text-align: center !important;
+}
+.ivu-table-body {
+  overflow: inherit !important;
 }
 .demo-spin-icon-load{
        animation: ani-demo-spin 1s linear infinite;

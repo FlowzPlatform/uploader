@@ -159,7 +159,7 @@ export default {
               this.$router.push('/upload/' + id)
             })
             .catch(error =>{
-               this.loadingBtn = false
+              this.loadingBtn = false
               if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
                 this.$Notice.error({
                  title: error.response.data.message
