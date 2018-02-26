@@ -18,17 +18,20 @@ export default {
     })
   },
   social: (params) => {
+    console.log('params....', params)
     return axios({
       method: 'post',
       url: config.microURI + '/verifyemail',
       data: params
     }).then(response => {
       if (response) {
+        console.log('response....', response)
         return response.data
       } else {
         throw new Error('Network error!')
       }
     }).catch(error => {
+      console.log(error)
       throw error
     })
   },

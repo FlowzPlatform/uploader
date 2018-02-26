@@ -24,7 +24,6 @@ export const ProductInformationSchema = new Schema({
         label: "Country",
         allowedValues: ['US', 'CA', 'AU'],
         optional: false,
-        allowedValues: [],
         defaultValue: '',
         maxLength : '',
         regEx:''
@@ -645,6 +644,15 @@ export const ProductInformationSchema = new Schema({
   supplier:{
           type: "string",
           label: "supplier",
+          optional: true,
+          allowedValues: [],
+          defaultValue: '',
+          maxLength : '',
+          regEx:''
+  },
+  supplier_id:{
+          type: "string",
+          label: "supplier_id",
           optional: true,
           allowedValues: [],
           defaultValue: '',

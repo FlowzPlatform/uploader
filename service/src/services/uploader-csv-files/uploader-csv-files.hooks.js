@@ -39,9 +39,16 @@ module.exports = {
 };
 
 var beforeCreate = async function(hook){
-    let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"] ))
-    hook.data["createdAt"] = new Date()
-    hook.data["updatedAt"] = new Date()
-    hook.data["deletedAt"] = ''
-    hook.data["user_id"] = user_data.data.userId
+  module.exports.authorization = this.authorization;
+  let uploaderData = await(hook.app.service('/uploader').get(hook.data["import_tracker_id"]))
+  let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"]))
+    if(uploaderData.user_id == user_data.data.userId){
+      hook.data["createdAt"] = new Date()
+      hook.data["updatedAt"] = new Date()
+      hook.data["deletedAt"] = ''
+      hook.data["user_id"] = user_data.data.userId
+    }
+    else{
+      throw new errors.GeneralError('You have selected wrong subscription id...')
+    }
 }

@@ -4,6 +4,7 @@ let await = require('asyncawait/await');
 let axios = require('axios');
 let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk'
 let subscription_url = 'https://api.' + domainkey + '/subscription/user-subscription'
+let getUserdetailUrl = 'https://api.' + domainkey + '/user/getuserdetails/'
 const _ = require('lodash');
 module.exports = {
   before: {
@@ -75,16 +76,29 @@ var beforeFind = async function(hook){
 
 var beforeCreate = async function(hook){
   module.exports.subscriptionId = this.subscriptionId;
-  let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"]))
+  module.exports.authorization = this.authorization;
+  let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"] ))
   let tdata = []
   tdata = await(hook.app.service('/uploader').find({query:{"masterJobStatus":"running","user_id":user_data.data.userId}}))
   if(tdata.data.length == 0){
+    let user_details = await axios({
+       method: 'get',
+       url: getUserdetailUrl + user_data.data.userId,
+       headers: {
+         'authorization': module.exports.authorization
+       }
+     })
     if(hook.data.stepStatus == 'upload_pending'){
-      // hook.data["subscriptionId"] = module.exports.subscriptionId
       hook.data["createdAt"] = new Date()
       hook.data["key"] = 'pdm_uploader'
       hook.data["masterJobStatus"] = 'running',
       hook.data["user_id"] = user_data.data.userId
+      if(user_details.data.data[0].firstname && user_details.data.data[0].lastname){
+        hook.data["username"] = user_details.data.data[0].firstname +  " " + user_details.data.data[0].lastname
+      }
+      else if(user_details.data.data[0].email){
+        hook.data["username"] = user_details.data.data[0].email
+      }
     }
     else{
       throw new errors.BadRequest('Invalid Parameters', {

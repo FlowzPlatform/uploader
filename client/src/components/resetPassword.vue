@@ -5,33 +5,14 @@
       </vue-particles>
       <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
-          <!-- <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="post">
-            <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
-          </form>
-          <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="post">
-            <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
-          </form>
-          <form id="form-twitter" name="form-twitter" :action="loginWithTwitterUrl" method="post">
-            <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
-          </form>
-          <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="post">
-            <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
-          </form>
-          <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="post">
-            <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
-          </form> -->
           <Form ref="formResetPassword" :model="formResetPassword" :rules="ruleResetPassword">
             <FormItem class="animate0 bounceIn">
 							<div class="pageheader">
                 <div class="pageicon"><i class="fa fa-unlock-alt"></i></div>
                 <div class="pagetitle">
-                  <!-- <h5>Your Login Information</h5> -->
                   <h1>Reset Password</h1>
                 </div>
               </div>
-              <!-- <div style="text-align: center;">
-                <img src="../assets/images/logo.png" style="width:60%;"/>
-              </div> -->
             </FormItem>
             <FormItem prop="password" class="animate1 bounceIn">
               <Input type="password" v-model="formResetPassword.password" placeholder="New Password">
@@ -54,10 +35,6 @@
         </Col>
       </Row>
     </div>
-
-    <!-- <div class="loginfooter">
-        <p>© 2017. Flowz technology. All Rights Reserved.</p>
-    </div> -->
   </div>
 </template>
 
@@ -101,29 +78,26 @@ export default {
       this.$refs[name].validate(async (valid) => {
         if (valid) {
                let self = this
-
+               self.loading = true
                let url = new URL(window.location.href);
-
                let forgetToken = url.search.split('=')
-
              axios.post(config.resetPasswordUrl, {
                      new_password: self.formResetPassword.password.trim(),
                      token: forgetToken[1]
                })
                .then(function (response) {
-
+                   self.loading = false
                    self.$message.success(response.data.message);
-                   self.$router.push('/Login');
+                   setTimeout(function(){
+                     self.$router.push('/Login')
+                   },1700);
                })
                .catch(function (error) {
-                   
+                   self.loading = false
                    self.$message.error(error.response.data);
                });
-
-          this.loading = false
-          this.$Message.error('Form validation success!')
         } else {
-          this.$Message.error('Form validation failed!')
+          // this.$Message.error('Form validation failed!')
         }
       })
     }

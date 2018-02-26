@@ -254,6 +254,7 @@ export default {
       }
     },
     mounted(){
+      this.loading = true
       this.$store.state.validationStatus = false
 
       if(this.$store.state.subscription_name != "All"){
