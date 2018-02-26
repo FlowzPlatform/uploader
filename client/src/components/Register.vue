@@ -111,6 +111,10 @@ export default {
             if (response) {
               this.loading = false
               this.$Message.success('User succesfuly register!')
+              this.formRegister.firstname = ""
+              this.formRegister.lastname = ""
+              this.formRegister.email = ""
+              this.formRegister.password = ""
               setTimeout(function(){
                 self.$router.push('/Login')
               },1700)

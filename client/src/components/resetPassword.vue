@@ -88,6 +88,8 @@ export default {
                .then(function (response) {
                    self.loading = false
                    self.$message.success(response.data.message);
+                   self.formResetPassword.password = ""
+                   self.formResetPassword.confirmpassword = ""
                    setTimeout(function(){
                      self.$router.push('/Login')
                    },1700);

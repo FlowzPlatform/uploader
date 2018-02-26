@@ -68,11 +68,11 @@
                 </div>
 
                 <div id="upload-csv-zone" v-if="mObj[activeTab].uploadDisplay">
-                  <div class="file-zone" @click="upldCSV(activeTab)">
+                  <div class="file-zone">
                       <span class="dz-message">Drop <span style="color: #494e6b">"{{activeTab}}"</span> files here<br/>
                           <small>(only csv files are valid.)</small>
                       </span>
-                      <input type="file" id="csv-file" name="files" accept=".csv"/>
+                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event)"/>
                   </div>
               </div>
 
@@ -364,25 +364,26 @@
                            <div slot="title">
                              <h3>Property</h3></div>
                            <div slot="content" class="prptycontent">
-                             <Form-item label="MaxLength" :label-width="80" class="prpty-label">
+                             <!-- <Form> -->
+                             <Form-item label="MaxLength" :label-width="1" class="prpty-label">
                                <Input  size="small" v-model="item.schemaObj.maxLength" ></Input>
                              </Form-item>
-                             <Form-item  label="Allowed Value" :label-width="80" class="prpty-label">
+                             <Form-item  label="Allowed Value" :label-width="1" class="prpty-label">
                                 <input-tag  :tags="item.schemaObj.allowedValues" class="allowedTags"></input-tag>
                              </Form-item>
-                             <Form-item  label="Default Value" :label-width="80" class="prpty-label">
+                             <Form-item  label="Default Value" :label-width="1" class="prpty-label">
                                <Input size="small" v-model="item.schemaObj.defaultValue"></Input>
                              </Form-item>
-                             <Form-item  label="regEx" :label-width="80" class="prpty-label">
+                             <Form-item  label="regEx" :label-width="1" class="prpty-label">
                                <Input size="small" v-model="item.schemaObj.regEx"></Input>
                              </Form-item>
-                             <Form-item  label="label" :label-width="80" class="prpty-label">
+                             <Form-item  label="label" :label-width="1" class="prpty-label">
                                <Input size="small" v-model="item.schemaObj.label"></Input>
                              </Form-item>
-                             <Form-item  label="" :label-width="80" class="prpty-label">
-                               <Checkbox class="propertychbx" v-model="item.schemaObj.optional">Optional</Checkbox>
+                             <Form-item  label="" :label-width="1" class="prpty-label">
+                               <Checkbox  id="prptychckbox" class="propertychbx" v-model="item.schemaObj.optional">Optional</Checkbox>
                              </Form-item>
-
+                           <!-- </Form> -->
                            </div>
                          </Poptip>
                        </div>
@@ -1006,6 +1007,52 @@ export default {
     }
   },
     methods:{
+      handleFileChange (e) {
+        let self = this
+        let tab = self.activeTab
+        file =  e.target.files[0]
+
+        let file_ext = file.name.split('.').pop()
+        if(file_ext != 'csv'){
+          self.$Notice.error({title: 'Only CSV files are allowed',duration: 1})
+        }
+        else{
+          self.mObj[tab].load = true
+          self.mObj[tab].uploadDisplay = false
+            Papa.parse(file, {
+              header: true,
+              dynamicTyping: true,
+              encoding: "UTF-8",
+              skipEmptyLines: false,
+              chunk: function(results, streamer){
+                self.mObj[tab].uploadCSV = results.data
+                self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
+                self.mObj[tab].headers.push("_id")
+                if(self.mObj[tab].new_flag == 1){
+
+                  self.mObj[tab].load = true
+                  self.mObj[tab].mapping = []
+                  self.generateHeadersandMapping(tab)
+                }
+                else{
+
+                  self.mObj[tab].load = true
+                  if(self.mObj[tab].newSchemaDisplay == true){
+                    self.mObj[tab].newSchemaDisplay = false
+                  }
+
+
+                  self.mObj[tab].mapping = []
+
+                  self.getMapping(tab)
+                  // self.mObj[tab].previewDisplay = true
+                  // self.mObj[tab].headerDisplay = true
+                }
+              }
+            })
+
+        }
+      },
       handleView (item) {
         let self = this
         self.imgpath = item.file_path;
@@ -1015,7 +1062,6 @@ export default {
 
         let _promise = new Promise((resolve, reject) => {
             reader.addEventListener('load',function () {
-              // console.log('encoded file: ', reader.result);
               let result = reader.result
               resolve(result)
               // return result
@@ -1027,36 +1073,36 @@ export default {
         let self = this
           const reader  = new FileReader();
           $(document).ready(function () {
-            $('#image-file').change(async function () {
-              let fileChooser = document.getElementById('image-file');
-              let file1 = fileChooser.files[0]
-
-              let file_ext = file1.name.split('.').pop()
-              let ext = ['jpg','jpeg','gif','png']
-              let ext_idx = lodash.findIndex(ext, function(o) { return o == file_ext; });
-              if(ext_idx == -1){
-                self.$Notice.error({title: 'Only jpg,png and gif files are allowed',duration: 200})
-              }
-              else{
-                // console.log("max.....",$(this).attr(max))
-                if(no_of_uplds > 5)
-                 {
-                 self.$Notice.error({title: 'Only 5 images can be uploaded',duration: 200})
-                 }
-                 else
-                 {
-                  no_of_uplds =  no_of_uplds + 1;
-                  reader.readAsDataURL(file1);
-                  let uri = await self.retResult(reader)
-
-                  api.request('post', '/upload-image/',{uri:uri,file_name:file1.name}).then(response => {
-
-                    self.uploadList.push(response.data)
-                  });
-                 }
-              }
-
-            })
+            // $('#image-file').change(async function () {
+            //   let fileChooser = document.getElementById('image-file');
+            //   let file1 = fileChooser.files[0]
+            //
+            //   let file_ext = file1.name.split('.').pop()
+            //   let ext = ['jpg','jpeg','gif','png']
+            //   let ext_idx = lodash.findIndex(ext, function(o) { return o == file_ext; });
+            //   if(ext_idx == -1){
+            //     self.$Notice.error({title: 'Only jpg,png and gif files are allowed',duration: 200})
+            //   }
+            //   else{
+            //     // console.log("max.....",$(this).attr(max))
+            //     if(no_of_uplds > 5)
+            //      {
+            //      self.$Notice.error({title: 'Only 5 images can be uploaded',duration: 200})
+            //      }
+            //      else
+            //      {
+            //       no_of_uplds =  no_of_uplds + 1;
+            //       reader.readAsDataURL(file1);
+            //       let uri = await self.retResult(reader)
+            //
+            //       api.request('post', '/upload-image/',{uri:uri,file_name:file1.name}).then(response => {
+            //
+            //         self.uploadList.push(response.data)
+            //       });
+            //      }
+            //   }
+            //
+            // })
           })
     },
       showUpload(){
@@ -1422,6 +1468,7 @@ export default {
           self.uploadStep = false
           self.validateStep = true
           self.currentStep = 1
+          $(".f-layout-copy").css("position","fixed");
           let obj2 = {
             "stepStatus": "validation_running"
           }
@@ -1861,6 +1908,7 @@ export default {
                    this.mObj[tab].newUploadCSV.push(obj)
 
                    this.mObj[tab].load = false
+                   $(".f-layout-copy").css("position","absolute");
                    if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
                      self.mObj[tab].previewDisplay = true
                      self.mObj[tab].headerDisplay = true
@@ -1939,13 +1987,13 @@ export default {
         let self = this
 
         $(document).ready(function () {
-          $('#csv-file').change(function () {
+          $('#csv-file').bind("change",function () {
             let fileChooser = document.getElementById('csv-file')
             file = fileChooser.files[0]
 
             let file_ext = file.name.split('.').pop()
             if(file_ext != 'csv'){
-              self.$Notice.error({title: 'Only CSV files are allowed',duration: 200})
+              self.$Notice.error({title: 'Only CSV files are allowed',duration: 20})
             }
             else{
               self.mObj[tab].load = true
@@ -1985,6 +2033,7 @@ export default {
             }
 
             })
+            $('#csv-file').unbind("change",function () {})
             })
     },
     generateHeadersandMapping(tab){
@@ -2015,6 +2064,7 @@ export default {
              self.mObj[tab].newSchemaDisplay = true
              self.mObj[tab].previewDisplay = true
              self.mObj[tab].load = false
+             $(".f-layout-copy").css("position","absolute");
              self.loadingdot = false
           }
             let index = self.mObj[tab].newUploadCSV.length - 1
@@ -2463,6 +2513,7 @@ export default {
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
+      $(".f-layout-copy").css("position","fixed");
     },
     abortUploadedRecords(tab){
       this.deleteRecModal = false
@@ -2638,6 +2689,8 @@ export default {
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'block'
       }
+      $(".f-layout-copy").css("position","fixed");
+
       // document.getElementById('hot-display-license-info').style.display = 'none'
     },
     modifyData (tab) {
@@ -3603,8 +3656,8 @@ export default {
 }
 .handsontable td.error {
 
-  border: 2px solid red;
-  outline: none;
+  border: 2px solid #2d8cf0;
+  /*outline: none;*/
 }
 
 .demo-spin-icon-load{
@@ -3810,27 +3863,22 @@ export default {
       /*padding-left: 7px;*/
     }
     .allowedTags{
-      width: 175px !important;
+      width: 253px !important;
       height: 25px !important;
     }
     .propertychbx{
-      margin-left: 50px;
-      margin-right: 6px;
+      float:right;
     }
     .prptycontent{
       overflow: inherit !important;
     }
-    /*.prpty-label{
-    text-align: justify !important;
-    vertical-align: middle;
-    float: left;
-    font-size: 12px !important;
-    color: #495060;
-    line-height: 1;
-    padding: 3px 20px 12px 0px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    }*/
+    #prptychckbox span {
+      margin-left: 0px;
+      margin-right: 0px;
+    }
 
+    /*.handsontable tbody th.ht__highlight, .handsontable thead th.ht__highlight {
+    background-color: #fff !important
+}*/
 
 </style>
