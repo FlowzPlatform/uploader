@@ -363,25 +363,26 @@
                            </a>
                            <div slot="title">
                              <h3>Property</h3></div>
-                           <div slot="content">
-                             <Form-item label="MaxLength" :label-width="80" class="no-margin">
+                           <div slot="content" class="prptycontent">
+                             <Form-item label="MaxLength" :label-width="80" class="prpty-label">
                                <Input  size="small" v-model="item.schemaObj.maxLength" ></Input>
                              </Form-item>
-                             <Form-item  label="Allowed Value" :label-width="80" class="no-margin">
+                             <Form-item  label="Allowed Value" :label-width="80" class="prpty-label">
                                 <input-tag  :tags="item.schemaObj.allowedValues" class="allowedTags"></input-tag>
                              </Form-item>
-                             <Form-item  label="Default Value" :label-width="80" class="no-margin">
+                             <Form-item  label="Default Value" :label-width="80" class="prpty-label">
                                <Input size="small" v-model="item.schemaObj.defaultValue"></Input>
                              </Form-item>
-                             <Form-item  label="regEx" :label-width="80" class="no-margin">
+                             <Form-item  label="regEx" :label-width="80" class="prpty-label">
                                <Input size="small" v-model="item.schemaObj.regEx"></Input>
                              </Form-item>
-                             <Form-item  label="label" :label-width="80" class="no-margin">
+                             <Form-item  label="label" :label-width="80" class="prpty-label">
                                <Input size="small" v-model="item.schemaObj.label"></Input>
                              </Form-item>
-                             <Form-item  label="" :label-width="80" class="no-margin">
+                             <Form-item  label="" :label-width="80" class="prpty-label">
                                <Checkbox class="propertychbx" v-model="item.schemaObj.optional">Optional</Checkbox>
                              </Form-item>
+
                            </div>
                          </Poptip>
                        </div>
@@ -1789,31 +1790,38 @@ export default {
           //
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
-          socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
-            this.existingSchemaData = res.data
-            let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
-            if(currentschema.length != 0){
+          socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
+            if(res){
+              this.existingSchemaData = res.data
+              let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
+              if(currentschema.length != 0){
 
-              schema_id = currentschema[0].id
-              this.mObj[tab].schema = new Schema(currentschema[0].schema)
+                schema_id = currentschema[0].id
+                this.mObj[tab].schema = new Schema(currentschema[0].schema)
 
-              this.mObj[tab].display = false
+                this.mObj[tab].display = false
 
-             if(this.mObj[tab].uploadDisplay){
-                this.mObj[tab].newSchemaDisplay = false
-                this.mObj[tab].headerDisplay = false
+                if(this.mObj[tab].uploadDisplay){
+                  this.mObj[tab].newSchemaDisplay = false
+                  this.mObj[tab].headerDisplay = false
+                }
+                else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
+                  this.mObj[tab].newSchemaDisplay = false
+                  this.mObj[tab].headerDisplay = false
+                }
+                else{
+                  this.mObj[tab].newSchemaDisplay = false
+                  this.mObj[tab].headerDisplay = true
+                }
+
+
+                this.getMapping(tab)
               }
-              else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
-                this.mObj[tab].newSchemaDisplay = false
-                this.mObj[tab].headerDisplay = false
-              }
-              else{
-                this.mObj[tab].newSchemaDisplay = false
-                this.mObj[tab].headerDisplay = true
-              }
-
-
-              this.getMapping(tab)
+            }
+            else{
+                this.$Notice.error({
+                 title: e.response.data.message
+               });
             }
           })
 
@@ -1830,51 +1838,58 @@ export default {
           this.loadingdot = true
           this.map = true
           this.mObj[tab].mapping = []
-           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"subscriptionId":this.$store.state.subscription_id}, (e, data) => {
-             this.mObj[tab].mapping = data.data[0].mapping
-             let schema_keys = _.keys(this.mObj[tab].schema.structure);
+           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, data) => {
+             if(data){
+               this.mObj[tab].mapping = data.data[0].mapping
+               let schema_keys = _.keys(this.mObj[tab].schema.structure);
 
-             if(this.mObj[tab].uploadCSV.length != 0){
-               this.mObj[tab].newUploadCSV = []
-               for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
-                 let obj = {}
-                  for(let key in this.mObj[tab].uploadCSV[i]){
-                    for(let j=0;j<this.mObj[tab].mapping.length;j++){
-                      if(this.mObj[tab].mapping[j].csvHeader == key){
-                          obj[this.mObj[tab].mapping[j].sysHeader] = this.mObj[tab].uploadCSV[i][key]
-                      }
-                      else if(!obj.hasOwnProperty(this.mObj[tab].mapping[j].sysHeader)){
-                           obj[this.mObj[tab].mapping[j].sysHeader] = ''
-                      }
-                    }
-                  }
-                  obj["_id"] = uuidV1()
-                  this.mObj[tab].newUploadCSV.push(obj)
+               if(this.mObj[tab].uploadCSV.length != 0){
+                 this.mObj[tab].newUploadCSV = []
+                 for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
+                   let obj = {}
+                   for(let key in this.mObj[tab].uploadCSV[i]){
+                     for(let j=0;j<this.mObj[tab].mapping.length;j++){
+                       if(this.mObj[tab].mapping[j].csvHeader == key){
+                         obj[this.mObj[tab].mapping[j].sysHeader] = this.mObj[tab].uploadCSV[i][key]
+                       }
+                       else if(!obj.hasOwnProperty(this.mObj[tab].mapping[j].sysHeader)){
+                         obj[this.mObj[tab].mapping[j].sysHeader] = ''
+                       }
+                     }
+                   }
+                   obj["_id"] = uuidV1()
+                   this.mObj[tab].newUploadCSV.push(obj)
 
-                  this.mObj[tab].load = false
-                  if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
-                    self.mObj[tab].previewDisplay = true
-                    self.mObj[tab].headerDisplay = true
-                  }
-                  this.loadingdot = false
-               }
+                   this.mObj[tab].load = false
+                   if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
+                     self.mObj[tab].previewDisplay = true
+                     self.mObj[tab].headerDisplay = true
+                   }
+                   this.loadingdot = false
+                 }
 
 
-             let index = this.mObj[tab].newUploadCSV.length - 1
-              this.mObj[tab].newUploadCSV.splice(index, 1)
-              this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
+                 let index = this.mObj[tab].newUploadCSV.length - 1
+                 this.mObj[tab].newUploadCSV.splice(index, 1)
+                 this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
-                for(let k=0;k<this.mObj[tab].mapping.length;k++){
-                 if(this.mObj[tab].mapping[k].transform != ""){
-                   this.transformData = this.mObj[tab].mapping[k].transform
-                   this.modelIndex = k
-                   this.handleModalOk()
+                 for(let k=0;k<this.mObj[tab].mapping.length;k++){
+                   if(this.mObj[tab].mapping[k].transform != ""){
+                     this.transformData = this.mObj[tab].mapping[k].transform
+                     this.modelIndex = k
+                     this.handleModalOk()
+                   }
                  }
                }
-              }
-              else{
-                this.loadingdot = false
-              }
+               else{
+                 this.loadingdot = false
+               }
+             }
+             else{
+               this.$Notice.error({
+                title: e.response.data.message
+              });
+             }
 
            })
          }
@@ -2068,7 +2083,7 @@ export default {
               if(value != "" || value != undefined){
                let date = moment(value)
                let isValid = date.isValid()
-               if (isValid != true) return 'invalid date. please provide date in y-m-d format'
+               if (isValid != true) return 'Invalid date. Please provide date in y-m-d format'
                date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
                return
              }
@@ -2078,7 +2093,7 @@ export default {
                 if (value != "" || value != undefined) {
                   let re = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/
                   if(re.test(value) !== true)
-                  return 'invalid url'
+                  return 'Invalid url'
                   else
                   return
                 }
@@ -2088,7 +2103,7 @@ export default {
         if(value !== undefined || value !== ""){
           let re = /\S+@\S+\.\S+/
           if(re.test(value) !== true)
-          return  'invalid email address'
+          return  'Invalid email address'
           else
           return
         }
@@ -2107,7 +2122,7 @@ export default {
         let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
         if (value !== undefined || value !== "") {
           if(re.test(value) !== true)
-          return 'invalid phone number'
+          return 'Invalid phone number'
           else
           return
         }
@@ -2117,7 +2132,7 @@ export default {
         let re = /^[0-9]{1,6}$/ // eslint-disable-line
         if (value !== undefined || value !== "") {
           if(re.test(value) !== true)
-          return 'invalid pin-code'
+          return 'Invalid pin-code'
           else
           return
         }
@@ -2260,7 +2275,7 @@ export default {
           if (value !== undefined) {
             let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
             if(check != true)
-            return  'invalid allowedValue, allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
+            return  'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
             else {
               return
             }
@@ -2276,7 +2291,7 @@ export default {
             i = key
           }
         })
-        if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== '') {
+        if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== '' && self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== undefined ) {
 
           if (value == "")
             return  'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
@@ -2401,7 +2416,12 @@ export default {
                     }
 
                     if(item.message == "Error during casting"){
+                      if(err_type == 'number'){
+                        self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
+                      }
+                      else if(err_type == 'string'){
                         self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
+                      }
                     }
                     else {
                       self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
@@ -2714,7 +2734,8 @@ export default {
         size: file.size,
         totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
         username: self.$store.state.user.email,
-        subscriptionId: self.$store.state.subscription_id
+        subscriptionId: self.$store.state.subscription_id,
+        import_tracker_id: id
       }
 
       let name = tab.replace(/\s/g, "")
@@ -2732,6 +2753,7 @@ export default {
           schema: self.mObj[tab].schema.structure,
           username: self.$store.state.user.email,
           subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id: id,
           tabname: tab
         }
 
@@ -2746,7 +2768,8 @@ export default {
                 mapping : self.mObj[tab].mapping,
                 fileTypeId : self.mObj[tab].selected_schema,
                 username : self.$store.state.user.email,
-                subscriptionId: self.$store.state.subscription_id
+                subscriptionId: self.$store.state.subscription_id,
+                import_tracker_id:id
               }
 
               api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
@@ -2781,6 +2804,8 @@ export default {
         .catch(error => {
           if(error.response.data.className == 'general-error' && error.response.data.code == 500)
             self.$Notice.error({title: error.response.data.message })
+          else
+            self.$Notice.error({title: error.response.data.message })
            })
 
       }
@@ -2806,7 +2831,7 @@ export default {
           })
       })
       .catch(error => {
-          self.$Notice.error({title: 'Error!'})
+          self.$Notice.error({title: error.response.data.message })
       })
     }
     self.proceedBtn = true
@@ -3110,7 +3135,7 @@ export default {
       id = self.$route.params.id
       self.loading = true
       self.$store.state.disableuser = true
-      self.$store.state.disablesubsciption = true
+      self.$store.state.disablesubscription = true
 
       api.request('get', '/uploader/' + id ).then(response => {
         if(response.data != null){
@@ -3215,42 +3240,50 @@ export default {
         }
       })
 
-      socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id}, (e, res) => {
-        self.existingSchemaData = res.data[0]
-        let schemaNames = lodash.groupBy(res.data,"tabname");
-        let schemavalue = lodash.isEmpty(schemaNames)
+      socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
+        if(res){
+          self.existingSchemaData = res.data[0]
+          let schemaNames = lodash.groupBy(res.data,"tabname");
+          let schemavalue = lodash.isEmpty(schemaNames)
 
-         if(schemavalue != true){
-           _.forEach(schemaNames,(value,key) => {
-             for(let i=0;i<value.length;i++){
-               if(key != undefined){
-                 self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
-               }
-             }
-           })
-           for(let i=0;i<self.fileTypes.length;i++){
-             self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
-             let new_index = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value == '--Add new--'; });
-             self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(new_index,1)[0]);
-           }
-         }
-
-
-        if(schemavalue == true){
-          for(let i=0;i<self.fileTypes.length;i++){
-            self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
-            self.mObj[self.fileTypes[i]].display = true
+          if(schemavalue != true){
+            _.forEach(schemaNames,(value,key) => {
+              for(let i=0;i<value.length;i++){
+                if(key != undefined){
+                  self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
+                }
+              }
+            })
+            for(let i=0;i<self.fileTypes.length;i++){
+              self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
+              let new_index = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value == '--Add new--'; });
+              self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(new_index,1)[0]);
+            }
           }
-          self.loading = false
-          for(let i=0;i<self.fileTypes.length;i++){
-            self.mObj[self.fileTypes[i]].uploadDisplay = true
+
+
+          if(schemavalue == true){
+            for(let i=0;i<self.fileTypes.length;i++){
+              self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
+              self.mObj[self.fileTypes[i]].display = true
+            }
+            self.loading = false
+            for(let i=0;i<self.fileTypes.length;i++){
+              self.mObj[self.fileTypes[i]].uploadDisplay = true
+            }
           }
+          else{
+            for(let i=0;i<self.fileTypes.length;i++){
+              self.mObj[self.fileTypes[i]].selected_schema = self.mObj[self.fileTypes[i]].schemaList[0].value
+            }
+            self.loading = false
+          }
+
         }
-        else{
-          for(let i=0;i<self.fileTypes.length;i++){
-            self.mObj[self.fileTypes[i]].selected_schema = self.mObj[self.fileTypes[i]].schemaList[0].value
-          }
-          self.loading = false
+        else {
+          this.$Notice.error({
+           title: e.response.data.message
+         });
         }
 
       })
@@ -3784,6 +3817,20 @@ export default {
       margin-left: 50px;
       margin-right: 6px;
     }
+    .prptycontent{
+      overflow: inherit !important;
+    }
+    /*.prpty-label{
+    text-align: justify !important;
+    vertical-align: middle;
+    float: left;
+    font-size: 12px !important;
+    color: #495060;
+    line-height: 1;
+    padding: 3px 20px 12px 0px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    }*/
 
 
 </style>

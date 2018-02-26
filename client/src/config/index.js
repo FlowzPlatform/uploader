@@ -28,7 +28,10 @@ var temp = {
   loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
   subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
-  getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/'
+  getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
+  resetPasswordRedirectUrl: 'https://uploader.' + domainkey + '/reset-password',
+  resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
+  forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -49,7 +52,10 @@ if (process.env.MYENV !== 'development') {
     loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
     jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
     subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
-    getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/'
+    getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
+    resetPasswordRedirectUrl: 'https://uploader.' + domainkey + '/reset-password',
+    resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
+    forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword'
   }
 }
 

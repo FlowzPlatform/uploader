@@ -142,15 +142,15 @@ export default {
               subscriptionId: this.$store.state.subscription_id
             }
 
-            if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.firstname
-            }
-            else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
-            }
-            else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.lastname
-            }
+            // if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
+            //   obj["username"] = this.$store.state.user.firstname
+            // }
+            // else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
+            //   obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
+            // }
+            // else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
+            //   obj["username"] = this.$store.state.user.lastname
+            // }
 
             api.request('post', '/uploader', obj).then(res => {
               id = res.data.id
@@ -187,6 +187,7 @@ export default {
      }
     },
     mounted(){
+      this.loading = true
       this.$store.state.validationStatus = false
       if(this.$store.state.disableuser == true){
         this.$store.state.disableuser = false
@@ -201,13 +202,13 @@ export default {
        });
       }
       else if(this.$store.state.subscription_id != "All"){
-        this.loading = false
+        // this.loading = false
         this.getData(this.$store.state.subscription_id)
       }
     },
     watch:{
     '$store.state.subscription_id': function (id) {
-    
+
       if(id == 'All'){
         this.loading = false
         this.$Notice.error({

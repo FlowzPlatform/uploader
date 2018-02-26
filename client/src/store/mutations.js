@@ -21,7 +21,6 @@ export default {
     }
 
 
-
     for(let key in state.subscription_detail_list){
       let response = await axios({
         method: 'get',
@@ -31,10 +30,11 @@ export default {
         }
       })
       .then(response => {
-
         return response
       })
-      list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})
+      if(response.data.data.length != 0){
+        list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})
+      }
     }
 
 
