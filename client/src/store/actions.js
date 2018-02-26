@@ -39,7 +39,7 @@ export default {
     commit('SET_USER', authToken)
   },
   authenticate ({ commit }, authToken) {
-    console.log("++++++++++++++++++ authenticate called")
+
     return axios({
       method: 'get',
       url: config.microURI + '/userdetails',

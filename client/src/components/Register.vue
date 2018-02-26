@@ -59,9 +59,22 @@
 <script>
 /*eslint-disable*/
 import modelAuthentication from '@/api/authentication'
+// import lodash from 'lodash'
 export default {
   name: 'Register',
   data () {
+    const emailValidator = (rule, value, callback) => {
+                if (value == '') {
+                    callback(new Error('Please fill email'));
+                } else if (value != '') {
+                  let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
+                  if(re.test(value) != true)
+                    callback(new Error('Please enter correct email'));
+                  else
+                    callback()
+                }
+            };
+
     return {
       loading: false,
       formRegister: {
@@ -80,8 +93,7 @@ export default {
           {required: true, message: 'Please fill Lastname', trigger: 'blur'}
         ],
         email: [
-          {required: true, message: 'Please fill Email', trigger: 'blur'},
-          { type: 'email', message: 'Invalid Email..Please enter correct email', trigger: 'blur' }
+          {validator:emailValidator,trigger: 'blur'}
         ],
         password: [
           {required: true, message: 'Please fill password', trigger: 'blur'}
@@ -91,6 +103,7 @@ export default {
 },
   methods: {
     handleSubmit (name) {
+      let self = this
       this.$refs[name].validate((valid) => {
         if (valid) {
           this.loading = true
@@ -98,7 +111,9 @@ export default {
             if (response) {
               this.loading = false
               this.$Message.success('User succesfuly register!')
-              this.$router.push('/Login')
+              setTimeout(function(){
+                self.$router.push('/Login')
+              },1700)
             } else {
               this.loading = false
             }
@@ -108,7 +123,9 @@ export default {
             this.loading = false
           })
         } else {
-          this.$Message.error('Please fill your details to register!')
+          // if(lodash.isEmpty(this.$refs[name].model["firstname"]) == true && lodash.isEmpty(this.$refs[name].model["lastname"]) == true && lodash.isEmpty(this.$refs[name].model["email"]) == true && lodash.isEmpty(this.$refs[name].model["password"]) == true){
+          //   this.$Message.error('Please fill your details to register!')
+          // }
         }
       })
     }

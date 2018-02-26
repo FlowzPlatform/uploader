@@ -68,8 +68,8 @@ export default {
       this.$refs[name].validate(async (valid) => {
         if (valid) {
           this.loading = true
-          var auth = await modelAuthentication.social(this.formLogin).catch(error => {
 
+          var auth = await modelAuthentication.social(this.formLogin).catch(error => {
 						this.$Message.error(error.response.data)
             return
           })
@@ -90,8 +90,11 @@ export default {
     }
   },
   mounted () {
-    let params = new URLSearchParams(window.location.search)
-    this.formLogin.id = params.get('ob_id')
+    // let params = new URLSearchParams(window.location.search)
+    // this.formLogin.id = params.get('ob_id')
+    let url = new URL(window.location.href);
+    let ob_id = url.search.split('=')[1]
+    this.formLogin.id = ob_id
   }
 }
 </script>

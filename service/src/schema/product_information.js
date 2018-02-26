@@ -104,6 +104,7 @@ const ProductInformationSchema = {
     private: "string",
 
     supplier: "string",
+    supplier_id: "string",
 
     company: "string",
 

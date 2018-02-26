@@ -41,18 +41,32 @@ module.exports = {
 };
 
 var beforeFind = async function(hook){
+  module.exports.authorization = this.authorization;
   if(!hook.params.query["user_id"]){
+    let uploaderData = await(hook.app.service('/uploader').get(hook.params.query["import_tracker_id"]))
     let user_data = await(axios.get(subscription_url + '/' + hook.params.query["subscriptionId"]))
+    if(uploaderData.user_id == user_data.data.userId){
     mappingData = await(hook.app.service('/uploader-csv-file-mapping').find({query:{"user_id":user_data.data.userId,"fileTypeId":hook.params.query.fileTypeId}}))
     hook.result = mappingData
+    }
+    else {
+      throw new errors.GeneralError('You have selected wrong subscription id...');
+    }
   }
 
 }
 
 var beforeCreate = async function(hook){
+    module.exports.authorization = this.authorization;
+    let uploaderData = await(hook.app.service('/uploader').get(hook.data["import_tracker_id"]))
     let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"] ))
+   if(uploaderData.user_id == user_data.data.userId){
     hook.data["createdAt"] = new Date()
     hook.data["updatedAt"] = new Date()
     hook.data["deletedAt"] = ''
     hook.data["user_id"] = user_data.data.userId
+   }
+   else{
+     throw new errors.GeneralError('You have selected wrong subscription id...')
+   }
 }

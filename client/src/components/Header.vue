@@ -129,6 +129,9 @@ import config from '@/config'
              this.selected_user = this.user_list[0].label
            }
          }
+         else if(list.length == 0){
+           this.selected_user = this.user_list[0].label
+         }
        },
        'selected_user':function(user){
          if(user != "All"){
@@ -154,13 +157,9 @@ import config from '@/config'
     },
     mounted(){
       let self = this
-        // if(this.$store.state.subscription_name != ''){
-        //   self.selected_subscription_name =  this.$store.state.subscription_name
-        // }
         for(let i=0 ;i<self.$store.state.subscription_detail_list.length;i++){
           self.subscription_list.push({"value":self.$store.state.subscription_detail_list[i].subscription_id,"label":self.$store.state.subscription_detail_list[i].name})
         }
-        // self.subscription_list.push({"value":"All","label":"All"})
         if(self.$store.state.storedSubscriptionName != "" && self.$store.state.storedSubscriptionName != "All"){
           let sub_id = lodash.findIndex(self.subscription_list, function(o) { return o.label == self.$store.state.storedSubscriptionName; })
           if(sub_id != -1){
@@ -169,6 +168,7 @@ import config from '@/config'
         }
         else{
           self.selected_subscription_name = self.subscription_list[0].label
+          self.selected_user = self.user_list[0].label
         }
 
       // }

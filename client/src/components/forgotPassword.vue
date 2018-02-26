@@ -5,33 +5,14 @@
       </vue-particles>
       <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
-          <!-- <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="post">
-            <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
-          </form>
-          <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="post">
-            <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
-          </form>
-          <form id="form-twitter" name="form-twitter" :action="loginWithTwitterUrl" method="post">
-            <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
-          </form>
-          <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="post">
-            <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
-          </form>
-          <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="post">
-            <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
-          </form> -->
           <Form ref="formForgotPassword" :model="formForgotPassword" :rules="ruleForgotPassword">
             <FormItem class="animate0 bounceIn">
 							<div class="pageheader">
                 <div class="pageicon"><i class="fa fa-unlock-alt"></i></div>
                 <div class="pagetitle">
-                  <!-- <h5>Your Login Information</h5> -->
                   <h1>Forgot Password</h1>
                 </div>
               </div>
-              <!-- <div style="text-align: center;">
-                <img src="../assets/images/logo.png" style="width:60%;"/>
-              </div> -->
             </FormItem>
             <FormItem prop="email" class="animate1 bounceIn">
               <Input type="text" v-model="formForgotPassword.email" placeholder="Enter your email">
@@ -57,10 +38,6 @@
         </Col>
       </Row>
     </div>
-
-    <!-- <div class="loginfooter">
-        <p>© 2017. Flowz technology. All Rights Reserved.</p>
-    </div> -->
   </div>
 </template>
 
@@ -75,6 +52,17 @@ import Cookies from 'js-cookie';
 export default {
   name: 'login',
   data () {
+    const emailValidator = (rule, value, callback) => {
+                if (value == '') {
+                    callback(new Error('Please fill email'));
+                } else if (value != '') {
+                  let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
+                  if(re.test(value) != true)
+                    callback(new Error('Please enter correct email'));
+                  else
+                    callback()
+                }
+    };
     return {
       loading: false,
       formForgotPassword: {
@@ -82,8 +70,8 @@ export default {
       },
       ruleForgotPassword: {
         email: [
-          { required: true, message: 'Please fill in the email id', trigger: 'blur' },
-          { type: 'email', message: 'Please input correct email address', trigger: 'blur' }
+          // { required: true, message: 'Please fill in the email id', trigger: 'blur' },
+          {validator:emailValidator,trigger: 'blur'}
         ]
       }
     }
@@ -93,7 +81,7 @@ export default {
       this.$refs[name].validate(async (valid) => {
         if (valid) {
           let self = this
-
+          self.loading = true
            axios.post(config.forgotPasswordUrl, {
                    email: self.formForgotPassword.email.trim(),
                    url: config.resetPasswordRedirectUrl,
@@ -102,18 +90,19 @@ export default {
                    }
                })
                .then(function(response) {
-                   
                    if (response.data.code == 200) {
+                       self.loading = false
                        self.$message.success(response.data.message);
                        self.formForgotPassword.email = ""
                    }
                })
                .catch(function(error) {
+                  self.loading = false
                   self.$message.error("Email is incorrect");
                });
-          this.loading = false
+
         } else {
-          this.$Message.error('Please enter your email')
+          // this.$Message.error('Please enter your email')
         }
       })
     }

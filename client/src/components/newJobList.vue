@@ -226,6 +226,7 @@ export default {
       '$store.state.subscription_id': function (id) {
 
         let self = this
+        self.loading = true
         self.$store.commit('SET_STORED_SUB_ID',id)
         self.data2 = []
         self.chunkData = []
@@ -233,6 +234,7 @@ export default {
       },
       '$store.state.selectedUserName': function(name) {
         let self = this
+        self.loading = true
         self.data2 = []
         self.chunkData = []
         self.getJobDetails()
@@ -246,6 +248,7 @@ export default {
     },
     mounted(){
       var self = this
+      this.loading = true
       if(this.$store.state.disableuser == true){
         this.$store.state.disableuser = false
       }

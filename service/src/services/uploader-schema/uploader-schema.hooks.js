@@ -40,28 +40,40 @@ module.exports = {
   }
 };
 var beforeFind = async function(hook){
+  module.exports.authorization = this.authorization;
   if(!hook.params.query["user_id"]){
-    let user_data = await(axios.get(subscription_url + '/' + hook.params.query["subscriptionId"] ))
-
-    schemaData = await(hook.app.service('/uploader-schema').find({query:{"user_id":user_data.data.userId}}))
-    
-    hook.result = schemaData
+    let uploaderData = await(hook.app.service('/uploader').get(hook.params.query["import_tracker_id"]))
+    let user_data = await(axios.get(subscription_url + '/' + hook.params.query["subscriptionId"]))
+    if(uploaderData.user_id == user_data.data.userId){
+      schemaData = await(hook.app.service('/uploader-schema').find({query:{"user_id":user_data.data.userId}}))
+      hook.result = schemaData
+    }
+    else {
+      throw new errors.GeneralError('You have selected wrong subscription id...');
+    }
   }
 
 }
 
 
 var beforeCreate = async function(hook){
+  module.exports.authorization = this.authorization;
   let schemaData = []
-  let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"] ))
-  schemaData = await(hook.app.service('/uploader-schema').find({query:{"name":hook.data.name,"user_id":user_data.data.userId}}))
-  if(schemaData.data.length == 0){
-    hook.data["createdAt"] = new Date()
-    hook.data["updatedAt"] = new Date()
-    hook.data["user_id"] = user_data.data.userId
+  let uploaderData = await(hook.app.service('/uploader').get(hook.data["import_tracker_id"]))
+  let user_data = await(axios.get(subscription_url + '/' + hook.data["subscriptionId"]))
+  if(uploaderData.user_id == user_data.data.userId){
+    schemaData = await(hook.app.service('/uploader-schema').find({query:{"name":hook.data.name,"user_id":user_data.data.userId}}))
+    if(schemaData.data.length == 0){
+      hook.data["createdAt"] = new Date()
+      hook.data["updatedAt"] = new Date()
+      hook.data["user_id"] = user_data.data.userId
+    }
+    else if(schemaData.data.length > 0){
+      throw new errors.GeneralError('This mapping name already exists');
+    }
   }
-  else if(schemaData.data.length > 0){
-    throw new errors.GeneralError('This mapping name already exists');
+  else{
+    throw new errors.GeneralError('You have selected wrong subscription id...')
   }
 
 }
