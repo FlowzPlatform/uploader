@@ -142,15 +142,18 @@ export default {
               subscriptionId: this.$store.state.subscription_id
             }
 
-            // if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
-            //   obj["username"] = this.$store.state.user.firstname
-            // }
-            // else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
-            //   obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
-            // }
-            // else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
-            //   obj["username"] = this.$store.state.user.lastname
-            // }
+            if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
+              obj["username"] = this.$store.state.user.firstname
+            }
+            else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
+              obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
+            }
+            else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
+              obj["username"] = this.$store.state.user.lastname
+            }
+            else if(this.$store.state.user.email){
+                obj["email"] = this.$store.state.user.email
+            }
 
             api.request('post', '/uploader', obj).then(res => {
               id = res.data.id
@@ -159,7 +162,7 @@ export default {
               this.$router.push('/upload/' + id)
             })
             .catch(error =>{
-               this.loadingBtn = false
+              this.loadingBtn = false
               if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
                 this.$Notice.error({
                  title: error.response.data.message

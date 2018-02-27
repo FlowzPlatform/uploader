@@ -9,11 +9,9 @@ export default {
     commit('SET_SCHEMA', [])
     api.request('get', '/schema')
       .then(response => {
-        // console.log('hdhd::', _.reject(response.data, { 'isdeleted': true })) response.data
         commit('SET_SCHEMA', _.reject(response.data, { 'isdeleted': true }))
       })
       .catch(error => {
-        console.log(error)
         commit('SET_SCHEMA', [])
       })
   },
@@ -24,13 +22,11 @@ export default {
         commit('SET_SETTINGS', response.data)
       })
       .catch(error => {
-        console.log(error)
         // commit('SET_SETTINGS', [])
       })
   },
   getTabdata ({commit}, text) {
     commit('SET_TABDATA', text)
-    // console.log('getTabdata', text)
   },
   delTabIndex ({commit}, text) {
     commit('DEL_TABINDEX', text)

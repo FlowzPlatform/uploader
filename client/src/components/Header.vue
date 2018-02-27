@@ -153,6 +153,11 @@ import config from '@/config'
             }
          }
        }
+       else {
+         if(this.selected_subscription_name == ""){
+           this.selected_subscription_name = this.subscription_list[0].label
+         }
+       }
      }
     },
     mounted(){
@@ -165,10 +170,11 @@ import config from '@/config'
           if(sub_id != -1){
             self.selected_subscription_name = self.subscription_list[sub_id].label
           }
+          self.selected_user = self.user_list[0].label
         }
         else{
           self.selected_subscription_name = self.subscription_list[0].label
-          self.selected_user = self.user_list[0].label
+          // self.selected_user = self.user_list[0].label
         }
 
       // }
