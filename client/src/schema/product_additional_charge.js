@@ -76,7 +76,7 @@ export const ProductAdditionalChargeSchema = new Schema({
           regEx:''
       },
       code_1: {
-          type: "number",
+          type: "string",
           label: "Code1",
           optional: true,
           allowedValues: [],

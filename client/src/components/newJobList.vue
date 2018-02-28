@@ -265,7 +265,7 @@ export default {
 <style scoped>
 .jobtable{
   text-align: center !important;
-  overflow: inherit !important;
+  /*overflow: inherit !important;*/
 }
 .jobtable th{
   text-align: center !important;
@@ -292,5 +292,6 @@ export default {
 .pagination{
   margin-top: 10px;
   float:right;
+  position:relative;
 }
 </style>

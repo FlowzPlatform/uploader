@@ -14,17 +14,17 @@ export default {
     let authToken = response.config.headers.authorization
     state.userid = response.data.data._id
     state.subscription_detail_list = []
+    state.subscription_list = [{"value":"All","label":"All"}]
     state.user_detail_list = []
     let list1 = []
     for(let key in response.data.data.package){
-      state.subscription_detail_list.push({"subscription_id":response.data.data.package[key].subscriptionId,"name":response.data.data.package[key].name,"role":response.data.data.package[key].role})
+      state.subscription_list.push({"value":response.data.data.package[key].subscriptionId,"label":response.data.data.package[key].name})
     }
 
-
-    for(let key in state.subscription_detail_list){
+    for(let key in state.subscription_list){
       let response = await axios({
         method: 'get',
-        url: config.subscriptionUri + '?id=' + state.subscription_detail_list[key].subscription_id,
+        url: config.subscriptionUri + '?id=' + state.subscription_list[key].value,
         headers: {
           'authorization': authToken
         }
@@ -33,7 +33,7 @@ export default {
         return response
       })
       if(response.data.data.length != 0){
-        list1.push({"value":state.subscription_detail_list[key].subscription_id,"label":response.data.data[0].userId})
+        list1.push({"value":state.subscription_list[key].value,"label":response.data.data[0].userId})
       }
     }
 

@@ -24,6 +24,10 @@
             </div>
           </ul>
         </Row>
+        <div class="landing_progress">
+            <Button type="primary" size="large" class="custombtn" @click="Proceed()" :disabled="disabled" v-if="!loadingBtn">Proceed</Button>
+            <Button type="primary" size="large" class="custombtn" v-if="loadingBtn">Loading...</Button>
+        </div>
         <Row>
           <div id="dv" class="clearfix col-md-10 col-md-offset-1 col-sm-12 col-xs-12" style="display:none">
               <Button type="ghost" class="ghtbtn">×</Button>
@@ -31,10 +35,7 @@
               <p id="get"></p>
           </div>
         </Row>
-        <div class="landing_progress">
-            <Button type="primary" size="large" class="custombtn" @click="Proceed()" :disabled="disabled" v-if="!loadingBtn">Proceed</Button>
-            <Button type="primary" size="large" class="custombtn" v-if="loadingBtn">Loading...</Button>
-        </div>
+
         <div id="display-error" style="display:none">Please choose a method of your choice.</div>
       </Form>
     </Row>
@@ -51,6 +52,7 @@ import config from '@/config'
 import io from 'socket.io-client'
 import feathers from 'feathers/client'
 import socketio from 'feathers-socketio/client'
+import lodash from 'lodash'
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -173,9 +175,7 @@ export default {
        }
      },
      getData(id){
-
        socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
-
          if (data.data.length !== 0) {
            this.showDiv = false
            this.loading = false
@@ -198,20 +198,56 @@ export default {
       if(this.$store.state.disablesubscription == true){
         this.$store.state.disablesubscription = false
       }
-      if(this.$store.state.subscription_id == 'All'){
-        this.loading = false
-        this.$Notice.error({
-         title: 'Please select a proper subscription id...'
-       });
+
+      if(this.$store.state.storedSubscriptionName != ""){
+        let self = this
+        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
+        if(sub_id != -1){
+            self.$store.state.subscription_list.splice(sub_id,1)
+        }
+
+        let subscription_obj1
+        subscription_obj1 = lodash.filter(self.$store.state.subscription_list, function(o) {
+           if(o.label == self.$store.state.storedSubscriptionName){
+             return o
+           }
+         });
+         if(subscription_obj1.length != 0){
+           self.$store.state.subscription_id = subscription_obj1[0].value
+         }
+        this.getData(this.$store.state.subscription_id)
       }
-      else if(this.$store.state.subscription_id != "All"){
+      else{
+        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
+        if(sub_id != -1){
+            self.$store.state.subscription_list.splice(sub_id,1)
+        }
+        this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
+        this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
         // this.loading = false
         this.getData(this.$store.state.subscription_id)
       }
+
+      // if(this.$store.state.subscription_id != ""){
+      //
+      // }
+
+      // if(this.$store.state.subscription_id == 'All'){
+      //   this.loading = false
+      //   this.$Notice.error({
+      //    title: 'Please select a proper subscription id...'
+      //  });
+      // }
+      // else if(this.$store.state.subscription_id != "All"){
+      //   // this.loading = false
+      //   this.getData(this.$store.state.subscription_id)
+      // }
+
+
+
     },
     watch:{
     '$store.state.subscription_id': function (id) {
-
       if(id == 'All'){
         this.loading = false
         this.$Notice.error({
