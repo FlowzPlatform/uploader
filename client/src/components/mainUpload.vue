@@ -2562,6 +2562,7 @@ export default {
       })
     },
     AbortValidation(tab){
+      console.log("++++++++++abort validation ++++++++++++++++")
       let self = this
       self.proceedBtn = true
       self.mObj[tab].errmsg = []
@@ -2674,7 +2675,7 @@ export default {
         data: [this.mObj[tab].data1[0]],
         colHeaders:this.mObj[tab].headers1[0],
         rowHeaders: true,
-        height: 65,
+        height: '100%',
         stretchH: "all",
         cells: (row, col) => {
           var cellProp = {}
@@ -2692,6 +2693,7 @@ export default {
           return cellProp
         }
       })
+
       ht.selectCell(row1,col1,row1,col1,true)
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'block'
@@ -3895,5 +3897,11 @@ export default {
     /*.handsontable tbody th.ht__highlight, .handsontable thead th.ht__highlight {
     background-color: #fff !important
 }*/
+#example1 .handsontable .wtHider {
+    height: 100% !important;
 
+}
+#example1 .ht_master .wtHolder {
+    height: 100% !important;
+}
 </style>

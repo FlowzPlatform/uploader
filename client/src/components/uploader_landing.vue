@@ -279,14 +279,30 @@ export default {
         this.findData(this.$store.state.subscription_id)
       }
       else{
+        let self = this
         let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
         if(sub_id != -1){
             self.$store.state.subscription_list.splice(sub_id,1)
         }
         this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
         this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
-        // this.loading = false
+        this.$store.state.storedSubscriptionName =   this.$store.state.subscription_name
         this.findData(this.$store.state.subscription_id)
+      }
+
+      if(this.$store.state.storedUsername != ""){
+        let self = this
+        let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
+        if(userId != -1){
+            self.$store.state.user_list.splice(userId,1)
+        }
+        if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
+          self.selected_user = self.$store.state.storedUsername
+        }
+        else{
+          self.selected_user = self.$store.state.user_list[0].label
+          self.$store.state.storedUsername = self.selected_user
+        }
       }
 
 
