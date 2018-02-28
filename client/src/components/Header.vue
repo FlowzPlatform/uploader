@@ -23,12 +23,12 @@
                    </router-link>
                    <Menu-item name="3" >
                      <Select v-model="selected_user" style="width:200px" @on-change="setSelectedUser()" :disabled=$store.state.disableuser>
-                        <Option v-for="item in user_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
+                        <Option v-for="item in $store.state.user_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
                     </Select>
                    </Menu-item>
                     <Menu-item name="4">
                       <Select v-model="selected_subscription_name" style="width:200px" @on-change="getSubscriptionId()" :disabled=$store.state.disablesubscription>
-                         <Option v-for="item in subscription_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
+                         <Option v-for="item in $store.state.subscription_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
                      </Select>
                     </Menu-item>
                     <Menu-item name="5">
@@ -99,16 +99,20 @@ import config from '@/config'
 
       },
       setSelectedUser(){
+        console.log("selecteduser....")
         let self = this
         self.$store.state.selectedUserName = self.selected_user
+        self.$store.state.storedUsername = self.selected_user
+        console.log("++++++++++++ storedusername ++++++++++++", self.$store.state.storedUsername)
       }
     },
     watch:{
       '$store.state.subscription_name': function (name) {
+
         let self = this
         let subscription_obj1
         self.selected_subscription_name =  name
-        subscription_obj1 = lodash.filter(self.subscription_list, function(o) {
+        subscription_obj1 = lodash.filter(self.$store.state.subscription_list, function(o) {
            if(o.label == self.selected_subscription_name ){
              return o
            }
@@ -116,21 +120,49 @@ import config from '@/config'
          if(subscription_obj1.length != 0){
            self.$store.state.subscription_id = subscription_obj1[0].value
          }
+
        },
        '$store.state.user_detail_list':function(list){
-         if(list.length != 0){
-           if(list[0].name != ""){
-             for(let i=0;i<list.length;i++){
-               let idx = lodash.findIndex(this.user_list, function(o) { return o.label == list[i]["name"]; })
-               if(idx == -1){
-                 this.user_list.push({"value":list[i].value,"label":list[i].name})
+         console.log("list called from header/....",list,this.$store.state.storedUsername)
+         if(this.$store.state.storedUsername == ""){
+           if(list.length != 0){
+             if(list[0].name != ""){
+               for(let i=0;i<list.length;i++){
+                 let idx = lodash.findIndex(this.$store.state.user_list, function(o) { return o.label == list[i]["name"]; })
+                 if(idx == -1){
+                   this.$store.state.user_list.push({"value":list[i].value,"label":list[i].name})
+                 }
                }
+               let indx2 = lodash.findIndex(this.$store.state.user_list, function(o) { return o.label == "All"; })
+               if(indx2 == -1){
+                 this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
+               }
+               this.selected_user = this.$store.state.user_list[0].label
+               this.$store.state.storedUsername = this.selected_user
+               console.log("++++++++++ storedUsername",this.$store.state.storedUsername)
              }
-             this.selected_user = this.user_list[0].label
+           }
+           else if(list.length == 0){
+             this.selected_user = this.$store.state.user_list[0].label
+             this.$store.state.storedUsername = this.selected_user
+             console.log("++++++++++ storedUsername",this.$store.state.storedUsername)
            }
          }
-         else if(list.length == 0){
-           this.selected_user = this.user_list[0].label
+         else{
+           let self = this
+           let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
+           if(userId != -1){
+               self.$store.state.user_list.splice(userId,1)
+           }
+           if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
+             console.log("if.....")
+             self.selected_user = self.$store.state.storedUsername
+           }
+           else{
+               console.log("else.....")
+             self.selected_user = self.$store.state.user_list[0].label
+             self.$store.state.storedUsername = self.selected_user
+           }
          }
        },
        'selected_user':function(user){
@@ -146,35 +178,55 @@ import config from '@/config'
              }
          })
 
-         for(let i=0;i<self.subscription_list.length;i++){
-            let idx1 = lodash.findIndex(sub_array, function(o) { return o.value == self.subscription_list[i].value; })
-            if(idx1 == -1 && self.subscription_list[i].value != "All"){
-             self.subscription_list.splice(i,1)
+         for(let i=0;i<self.$store.state.subscription_list.length;i++){
+            let idx1 = lodash.findIndex(sub_array, function(o) { return o.value == self.$store.state.subscription_list[i].value; })
+            if(idx1 == -1 && self.$store.state.subscription_list[i].value != "All"){
+             self.$store.state.subscription_list.splice(i,1)
             }
          }
        }
        else {
          if(this.selected_subscription_name == ""){
-           this.selected_subscription_name = this.subscription_list[0].label
+           this.selected_subscription_name = this.$store.state.subscription_list[0].label
          }
        }
+     },
+     '$store.state.subscription_list':function(list){
+       let self = this
+       if(self.$store.state.storedSubscriptionName != "" && self.$store.state.storedSubscriptionName != "All"){
+         let sub_id = lodash.findIndex(list, function(o) { return o.label == self.$store.state.storedSubscriptionName; })
+         if(sub_id != -1){
+           self.selected_subscription_name = list[sub_id].label
+           self.$store.state.subscription_name = self.selected_subscription_name
+         }
+         self.selected_user = self.$store.state.user_list[0].label
+       }
+       else{
+         self.selected_subscription_name = list[0].label
+        self.$store.state.subscription_name = self.selected_subscription_name
+         // self.selected_user = self.user_list[0].label
+       }
+
      }
     },
     mounted(){
       let self = this
-        for(let i=0 ;i<self.$store.state.subscription_detail_list.length;i++){
-          self.subscription_list.push({"value":self.$store.state.subscription_detail_list[i].subscription_id,"label":self.$store.state.subscription_detail_list[i].name})
-        }
+        // for(let i=0 ;i<self.$store.state.subscription_detail_list.length;i++){
+        //   self.subscription_list.push({"value":self.$store.state.subscription_detail_list[i].subscription_id,"label":self.$store.state.subscription_detail_list[i].name})
+        // }
+
+        // self.$store.state.subscription_list
         if(self.$store.state.storedSubscriptionName != "" && self.$store.state.storedSubscriptionName != "All"){
-          let sub_id = lodash.findIndex(self.subscription_list, function(o) { return o.label == self.$store.state.storedSubscriptionName; })
+          let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == self.$store.state.storedSubscriptionName; })
           if(sub_id != -1){
-            self.selected_subscription_name = self.subscription_list[sub_id].label
+            self.selected_subscription_name = self.$store.state.subscription_list[sub_id].label
+             self.$store.state.subscription_name = self.selected_subscription_name
           }
-          self.selected_user = self.user_list[0].label
+          self.selected_user = self.$store.state.user_list[0].label
         }
         else{
-          self.selected_subscription_name = self.subscription_list[0].label
-          // self.selected_user = self.user_list[0].label
+          self.selected_subscription_name = self.$store.state.subscription_list[0].label
+           self.$store.state.subscription_name = self.selected_subscription_name
         }
 
       // }

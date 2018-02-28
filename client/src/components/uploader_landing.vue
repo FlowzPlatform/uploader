@@ -164,6 +164,8 @@ import io from 'socket.io-client'
 import feathers from 'feathers/client'
 import socketio from 'feathers-socketio/client'
 var moment = require('moment');
+import lodash from 'lodash'
+
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -231,6 +233,7 @@ export default {
         this.$router.push('/upload/' + this.$route.params.id)
       },
       findData(sub_id){
+
         socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
           if(data.data.length != 0){
             this.$store.state.jobData = data.data[0]
@@ -257,27 +260,77 @@ export default {
       this.loading = true
       this.$store.state.validationStatus = false
 
-      if(this.$store.state.subscription_name != "All"){
+      if(this.$store.state.storedSubscriptionName != ""){
+        let self = this
+        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
+        if(sub_id != -1){
+            self.$store.state.subscription_list.splice(sub_id,1)
+        }
+
+        let subscription_obj1
+        subscription_obj1 = lodash.filter(self.$store.state.subscription_list, function(o) {
+           if(o.label == self.$store.state.storedSubscriptionName){
+             return o
+           }
+         });
+         if(subscription_obj1.length != 0){
+           self.$store.state.subscription_id = subscription_obj1[0].value
+         }
         this.findData(this.$store.state.subscription_id)
       }
-      else if(this.$store.state.subscription_name == "All"){
-        this.loading = false
-        this.$Notice.error({
-         title: 'Please select a proper subscription id...'
-       });
+      else{
+        let self = this
+        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
+        if(sub_id != -1){
+            self.$store.state.subscription_list.splice(sub_id,1)
+        }
+        this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
+        this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
+        this.$store.state.storedSubscriptionName =   this.$store.state.subscription_name
+        this.findData(this.$store.state.subscription_id)
       }
+
+      if(this.$store.state.storedUsername != ""){
+        let self = this
+        let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
+        if(userId != -1){
+            self.$store.state.user_list.splice(userId,1)
+        }
+        if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
+          self.selected_user = self.$store.state.storedUsername
+        }
+        else{
+          self.selected_user = self.$store.state.user_list[0].label
+          self.$store.state.storedUsername = self.selected_user
+        }
+      }
+
+
+      // if(this.$store.state.subscription_name != "All"){
+      //   this.findData(this.$store.state.subscription_id)
+      // }
+      // else if(this.$store.state.subscription_name == "All"){
+      //   this.loading = false
+      //   this.$Notice.error({
+      //    title: 'Please select a proper subscription id...'
+      //  });
+      // }
     },
     watch:{
     '$store.state.subscription_id': function (sub_id) {
-
+      let self = this
       if(sub_id == 'All'){
-        this.loading = false
-        this.$Notice.error({
+        self.loading = false
+        self.$Notice.error({
          title: 'Please select a proper subscription id...'
        });
       }
       else {
-        this.findData(sub_id)
+        if(self.show_table == true){
+          self.show_table = false
+        }
+        self.loading = true
+        self.findData(sub_id)
       }
     }
   }

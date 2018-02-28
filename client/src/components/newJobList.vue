@@ -43,7 +43,7 @@ export default {
             columns1: [
                 {
                     type: 'expand',
-                    width: 20,
+                    width: 50,
                     render: (h, params) => {
                         return h(innerJoblist, {
                             props: {
@@ -54,11 +54,13 @@ export default {
                 },
                 {
                     title: 'Import-tracker Id',
-                    key: 'id'
+                    width: 330,
+                    key: 'id',
                 },
                 {
                     title: 'Created At',
                     key: 'createdAt',
+                    width: 200,
                     render: (h, params) => {
                       let mydate = moment(params.row.createdAt).fromNow()
                       return h('div', mydate)
@@ -99,6 +101,7 @@ export default {
                 {
                     title: 'Username',
                     key: 'username',
+                    width: 200,
                     render: (h,params) => {
                       if(params.row.username == null || params.row.username == undefined){
                         let username = '-'
@@ -146,9 +149,10 @@ export default {
         if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id != "All"){
           socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id}, (e, data) => {
 
+            self.cpage = 1
             if(data.data.length != 0){
               self.loading = false
-              self.data2 = data.data
+              self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
               // self.data2 = self.data2.reverse()
               self.chunkData = lodash.chunk(self.data2, 10);
 
@@ -161,9 +165,10 @@ export default {
         else if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id == "All"){
           socket.emit('uploader::find', {"user_id":id1,"role":"other"}, (e, data) => {
 
+            self.cpage = 1
               if(data.data.length != 0){
                 self.loading = false
-                self.data2 = data.data
+                self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
                 // self.data2 = self.data2.reverse()
                 self.chunkData = lodash.chunk(self.data2, 10);
 
@@ -177,9 +182,11 @@ export default {
 
           socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"}, (e, data) => {
 
+            self.cpage = 1
               if(data.data.length != 0){
                 self.loading = false
-                self.data2 = data.data
+                self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
+                console.log("data2......",self.data2)
                 // self.data2 = self.data2.reverse()
                 self.chunkData = lodash.chunk(self.data2, 10);
 
@@ -233,27 +240,48 @@ export default {
           self.getJobDetails()
       },
       '$store.state.selectedUserName': function(name) {
-        let self = this
-        self.loading = true
-        self.data2 = []
-        self.chunkData = []
-        self.getJobDetails()
+        if(name != null){
+          let self = this
+          self.loading = true
+          self.data2 = []
+          self.chunkData = []
+          self.getJobDetails()
+        }
       },
       '$store.state.subscription_name':function(name){
 
         let self = this
-        self.$store.commit('SET_STORED_SUB_NAME',name)
+        // self.$store.commit('SET_STORED_SUB_NAME',name)
 
+      },
+      '$store.state.storedUsername':function(name1){
+        console.log("storedusername")
+        if(name1 != ""){
+          if(this.$store.state.user_list.length != 0){
+            let userId = lodash.findIndex(this.$store.state.user_list, function(o) { return o.label == "All"; })
+            console.log("userId....",userId)
+            if(userId == -1){
+              this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
+            }
+          }
+        }
       }
     },
     mounted(){
       var self = this
       this.loading = true
+      console.log("joblist called...")
       if(this.$store.state.disableuser == true){
         this.$store.state.disableuser = false
       }
       if(this.$store.state.disablesubscription == true){
         this.$store.state.disablesubscription = false
+      }
+      // this.$store.commit('SET_STOREDUSERNAME', "")
+      let userId = lodash.findIndex(this.$store.state.user_list, function(o) { return o.label == "All"; })
+      console.log(userId)
+      if(userId == -1){
+          this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
       }
       self.data2 = []
       self.chunkData = []
@@ -265,7 +293,7 @@ export default {
 <style scoped>
 .jobtable{
   text-align: center !important;
-  overflow: inherit !important;
+  /*overflow: inherit !important;*/
 }
 .jobtable th{
   text-align: center !important;
@@ -292,5 +320,10 @@ export default {
 .pagination{
   margin-top: 10px;
   float:right;
+  position:relative;
 }
+</style>
+<style>
+.jobtable .ivu-table-body table {width: 100% !important;}
+.jobtable .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
 </style>

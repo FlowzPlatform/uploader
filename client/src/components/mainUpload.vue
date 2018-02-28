@@ -36,7 +36,7 @@
                             <Option v-for="schema in mObj[activeTab].schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
                         </Select>
                        </Col>
-
+                       {{mObj[activeTab].load}}
 
                        <Col span="3">
                         <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
@@ -72,7 +72,7 @@
                       <span class="dz-message">Drop <span style="color: #494e6b">"{{activeTab}}"</span> files here<br/>
                           <small>(only csv files are valid.)</small>
                       </span>
-                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event)"/>
+                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
                   </div>
               </div>
 
@@ -259,7 +259,7 @@
 
             <div v-if="mObj[activeTab].headerDisplay && mObj[activeTab].mapping.length != 0">
             <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
-            <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are compulsory to map</h3>
+            <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
              <div class="schema-form ivu-table-wrapper" >
                <div class="ivu-table ivu-table-border customtable" >
                  <div class="ivu-table-body">
@@ -280,7 +280,7 @@
                        <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                          <td>
                            <div class="ivu-table-cell" >
-                             <span v-if="item.schemaObj.optional == false" style="color:red"> * {{item.sysHeader}}</span>
+                             <span v-if="item.schemaObj.optional == false"><span style="color:red">*</span>{{item.sysHeader}}</span>
                               <span v-else>{{item.sysHeader}}</span>
                            </div>
                          </td>
@@ -310,7 +310,7 @@
 
          <div v-if="mObj[activeTab].newSchemaDisplay">
          <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
-         <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are compulsory to map</h3>
+         <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
          <div class="schema-form ivu-table-wrapper">
            <div class="ivu-table ivu-table-border customtable" >
              <div class="ivu-table-body">
@@ -335,7 +335,7 @@
                    <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader != '_id'">
                      <th>
                        <div class="ivu-table-cell headercolor">
-                         <span v-if="item.schemaObj.optional == false" style="color:red"> * {{item.sysHeader}}</span>
+                         <span v-if="item.schemaObj.optional == false"><span style="color:red">*</span> {{item.sysHeader}}</span>
                           <span v-else>{{item.sysHeader}}</span>
                        </div>
                      </th>
@@ -593,7 +593,7 @@
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Please confirm to go for Live</p></div>
-      <Button type="primary" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right" :disabled="!importBtn">Import to Confirm</Button>
+      <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right" :disabled="!importBtn">Go Live</Button>
       <!-- <Button type="error" @click="abortImportConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button> -->
       </Card>
     </template>
@@ -1007,9 +1007,8 @@ export default {
     }
   },
     methods:{
-      handleFileChange (e) {
+      handleFileChange (e,tab) {
         let self = this
-        let tab = self.activeTab
         file =  e.target.files[0]
 
         let file_ext = file.name.split('.').pop()
@@ -1017,8 +1016,10 @@ export default {
           self.$Notice.error({title: 'Only CSV files are allowed',duration: 1})
         }
         else{
-          self.mObj[tab].load = true
+
+          // self.mObj[tab].load = true
           self.mObj[tab].uploadDisplay = false
+
             Papa.parse(file, {
               header: true,
               dynamicTyping: true,
@@ -1028,6 +1029,7 @@ export default {
                 self.mObj[tab].uploadCSV = results.data
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
+                // self.mObj[tab].load = true
                 if(self.mObj[tab].new_flag == 1){
 
                   self.mObj[tab].load = true
@@ -1045,8 +1047,6 @@ export default {
                   self.mObj[tab].mapping = []
 
                   self.getMapping(tab)
-                  // self.mObj[tab].previewDisplay = true
-                  // self.mObj[tab].headerDisplay = true
                 }
               }
             })
@@ -1792,6 +1792,7 @@ export default {
       },
       changeSchema(tab,value){
         if(value == "--Add new--"){
+
           this.proceedBtn = true
           // this.loadingdot = true
           this.mObj[tab].display = true
@@ -1877,7 +1878,12 @@ export default {
       },
       getMapping(tab){
         let self = this
+
          if(this.mObj[tab].selected_schema != '--Add new--'){
+           if(self.mObj[tab].new_flag == 1){
+
+             self.mObj[tab].new_flag = 0
+           }
 
            if(this.mObj[tab].headerDisplay == true){
              this.mObj[tab].headerDisplay = false
@@ -1983,59 +1989,59 @@ export default {
           }
         }
       },
-      upldCSV(tab){
-        let self = this
-
-        $(document).ready(function () {
-          $('#csv-file').bind("change",function () {
-            let fileChooser = document.getElementById('csv-file')
-            file = fileChooser.files[0]
-
-            let file_ext = file.name.split('.').pop()
-            if(file_ext != 'csv'){
-              self.$Notice.error({title: 'Only CSV files are allowed',duration: 20})
-            }
-            else{
-              self.mObj[tab].load = true
-              self.mObj[tab].uploadDisplay = false
-                Papa.parse(file, {
-                  header: true,
-                  dynamicTyping: true,
-                  encoding: "UTF-8",
-                  skipEmptyLines: false,
-                  chunk: function(results, streamer){
-                    self.mObj[tab].uploadCSV = results.data
-                    self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
-                    self.mObj[tab].headers.push("_id")
-                    if(self.mObj[tab].new_flag == 1){
-
-                      self.mObj[tab].load = true
-                      self.mObj[tab].mapping = []
-                      self.generateHeadersandMapping(tab)
-                    }
-                    else{
-
-                      self.mObj[tab].load = true
-                      if(self.mObj[tab].newSchemaDisplay == true){
-                        self.mObj[tab].newSchemaDisplay = false
-                      }
-
-
-                      self.mObj[tab].mapping = []
-
-                      self.getMapping(tab)
-                      // self.mObj[tab].previewDisplay = true
-                      // self.mObj[tab].headerDisplay = true
-                    }
-                  }
-                })
-
-            }
-
-            })
-            $('#csv-file').unbind("change",function () {})
-            })
-    },
+    //   upldCSV(tab){
+    //     let self = this
+    //
+    //     $(document).ready(function () {
+    //       $('#csv-file').bind("change",function () {
+    //         let fileChooser = document.getElementById('csv-file')
+    //         file = fileChooser.files[0]
+    //
+    //         let file_ext = file.name.split('.').pop()
+    //         if(file_ext != 'csv'){
+    //           self.$Notice.error({title: 'Only CSV files are allowed',duration: 20})
+    //         }
+    //         else{
+    //           self.mObj[tab].load = true
+    //           self.mObj[tab].uploadDisplay = false
+    //             Papa.parse(file, {
+    //               header: true,
+    //               dynamicTyping: true,
+    //               encoding: "UTF-8",
+    //               skipEmptyLines: false,
+    //               chunk: function(results, streamer){
+    //                 self.mObj[tab].uploadCSV = results.data
+    //                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
+    //                 self.mObj[tab].headers.push("_id")
+    //                 if(self.mObj[tab].new_flag == 1){
+    //
+    //                   self.mObj[tab].load = true
+    //                   self.mObj[tab].mapping = []
+    //                   self.generateHeadersandMapping(tab)
+    //                 }
+    //                 else{
+    //
+    //                   self.mObj[tab].load = true
+    //                   if(self.mObj[tab].newSchemaDisplay == true){
+    //                     self.mObj[tab].newSchemaDisplay = false
+    //                   }
+    //
+    //
+    //                   self.mObj[tab].mapping = []
+    //
+    //                   self.getMapping(tab)
+    //                   // self.mObj[tab].previewDisplay = true
+    //                   // self.mObj[tab].headerDisplay = true
+    //                 }
+    //               }
+    //             })
+    //
+    //         }
+    //
+    //         })
+    //         $('#csv-file').unbind("change",function () {})
+    //         })
+    // },
     generateHeadersandMapping(tab){
 
       let self = this
@@ -2045,6 +2051,7 @@ export default {
       self.mObj[tab].newUploadCSV = []
 
       if(self.mObj[tab].uploadCSV.length != 0){
+
         self.loadingdot = true
           for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
             let obj = {}
@@ -2555,6 +2562,7 @@ export default {
       })
     },
     AbortValidation(tab){
+      console.log("++++++++++abort validation ++++++++++++++++")
       let self = this
       self.proceedBtn = true
       self.mObj[tab].errmsg = []
@@ -2667,7 +2675,7 @@ export default {
         data: [this.mObj[tab].data1[0]],
         colHeaders:this.mObj[tab].headers1[0],
         rowHeaders: true,
-        height: 65,
+        height: '100%',
         stretchH: "all",
         cells: (row, col) => {
           var cellProp = {}
@@ -2685,6 +2693,7 @@ export default {
           return cellProp
         }
       })
+
       ht.selectCell(row1,col1,row1,col1,true)
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'block'
@@ -3308,9 +3317,16 @@ export default {
               }
             })
             for(let i=0;i<self.fileTypes.length;i++){
+
               self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
               let new_index = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value == '--Add new--'; });
               self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(new_index,1)[0]);
+            }
+
+            for(let i=0;i<self.fileTypes.length;i++){
+              if(self.mObj[self.fileTypes[i]].schemaList[0].value == '--Add new--'){
+                self.mObj[self.fileTypes[i]].display = true
+              }
             }
           }
 
@@ -3543,6 +3559,7 @@ export default {
     border-color: #1fb58f;
     width: 152%;
 }*/
+
 .ivu-table-cell {
   padding-left: 18px;
   padding-right: 18px;
@@ -3767,8 +3784,8 @@ export default {
 
 #importBtn[disabled] {
   color: #fff;
-  background-color: #20a0ff;
-  border-color: #20a0ff;
+  background-color: ##1fb58f;
+  border-color: ##1fb58f;
 }
 
 .apply {
@@ -3880,5 +3897,11 @@ export default {
     /*.handsontable tbody th.ht__highlight, .handsontable thead th.ht__highlight {
     background-color: #fff !important
 }*/
+#example1 .handsontable .wtHider {
+    height: 100% !important;
 
+}
+#example1 .ht_master .wtHolder {
+    height: 100% !important;
+}
 </style>
