@@ -92,7 +92,7 @@ export const ProductShippingSchema = new Schema({
       maxLength : '',
       regEx:''
         },
-        carton_height: {
+      carton_height: {
     	type: "string",
     	label: "Carton Height",
       optional: true,

@@ -80,10 +80,10 @@ export default {
                let self = this
                self.loading = true
                let url = new URL(window.location.href);
-               let forgetToken = url.search.split('=')
+               let forgetToken = self.$route.query.forget_token
              axios.post(config.resetPasswordUrl, {
                      new_password: self.formResetPassword.password.trim(),
-                     token: forgetToken[1]
+                     token: forgetToken
                })
                .then(function (response) {
                    self.loading = false

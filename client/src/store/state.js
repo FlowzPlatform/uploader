@@ -19,6 +19,7 @@ export default {
   subscription_id: '',
   subscription_name: '',
   subscription_detail_list: [],
+  subscription_list: [],
   user_detail_list: [],
   selectedUserName: '',
   userid: '',
