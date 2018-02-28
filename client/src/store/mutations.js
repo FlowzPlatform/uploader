@@ -20,7 +20,6 @@ export default {
     for(let key in response.data.data.package){
       state.subscription_list.push({"value":response.data.data.package[key].subscriptionId,"label":response.data.data.package[key].name})
     }
-
     for(let key in state.subscription_list){
       let response = await axios({
         method: 'get',
@@ -93,6 +92,9 @@ export default {
   SET_STORED_SUB_ID(state,id){
 
     state.storedSubscriptionId = id
+  },
+  SET_STOREDUSERNAME(state,username){
+    state.storedUsername = username
   },
   SET_SCHEMA (state, schema) {
     state.schema = schema
