@@ -16,10 +16,12 @@ export default {
     state.subscription_detail_list = []
     state.subscription_list = [{"value":"All","label":"All"}]
     state.user_detail_list = []
+    state.user_list = []
     let list1 = []
     for(let key in response.data.data.package){
       state.subscription_list.push({"value":response.data.data.package[key].subscriptionId,"label":response.data.data.package[key].name})
     }
+
     for(let key in state.subscription_list){
       let response = await axios({
         method: 'get',
