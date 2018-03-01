@@ -186,7 +186,6 @@ export default {
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
-                console.log("data2......",self.data2)
                 // self.data2 = self.data2.reverse()
                 self.chunkData = lodash.chunk(self.data2, 10);
 
@@ -249,44 +248,32 @@ export default {
         }
       },
       '$store.state.subscription_name':function(name){
-
         let self = this
-        // self.$store.commit('SET_STORED_SUB_NAME',name)
-
-      },
-      '$store.state.storedUsername':function(name1){
-        console.log("storedusername")
-        if(name1 != ""){
-          if(this.$store.state.user_list.length != 0){
-            let userId = lodash.findIndex(this.$store.state.user_list, function(o) { return o.label == "All"; })
-            console.log("userId....",userId)
-            if(userId == -1){
-              this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
-            }
-          }
-        }
       }
     },
     mounted(){
       var self = this
       this.loading = true
-      console.log("joblist called...")
       if(this.$store.state.disableuser == true){
         this.$store.state.disableuser = false
       }
       if(this.$store.state.disablesubscription == true){
         this.$store.state.disablesubscription = false
       }
-      // this.$store.commit('SET_STOREDUSERNAME', "")
       let userId = lodash.findIndex(this.$store.state.user_list, function(o) { return o.label == "All"; })
-      console.log(userId)
       if(userId == -1){
           this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
+      }
+      if(this.$store.state.storedUsername != ""){
+        console.log("newjoblist if condition++++++",self.$store.state.user_detail_list)
+        let sub_id = lodash.findIndex(self.$store.state.user_detail_list, function(o) { return o.name == self.$store.state.storedUsername; })
+        if(sub_id != -1){
+           self.selected_user = self.$store.state.user_detail_list[sub_id].name
+        }
       }
       self.data2 = []
       self.chunkData = []
       self.getJobDetails()
-
     }
 }
 </script>

@@ -36,7 +36,6 @@
                             <Option v-for="schema in mObj[activeTab].schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
                         </Select>
                        </Col>
-                       {{mObj[activeTab].load}}
 
                        <Col span="3">
                         <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
@@ -2562,7 +2561,6 @@ export default {
       })
     },
     AbortValidation(tab){
-      console.log("++++++++++abort validation ++++++++++++++++")
       let self = this
       self.proceedBtn = true
       self.mObj[tab].errmsg = []
