@@ -2959,6 +2959,7 @@ export default {
     }
   },
   setprogress(message){
+    console.log("called....progress")
     let self = this
     self.val_data = []
     self.val_data = self.$store.state.data
