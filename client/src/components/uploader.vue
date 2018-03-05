@@ -167,7 +167,8 @@ export default {
               this.loadingBtn = false
               if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
                 this.$Notice.error({
-                 title: error.response.data.message
+                 title: error.response.data.message,
+                 duration: 3
                });
               }
             })
@@ -230,21 +231,21 @@ export default {
         this.getData(this.$store.state.subscription_id)
       }
 
-      if(this.$store.state.storedUsername != ""){
-        let self = this
-        let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
-        if(userId != -1){
-            self.$store.state.user_list.splice(userId,1)
-        }
-        if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
-          self.selected_user = self.$store.state.storedUsername
-        }
-        else{
-
-          self.selected_user = self.$store.state.user_list[0].label
-          self.$store.state.storedUsername = self.selected_user
-        }
-      }
+      // if(this.$store.state.storedUsername != ""){
+      //   console.log("called uploader ++++++++++++++++",this.$store.state.storedUsername,this.$store.state.user_list)
+      //   let self = this
+      //   let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
+      //   if(userId != -1){
+      //       self.$store.state.user_list.splice(userId,1)
+      //   }
+      //   if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
+      //     self.selected_user = self.$store.state.storedUsername
+      //   }
+      //   else{
+      //     self.selected_user = self.$store.state.user_list[0].label
+      //     self.$store.state.storedUsername = self.selected_user
+      //   }
+      // }
 
       // if(this.$store.state.subscription_id != ""){
       //
@@ -278,6 +279,17 @@ export default {
         }
         this.loading = true
         this.getData(id)
+      }
+    },
+    '$store.state.user_list': function(list){
+      if(list.length != 0){
+        if(this.$store.state.storedUsername != ""){
+          let self = this
+          let userId = lodash.findIndex(list, function(o) { return o.label == "All"; })
+          if(userId != -1){
+              list.splice(userId,1)
+          }
+        }
       }
     }
   }
@@ -338,7 +350,7 @@ ul.mySection label:hover {
     margin-top: 100px !important;
     margin-left: auto;
     margin-right: auto;
-    text-align: -webkit-center;
+    text-align: -webkit-center !important;
     border: 2px #7c7e86 dashed;
     width: 60%;
     margin-top:10px;

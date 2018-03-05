@@ -10,7 +10,6 @@ const ProductInformationSchema = {
     price_1: "number",
     default_color: "string",
     attr_colors: "string",
-    attr_colors: "string",
     attr_imprint_color:"string",
     attr_shape: "string",
     attr_decimal: "string",

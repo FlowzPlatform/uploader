@@ -37,6 +37,8 @@
                         </Select>
                        </Col>
 
+
+
                        <Col span="3">
                         <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
                           <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled mapping</a>
@@ -52,6 +54,8 @@
                            </div>
                        </Poptip>
                      </Col>
+
+
 
                      <!-- <Col span="3">
                      <a @click="showUpload()" v-if="activeTab == 'Product Image'">Upload Image</a>
@@ -412,10 +416,10 @@
          </tr>
          </table>
          <div id="hot-preview" v-if="mObj[activeTab].showHandson">
-           <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
+           <Button type="error" @click="AbortValidation(activeTab)" style="float:right;margin-right:10px;">Abort Data</Button>
          </div>
          <div id="hot-preview" v-if="mObj[activeTab].showHandson">
-           <Button type="error" @click="AbortValidation(activeTab)" style="float:right;margin-right:10px;">Abort Data</Button>
+           <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
          </div>
 
          <Modal  v-model="model" title="Transform" @on-ok="handleModalOk" width="900px" :mask-closable="false ">
@@ -476,7 +480,7 @@
           </div>
           <div slot="footer">
               <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
-              <!-- <Button type="primary"  @click="continuee(activeTab)">Continue</Button> -->
+              <Button type="primary"  @click="continuee(activeTab)" v-if="showContinue" style="background-color:#1fb58f;border-color:#1fb58f;">Continue</Button>
           </div>
        </Modal>
 
@@ -579,8 +583,8 @@
       </div> -->
 
       <div v-if="validation_completed"><p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p></div>
-      <Button type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right">Import</Button>
-      <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Abort</Button>
+      <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
+      <Button type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Import</Button>
       </Card>
     </template>
     <template v-if="currentStep == 2 && importStep">
@@ -591,9 +595,9 @@
           <Button type="error" @click="abortImportInProgress()"  style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
-      <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Please confirm to go for Live</p></div>
+      <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
       <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right" :disabled="!importBtn">Go Live</Button>
-      <!-- <Button type="error" @click="abortImportConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button> -->
+      <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
       </Card>
     </template>
    </div>
@@ -646,6 +650,7 @@ let err_length = 0
 let prop_keys = []
 let uploader_obj = {}
 let validation_obj = {}
+let map_flag = false
 let continue_flag = false
 let errors_length = 0
 let prod_info_upld = false
@@ -746,6 +751,8 @@ export default {
              dictDefaultMessage: 'Drag and drop file here to upload ',
              parallelUploads: 5
          },
+         showContinue: false,
+         abortImportBtn: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -1006,7 +1013,7 @@ export default {
     }
   },
     methods:{
-      handleFileChange (e,tab) {
+      async handleFileChange (e,tab) {
         let self = this
         file =  e.target.files[0]
 
@@ -1016,7 +1023,7 @@ export default {
         }
         else{
 
-          // self.mObj[tab].load = true
+          self.mObj[tab].load = true
           self.mObj[tab].uploadDisplay = false
 
             Papa.parse(file, {
@@ -1024,16 +1031,15 @@ export default {
               dynamicTyping: true,
               encoding: "UTF-8",
               skipEmptyLines: false,
-              chunk: function(results, streamer){
+              chunk: await (function(results, streamer){
                 self.mObj[tab].uploadCSV = results.data
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
                 // self.mObj[tab].load = true
                 if(self.mObj[tab].new_flag == 1){
-
                   self.mObj[tab].load = true
-                  self.mObj[tab].mapping = []
-                  self.generateHeadersandMapping(tab)
+                  setTimeout(function(){self.mObj[tab].mapping = []
+                  self.generateHeadersandMapping(tab)},1)
                 }
                 else{
 
@@ -1047,7 +1053,7 @@ export default {
 
                   self.getMapping(tab)
                 }
-              }
+              })
             })
 
         }
@@ -1478,7 +1484,17 @@ export default {
 
                 uploader_obj = res.data
 
-              let properties = Object.keys(response.data)
+              let properties1 = Object.keys(response.data)
+              let properties = []
+              let tab_array = ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"]
+              for(let i=0;i<tab_array.length;i++){
+                for(let j=0;j<properties1.length;j++){
+                  if(tab_array[i] == properties1[j]){
+                    properties.push(tab_array[i])
+                  }
+                }
+              }
+
               prop_keys = []
               for(let i=0;i<properties.length;i++){
                 if(properties[i] == "ProductInformation" || properties[i] == "ProductPrice" ||  properties[i] == "ProductImage" || properties[i] == "ProductImprintData" ||  properties[i] == "ProductShipping" || properties[i] == "ProductAdditionalCharges" ||  properties[i] == "ProductVariationPrice"){
@@ -1513,7 +1529,6 @@ export default {
             key: key
           }
           api.request('post', '/uploader-validation/',validation_obj).then(result => {
-
             if(result.data.length > 0){
                self.showValidationHandson(result.data,sheet_name)
             }
@@ -1582,7 +1597,7 @@ export default {
 
            var cell3 = row1.insertCell(1);
            cell3.colSpan = 2
-           cell3.innerHTML = '<button type="button" id="proceed-to-next"  style="float: right;margin-right: 20px;background-color: #13ce66;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color: #13ce66;">Proceed To Next</Button><button type="button" id="abortServerSide"  style="float: right;margin-right: 20px;background-color: #ed3f14;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color:#ed3f14;width:15%;">Abort</Button>'
+           cell3.innerHTML = '<button type="button" id="abortServerSide"  style="float: right;margin-right: 20px;background-color: #ed3f14;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color:#ed3f14;width:15%;">Abort</button><button type="button" id="proceed-to-next"  style="float: right;margin-right: 20px;background-color: #13ce66;color: white;height: 32px;padding: 5px;border-radius: 5px;border-color: #13ce66;">Proceed To Next</button>'
 
            document.getElementById('proceed-to-next').onclick = function(){
              self.proceedToNext()
@@ -1606,6 +1621,10 @@ export default {
             data: self.error_data,
             colHeaders:Object.keys(self.error_data[0]),
             height: 200,
+            hiddenColumns: {
+              columns: [0],
+              indicators: false
+            },
             cells: (row, col) => {
               var cellProp = {}
               _.forEach(errcols, (value, key) => {
@@ -1624,6 +1643,7 @@ export default {
             }
           })
           ht1.selectCell(err_row,err_col,err_row,err_col,true)
+
           self.proceedNext = true
       },
 
@@ -1721,6 +1741,9 @@ export default {
                      this.validateStep = true
                      this.importStep = true
                      this.currentStep = 2
+                     if(this.abortImportBtn == true){
+                       this.abortImportBtn = false
+                     }
                 }
 
               })
@@ -1747,7 +1770,7 @@ export default {
 
       // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
       importToConfirm(){
-
+        this.abortImportBtn = false
         let jobQueue_obj = {
           "importTrackerId":id
         }
@@ -2090,6 +2113,16 @@ export default {
                  self.mObj[tab].mapping[index]['csvHeader'] = self.mObj[tab].headers[i]
                }
             }
+
+            // for(let i=0;i<self.mObj[tab].headers.length;i++){
+            //   for(let j=0;j<self.mObj[tab].mapping.length;j++){
+            //     if(self.mObj[tab].mapping[j]['csvHeader'] == ""){
+            //       if(self.mObj[tab].headers[i].toLowerCase().indexOf(self.mObj[tab].mapping[j]['sysHeader']) != -1){
+            //         self.mObj[tab].mapping[j]['csvHeader'] = self.mObj[tab].headers[i]
+            //       }
+            //     }
+            //   }
+            // }
             return self.mObj[tab].mapping;
         }
         else{
@@ -2097,19 +2130,20 @@ export default {
         }
     },
     mapHeaders(tab){
-      continue_flag = false
+      map_flag = false
       this.modal1 = false
       this.proceedBtn = true
     },
-    // continuee(tab){
-    //   this.modal1 = false
-    //   this.proceedBtn = true
-    //   this.ProceedToValidate(tab)
-    // },
+    continuee(tab){
+      this.modal1 = false
+      this.continue_flag = true
+      this.proceedBtn = true
+      this.ProceedToValidate(tab)
+    },
     Proceed(tab){
       let self = this
       self.proceedBtn = false
-        if(continue_flag == false){
+        if(map_flag == false){
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
             if(o.schemaObj.optional == false && o.csvHeader == ""){
               return o.csvHeader == "";
@@ -2119,7 +2153,24 @@ export default {
               self.modal1 = true
           }
           else{
-              self.ProceedToValidate(tab)
+             self.showContinue = true
+             if(continue_flag == false){
+               let optional_headers = _.filter(self.mObj[tab].mapping, function(o) {
+                 if(o.schemaObj.optional == true && o.csvHeader == ""){
+                   return o.csvHeader == "";
+                 }
+               });
+               if(optional_headers.length != 0){
+                   self.modal1 = true
+                   continue_flag = true
+               }
+               else{
+                  self.ProceedToValidate(tab)
+               }
+             }
+             else{
+               self.ProceedToValidate(tab)
+             }
           }
         }
         else{
@@ -2128,12 +2179,15 @@ export default {
     },
     ProceedToValidate(tab){
       let self = this
-      continue_flag = false
+      map_flag = false
+
       if(self.mObj[tab].selected_schema == '--Add new--'){
         self.proceedBtn = true
         self.$Notice.error({title: 'Please enter a valid mapping name',duration: 5})
       }
       else {
+      continue_flag = false
+      self.showContinue = false
       let errcols = []
       let dateValidatorFunc = function (obj, value, fieldName) {
               if(value != "" || value != undefined){
@@ -2513,6 +2567,8 @@ export default {
     Abort(tab){
       let self = this
       self.proceedBtn = true
+      continue_flag = false
+      self.showContinue = false
       self.mObj[tab].load = false
       self.mObj[tab].uploadCSV = []
       self.mObj[tab].headerDisplay = false
@@ -2664,12 +2720,12 @@ export default {
          self.setPage(obj1[1],obj1[2],result.data)
       })
     },
-    showerrmsg (errcols,tab,schema) {
+    async showerrmsg (errcols,tab,schema) {
       var example1 = document.getElementById('example1')
       let row1
       let col1
       let prop = {}
-      var ht = new Handsontable(example1, { // eslint-disable-line
+      var ht = await(new Handsontable(example1, { // eslint-disable-line
         data: [this.mObj[tab].data1[0]],
         colHeaders:this.mObj[tab].headers1[0],
         rowHeaders: true,
@@ -2683,16 +2739,14 @@ export default {
               col1 = value.cols
               // cellProp.className = 'error'
               prop = cellProp
-
-              // cellProp.selectCell(row, col, 0, 0, true)
             }
           })
-          // selectCellByProp(row1, cellProp, true)
           return cellProp
         }
-      })
+      }))
 
-      ht.selectCell(row1,col1,row1,col1,true)
+      setTimeout(function(){ht.selectCell(row1,col1,row1,col1,true)},200)
+
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'block'
       }
@@ -3004,8 +3058,8 @@ export default {
       this.$store.state.data = []
       let self = this
 
+      for(let i=0 ;i<filtered_keys.length;i++){
       for(let key in data){
-        for(let i=0 ;i<filtered_keys.length;i++){
           if(filtered_keys[i] == key){
             if(data[filtered_keys[i]].validateStatus == 'pending' && data[filtered_keys[i]].currentRuleIndex){
               self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
@@ -3150,6 +3204,9 @@ export default {
                  self.importStep = true
                  self.currentStep = 2
                }
+               if(self.abortImportBtn == true){
+                 self.abortImportBtn = false
+               }
 
                 self.import1 = false
             }
@@ -3172,16 +3229,20 @@ export default {
                 self.currentStep = 2
               }
               self.import1 = true
+              self.abortImportBtn = true
               self.importBtn = true
 
 
               if(message.stepStatus == "import_to_confirm_in_progress"){
-
+                self.abortImportBtn = false
                 self.import1 = true
                 self.importBtn = false
               }
             }
             else if(message.stepStatus == "import_completed"){
+              if(self.abortImportBtn == true){
+                self.abortImportBtn = false
+              }
               self.$Notice.success({title: 'Import Completed', desc: 'Your data has gone Live...'})
               self.$router.push('/uploader')
             }
@@ -3200,11 +3261,22 @@ export default {
       api.request('get', '/uploader/' + id ).then(response => {
         if(response.data != null){
                 let keys = Object.keys(response.data)
-                let filtered_keys = _.filter(keys, function(o) {
-                  if(o == 'ProductInformation' || o == 'ProductPrice' || o == 'ProductImprintData' || o == 'ProductShipping' || o == 'ProductImage' || o == 'ProductVariationPrice' || o == "ProductAdditionalCharges"){
-                    return o;
+                 let filtered_keys = []
+                // let filtered_keys = _.filter(keys, function(o) {
+                //   if(o == 'ProductInformation' || o == 'ProductPrice' || o == 'ProductImprintData' || o == 'ProductShipping' || o == 'ProductImage' || o == 'ProductVariationPrice' || o == "ProductAdditionalCharges"){
+                //     return o;
+                //   }
+                // });
+
+                let tab_array = ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"]
+                for(let i=0;i<tab_array.length;i++){
+                  for(let j=0;j<keys.length;j++){
+                    if(tab_array[i] == keys[j]){
+                      filtered_keys.push(tab_array[i])
+                    }
                   }
-                });
+                }
+
 
                   if(response.data.stepStatus == 'upload_pending'){
                     self.uploadStep = true
@@ -3226,8 +3298,8 @@ export default {
                     let self = this
 
                     if(self.$store.state.calledFromContinue == false){
-                    for(let key in response.data){
                       for(let i=0 ;i<filtered_keys.length;i++){
+                      for(let key in response.data){
                         if(filtered_keys[i] == key){
                           if(response.data[filtered_keys[i]].validateStatus == 'pending' && response.data[filtered_keys[i]].currentRuleIndex){
                             self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
@@ -3251,12 +3323,15 @@ export default {
                     if(response.data.validate_flag == 'running' || response.data.validate_flag == 'completed'){
 
                       if(self.val_data.length == 0){
+
                         self.$store.state.calledFromContinue = false
 
                         self.setValData(response.data,filtered_keys)
                       }
                       else if(self.val_data.length > 0){
+
                         self.$store.state.validationStatus = true
+                        // self.setValData(response.data,filtered_keys)
 
                       }
 
@@ -3281,6 +3356,9 @@ export default {
                     this.validateStep = false
                     this.importStep = true
                     this.currentStep = 2
+                    if(this.abortImportBtn == true){
+                      this.abortImportBtn = false
+                    }
                   }
                   else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
 
@@ -3289,7 +3367,9 @@ export default {
                     this.importStep = true
                     this.currentStep = 2
                     this.import1 = true
+                    this.abortImportBtn = true
                     if(response.data.stepStatus == 'import_to_confirm_in_progress'){
+                      this.abortImportBtn = false
                       this.importBtn = false
                     }
                   }
@@ -3671,8 +3751,11 @@ export default {
 }
 .handsontable td.error {
 
-  border: 2px solid #2d8cf0;
-  /*outline: none;*/
+  border-left: 2px solid #2d8cf0;
+  border-right: 2px solid #2d8cf0;
+  border-top: 2px solid #2d8cf0;
+  border-bottom: 2px solid #2d8cf0;
+  outline: none;
 }
 
 .demo-spin-icon-load{
@@ -3901,5 +3984,14 @@ export default {
 }
 #example1 .ht_master .wtHolder {
     height: 100% !important;
+}
+
+.ivu-col-span-6 {
+    display: block;
+    width: 25% !important;
+}
+.ivu-col-span-18 {
+    display: block;
+    width: 75% !important;
 }
 </style>
