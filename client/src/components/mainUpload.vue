@@ -469,7 +469,7 @@
            </Row>
          </Modal>
 
-         <Modal v-model="modal1" width="500">
+         <Modal v-model="modal1" width="500" @on-cancel="cancel">
           <p slot="header" style="color:#f60;text-align:center;font-size:20px">
               <Icon type="information-circled"></Icon>
               <span>Some of your headers are not mapped ...</span>
@@ -596,8 +596,8 @@
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
-      <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right" :disabled="!importBtn">Go Live</Button>
-      <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
+      <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
+      <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
       </Card>
     </template>
    </div>
@@ -2133,12 +2133,17 @@ export default {
       map_flag = false
       this.modal1 = false
       this.proceedBtn = true
+      continue_flag = false
     },
     continuee(tab){
       this.modal1 = false
-      this.continue_flag = true
+      continue_flag = true
       this.proceedBtn = true
       this.ProceedToValidate(tab)
+    },
+    cancel (){
+      this.proceedBtn = true
+      continue_flag = false
     },
     Proceed(tab){
       let self = this
