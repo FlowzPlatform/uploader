@@ -121,7 +121,7 @@ export default {
       ruleLogin: {
         email: [
           { required: true, message: 'Please fill in the email id', trigger: 'blur' },
-          { type: 'email', message: 'Please input correct email address', trigger: 'blur,change' }
+          { type: 'email', message: 'Please input correct email address', trigger: 'blur' }
         ],
         password: [
           { required: true, message: 'Please fill in the password.', trigger: 'blur' }
@@ -152,6 +152,7 @@ export default {
             this.$store.commit('SET_TOKEN', auth.logintoken)
             this.$store.commit('SET_STORED_SUB_NAME',"")
             this.$store.commit('SET_STORED_SUB_ID',"")
+            this.$store.commit('SET_STOREDUSERNAME',"")
 						// Token Store in cookie
 						let location = psl.parse(window.location.hostname)    // get parent domain
 						location = location.domain === null ? location.input : location.domain

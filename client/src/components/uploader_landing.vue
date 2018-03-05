@@ -134,8 +134,9 @@
 
 
       <div class="landingBtnDiv">
-        <Button type="error" class="landingAbortBtn" @click="modal1 = true">Abort</Button>
+
         <Button type="primary" class="landingContinuetBtn" @click="continue1()">Continue</Button>
+        <Button type="error" class="landingAbortBtn" @click="modal1 = true">Abort</Button>
       </div>
       <Modal v-model="modal1" width="450">
        <p slot="header" style="color:#f60;text-align:center;font-size:20px">
@@ -290,21 +291,6 @@ export default {
         this.findData(this.$store.state.subscription_id)
       }
 
-      if(this.$store.state.storedUsername != ""){
-        let self = this
-        let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
-        if(userId != -1){
-            self.$store.state.user_list.splice(userId,1)
-        }
-        if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
-          self.selected_user = self.$store.state.storedUsername
-        }
-        else{
-          self.selected_user = self.$store.state.user_list[0].label
-          self.$store.state.storedUsername = self.selected_user
-        }
-      }
-
 
       // if(this.$store.state.subscription_name != "All"){
       //   this.findData(this.$store.state.subscription_id)
@@ -331,6 +317,17 @@ export default {
         }
         self.loading = true
         self.findData(sub_id)
+      }
+    },
+    '$store.state.user_list': function(list){
+      if(list.length != 0){
+        if(this.$store.state.storedUsername != ""){
+          let self = this
+          let userId = lodash.findIndex(list, function(o) { return o.label == "All"; })
+          if(userId != -1){
+              list.splice(userId,1)
+          }
+        }
       }
     }
   }

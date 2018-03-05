@@ -76,15 +76,6 @@ export const ProductInformationSchema = new Schema({
     attr_colors:{
       type: "string",
       label: "Attribute Color",
-      optional: true,
-      allowedValues: [],
-      defaultValue: '',
-      maxLength : '',
-      regEx:''
-    },
-    attr_colors:{
-      type: "string",
-      label: "Attribute Color",
       optional: false,
       allowedValues: [],
       defaultValue: '',
