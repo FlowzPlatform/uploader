@@ -74,6 +74,9 @@ export default {
                       if(masterJobStatus == 'rejected'){
                         return h('div', 'User cancelled')
                       }
+                      else if(masterJobStatus == 'completed'){
+                        return h('div','Live')
+                      }
                       else{
                         let masterJobStatus = lodash.capitalize( params.row.masterJobStatus)
                         return h('div', masterJobStatus)
@@ -87,7 +90,12 @@ export default {
                     key: 'stepStatus',
                     render: (h, params) => {
                       let StepStatus = this.getStatus(params.row.stepStatus)
-                      return h('div', StepStatus)
+                      if(StepStatus == 'Import completed'){
+                        return h('div','Imported')
+                      }
+                      else{
+                        return h('div', StepStatus)
+                      }
                     }
                 },
                 {
@@ -150,15 +158,17 @@ export default {
           socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id}, (e, data) => {
 
             self.cpage = 1
-            if(data.data.length != 0){
-              self.loading = false
-              self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
-              // self.data2 = self.data2.reverse()
-              self.chunkData = lodash.chunk(self.data2, 10);
+            if(data){
+              if(data.data.length != 0){
+                self.loading = false
+                self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
+                // self.data2 = self.data2.reverse()
+                self.chunkData = lodash.chunk(self.data2, 10);
 
-            }
-            else{
-              self.loading = false
+              }
+              else{
+                self.loading = false
+              }
             }
           })
         }
@@ -166,6 +176,7 @@ export default {
           socket.emit('uploader::find', {"user_id":id1,"role":"other"}, (e, data) => {
 
             self.cpage = 1
+            if(data){
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
@@ -176,6 +187,7 @@ export default {
               else{
                 self.loading = false
               }
+            }
             })
         }
         else {
@@ -183,6 +195,7 @@ export default {
           socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"}, (e, data) => {
 
             self.cpage = 1
+            if(data){
               if(data.data.length != 0){
                 self.loading = false
                 self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
@@ -193,6 +206,7 @@ export default {
               else{
                 self.loading = false
               }
+            }
             })
         }
 
@@ -265,7 +279,6 @@ export default {
           this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
       }
       if(this.$store.state.storedUsername != ""){
-        console.log("newjoblist if condition++++++",self.$store.state.user_detail_list)
         let sub_id = lodash.findIndex(self.$store.state.user_detail_list, function(o) { return o.name == self.$store.state.storedUsername; })
         if(sub_id != -1){
            self.selected_user = self.$store.state.user_detail_list[sub_id].name

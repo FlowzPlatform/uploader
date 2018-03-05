@@ -83,7 +83,7 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
-    Web_image_3: {
+    web_image_3: {
         type: "string",
         label: "Web Image 3",
         optional: true,

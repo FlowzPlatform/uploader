@@ -57,6 +57,12 @@ let currentDate = new Date().toISOString().slice(0,10);
         qryMongo: {$or:[{"search_keyword":null},{"search_keyword":""}]}
     },
     {
+        columnName: 'attr_colors',
+        errorString: "Attribute Colors field found blank , please provide valid data at row number",
+        errorCode: 'Attribute_ColorsBlankCheck400',
+        qryMongo: {$or:[{"attr_colors":null},{"attr_colors":""}]}
+    },
+    {
         columnName: 'default_image',
         errorString: "Default_Image field found blank , please provide valid data at row number",
         errorCode: 'Default_ImageBlankCheck400',
