@@ -30,7 +30,7 @@ jobs:
             docker push $DOCKER_USERNAME/uploader_backend_flowz:dev;
         elif [ ${TRAVIS_BRANCH} = "staging" ]; then
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-            docker build -t uploader_backend_flowz:staging ./service/;
+            docker build -t uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER ./service/;
             docker tag uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
             docker tag uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_backend_flowz:staging;
             docker images;
@@ -59,7 +59,7 @@ jobs:
             docker push $DOCKER_USERNAME/uploader_frontend_flowz:dev;
         elif [ ${TRAVIS_BRANCH} = "staging" ]; then
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-            docker build -t uploader_frontend_flowz:staging --build-arg domainkey="$DOMAINKEY_STAGING" --build-arg is_ssl=true --build-arg MYENV=Production ./client/;
+            docker build -t uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER --build-arg domainkey="$DOMAINKEY_STAGING" --build-arg is_ssl=true --build-arg MYENV=Production ./client/;
             docker tag uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
             docker tag uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_frontend_flowz:staging;
             docker images;
