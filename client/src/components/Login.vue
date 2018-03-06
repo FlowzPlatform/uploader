@@ -120,11 +120,11 @@ export default {
       },
       ruleLogin: {
         email: [
-          { required: true, message: 'Please fill in the email id', trigger: 'blur' },
-          { type: 'email', message: 'Please input correct email address', trigger: 'blur' }
+          { required: true, message: 'Please enter email id', trigger: 'blur' },
+          { type: 'email', message: 'Please enter correct email address', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: 'Please fill in the password.', trigger: 'blur' }
+          { required: true, message: 'Please enter password.', trigger: 'blur' }
         ]
       },
       facebookSuccessCallbackUrl : config.facebookSuccessCallbackUrl,

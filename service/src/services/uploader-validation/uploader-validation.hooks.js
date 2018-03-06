@@ -110,12 +110,15 @@ var connectToMongo = async function(hook,url){
           // obj["validate_flag"] = 'running'
           uploader_obj[hook.data.key] = obj
           uploader_obj["validate_flag"] = 'running'
-          var update_ruleindx = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
-          if(query_result.length > 0){
+
+          if(query_result.length > 0) {
             err_obj["err_data"] = query_result
             err_obj["err_fields"].push({"columnName":rules[j].columnName, "errorString": rules[j].errorString,"errCode":rules[j].errorCode })
+            obj["currentRuleIndex"] = j
+            var update_ruleindx = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
             break;
           }
+          var update_ruleindx = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
     }
     errors_arr.push(err_obj)
     if(errors_arr[0].err_data.length != 0){
