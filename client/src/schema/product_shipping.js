@@ -137,8 +137,8 @@ export const ProductShippingSchema = new Schema({
       defaultValue: '',
       maxLength : '',
       regEx:''
-        },
-        product_weight: {
+      },
+      product_weight: {
     	type: "string",
     	label: "Product Weight",
       optional: false,
@@ -146,8 +146,8 @@ export const ProductShippingSchema = new Schema({
       defaultValue: '',
       maxLength : '',
       regEx:''
-        },
-        carton_size_unit: {
+      },
+      carton_size_unit: {
     	type: "string",
     	label: "Carton Size Unit",
       optional: true,
@@ -155,8 +155,8 @@ export const ProductShippingSchema = new Schema({
       defaultValue: '',
       maxLength : '',
       regEx:''
-        },
-        carton_weight_unit: {
+      },
+      carton_weight_unit: {
     	type: "string",
     	label: "Carton Weight Unit",
     	max: 200,

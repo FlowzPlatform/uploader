@@ -107,7 +107,7 @@ export default {
                     }
                 },
                 {
-                    title: 'Username',
+                    title: 'Name',
                     key: 'username',
                     width: 200,
                     render: (h,params) => {

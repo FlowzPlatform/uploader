@@ -7,7 +7,7 @@
    </Steps>
    <template v-if="currentStep == 0 && uploadStep">
      <Row>
-          <Col span="6">
+          <Col span="6" class="tabList">
                 <vue-tabs active-tab-color="#494e6b"
                           active-text-color="#fff"
                           type="pills"
@@ -25,7 +25,7 @@
                       <Button type="success" class="sucessbtn" size="large" style="font-size:15px" :disabled="validate" @click="startValidation()">Start validation<i class="ivu-icon ivu-icon-android-arrow-dropright-circle" style="margin-left:7%"></i></Button>
                 </div>
           </Col>
-          <Col span="18">
+          <Col span="18" class="tabView">
             <div id="uploadCsv" style="margin-top:5%;" v-model="mObj[activeTab]">
                 <div>
                     <Form>
@@ -1159,7 +1159,10 @@ export default {
 
           if(this.mObj[tab].newUploadCSV.length > 0){
             this.mObj[tab].main_arr = lodash.chunk(this.mObj[tab].newUploadCSV, 5);
+          }
 
+          if(this.mObj[tab].main_arr[this.mObj[tab].cpage - 1] == undefined){
+            this.mObj[tab].cpage = 1
           }
         }
 
@@ -1256,7 +1259,6 @@ export default {
         let del_ids = []
 
         if(self.mObj[tab].filter_flag == true){
-
           for(let i=0; i<self.deletedValues.length ;i++){
 
             let findidx = lodash.findIndex(self.mObj[tab].csv, function(o) { return o._id == self.deletedValues[i]._id; });
@@ -1298,12 +1300,15 @@ export default {
               }
               cpage_array = []
             }
+
+            if(self.mObj[tab].main_arr[self.mObj[tab].cpage - 1] == undefined){
+              self.mObj[tab].cpage =  1
+            }
           }
 
 
         }
         else{
-
           for(let i=0; i<self.deletedValues.length ;i++){
             let findidx = lodash.findIndex(self.mObj[tab].newUploadCSV, function(o) { return o._id == self.deletedValues[i]._id; });
 
@@ -1316,6 +1321,7 @@ export default {
             self.mObj[tab].main_arr = []
             self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
           }
+
           if(cpage_array.length > 0){
             for(let i=0;i<cpage_array.length;i++){
               if(self.mObj[tab].mPage[cpage_array[i]-1].mCheck == true){
@@ -1325,21 +1331,28 @@ export default {
             cpage_array = []
           }
 
+          if(self.mObj[tab].main_arr[self.mObj[tab].cpage - 1] == undefined){
+              self.mObj[tab].cpage = 1
+          }
+
         }
 
         for(let value in self.deletedValues){
           del_ids.push(self.deletedValues[value]._id)
         }
 
+
+
+
         api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab + '&deletedIds=' + del_ids).then(res => {
-          self.deletedValues = []
-
-          if(self.mObj[tab].csv.length == 0 && self.mObj[tab].newUploadCSV.length  == 0){
-
-            this.mObj[tab].savePreviewDisplay = false
-            this.mObj[tab].uploadDisplay = true
-            self.mObj[tab].uploadCSV = []
-            this.mObj[tab].newUploadCSV = []
+          if(res !== undefined){
+            self.deletedValues = []
+            if(self.mObj[tab].csv.length == 0 && self.mObj[tab].newUploadCSV.length  == 0){
+              this.mObj[tab].savePreviewDisplay = false
+              this.mObj[tab].uploadDisplay = true
+              self.mObj[tab].uploadCSV = []
+              this.mObj[tab].newUploadCSV = []
+            }
           }
           self.delete1 = true
         })
@@ -1814,9 +1827,7 @@ export default {
       },
       changeSchema(tab,value){
         if(value == "--Add new--"){
-
           this.proceedBtn = true
-          // this.loadingdot = true
           this.mObj[tab].display = true
           this.mObj[tab].new_flag = 1
           if(this.mObj[tab].uploadDisplay){
@@ -1903,7 +1914,6 @@ export default {
 
          if(this.mObj[tab].selected_schema != '--Add new--'){
            if(self.mObj[tab].new_flag == 1){
-
              self.mObj[tab].new_flag = 0
            }
 
@@ -1968,6 +1978,9 @@ export default {
              }
 
            })
+         }
+         else if(this.mObj[tab].selected_schema == '--Add new--'){
+           this.mObj[tab].display = true
          }
       },
       validateSchema(tab,schema){
@@ -2065,15 +2078,11 @@ export default {
     //         })
     // },
     generateHeadersandMapping(tab){
-
       let self = this
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
-      // self.loadingdot = true
-
       self.mObj[tab].newUploadCSV = []
 
       if(self.mObj[tab].uploadCSV.length != 0){
-
         self.loadingdot = true
           for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
             let obj = {}
@@ -2445,8 +2454,12 @@ export default {
         if (self.mObj[self.activeTab].mapping[i].schemaObj.regEx !== '') {
           if (value !== undefined) {
             let pttrn = new RegExp(self.mObj[self.activeTab].mapping[i].schemaObj.regEx)
-            if (pttrn.test(value) === false) return 'not match with regEx value'
-            return
+            if (pttrn.test(value) === false && fieldName == 'max_imprint_color_allowed'){
+              return 'Decimal value not allowed'
+            }
+            else if(pttrn.test(value) === false && fieldName != 'max_imprint_color_allowed'){
+              return  'Value does not match with the regex'
+            }
           }
         }
       }
@@ -2471,7 +2484,7 @@ export default {
                 schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: pincodeValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
               }
               else{
-                schema_Obj[value.sysHeader] = {type: value.schemaObj.type,label: value.schemaObj.type,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+                schema_Obj[value.sysHeader] = {type: value.schemaObj.type,validator:regExValidatorFunc,label: value.schemaObj.type,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
               }
           }
           else if(value.schemaObj.optional == false) {
@@ -2651,6 +2664,8 @@ export default {
        self.validation_completed = false
        self.val_data = []
        self.$store.state.data = []
+      //  self.mObj["Product Information"].newUploadCSV = []
+      //  self.mObj["Product Price"].newUploadCSV = []
        api.request('get', '/uploader/' + id).then(response => {
          let obj = self.ModifyObj(response.data)
          api.request('put','/uploader/' + id,obj[0]).then(result =>{
@@ -2959,7 +2974,6 @@ export default {
     }
   },
   setprogress(message){
-    console.log("called....progress")
     let self = this
     self.val_data = []
     self.val_data = self.$store.state.data
@@ -3031,30 +3045,55 @@ export default {
       }
 
   },
-  arrangeTab(tabname,id){
+  async arrangeTab(tabname,id){
     let self = this
     let tab = tabname.replace(/([A-Z])/g, ' $1').trim()
+    if(self.mObj[tab].savePreviewDisplay == true){
+      self.mObj[tab].savePreviewDisplay = false
+    }
     self.mObj[tab].uploadDisplay = false
     self.mObj[tab].load = true
     let table_name = "uploader" + tabname.charAt(0).toUpperCase() + tabname.substr(1).toLowerCase()
-     api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name).then(res => {
-       self.mObj[tab].newUploadCSV = res.data
-       self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-         return _.extend({}, element, {is_checked: false});
-       });
+    let res = await(api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name))
+    self.mObj[tab].newUploadCSV = res.data
+      self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
+        return _.extend({}, element, {is_checked: false});
+      });
+      self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
+      let loop = self.mObj[tab].newUploadCSV.length/5
+      let dec_val = loop.toString().split('.')
+      if(dec_val[1] > 0){
+        loop = dec_val[0] + 1
+      }
+      for(let i=0;i<=loop;i++){
+        self.mObj[tab].mPage.push({'mCheck':false})
+      }
+      if(self.mObj[tab].main_arr.length != 0){
+        self.mObj[tab].headers = Object.keys(res.data[0])
+        self.map = true
+        self.mObj[tab].load =  false
+        self.mObj[tab].savePreviewDisplay = true
+      }
+      return;
 
-       self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
-       let loop = self.mObj[tab].newUploadCSV.length/5
-       for(let i=0;i<=loop;i++){
-         self.mObj[tab].mPage.push({'mCheck':false})
-       }
-
-       self.mObj[tab].headers = Object.keys(res.data[0])
-       self.map = true
-       self.mObj[tab].load =  false
-       self.mObj[tab].savePreviewDisplay = true
-       return;
-    })
+    //  api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name).then(res => {
+    //    self.mObj[tab].newUploadCSV = res.data
+    //    self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
+    //      return _.extend({}, element, {is_checked: false});
+    //    });
+    //    console.log("+++++++++++self.mObj[tab].newUploadCSV",self.mObj[tab].newUploadCSV)
+    //    self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
+    //    let loop = self.mObj[tab].newUploadCSV.length/5
+    //    for(let i=0;i<=loop;i++){
+    //      self.mObj[tab].mPage.push({'mCheck':false})
+    //    }
+    //
+    //    self.mObj[tab].headers = Object.keys(res.data[0])
+    //    self.map = true
+    //    self.mObj[tab].load =  false
+    //    self.mObj[tab].savePreviewDisplay = true
+    //    return;
+    // })
 },
   setValData(data,filtered_keys){
 
@@ -3148,6 +3187,10 @@ export default {
 
                 self.mObj[self.activeTab].main_arr = lodash.chunk(self.mObj[self.activeTab].newUploadCSV, 5);
                 let loop = self.mObj[self.activeTab].newUploadCSV.length/5
+                let dec_val = loop.toString().split('.')
+                if(dec_val[1] > 0){
+                  loop = dec_val[0] + 1
+                }
                 for(let i=0;i<=loop;i++){
                   self.mObj[self.activeTab].mPage.push({'mCheck':false})
                 }
@@ -3992,12 +4035,14 @@ export default {
     height: 100% !important;
 }
 
-.ivu-col-span-6 {
+.tabList {
     display: block;
     width: 25% !important;
 }
-.ivu-col-span-18 {
+.tabView {
     display: block;
     width: 75% !important;
 }
+
+
 </style>
