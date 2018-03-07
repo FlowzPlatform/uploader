@@ -32,7 +32,10 @@ var temp = {
   resetPasswordRedirectUrl: 'https://uploader.' + domainkey + '/reset-password',
   // resetPasswordRedirectUrl: protocol + '://localhost:8000/reset-password',
   resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
-  forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword'
+  forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
+  flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
+  crmUrl: 'https://www.crm.' + domainkey,
+  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -56,7 +59,10 @@ if (process.env.MYENV !== 'development') {
     getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
     resetPasswordRedirectUrl: 'https://uploader.' + domainkey + '/reset-password',
     resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
-    forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword'
+    forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
+    flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
+    crmUrl: 'https://www.crm.' + domainkey,
+    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
   }
 }
 
