@@ -22,13 +22,14 @@ import feathers from 'feathers/client';
 import socketio from 'feathers-socketio/client';
 import Emitter from '@/mixins/emitter'
 import config from '@/config'
+import Cookies from 'js-cookie';
 var lodash = require('lodash');
 var _ = require("underscore");
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 } else {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 }
 
 const app = feathers().configure(socketio(socket))
@@ -111,21 +112,15 @@ export default {
                     key: 'username',
                     width: 200,
                     render: (h,params) => {
-                      if(params.row.username == null || params.row.username == undefined){
-                        let username = '-'
-                        return h('div', username)
-                      }
-                      else{
-                        let username = lodash.capitalize(params.row.username)
-                        return h('div', username)
-                      }
+                            return h('div',params.row.username)
                     }
                 }
             ],
             data2: [],
             chunkData: [],
             loading: true,
-            cpage: 1
+            cpage: 1,
+            uniq_users: []
         }
     },
     methods:{
@@ -137,6 +132,39 @@ export default {
       },
       changePage(page) {
         this.cpage = page
+      },
+      async renderData(data){
+        let self = this
+        let uniq_user_ids = lodash.uniqBy(data,'user_id')
+        for(let i=0;i<uniq_user_ids.length;i++){
+          let response = await(axios({
+            method: 'get',
+            url: config.getUserdetailUri + uniq_user_ids[i].user_id,
+            headers: {
+              'authorization': Cookies.get('auth_token')
+            }
+          }))
+          if(response.data.data[0].firstname != undefined && response.data.data[0].lastname != undefined){
+            let name = response.data.data[0].firstname + " " + response.data.data[0].lastname
+            name = lodash.capitalize(name)
+            self.uniq_users.push({'id':uniq_user_ids[i].user_id,'username':name})
+          }
+          else{
+            let name = '-'
+            self.uniq_users.push({'id':uniq_user_ids[i].user_id,'username':name})
+          }
+
+        }
+        for(let i=0;i<data.length;i++){
+          for(let j=0;j<self.uniq_users.length;j++){
+            if(data[i].user_id == self.uniq_users[j].id){
+              data[i]["username"] = self.uniq_users[j]["username"]
+            }
+          }
+        }
+        self.loading = false
+        self.data2 =  lodash.orderBy(data, ['createdAt'],['desc']);
+        self.chunkData = lodash.chunk(self.data2, 10);
       },
       getJobDetails(){
         let self = this
@@ -155,16 +183,11 @@ export default {
         }
 
         if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id != "All"){
-          socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id}, (e, data) => {
-
+          socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id},async (e, data) => {
             self.cpage = 1
             if(data){
               if(data.data.length != 0){
-                self.loading = false
-                self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
-                // self.data2 = self.data2.reverse()
-                self.chunkData = lodash.chunk(self.data2, 10);
-
+                  await self.renderData(data.data)
               }
               else{
                 self.loading = false
@@ -173,16 +196,11 @@ export default {
           })
         }
         else if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id == "All"){
-          socket.emit('uploader::find', {"user_id":id1,"role":"other"}, (e, data) => {
-
+          socket.emit('uploader::find', {"user_id":id1,"role":"other"}, async (e, data) => {
             self.cpage = 1
             if(data){
               if(data.data.length != 0){
-                self.loading = false
-                self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
-                // self.data2 = self.data2.reverse()
-                self.chunkData = lodash.chunk(self.data2, 10);
-
+                await self.renderData(data.data)
               }
               else{
                 self.loading = false
@@ -192,16 +210,11 @@ export default {
         }
         else {
 
-          socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"}, (e, data) => {
-
+          socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"},async (e, data) => {
             self.cpage = 1
             if(data){
               if(data.data.length != 0){
-                self.loading = false
-                self.data2 =  lodash.orderBy(data.data, ['createdAt'],['desc']);
-                // self.data2 = self.data2.reverse()
-                self.chunkData = lodash.chunk(self.data2, 10);
-
+                 await self.renderData(data.data)
               }
               else{
                 self.loading = false

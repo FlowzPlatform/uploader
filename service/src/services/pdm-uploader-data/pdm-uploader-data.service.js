@@ -28,12 +28,11 @@ module.exports = function () {
   const paginate = app.get('paginate');
 
   app.configure(socketio(function(io) {
-  io.on('connection', function(socket) {
+  io.on('connection',function(socket) {
     socket.on('pdmData',async function( data){
           var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
           var cnn_with_mongo = await connectToMongo(url,data)
           socket.emit('response',{stdout:cnn_with_mongo.result})
-
   });
   });
   io.use(function (socket, next) {

@@ -572,15 +572,6 @@
        </div>
       </div>
 
-      <!-- <div id="validation_err" class="hot handsontable htColumnHeaders"></div> -->
-      <!-- <table>
-        <tr>
-        <td class="ivu-table-row"  style="color:red;font-size:14px;" v-if="validation_err_fields != ''">{{validation_err_fields}}</td>
-      </tr>
-      </table>
-      <div id="hot-preview" v-if="proceedNext">
-        <Button type="primary" @click="proceedToNext()" style="float: right;margin-right: 20px;">Proceed To Next</Button>
-      </div> -->
 
       <div v-if="validation_completed"><p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p></div>
       <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
@@ -592,7 +583,7 @@
         <div v-if="!import1">
           <h2>Import in progress</h2>
           <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
-          <Button type="error" @click="abortImportInProgress()"  style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button>
+          <!-- <Button type="error" @click="abortImportInProgress()"  style="font-size:15px;margin-top:25px;float:right;margin-right:10px;">Abort</Button> -->
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
@@ -657,14 +648,15 @@ let prod_info_upld = false
 let cpage_array = []
 let mounted_flag = false
 let no_of_uplds = 0
+let notice_flag = true
 
 
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 } else {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 }
 
 const app = feathers().configure(socketio(socket))
@@ -1751,7 +1743,7 @@ export default {
                      this.showValidationTable = false
                      this.validation_completed = false
                      this.validation_data = true
-                     this.validateStep = true
+                     this.validateStep = false
                      this.importStep = true
                      this.currentStep = 2
                      if(this.abortImportBtn == true){
@@ -3212,8 +3204,6 @@ export default {
                 })
                 $("#t-" + old_tab_index).css("background-color","#ccc","border-color","#ccc");
                 $("#t-" + old_tab_index).append(' <style>' + '#t-' +  old_tab_index + '{font-size: 16px;list-style-type: none; position: relative; }' + '#t-' + old_tab_index + ':before{content: " ";display: block;border: solid 0.8em rgb(73,78,107); border-radius: .8em; top: 35%; margin-top: -0.5em;}' + '#t-' + old_tab_index + ':after {content: " ";display: block;width: 0.3em; height: 0.6em;border: solid white;border-width: 0 0.2em 0.2em 0; position: absolute;left: 1em;top: 40%;margin-top: -0.2em;-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg);-o-transform: rotate(45deg);transform: rotate(45deg);}</style>')
-                //  $("#t-" + old_tab_index).addClass('ivu-icon ivu-icon-checkmark')
-                // setTimeout(function(){  $("#t-" + old_tab_index).addClass('ivu-icon ivu-icon-checkmark')},0)
                 self.activeTab = new_tab
 
               }
@@ -3247,7 +3237,7 @@ export default {
                  self.validation_data = true
                }
                if(self.validateStep == true){
-                   self.validateStep = false
+                  self.validateStep = false
                }
                if(self.importStep == false){
                  self.importStep = true
@@ -3256,20 +3246,18 @@ export default {
                if(self.abortImportBtn == true){
                  self.abortImportBtn = false
                }
-
                 self.import1 = false
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
-
               if(self.showValidationTable == true){
                 self.showValidationTable = false
               }
               if(self.validation_completed == true){
                 self.validation_completed = false
               }
-              if(self.validation_data == false){
-                self.validation_data = true
-              }
+              // if(self.validation_data == false){
+              //   self.validation_data = true
+              // }
               if(self.validateStep == true){
                 self.validateStep = false
               }
@@ -3292,7 +3280,10 @@ export default {
               if(self.abortImportBtn == true){
                 self.abortImportBtn = false
               }
-              self.$Notice.success({title: 'Import Completed', desc: 'Your data has gone Live...'})
+              if(notice_flag == true){
+                self.$Notice.success({title: 'Import Completed', desc: 'Your data has gone Live...'})
+                notice_flag = false
+              }
               self.$router.push('/uploader')
             }
           }
@@ -3306,6 +3297,7 @@ export default {
       self.loading = true
       self.$store.state.disableuser = true
       self.$store.state.disablesubscription = true
+      notice_flag = true
 
       api.request('get', '/uploader/' + id ).then(response => {
         if(response.data != null){
