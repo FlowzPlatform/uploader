@@ -56,9 +56,9 @@ import lodash from 'lodash'
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 } else {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 }
 const app = feathers().configure(socketio(socket))
 let id
@@ -144,18 +144,18 @@ export default {
               subscriptionId: this.$store.state.subscription_id
             }
 
-            if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.firstname
-            }
-            else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
-            }
-            else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.lastname
-            }
-            else if(this.$store.state.user.email){
-                obj["username"] = this.$store.state.user.email
-            }
+            // if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
+            //   obj["username"] = this.$store.state.user.firstname
+            // }
+            // else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
+            //   obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
+            // }
+            // else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
+            //   obj["username"] = this.$store.state.user.lastname
+            // }
+            // else if(this.$store.state.user.email){
+            //     obj["username"] = this.$store.state.user.email
+            // }
 
             api.request('post', '/uploader', obj).then(res => {
               id = res.data.id
