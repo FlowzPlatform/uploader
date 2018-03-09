@@ -170,9 +170,9 @@ import lodash from 'lodash'
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 } else {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 }
 const app = feathers().configure(socketio(socket))
 moment().format();

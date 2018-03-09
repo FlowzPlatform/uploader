@@ -40,7 +40,6 @@ export default {
 
 
       let uniq_user_id = _.uniqBy(list1, 'label');
-
       let uniq_user_array = []
     // setTimeout(function(){
       for(let i=0;i<uniq_user_id.length;i++){
