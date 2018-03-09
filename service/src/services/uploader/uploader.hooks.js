@@ -81,24 +81,11 @@ var beforeCreate = async function(hook){
   let tdata = []
   tdata = await(hook.app.service('/uploader').find({query:{"masterJobStatus":"running","user_id":user_data.data.userId}}))
   if(tdata.data.length == 0){
-    // let user_details = await axios({
-    //    method: 'get',
-    //    url: getUserdetailUrl + user_data.data.userId,
-    //    headers: {
-    //      'authorization': module.exports.authorization
-    //    }
-    //  })
     if(hook.data.stepStatus == 'upload_pending'){
       hook.data["createdAt"] = new Date()
       hook.data["key"] = 'pdm_uploader'
       hook.data["masterJobStatus"] = 'running',
       hook.data["user_id"] = user_data.data.userId
-      // if(user_details.data.data[0].firstname && user_details.data.data[0].lastname){
-      //   hook.data["username"] = user_details.data.data[0].firstname +  " " + user_details.data.data[0].lastname
-      // }
-      // else if(user_details.data.data[0].email){
-      //   hook.data["username"] = user_details.data.data[0].email
-      // }
     }
     else{
       throw new errors.BadRequest('Invalid Parameters', {
