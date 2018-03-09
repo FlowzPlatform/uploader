@@ -230,40 +230,6 @@ export default {
         // this.loading = false
         this.getData(this.$store.state.subscription_id)
       }
-
-      // if(this.$store.state.storedUsername != ""){
-      //   console.log("called uploader ++++++++++++++++",this.$store.state.storedUsername,this.$store.state.user_list)
-      //   let self = this
-      //   let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
-      //   if(userId != -1){
-      //       self.$store.state.user_list.splice(userId,1)
-      //   }
-      //   if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
-      //     self.selected_user = self.$store.state.storedUsername
-      //   }
-      //   else{
-      //     self.selected_user = self.$store.state.user_list[0].label
-      //     self.$store.state.storedUsername = self.selected_user
-      //   }
-      // }
-
-      // if(this.$store.state.subscription_id != ""){
-      //
-      // }
-
-      // if(this.$store.state.subscription_id == 'All'){
-      //   this.loading = false
-      //   this.$Notice.error({
-      //    title: 'Please select a proper subscription id...'
-      //  });
-      // }
-      // else if(this.$store.state.subscription_id != "All"){
-      //   // this.loading = false
-      //   this.getData(this.$store.state.subscription_id)
-      // }
-
-
-
     },
     watch:{
     '$store.state.subscription_id': function (id) {

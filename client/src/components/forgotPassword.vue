@@ -54,7 +54,7 @@ export default {
   data () {
     const emailValidator = (rule, value, callback) => {
                 if (value == '') {
-                    callback(new Error('Please fill email'));
+                    callback(new Error('Please enter email'));
                 } else if (value != '') {
                   let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
                   if(re.test(value) != true)

@@ -65,7 +65,7 @@ export default {
       },
       ruleResetPassword: {
         password: [
-          { required: true, message: 'Please fill in the password', trigger: 'blur' }
+          { required: true, message: 'Please enter password', trigger: 'blur' }
         ],
         confirmpassword: [
           { trigger: 'blur',validator: validatePassCheck }

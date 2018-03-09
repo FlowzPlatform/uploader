@@ -9,6 +9,7 @@ branches:
   only:
   - master
   - develop
+  - staging
   - QA
 
 jobs:
@@ -27,6 +28,14 @@ jobs:
             docker images;
             docker tag uploader_backend_flowz:dev $DOCKER_USERNAME/uploader_backend_flowz:dev;
             docker push $DOCKER_USERNAME/uploader_backend_flowz:dev;
+        elif [ ${TRAVIS_BRANCH} = "staging" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER ./service/;
+            docker tag uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker tag uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_backend_flowz:staging;
+            docker images;
+            docker push $DOCKER_USERNAME/uploader_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker push $DOCKER_USERNAME/uploader_backend_flowz:staging;
         else
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
             docker build -t uploader_backend_flowz:qa ./service/;
@@ -48,6 +57,14 @@ jobs:
             docker images;
             docker tag uploader_frontend_flowz:dev $DOCKER_USERNAME/uploader_frontend_flowz:dev;
             docker push $DOCKER_USERNAME/uploader_frontend_flowz:dev;
+        elif [ ${TRAVIS_BRANCH} = "staging" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER --build-arg domainkey="$DOMAINKEY_STAGING" --build-arg is_ssl=true --build-arg MYENV=Production ./client/;
+            docker tag uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker tag uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/uploader_frontend_flowz:staging;
+            docker images;
+            docker push $DOCKER_USERNAME/uploader_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker push $DOCKER_USERNAME/uploader_frontend_flowz:staging;
         else
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
             docker build -t uploader_frontend_flowz:qa --build-arg domainkey="$DOMAINKEY_QA" --build-arg is_ssl=true --build-arg MYENV=Production ./client/;
