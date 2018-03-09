@@ -91,7 +91,7 @@ curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
        "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$mongodb_host"'","mongodb_port":"'"$mongodb_port"'","username":"'"$username_env"'","password":"'"$password"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
 $RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_BACKEND?action=upgrade
 
-curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
+curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
 -X POST \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
