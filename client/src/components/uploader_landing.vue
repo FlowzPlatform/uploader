@@ -238,6 +238,18 @@ export default {
         socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
           if(data.data.length != 0){
             this.$store.state.jobData = data.data[0]
+
+            let tab_array = ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"]
+            for(let i=0;i<tab_array.length;i++){
+              for(let key in data.data[0]){
+                if(tab_array[i] == key){
+                  let prod_data = data.data[0][key]
+                  delete data.data[0][key]
+                  data.data[0][tab_array[i]] = prod_data
+                }
+              }
+            }
+            
             this.job.push(data.data[0])
             this.loading = false
             this.show_table = true

@@ -1032,6 +1032,7 @@ export default {
         else{
 
           self.mObj[tab].load = true
+          self.loadProcessing = false
           self.mObj[tab].uploadDisplay = false
           let my_flag = true
             Papa.parse(file, {
@@ -2296,7 +2297,6 @@ export default {
                    continue_flag = true
                }
                else{
-
                   self.loadProceed = true
                   setTimeout(async function(){
                     await self.makeNewUploadCSVObj(tab)
@@ -2317,7 +2317,6 @@ export default {
           }
         }
         else{
-
           self.loadProceed = true
           setTimeout(async function(){
             await self.makeNewUploadCSVObj(tab)
@@ -3102,8 +3101,6 @@ export default {
       self.proceedBtn = true
       continue_flag = false
       self.showContinue = false
-      self.loadProcessing = false
-      self.loadProceed = false
       self.mObj[tab].load = false
       self.mObj[tab].uploadCSV = []
       self.mObj[tab].newUploadCSV = []
@@ -3111,6 +3108,8 @@ export default {
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
+      self.loadProcessing = false
+      self.loadProceed = false
       $(".f-layout-copy").css("position","fixed");
     },
     abortUploadedRecords(tab){
@@ -3283,7 +3282,7 @@ export default {
         }
       }))
       // ht.selectCell(row1,col1,row1,col1,true)
-       setTimeout(function(){ht.selectCell(row1,col1,row1,col1,true)},200)
+      setTimeout(function(){ht.selectCell(row1,col1,row1,col1,true)},200)
 
       if(document.getElementById('example1')){
         document.getElementById('example1').style.display = 'block'
@@ -3354,8 +3353,6 @@ export default {
           if(document.getElementsByClassName('ht_master handsontable')[0]){
             document.getElementsByClassName('ht_master handsontable')[0].remove()
           }
-
-
 
           self.showerrmsg(errcols,tab)
         }
@@ -3625,32 +3622,47 @@ export default {
     // })
 },
   setValData(data,filtered_keys){
-
       uploader_obj = data
       prop_keys = filtered_keys
       this.val_data = []
       this.$store.state.data = []
       let self = this
+      let rem_arr = []
 
       for(let i=0 ;i<filtered_keys.length;i++){
       for(let key in data){
           if(filtered_keys[i] == key){
             if(data[filtered_keys[i]].validateStatus == 'pending' && data[filtered_keys[i]].currentRuleIndex){
               self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
+              // rem_arr.push(filtered_keys[i])
             }
             else if(data[filtered_keys[i]].validateStatus == 'pending' && !data[filtered_keys[i]].currentRuleIndex){
               self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":0})
             }
             else if(data[filtered_keys[i]].validateStatus == 'completed'){
               self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
-              prop_keys.splice(i,1)
+              rem_arr.push(filtered_keys[i])
+              // prop_keys.splice(i,1)
             }
           }
         }
       }
+      for(let i=0;i<rem_arr.length;i++){
+        for(let j=0;j<prop_keys.length;j++){
+          if(rem_arr[i] == prop_keys[j]){
+            prop_keys.splice(j,1)
+          }
+        }
+      }
+
 
       self.$store.state.data = self.val_data
-     self.sheetwiseValidation(prop_keys[0],uploader_obj)
+      if(prop_keys[0] != undefined){
+        self.sheetwiseValidation(prop_keys[0],uploader_obj)
+      }
+      else{
+        self.validation_completed = true
+      }
       return;
   }
   },
@@ -3874,13 +3886,12 @@ export default {
                     this.validating = false
                     this.showValidationTable = true
 
-
-
                     uploader_obj = response.data
                     prop_keys = filtered_keys
                     this.val_data = []
                     this.$store.state.data = []
                     let self = this
+                    let rem_arr = []
 
                     if(self.$store.state.calledFromContinue == false){
                       for(let i=0 ;i<filtered_keys.length;i++){
@@ -3894,7 +3905,8 @@ export default {
                           }
                           else if(response.data[filtered_keys[i]].validateStatus == 'completed'){
                             self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
-                            prop_keys.splice(i,1)
+                            rem_arr.push(filtered_keys[i])
+                            // prop_keys.splice(i,1)
                           }
                         }
                       }
@@ -3903,18 +3915,23 @@ export default {
 
                   }
 
+                  for(let i=0;i<rem_arr.length;i++){
+                    for(let j=0;j<prop_keys.length;j++){
+                      if(rem_arr[i] == prop_keys[j]){
+                        prop_keys.splice(j,1)
+                      }
+                    }
+                  }
+
 
 
                     if(response.data.validate_flag == 'running' || response.data.validate_flag == 'completed'){
 
                       if(self.val_data.length == 0){
-
                         self.$store.state.calledFromContinue = false
-
                         self.setValData(response.data,filtered_keys)
                       }
                       else if(self.val_data.length > 0){
-
                         self.$store.state.validationStatus = true
                         // self.setValData(response.data,filtered_keys)
 
@@ -4560,9 +4577,6 @@ export default {
       margin-right: 0px;
     }
 
-    /*.handsontable tbody th.ht__highlight, .handsontable thead th.ht__highlight {
-    background-color: #fff !important
-}*/
 #example1 .handsontable .wtHider {
     height: 100% !important;
 
