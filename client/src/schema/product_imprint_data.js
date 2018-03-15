@@ -204,7 +204,6 @@ export const ProductImprintDataSchema = new Schema({
         maxLength : '',
         regEx:''
     },
-
     qty_2_min: {
         type: "number",
         label: "Qty_2_Min",

@@ -157,7 +157,9 @@
                  </div>
              </div>
              <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:9%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn">Proceed</Button>
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:9%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn">
+              Proceed
+             </Button>
            </div>
 
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
@@ -469,7 +471,7 @@
            </Row>
          </Modal>
 
-         <Modal v-model="modal1" width="500" @on-cancel="cancel">
+         <Modal v-model="modal1" width="500" @on-cancel="cancel" >
           <p slot="header" style="color:#f60;text-align:center;font-size:20px">
               <Icon type="information-circled"></Icon>
               <span>Some of your headers are not mapped ...</span>
@@ -480,7 +482,11 @@
           </div>
           <div slot="footer">
               <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
-              <Button type="primary"  @click="continuee(activeTab)" v-if="showContinue" style="background-color:#1fb58f;border-color:#1fb58f;">Continue</Button>
+              <Button type="primary"  @click="continuee(activeTab)"  style="background-color:#1fb58f;border-color:#1fb58f;" v-if="showContinue" :disabled="!showContinue">
+                <!-- <span v-if="showContinue">Continue</span>
+                <span v-else>Processing...</span> -->
+                Continue
+              </Button>
           </div>
        </Modal>
 
@@ -744,7 +750,10 @@ export default {
              parallelUploads: 5
          },
          showContinue: false,
+         // loadProcessing: false,
+         // loadProceed: false,
          abortImportBtn: false,
+         calledfromModify: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -775,6 +784,7 @@ export default {
                   load: false,
                   mPage:[],
                   cpage:1,
+                  tab_flag:false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -812,6 +822,7 @@ export default {
                   load: false,
                   mPage:[],
                   cpage:1,
+                  tab_flag:false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -850,6 +861,7 @@ export default {
                   load: false,
                   mPage:[],
                   cpage:1,
+                  tab_flag:false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -886,6 +898,7 @@ export default {
                   load: false,
                   mPage:[],
                   cpage:1,
+                  tab_flag:false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -922,6 +935,7 @@ export default {
                   load: false,
                   mPage:[],
                   cpage:1,
+                  tab_flag:false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -958,6 +972,7 @@ export default {
                   load: false,
                   mPage:[],
                   cpage:1,
+                  tab_flag:false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -994,6 +1009,7 @@ export default {
                   load: false,
                   mPage:[],
                   cpage:1,
+                  tab_flag:false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -1016,34 +1032,44 @@ export default {
         else{
 
           self.mObj[tab].load = true
+          // self.loadProcessing = false
           self.mObj[tab].uploadDisplay = false
-
+          let my_flag = true
             Papa.parse(file, {
               header: true,
               dynamicTyping: true,
               encoding: "UTF-8",
-              skipEmptyLines: false,
+              skipEmptyLines: true,
               chunk: await (function(results, streamer){
-                self.mObj[tab].uploadCSV = results.data
+                let res_arr = []
+                res_arr.push(results)
+                for(let i=0;i<res_arr.length;i++){
+                  self.mObj[tab].uploadCSV =  lodash.unionBy(self.mObj[tab].uploadCSV,res_arr[i].data)
+                }
+                // self.mObj[tab].uploadCSV = results.data
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
+                // self.loadProceed = false
                 // self.mObj[tab].load = true
                 if(self.mObj[tab].new_flag == 1){
-                  self.mObj[tab].load = true
-                  setTimeout(function(){self.mObj[tab].mapping = []
-                  self.generateHeadersandMapping(tab)},1)
+                  if(my_flag == true){
+                    self.mObj[tab].load = true
+                    my_flag = false
+                    setTimeout(function(){self.mObj[tab].mapping = []
+                      self.generateHeadersandMapping(tab)},1)
+
+                  }
                 }
                 else{
-
-                  self.mObj[tab].load = true
-                  if(self.mObj[tab].newSchemaDisplay == true){
-                    self.mObj[tab].newSchemaDisplay = false
+                  if(my_flag == true){
+                    self.mObj[tab].load = true
+                    my_flag = false
+                    if(self.mObj[tab].newSchemaDisplay == true){
+                      self.mObj[tab].newSchemaDisplay = false
+                    }
+                    self.mObj[tab].mapping = []
+                    self.getMapping(tab)
                   }
-
-
-                  self.mObj[tab].mapping = []
-
-                  self.getMapping(tab)
                 }
               })
             })
@@ -1367,7 +1393,9 @@ export default {
         let newIndex = files.replace(/ /g,"_");
         return newIndex
       },
+      tabClick(){
 
+      },
       //Manages the client side validation handson table in different tabs
       hideHandson(){
         let self = this
@@ -1384,8 +1412,14 @@ export default {
             }
 
           }
-          //  $("#t-" + "Product_Information").addClass('ivu-icon ivu-icon-checkmark')
 
+
+          let tab = self.activeTab.replace(/\s/g, "")
+
+          if(self.mObj[self.activeTab].tab_flag == true && self.mObj[self.activeTab].newUploadCSV.length == 0){
+            self.mObj[self.activeTab].tab_flag = false
+            self.arrangeTab(tab,self.$route.params.id)
+          }
       },
 
       // Transform functions..........
@@ -1417,7 +1451,7 @@ export default {
 
           self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].csv_arr, function (row, rinx) {
             return _.reduce(row, function (result, value, key) {
-              let inx = _.find( self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
+              let inx = _.find(self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
               if (inx.transform !== '') {
                 var s = new Function('row', inx.transform).call(self, row) // eslint-disable-line
                 result[key] = s
@@ -1455,7 +1489,7 @@ export default {
       mapHeader(sysHeader,csvHeader){
         let self = this
         let tab = self.activeTab
-        for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
+        for(let i=0;i<5;i++){
            for(let key in self.mObj[tab].uploadCSV[i]){
              if(key == csvHeader){
                 self.mObj[tab].newUploadCSV[i][sysHeader] = self.mObj[tab].uploadCSV[i][key]
@@ -1886,8 +1920,6 @@ export default {
                   this.mObj[tab].newSchemaDisplay = false
                   this.mObj[tab].headerDisplay = true
                 }
-
-
                 this.getMapping(tab)
               }
             }
@@ -1901,7 +1933,7 @@ export default {
 
         }
       },
-      getMapping(tab){
+      async getMapping(tab){
         let self = this
 
          if(this.mObj[tab].selected_schema != '--Add new--'){
@@ -1915,14 +1947,14 @@ export default {
           this.loadingdot = true
           this.map = true
           this.mObj[tab].mapping = []
-           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, data) => {
+
+           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id},async (e, data) => {
              if(data){
                this.mObj[tab].mapping = data.data[0].mapping
                let schema_keys = _.keys(this.mObj[tab].schema.structure);
-
                if(this.mObj[tab].uploadCSV.length != 0){
                  this.mObj[tab].newUploadCSV = []
-                 for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
+                 for(let i=0;i<5;i++){
                    let obj = {}
                    for(let key in this.mObj[tab].uploadCSV[i]){
                      for(let j=0;j<this.mObj[tab].mapping.length;j++){
@@ -1935,6 +1967,7 @@ export default {
                      }
                    }
                    obj["_id"] = uuidV1()
+                  //  await self.validateObj(schema_Obj,obj,tab,errcols,i)
                    this.mObj[tab].newUploadCSV.push(obj)
 
                    this.mObj[tab].load = false
@@ -1948,7 +1981,7 @@ export default {
 
 
                  let index = this.mObj[tab].newUploadCSV.length - 1
-                 this.mObj[tab].newUploadCSV.splice(index, 1)
+                //  this.mObj[tab].newUploadCSV.splice(index, 1)
                  this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
                  for(let k=0;k<this.mObj[tab].mapping.length;k++){
@@ -2074,31 +2107,62 @@ export default {
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
       self.mObj[tab].newUploadCSV = []
 
+      // errcols = []
+      // err_length = 0
+      // self.mObj[tab].data1 = []
+      // self.mObj[tab].headers1 = []
+      // self.mObj[tab].errmsg = []
+      // schema_Obj = await this.makeSchemaObj(tab)
+
       if(self.mObj[tab].uploadCSV.length != 0){
         self.loadingdot = true
-          for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
-            let obj = {}
-             for(let key in self.mObj[tab].uploadCSV[i]){
 
-               for(let j=0;j<schema_keys.length;j++){
-                 if(schema_keys[j] == key.toLowerCase()){
-                     obj[schema_keys[j]] = self.mObj[tab].uploadCSV[i][key]
-                 }
-                 else if(!obj.hasOwnProperty(schema_keys[j])){
-                      obj[schema_keys[j]] = ''
-                 }
+        for(let i=0;i<5;i++){
+          let obj = {}
+           for(let key in self.mObj[tab].uploadCSV[i]){
+
+             for(let j=0;j<schema_keys.length;j++){
+               if(schema_keys[j] == key.toLowerCase()){
+                   obj[schema_keys[j]] = self.mObj[tab].uploadCSV[i][key]
+               }
+               else if(!obj.hasOwnProperty(schema_keys[j])){
+                    obj[schema_keys[j]] = ''
                }
              }
-             obj["_id"] = uuidV1()
-             self.mObj[tab].newUploadCSV.push(obj)
-             self.mObj[tab].newSchemaDisplay = true
-             self.mObj[tab].previewDisplay = true
-             self.mObj[tab].load = false
-             $(".f-layout-copy").css("position","absolute");
-             self.loadingdot = false
-          }
-            let index = self.mObj[tab].newUploadCSV.length - 1
-            self.mObj[tab].newUploadCSV.splice(index,1)
+           }
+           obj["_id"] = uuidV1()
+           self.mObj[tab].newUploadCSV.push(obj)
+
+           self.mObj[tab].newSchemaDisplay = true
+           self.mObj[tab].previewDisplay = true
+           self.mObj[tab].load = false
+           $(".f-layout-copy").css("position","absolute");
+           self.loadingdot = false
+        }
+
+          // for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
+          //   let obj = {}
+          //    for(let key in self.mObj[tab].uploadCSV[i]){
+          //
+          //      for(let j=0;j<schema_keys.length;j++){
+          //        if(schema_keys[j] == key.toLowerCase()){
+          //            obj[schema_keys[j]] = self.mObj[tab].uploadCSV[i][key]
+          //        }
+          //        else if(!obj.hasOwnProperty(schema_keys[j])){
+          //             obj[schema_keys[j]] = ''
+          //        }
+          //      }
+          //    }
+          //    obj["_id"] = uuidV1()
+          //    self.mObj[tab].newUploadCSV.push(obj)
+          //    self.mObj[tab].newSchemaDisplay = true
+          //    self.mObj[tab].previewDisplay = true
+          //    self.mObj[tab].load = false
+          //    $(".f-layout-copy").css("position","absolute");
+          //    self.loadingdot = false
+          // }
+            // let index = self.mObj[tab].newUploadCSV.length - 1
+            // self.mObj[tab].newUploadCSV.splice(index,1)
             self.mObj[tab].csv_arr = self.mObj[tab].newUploadCSV
 
             self.mObj[tab].mapping =[]
@@ -2136,17 +2200,73 @@ export default {
       this.proceedBtn = true
       continue_flag = false
     },
-    continuee(tab){
-      this.modal1 = false
+   async continuee(tab){
+      // this.loadProcessing = true
+      let self = this
       continue_flag = true
+      this.showContinue = false
       this.proceedBtn = true
-      this.ProceedToValidate(tab)
+      await self.makeNewUploadCSVObj(tab)
+      await self.transformFromMapping(tab)
+      self.modal1 = false
+      self.ProceedToValidate(tab)
     },
     cancel (){
       this.proceedBtn = true
       continue_flag = false
     },
-    Proceed(tab){
+    transformFromMapping(tab){
+      this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
+       for(let k=0;k<this.mObj[tab].mapping.length;k++){
+         if(this.mObj[tab].mapping[k].transform != ""){
+           this.transformData = this.mObj[tab].mapping[k].transform
+           this.modelIndex = k
+           this.handleModalOk()
+         }
+       }
+    },
+    async makeNewUploadCSVObj(tab){
+      let self = this
+       // self.loadProcessing = true
+
+      // errcols = []
+      // err_length = 0
+      // self.mObj[tab].data1 = []
+      // self.mObj[tab].headers1 = []
+      // self.mObj[tab].errmsg = []
+      // console.log("^^^^^^ schema_obj ^^^^^^^",schema_Obj)
+
+      for(let i=5 ;i< self.mObj[tab].uploadCSV.length;i++){
+        let obj = {}
+         for(let key in self.mObj[tab].uploadCSV[i]){
+
+           for(let j=0;j<self.mObj[tab].mapping.length;j++){
+             if(self.mObj[tab].mapping[j]["csvHeader"] == key){
+                 obj[self.mObj[tab].mapping[j]["sysHeader"]] = self.mObj[tab].uploadCSV[i][key]
+             }
+             else if(!obj.hasOwnProperty(self.mObj[tab].mapping[j]["sysHeader"])){
+                  obj[self.mObj[tab].mapping[j]["sysHeader"]] = ''
+             }
+           }
+         }
+         obj["_id"] = uuidV1()
+        //  await self.validateObj(schema_Obj,obj,tab,errcols,i)
+         self.mObj[tab].newUploadCSV.push(obj)
+        //  console.log("%%%%%% newUploadCSV  full object %%%%%%",self.mObj[tab].newUploadCSV)
+
+         this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
+
+         for(let k=0;k<this.mObj[tab].mapping.length;k++){
+           if(this.mObj[tab].mapping[k].transform != ""){
+             this.transformData = this.mObj[tab].mapping[k].transform
+             this.modelIndex = k
+             this.handleModalOk()
+           }
+         }
+      }
+      return;
+    },
+    async Proceed(tab){
       let self = this
       self.proceedBtn = false
         if(map_flag == false){
@@ -2157,6 +2277,34 @@ export default {
           });
           if(check_headers.length != 0){
               self.modal1 = true
+              // this.$Modal.confirm({
+              //              title: 'Confirm',
+              //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
+              //              loading: true,
+              //              okText: 'Continue',
+              //              cancelText: 'Map',
+              //              onOk: async () => {
+              //                let self = this
+              //                // self.loadProcessing = true
+              //                continue_flag = true
+              //                self.showContinue = false
+              //                self.proceedBtn = true
+              //                await self.makeNewUploadCSVObj(tab)
+              //                await self.transformFromMapping(tab)
+              //                // self.modal1 = false
+              //                let res = await self.ProceedToValidate(tab)
+              //                 console.log("res....",res)
+              //                if(res){
+              //                  self.$Modal.remove()
+              //                }
+              //              },
+              //              onCancel: async() => {
+              //                map_flag = false
+              //                self.modal1 = false
+              //                self.proceedBtn = true
+              //                continue_flag = false
+              //              }
+              //            })
           }
           else{
              self.showContinue = true
@@ -2168,21 +2316,439 @@ export default {
                });
                if(optional_headers.length != 0){
                    self.modal1 = true
+                   // this.$Modal.confirm({
+                   //              title: 'Confirm',
+                   //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
+                   //              loading: true,
+                   //              okText: 'Continue',
+                   //              cancelText: 'Map',
+                   //              onOk: async () => {
+                   //                let self = this
+                   //                // self.loadProcessing = true
+                   //                continue_flag = true
+                   //                self.showContinue = false
+                   //                self.proceedBtn = true
+                   //                await self.makeNewUploadCSVObj(tab)
+                   //                await self.transformFromMapping(tab)
+                   //                // self.modal1 = false
+                   //                let res = await self.ProceedToValidate(tab)
+                   //                console.log("res....",res)
+                   //                if(res){
+                   //                  self.$Modal.remove()
+                   //                }
+                   //              },
+                   //              onCancel: async() => {
+                   //                map_flag = false
+                   //                self.modal1 = false
+                   //                self.proceedBtn = true
+                   //                continue_flag = false
+                   //              }
+                   //            })
                    continue_flag = true
                }
                else{
-                  self.ProceedToValidate(tab)
+                  // self.loadProceed = true
+                    await self.makeNewUploadCSVObj(tab)
+                    await self.transformFromMapping(tab)
+                    self.ProceedToValidate(tab)
                }
              }
              else{
-               self.ProceedToValidate(tab)
+
+               // self.loadProceed = true
+                 await self.makeNewUploadCSVObj(tab)
+                 await self.transformFromMapping(tab)
+                 self.ProceedToValidate(tab)
              }
           }
         }
         else{
-          self.ProceedToValidate(tab)
+          // self.loadProceed = true
+            await self.makeNewUploadCSVObj(tab)
+            await self.transformFromMapping(tab)
+            self.ProceedToValidate(tab)
         }
     },
+    // makeSchemaObj(tab){
+    //   console.log("++++++++makeSchemaObj called ++++++")
+    //   let self = this
+    //   // let errcols = []
+    //   let dateValidatorFunc = function (obj, value,fieldName) {
+    //           if(value != "" || value != undefined){
+    //            let date = moment(value)
+    //            let isValid = date.isValid()
+    //            if (isValid != true) return 'Invalid date. Please provide date in y-m-d format'
+    //            date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
+    //            return
+    //          }
+    //   }
+    //   let urlValidatorFunc = function (obj, value, fieldName) {
+    //
+    //             if (value != "" || value != undefined) {
+    //               let re = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/
+    //               if(re.test(value) !== true)
+    //               return 'Invalid url'
+    //               else
+    //               return
+    //             }
+    //           }
+    //
+    //   let emailValidatorFunc = function (obj, value, fieldName) {
+    //     if(value !== undefined || value !== ""){
+    //       let re = /\S+@\S+\.\S+/
+    //       if(re.test(value) !== true)
+    //       return  'Invalid email address'
+    //       else
+    //       return
+    //     }
+    //   }
+    //
+    //   let optionalValidatorFunc = function (obj, value, fieldName) {
+    //     if(value == '')
+    //       return  fieldName + ' cannot be left blank'
+    //       else
+    //       return
+    //
+    //   }
+    //
+    //
+    //   let phoneValidatorFunc = function (obj, value, fieldName) {
+    //     let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
+    //     if (value !== undefined || value !== "") {
+    //       if(re.test(value) !== true)
+    //       return 'Invalid phone number'
+    //       else
+    //       return
+    //     }
+    //   }
+    //
+    //   let pincodeValidatorFunc = function (obj, value, fieldName) {
+    //     let re = /^[0-9]{1,6}$/ // eslint-disable-line
+    //     if (value !== undefined || value !== "") {
+    //       if(re.test(value) !== true)
+    //       return 'Invalid pin-code'
+    //       else
+    //       return
+    //     }
+    //   }
+    //
+    //   let getFunctionDate = function (obj, value, fieldName) {
+    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+    //     var func2 = regExValidatorFunc(obj, value, fieldName)
+    //     var func3 = dateValidatorFunc(obj, value, fieldName)
+    //     var func4 =  defaultValidatorFunc(obj, value, fieldName)
+    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
+    //     if (func1 !== undefined) {
+    //       return func1
+    //     } else if (func2 !== undefined) {
+    //       return func2
+    //     } else if (func3 !== undefined) {
+    //       return func3
+    //     } else if(func4 !== undefined){
+    //       return func4
+    //     }else if(func5 !== undefined){
+    //       return func5
+    //     }else {
+    //       return
+    //     }
+    //   }
+    //
+    //   let getFunctionUrl = function (obj, value, fieldName) {
+    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+    //     var func2 = regExValidatorFunc(obj, value, fieldName)
+    //     var func3 = urlValidatorFunc(obj, value, fieldName)
+    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
+    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
+    //     if (func1 !== undefined) {
+    //       return func1
+    //     } else if (func2 !== undefined) {
+    //       return func2
+    //     } else if (func3 !== undefined) {
+    //       return func3
+    //     } else if(func4 !== undefined){
+    //       return func4
+    //     }else if(func5 !== undefined){
+    //       return func5
+    //     }else {
+    //       return
+    //     }
+    //   }
+    //
+    //   let getFunctionEmail = function (obj, value, fieldName) {
+    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+    //     var func2 = regExValidatorFunc(obj, value, fieldName)
+    //     var func3 = emailValidatorFunc(obj, value, fieldName)
+    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
+    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
+    //     if (func1 !== undefined) {
+    //       return func1
+    //     } else if (func2 !== undefined) {
+    //       return func2
+    //     } else if (func3 !== undefined) {
+    //       return func3
+    //     } else if(func4 !== undefined){
+    //       return func4
+    //     }else if(func5 !== undefined){
+    //       return func5
+    //     }else {
+    //       return
+    //     }
+    //   }
+    //
+    //   let getFunctionPhone = function (obj, value, fieldName) {
+    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+    //     var func2 = regExValidatorFunc(obj, value, fieldName)
+    //     var func3 = phoneValidatorFunc(obj, value, fieldName)
+    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
+    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
+    //     if (func1 !== undefined) {
+    //       return func1
+    //     } else if (func2 !== undefined) {
+    //       return func2
+    //     } else if (func3 !== undefined) {
+    //       return func3
+    //     } else if(func4 !== undefined){
+    //       return func4
+    //     }else if(func5 !== undefined){
+    //       return func5
+    //     }else {
+    //       return
+    //     }
+    //   }
+    //
+    //   let getFunctionPincode = function (obj, value, fieldName) {
+    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+    //     var func2 = regExValidatorFunc(obj, value, fieldName)
+    //     var func3 = getFunctionPincode(obj, value, fieldName)
+    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
+    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
+    //     if (func1 !== undefined) {
+    //       return func1
+    //     } else if (func2 !== undefined) {
+    //       return func2
+    //     } else if (func3 !== undefined) {
+    //       return func3
+    //     } else if(func4 !== undefined){
+    //       return func4
+    //     }else if(func5 !== undefined){
+    //       return func5
+    //     }else {
+    //       return
+    //     }
+    //   }
+    //
+    //   let getFunctionText = function (obj, value, fieldName) {
+    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+    //     var func2 = regExValidatorFunc(obj, value, fieldName)
+    //     var func3 = defaultValidatorFunc(obj, value, fieldName)
+    //     var func4 = maxLengthValidatorFunc(obj, value, fieldName)
+    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
+    //     if (func1 !== undefined) {
+    //       return func1
+    //     } else if (func2 !== undefined) {
+    //       return func2
+    //     } else if (func3 !== undefined){
+    //         return func3
+    //     } else if(func4 !== undefined){
+    //        return func4
+    //     }else if(func5 !== undefined){
+    //        return func5
+    //     }else {
+    //       return
+    //     }
+    //   }
+    //
+    //   let allowedValueValidatorFunc = function (obj, value, fieldName) {
+    //     var i
+    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+    //       if (fieldName === value) {
+    //         i = key
+    //       }
+    //     })
+    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
+    //       if (value !== undefined) {
+    //         let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
+    //         if(check != true)
+    //         return  'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
+    //         else {
+    //           return
+    //         }
+    //       }
+    //     }
+    //   }
+    //
+    //   let defaultValidatorFunc = function (obj, value, fieldName) {
+    //
+    //     var i
+    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+    //       if (fieldName === value) {
+    //         i = key
+    //       }
+    //     })
+    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== '' && self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== undefined ) {
+    //
+    //       if (value == "")
+    //         return  'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
+    //         else
+    //           return
+    //       }
+    //     }
+    //
+    //     let maxLengthValidatorFunc = function (obj, value, fieldName) {
+    //
+    //       var i
+    //       _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+    //         if (fieldName === value) {
+    //           i = key
+    //         }
+    //       })
+    //       if (self.mObj[self.activeTab].mapping[i].schemaObj.maxLength !== '') {
+    //         if (value !== undefined && typeof(value) == "string") {
+    //           let check = value.length
+    //           if(check != self.mObj[self.activeTab].mapping[i].schemaObj.maxLength)
+    //           return  'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength
+    //           else {
+    //             return
+    //           }
+    //         }
+    //       }
+    //       }
+    //
+    //   let regExValidatorFunc = function (obj, value, fieldName) {
+    //     var i
+    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+    //       if (fieldName === value) {
+    //         i = key
+    //       }
+    //     })
+    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.regEx !== '') {
+    //       if (value !== undefined) {
+    //         let pttrn = new RegExp(self.mObj[self.activeTab].mapping[i].schemaObj.regEx)
+    //         if (pttrn.test(value) === false && fieldName == 'max_imprint_color_allowed'){
+    //           return 'Decimal value not allowed'
+    //         }
+    //         else if(pttrn.test(value) === false && fieldName != 'max_imprint_color_allowed'){
+    //           return  'Value does not match with the regex'
+    //         }
+    //       }
+    //     }
+    //   }
+    //
+    //
+    //     let schema_Obj = {}
+    //     _.forEach(self.mObj[tab].mapping, function (value, key) {
+    //       console.log("mapping loop started ========")
+    //       if(value.schemaObj.optional == true){
+    //           if(value.schemaObj.type == 'date'){
+    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: dateValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //           }
+    //           else if(value.schemaObj.type == 'url'){
+    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: urlValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //           }
+    //           else if (value.schemaObj.type == 'email') {
+    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: emailValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //           }
+    //           else if (value.schemaObj.type == 'phone') {
+    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: phoneValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //           }
+    //           else if (value.schemaObj.type == 'pin-code') {
+    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: pincodeValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //           }
+    //           else{
+    //             schema_Obj[value.sysHeader] = {type: value.schemaObj.type,validator:regExValidatorFunc,label: value.schemaObj.type,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //           }
+    //       }
+    //       else if(value.schemaObj.optional == false) {
+    //         if(value.schemaObj.type == 'date'){
+    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionDate,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //         }
+    //         else if(value.schemaObj.type == 'url'){
+    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionUrl,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //         }
+    //         else if (value.schemaObj.type == 'email') {
+    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionEmail,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //         }
+    //         else if (value.schemaObj.type == 'phone') {
+    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionPhone,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //         }
+    //         else if (value.schemaObj.type == 'pin-code') {
+    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionPincode,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //         }
+    //         else{
+    //           schema_Obj[value.sysHeader] = {type: value.schemaObj.type,label: value.schemaObj.type,validator: getFunctionText,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
+    //         }
+    //       }
+    //     })
+    //
+    //     return schema_Obj
+    // },
+    // validateObj(schema_Obj,obj,tab,errcols,key){
+    //   let self = this
+    //   console.log("validating_obj called......")
+    //   self.mObj[tab].schema = new Schema(schema_Obj)
+    //   // err_length = 0
+    //   // self.mObj[tab].data1 = []
+    //   // self.mObj[tab].headers1 = []
+    //   // self.mObj[tab].errmsg = []
+    //
+    //   self.mObj[tab].schema.validate(obj, function (err, newP, errors) {
+    //
+    //     if (err) {
+    //       throw err
+    //     } else {
+    //       if (errors.length) {
+    //         console.log("errrorssssssss")
+    //         // err_length = errors.length
+    //         err_length = err_length + 1
+    //         let err_type = ''
+    //         if (!_.isEqual(Object.values(obj), [""])) {
+    //
+    //           self.mObj[tab].data1.push(Object.values(obj))
+    //           self.mObj[tab].headers1.push(Object.keys(obj))
+    //
+    //           // let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
+    //           _.forEach(errors, (item) => {
+    //             errcols.push({
+    //               cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
+    //               rows: key
+    //             })
+    //
+    //             for(let key in schema_Obj){
+    //               if(key == item.field){
+    //                 err_type = schema_Obj[key].type
+    //               }
+    //             }
+    //
+    //             if(item.message == "Error during casting"){
+    //               if(err_type == 'number'){
+    //                 self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
+    //               }
+    //               else if(err_type == 'string'){
+    //                 self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
+    //               }
+    //             }
+    //             else {
+    //               self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
+    //             }
+    //           })
+    //
+    //           console.log("errmsg .......", self.mObj[tab].errmsg,errcols)
+    //
+    //           // self.mObj[tab].headerDisplay = false
+    //           // self.mObj[tab].newSchemaDisplay = false
+    //           // self.mObj[tab].previewDisplay = false
+    //           // self.mObj[tab].uploadDisplay = false
+    //           // self.mObj[tab].showHandson = true
+    //           // self.mObj[tab].errDisplay = true
+    //           // self.loadProcessing = false
+    //           // self.showerrmsg(errcols,tab)
+    //         }
+    //       } else {
+    //
+    //       }
+    //     }
+    //   })
+    // },
     ProceedToValidate(tab){
       let self = this
       map_flag = false
@@ -2552,12 +3118,14 @@ export default {
                   self.mObj[tab].newSchemaDisplay = false
                   self.mObj[tab].previewDisplay = false
                   self.mObj[tab].uploadDisplay = false
+                  // self.$Modal.remove()
                   self.mObj[tab].showHandson = true
                   self.mObj[tab].errDisplay = true
                   self.showerrmsg(errcols,tab)
+                  // return 1
                 }
               } else {
-
+                  // return 1
               }
             }
           })
@@ -2568,9 +3136,11 @@ export default {
         self.mObj[tab].newSchemaDisplay = false
         self.mObj[tab].previewDisplay = false
         self.mObj[tab].uploadDisplay = false
+        // self.$Modal.remove()
         self.mObj[tab].showHandson = false
         self.mObj[tab].load = true
         self.saveData(tab)
+        // return 1
       }
     }
     },
@@ -2581,10 +3151,13 @@ export default {
       self.showContinue = false
       self.mObj[tab].load = false
       self.mObj[tab].uploadCSV = []
+      self.mObj[tab].newUploadCSV = []
       self.mObj[tab].headerDisplay = false
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
+      // self.loadProcessing = false
+      // self.loadProceed = false
       $(".f-layout-copy").css("position","fixed");
     },
     abortUploadedRecords(tab){
@@ -2627,28 +3200,28 @@ export default {
       })
     },
     AbortValidation(tab){
-      let self = this
-      self.proceedBtn = true
-      self.mObj[tab].errmsg = []
-      self.mObj[tab].uploadCSV = []
-      self.mObj[tab].newUploadCSV = []
-      self.mObj[tab].data1 = []
-      self.mObj[tab].headers1 = []
-      $('table.htCore').each(function () {
-        this.remove()
-      })
+        let self = this
+        self.proceedBtn = true
+        self.mObj[tab].errmsg = []
+        self.mObj[tab].uploadCSV = []
+        self.mObj[tab].newUploadCSV = []
+        self.mObj[tab].data1 = []
+        self.mObj[tab].headers1 = []
+        $('table.htCore').each(function () {
+          this.remove()
+        })
 
-      if(document.getElementsByClassName('ht_master handsontable')[0]){
-        document.getElementsByClassName('ht_master handsontable')[0].remove()
-      }
+        if(document.getElementsByClassName('ht_master handsontable')[0]){
+          document.getElementsByClassName('ht_master handsontable')[0].remove()
+        }
 
-      if(document.getElementById('example1')){
-        document.getElementById('example1').style.display = 'none'
-      }
-      self.mObj[tab].showHandson = false
-      self.mObj[tab].errDisplay = false
-      self.mObj[tab].uploadDisplay = true
-    },
+        if(document.getElementById('example1')){
+          document.getElementById('example1').style.display = 'none'
+        }
+        self.mObj[tab].showHandson = false
+        self.mObj[tab].errDisplay = false
+        self.mObj[tab].uploadDisplay = true
+      },
     abortImport(){
        let self = this
        self.showValidationTable = false
@@ -2733,126 +3306,128 @@ export default {
       })
     },
     async showerrmsg (errcols,tab,schema) {
-      var example1 = document.getElementById('example1')
-      let row1
-      let col1
-      let prop = {}
-      var ht = await(new Handsontable(example1, { // eslint-disable-line
-        data: [this.mObj[tab].data1[0]],
-        colHeaders:this.mObj[tab].headers1[0],
-        rowHeaders: true,
-        height: '100%',
-        stretchH: "all",
-        cells: (row, col) => {
-          var cellProp = {}
-          _.forEach([errcols[0]], (value, key) => {
-            if (col === value.cols && row === key) {
-              row1 = key
-              col1 = value.cols
-              // cellProp.className = 'error'
-              prop = cellProp
-            }
-          })
-          return cellProp
-        }
-      }))
+     var example1 = document.getElementById('example1')
+     let row1
+     let col1
+     let prop = {}
+     var ht = await(new Handsontable(example1, { // eslint-disable-line
+       data: [this.mObj[tab].data1[0]],
+       colHeaders:this.mObj[tab].headers1[0],
+       rowHeaders: true,
+       height: '100%',
+       stretchH: "all",
+       cells: (row, col) => {
+         var cellProp = {}
+         _.forEach([errcols[0]], (value, key) => {
+           if (col === value.cols && row === key) {
+             row1 = key
+             col1 = value.cols
+             // cellProp.className = 'error'
+             prop = cellProp
+           }
+         })
+         return cellProp
+       }
+     }))
+      // ht.selectCell(row1,col1,row1,col1,true)
+     setTimeout(function(){
+       ht.selectCell(row1,col1,row1,col1,true)
+     },200)
 
-      setTimeout(function(){ht.selectCell(row1,col1,row1,col1,true)},200)
+     if(document.getElementById('example1')){
+       document.getElementById('example1').style.display = 'block'
+     }
+     $(".f-layout-copy").css("position","fixed");
 
-      if(document.getElementById('example1')){
-        document.getElementById('example1').style.display = 'block'
-      }
-      $(".f-layout-copy").css("position","fixed");
+     // document.getElementById('hot-display-license-info').style.display = 'none'
+   },
+   modifyData (tab) {
+       let schema = this.mObj[tab].schema
+       let colHeaders = this.mObj[tab].headers1[0]
+       let hotSettingsData = this.mObj[tab].data1
+       let errMsgArray = this.mObj[tab].errmsg
+       let userUploadedDataArr = this.mObj[tab].newUploadCSV
+       let newHotSettingsData = []
 
-      // document.getElementById('hot-display-license-info').style.display = 'none'
-    },
-    modifyData (tab) {
-      let schema = this.mObj[tab].schema
-      let colHeaders = this.mObj[tab].headers1[0]
-      let hotSettingsData = this.mObj[tab].data1
-      let errMsgArray = this.mObj[tab].errmsg
-      let userUploadedDataArr = this.mObj[tab].newUploadCSV
-      let newHotSettingsData = []
+       errMsgArray = []
+       var errcols = []
+       var self = this
+       _.forEach(hotSettingsData, (value, key) => {
+         let valueToBeValidated = _.object(colHeaders, value)
+         schema.validate(valueToBeValidated, (err, newP, errors) => {
+           if (err) {} else {
+             // if (errors.length) {
+             //     // errors_length = errors.length
+             //   newHotSettingsData.push(Object.values(value))
+             //   console.log("new...........",newHotSettingsData)
+             //   self.mObj[tab].data1 = newHotSettingsData
+             //   _.forEach(errors, (item) => {
+             //     errcols.push({
+             //       cols: _.indexOf(colHeaders, item.field),
+             //       rows: key
+             //     })
+             //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
+             //   })
+             //   self.mObj[tab].errmsg = errMsgArray
+             // }
+             // else {
 
-      errMsgArray = []
-      var errcols = []
-      var self = this
-      _.forEach(hotSettingsData, (value, key) => {
-        let valueToBeValidated = _.object(colHeaders, value)
-        schema.validate(valueToBeValidated, (err, newP, errors) => {
-          if (err) {} else {
-            // if (errors.length) {
-            //     // errors_length = errors.length
-            //   newHotSettingsData.push(Object.values(value))
-            //   console.log("new...........",newHotSettingsData)
-            //   self.mObj[tab].data1 = newHotSettingsData
-            //   _.forEach(errors, (item) => {
-            //     errcols.push({
-            //       cols: _.indexOf(colHeaders, item.field),
-            //       rows: key
-            //     })
-            //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
-            //   })
-            //   self.mObj[tab].errmsg = errMsgArray
-            // }
-            // else {
+               let modified_field = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(":") + 1);
+               modified_field = modified_field.trim()
 
-              let modified_field = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(":") + 1);
-              modified_field = modified_field.trim()
+               let modifiedField_data = newP[modified_field]
+               let modified_id = newP._id
 
-              let modifiedField_data = newP[modified_field]
-              let modified_id = newP._id
+               let new_arr = []
+               lodash.transform(userUploadedDataArr, function(result, n) {
+                   if (n._id == modified_id) {
+                       n[modified_field] =  modifiedField_data
+                   }
+                   new_arr.push(n)
+                   })
 
-              let new_arr = []
-              lodash.transform(userUploadedDataArr, function(result, n) {
-                  if (n._id == modified_id) {
-                      n[modified_field] =  modifiedField_data
-                  }
-                  new_arr.push(n)
-                  })
+               userUploadedDataArr = []
+               userUploadedDataArr = new_arr
 
-              userUploadedDataArr = []
-              userUploadedDataArr = new_arr
+             // }
+           }
+         })
+       })
 
-            // }
-          }
-        })
-      })
-
-      if (userUploadedDataArr !== undefined) {
-        self.mObj[tab].newUploadCSV =  userUploadedDataArr
-        if(errcols.length > 0){
-          $('table.htCore').each(function () {
-            this.remove()
-          })
-          if(document.getElementsByClassName('ht_master handsontable')[0]){
-            document.getElementsByClassName('ht_master handsontable')[0].remove()
-          }
+       if (userUploadedDataArr !== undefined) {
+         self.mObj[tab].newUploadCSV =  userUploadedDataArr
+         if(errcols.length > 0){
+           $('table.htCore').each(function () {
+             this.remove()
+           })
+           if(document.getElementsByClassName('ht_master handsontable')[0]){
+             document.getElementsByClassName('ht_master handsontable')[0].remove()
+           }
 
 
 
-          self.showerrmsg(errcols,tab)
-        }
-        else{
-          self.mObj[tab].errmsg = []
-          self.mObj[tab].showHandson = false
-          self.mObj[tab].errDisplay = false
-          $('table.htCore').each(function () {
-            this.remove()
-          })
-          if(document.getElementsByClassName('ht_master handsontable')[0]){
-            document.getElementsByClassName('ht_master handsontable')[0].remove()
-          }
+           self.showerrmsg(errcols,tab)
+         }
+         else{
+           self.mObj[tab].errmsg = []
+           self.mObj[tab].showHandson = false
+           self.mObj[tab].errDisplay = false
+           $('table.htCore').each(function () {
+             this.remove()
+           })
+           if(document.getElementsByClassName('ht_master handsontable')[0]){
+             document.getElementsByClassName('ht_master handsontable')[0].remove()
+           }
 
-          self.ProceedToValidate(tab)
-        }
+           self.ProceedToValidate(tab)
+         }
 
-      }
+       }
 
-      if(document.getElementById('hot-display-license-info')){
-        document.getElementById('hot-display-license-info').style.display = 'none'
-      }
-    },
+       if(document.getElementById('hot-display-license-info')){
+         document.getElementById('hot-display-license-info').style.display = 'none'
+       }
+     },
     saveData(tab){
       let self = this
       let CSVFileObj = {
@@ -2992,7 +3567,8 @@ export default {
     self.activeTab = self.convert(diff_keys[0])
 
       if(Object.keys(response).indexOf("ProductInformation") >= 0){
-        self.arrangeTab("ProductInformation",response.id)
+        self.mObj['Product Information'].tab_flag = true
+        // self.arrangeTab("ProductInformation",response.id)
         prod_info_upld = true
         self.validate = false
       }
@@ -3000,37 +3576,43 @@ export default {
         self.mObj["Product Information"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductPrice") >= 0){
-        self.arrangeTab("ProductPrice",response.id)
+          self.mObj['Product Price'].tab_flag = true
+        // self.arrangeTab("ProductPrice",response.id)
       }
       else{
         self.mObj["Product Price"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductImprintData") >= 0){
-        self.arrangeTab("ProductImprintData",response.id)
+        self.mObj['Product Imprint Data'].tab_flag = true
+        // self.arrangeTab("ProductImprintData",response.id)
       }
       else{
         self.mObj["Product Imprint Data"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductShipping") >= 0){
-        self.arrangeTab("ProductShipping",response.id)
+        self.mObj['Product Shipping'].tab_flag = true
+        // self.arrangeTab("ProductShipping",response.id)
       }
       else{
         self.mObj["Product Shipping"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductImage") >= 0){
-        self.arrangeTab("ProductImage",response.id)
+        self.mObj['Product Image'].tab_flag = true
+        // self.arrangeTab("ProductImage",response.id)
       }
       else{
         self.mObj["Product Image"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductAdditionalCharges") >= 0){
-        self.arrangeTab("ProductAdditionalCharges",response.id)
+        self.mObj['Product Additional Charges'].tab_flag = true
+        // self.arrangeTab("ProductAdditionalCharges",response.id)
       }
       else{
         self.mObj["Product Additional Charges"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductVariationPrice") >= 0){
-        self.arrangeTab("ProductVariationPrice",response.id)
+        self.mObj['Product Variation Price'].tab_flag = true
+        // self.arrangeTab("ProductVariationPrice",response.id)
       }
       else{
         self.mObj["Product Variation Price"].uploadDisplay = true
@@ -3038,6 +3620,7 @@ export default {
 
   },
   async arrangeTab(tabname,id){
+
     let self = this
     let tab = tabname.replace(/([A-Z])/g, ' $1').trim()
     if(self.mObj[tab].savePreviewDisplay == true){
@@ -3046,12 +3629,15 @@ export default {
     self.mObj[tab].uploadDisplay = false
     self.mObj[tab].load = true
     let table_name = "uploader" + tabname.charAt(0).toUpperCase() + tabname.substr(1).toLowerCase()
+
     let res = await(api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name))
+
     self.mObj[tab].newUploadCSV = res.data
       self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
         return _.extend({}, element, {is_checked: false});
       });
       self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
+
       let loop = self.mObj[tab].newUploadCSV.length/5
       let dec_val = loop.toString().split('.')
       if(dec_val[1] > 0){
@@ -3088,32 +3674,47 @@ export default {
     // })
 },
   setValData(data,filtered_keys){
-
       uploader_obj = data
       prop_keys = filtered_keys
       this.val_data = []
       this.$store.state.data = []
       let self = this
+      let rem_arr = []
 
       for(let i=0 ;i<filtered_keys.length;i++){
       for(let key in data){
           if(filtered_keys[i] == key){
             if(data[filtered_keys[i]].validateStatus == 'pending' && data[filtered_keys[i]].currentRuleIndex){
               self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":Math.round(uploader_obj[filtered_keys[i]].currentRuleIndex / uploader_obj[filtered_keys[i]].ruleIndex * 100)})
+              // rem_arr.push(filtered_keys[i])
             }
             else if(data[filtered_keys[i]].validateStatus == 'pending' && !data[filtered_keys[i]].currentRuleIndex){
               self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":0})
             }
             else if(data[filtered_keys[i]].validateStatus == 'completed'){
               self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
-              prop_keys.splice(i,1)
+              rem_arr.push(filtered_keys[i])
+              // prop_keys.splice(i,1)
             }
           }
         }
       }
+      for(let i=0;i<rem_arr.length;i++){
+        for(let j=0;j<prop_keys.length;j++){
+          if(rem_arr[i] == prop_keys[j]){
+            prop_keys.splice(j,1)
+          }
+        }
+      }
+
 
       self.$store.state.data = self.val_data
-     self.sheetwiseValidation(prop_keys[0],uploader_obj)
+      if(prop_keys[0] != undefined){
+        self.sheetwiseValidation(prop_keys[0],uploader_obj)
+      }
+      else{
+        self.validation_completed = true
+      }
       return;
   }
   },
@@ -3171,23 +3772,29 @@ export default {
 
               if(message[name] && message[name].uploadStatus == "completed"){
                 self.mObj[self.activeTab].load = false
+                self.mObj[self.activeTab].newUploadCSV = []
+                self.mObj[self.activeTab].uploadCSV = []
+                self.mObj[self.activeTab].csv_arr = []
+                self.mObj[self.activeTab].mapping = []
+                self.mObj[self.activeTab].tab_flag = true
+                // self.loadProcessing = false
 
 
-                self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].newUploadCSV, function(element) {
-                  return _.extend({}, element, {is_checked: false});
-                });
-
-                self.mObj[self.activeTab].main_arr = lodash.chunk(self.mObj[self.activeTab].newUploadCSV, 5);
-                let loop = self.mObj[self.activeTab].newUploadCSV.length/5
-                let dec_val = loop.toString().split('.')
-                if(dec_val[1] > 0){
-                  loop = dec_val[0] + 1
-                }
-                for(let i=0;i<=loop;i++){
-                  self.mObj[self.activeTab].mPage.push({'mCheck':false})
-                }
-
-                self.mObj[self.activeTab].savePreviewDisplay = true
+                // self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].newUploadCSV, function(element) {
+                //   return _.extend({}, element, {is_checked: false});
+                // });
+                //
+                // self.mObj[self.activeTab].main_arr = lodash.chunk(self.mObj[self.activeTab].newUploadCSV, 5);
+                // let loop = self.mObj[self.activeTab].newUploadCSV.length/5
+                // let dec_val = loop.toString().split('.')
+                // if(dec_val[1] > 0){
+                //   loop = dec_val[0] + 1
+                // }
+                // for(let i=0;i<=loop;i++){
+                //   self.mObj[self.activeTab].mPage.push({'mCheck':false})
+                // }
+                //
+                // self.mObj[self.activeTab].savePreviewDisplay = true
 
                 if(self.activeTab == 'Product Information'){
                   prod_info_upld = true
@@ -3209,7 +3816,6 @@ export default {
               }
             }
             else if(message.stepStatus == "validation_completed" ){
-
                if(self.validating == true){
                  self.validating = false
                }
@@ -3298,6 +3904,7 @@ export default {
       self.$store.state.disableuser = true
       self.$store.state.disablesubscription = true
       notice_flag = true
+      // self.loadProceed = false
 
       api.request('get', '/uploader/' + id ).then(response => {
         if(response.data != null){
@@ -3330,13 +3937,12 @@ export default {
                     this.validating = false
                     this.showValidationTable = true
 
-
-
                     uploader_obj = response.data
                     prop_keys = filtered_keys
                     this.val_data = []
                     this.$store.state.data = []
                     let self = this
+                    let rem_arr = []
 
                     if(self.$store.state.calledFromContinue == false){
                       for(let i=0 ;i<filtered_keys.length;i++){
@@ -3350,7 +3956,8 @@ export default {
                           }
                           else if(response.data[filtered_keys[i]].validateStatus == 'completed'){
                             self.val_data.push({"name":filtered_keys[i],"data":uploader_obj[filtered_keys[i]],"progress":100})
-                            prop_keys.splice(i,1)
+                            rem_arr.push(filtered_keys[i])
+                            // prop_keys.splice(i,1)
                           }
                         }
                       }
@@ -3359,18 +3966,23 @@ export default {
 
                   }
 
+                  for(let i=0;i<rem_arr.length;i++){
+                    for(let j=0;j<prop_keys.length;j++){
+                      if(rem_arr[i] == prop_keys[j]){
+                        prop_keys.splice(j,1)
+                      }
+                    }
+                  }
+
 
 
                     if(response.data.validate_flag == 'running' || response.data.validate_flag == 'completed'){
 
                       if(self.val_data.length == 0){
-
                         self.$store.state.calledFromContinue = false
-
                         self.setValData(response.data,filtered_keys)
                       }
                       else if(self.val_data.length > 0){
-
                         self.$store.state.validationStatus = true
                         // self.setValData(response.data,filtered_keys)
 
@@ -3385,6 +3997,7 @@ export default {
 
                   }
                   else if(response.data.stepStatus == 'validation_completed'){
+
                     this.validating = false
                     this.uploadStep = false
                     this.validateStep = true
@@ -4016,9 +4629,6 @@ export default {
       margin-right: 0px;
     }
 
-    /*.handsontable tbody th.ht__highlight, .handsontable thead th.ht__highlight {
-    background-color: #fff !important
-}*/
 #example1 .handsontable .wtHider {
     height: 100% !important;
 
