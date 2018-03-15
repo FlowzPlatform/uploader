@@ -157,9 +157,8 @@
                  </div>
              </div>
              <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:9%" @click="Proceed(activeTab)" :loading="loadProceed" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">
-               <span v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn">Proceed</span>
-               <span v-else>Processing...</span>
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:9%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn">
+              Proceed
              </Button>
            </div>
 
@@ -472,7 +471,7 @@
            </Row>
          </Modal>
 
-         <Modal v-model="modal1" width="500" @on-cancel="cancel">
+         <Modal v-model="modal1" width="500" @on-cancel="cancel" >
           <p slot="header" style="color:#f60;text-align:center;font-size:20px">
               <Icon type="information-circled"></Icon>
               <span>Some of your headers are not mapped ...</span>
@@ -483,9 +482,10 @@
           </div>
           <div slot="footer">
               <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
-              <Button type="primary"  @click="continuee(activeTab)" :loading="loadProcessing" style="background-color:#1fb58f;border-color:#1fb58f;">
-                <span v-if="showContinue">Continue</span>
-                <span v-else>Processing...</span>
+              <Button type="primary"  @click="continuee(activeTab)"  style="background-color:#1fb58f;border-color:#1fb58f;" v-if="showContinue" :disabled="!showContinue">
+                <!-- <span v-if="showContinue">Continue</span>
+                <span v-else>Processing...</span> -->
+                Continue
               </Button>
           </div>
        </Modal>
@@ -750,8 +750,8 @@ export default {
              parallelUploads: 5
          },
          showContinue: false,
-         loadProcessing: false,
-         loadProceed: false,
+         // loadProcessing: false,
+         // loadProceed: false,
          abortImportBtn: false,
          calledfromModify: false,
           mObj:{
@@ -1032,7 +1032,7 @@ export default {
         else{
 
           self.mObj[tab].load = true
-          self.loadProcessing = false
+          // self.loadProcessing = false
           self.mObj[tab].uploadDisplay = false
           let my_flag = true
             Papa.parse(file, {
@@ -1049,7 +1049,7 @@ export default {
                 // self.mObj[tab].uploadCSV = results.data
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
-                self.loadProceed = false
+                // self.loadProceed = false
                 // self.mObj[tab].load = true
                 if(self.mObj[tab].new_flag == 1){
                   if(my_flag == true){
@@ -1067,10 +1067,7 @@ export default {
                     if(self.mObj[tab].newSchemaDisplay == true){
                       self.mObj[tab].newSchemaDisplay = false
                     }
-
-
                     self.mObj[tab].mapping = []
-
                     self.getMapping(tab)
                   }
                 }
@@ -1492,7 +1489,7 @@ export default {
       mapHeader(sysHeader,csvHeader){
         let self = this
         let tab = self.activeTab
-        for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
+        for(let i=0;i<5;i++){
            for(let key in self.mObj[tab].uploadCSV[i]){
              if(key == csvHeader){
                 self.mObj[tab].newUploadCSV[i][sysHeader] = self.mObj[tab].uploadCSV[i][key]
@@ -1923,8 +1920,6 @@ export default {
                   this.mObj[tab].newSchemaDisplay = false
                   this.mObj[tab].headerDisplay = true
                 }
-
-
                 this.getMapping(tab)
               }
             }
@@ -2205,16 +2200,16 @@ export default {
       this.proceedBtn = true
       continue_flag = false
     },
-    async continuee(tab){
+   async continuee(tab){
+      // this.loadProcessing = true
       let self = this
-      this.loadProcessing = true
       continue_flag = true
       this.showContinue = false
-      setTimeout(async function(){this.proceedBtn = true
+      this.proceedBtn = true
       await self.makeNewUploadCSVObj(tab)
       await self.transformFromMapping(tab)
       self.modal1 = false
-      self.ProceedToValidate(tab)},50)
+      self.ProceedToValidate(tab)
     },
     cancel (){
       this.proceedBtn = true
@@ -2232,6 +2227,7 @@ export default {
     },
     async makeNewUploadCSVObj(tab){
       let self = this
+       // self.loadProcessing = true
 
       // errcols = []
       // err_length = 0
@@ -2271,7 +2267,6 @@ export default {
       return;
     },
     async Proceed(tab){
-
       let self = this
       self.proceedBtn = false
         if(map_flag == false){
@@ -2282,9 +2277,36 @@ export default {
           });
           if(check_headers.length != 0){
               self.modal1 = true
+              // this.$Modal.confirm({
+              //              title: 'Confirm',
+              //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
+              //              loading: true,
+              //              okText: 'Continue',
+              //              cancelText: 'Map',
+              //              onOk: async () => {
+              //                let self = this
+              //                // self.loadProcessing = true
+              //                continue_flag = true
+              //                self.showContinue = false
+              //                self.proceedBtn = true
+              //                await self.makeNewUploadCSVObj(tab)
+              //                await self.transformFromMapping(tab)
+              //                // self.modal1 = false
+              //                let res = await self.ProceedToValidate(tab)
+              //                 console.log("res....",res)
+              //                if(res){
+              //                  self.$Modal.remove()
+              //                }
+              //              },
+              //              onCancel: async() => {
+              //                map_flag = false
+              //                self.modal1 = false
+              //                self.proceedBtn = true
+              //                continue_flag = false
+              //              }
+              //            })
           }
           else{
-
              self.showContinue = true
              if(continue_flag == false){
                let optional_headers = _.filter(self.mObj[tab].mapping, function(o) {
@@ -2294,35 +2316,57 @@ export default {
                });
                if(optional_headers.length != 0){
                    self.modal1 = true
+                   // this.$Modal.confirm({
+                   //              title: 'Confirm',
+                   //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
+                   //              loading: true,
+                   //              okText: 'Continue',
+                   //              cancelText: 'Map',
+                   //              onOk: async () => {
+                   //                let self = this
+                   //                // self.loadProcessing = true
+                   //                continue_flag = true
+                   //                self.showContinue = false
+                   //                self.proceedBtn = true
+                   //                await self.makeNewUploadCSVObj(tab)
+                   //                await self.transformFromMapping(tab)
+                   //                // self.modal1 = false
+                   //                let res = await self.ProceedToValidate(tab)
+                   //                console.log("res....",res)
+                   //                if(res){
+                   //                  self.$Modal.remove()
+                   //                }
+                   //              },
+                   //              onCancel: async() => {
+                   //                map_flag = false
+                   //                self.modal1 = false
+                   //                self.proceedBtn = true
+                   //                continue_flag = false
+                   //              }
+                   //            })
                    continue_flag = true
                }
                else{
-                  self.loadProceed = true
-                  setTimeout(async function(){
+                  // self.loadProceed = true
                     await self.makeNewUploadCSVObj(tab)
                     await self.transformFromMapping(tab)
                     self.ProceedToValidate(tab)
-                  },100)
                }
              }
              else{
 
-               self.loadProceed = true
-               setTimeout(async function(){
+               // self.loadProceed = true
                  await self.makeNewUploadCSVObj(tab)
                  await self.transformFromMapping(tab)
                  self.ProceedToValidate(tab)
-               },100)
              }
           }
         }
         else{
-          self.loadProceed = true
-          setTimeout(async function(){
+          // self.loadProceed = true
             await self.makeNewUploadCSVObj(tab)
             await self.transformFromMapping(tab)
             self.ProceedToValidate(tab)
-          },100)
         }
     },
     // makeSchemaObj(tab){
@@ -3074,12 +3118,14 @@ export default {
                   self.mObj[tab].newSchemaDisplay = false
                   self.mObj[tab].previewDisplay = false
                   self.mObj[tab].uploadDisplay = false
+                  // self.$Modal.remove()
                   self.mObj[tab].showHandson = true
                   self.mObj[tab].errDisplay = true
                   self.showerrmsg(errcols,tab)
+                  // return 1
                 }
               } else {
-
+                  // return 1
               }
             }
           })
@@ -3090,9 +3136,11 @@ export default {
         self.mObj[tab].newSchemaDisplay = false
         self.mObj[tab].previewDisplay = false
         self.mObj[tab].uploadDisplay = false
+        // self.$Modal.remove()
         self.mObj[tab].showHandson = false
         self.mObj[tab].load = true
         self.saveData(tab)
+        // return 1
       }
     }
     },
@@ -3108,8 +3156,8 @@ export default {
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
-      self.loadProcessing = false
-      self.loadProceed = false
+      // self.loadProcessing = false
+      // self.loadProceed = false
       $(".f-layout-copy").css("position","fixed");
     },
     abortUploadedRecords(tab){
@@ -3152,28 +3200,28 @@ export default {
       })
     },
     AbortValidation(tab){
-      let self = this
-      self.proceedBtn = true
-      self.mObj[tab].errmsg = []
-      self.mObj[tab].uploadCSV = []
-      self.mObj[tab].newUploadCSV = []
-      self.mObj[tab].data1 = []
-      self.mObj[tab].headers1 = []
-      $('table.htCore').each(function () {
-        this.remove()
-      })
+        let self = this
+        self.proceedBtn = true
+        self.mObj[tab].errmsg = []
+        self.mObj[tab].uploadCSV = []
+        self.mObj[tab].newUploadCSV = []
+        self.mObj[tab].data1 = []
+        self.mObj[tab].headers1 = []
+        $('table.htCore').each(function () {
+          this.remove()
+        })
 
-      if(document.getElementsByClassName('ht_master handsontable')[0]){
-        document.getElementsByClassName('ht_master handsontable')[0].remove()
-      }
+        if(document.getElementsByClassName('ht_master handsontable')[0]){
+          document.getElementsByClassName('ht_master handsontable')[0].remove()
+        }
 
-      if(document.getElementById('example1')){
-        document.getElementById('example1').style.display = 'none'
-      }
-      self.mObj[tab].showHandson = false
-      self.mObj[tab].errDisplay = false
-      self.mObj[tab].uploadDisplay = true
-    },
+        if(document.getElementById('example1')){
+          document.getElementById('example1').style.display = 'none'
+        }
+        self.mObj[tab].showHandson = false
+        self.mObj[tab].errDisplay = false
+        self.mObj[tab].uploadDisplay = true
+      },
     abortImport(){
        let self = this
        self.showValidationTable = false
@@ -3257,125 +3305,129 @@ export default {
          self.setPage(obj1[1],obj1[2],result.data)
       })
     },
-    async showerrmsg (errcols,tab) {
-      var example1 = document.getElementById('example1')
-      let row1
-      let col1
-      let prop = {}
-      var ht = await(new Handsontable(example1, { // eslint-disable-line
-        data: [this.mObj[tab].data1[0]],
-        colHeaders:this.mObj[tab].headers1[0],
-        rowHeaders: true,
-        height: '100%',
-        stretchH: "all",
-        cells: (row, col) => {
-          var cellProp = {}
-          _.forEach([errcols[0]], (value, key) => {
-            if (col === value.cols && row === key) {
-              row1 = key
-              col1 = value.cols
-              // cellProp.className = 'error'
-              prop = cellProp
-            }
-          })
-          return cellProp
-        }
-      }))
+    async showerrmsg (errcols,tab,schema) {
+     var example1 = document.getElementById('example1')
+     let row1
+     let col1
+     let prop = {}
+     var ht = await(new Handsontable(example1, { // eslint-disable-line
+       data: [this.mObj[tab].data1[0]],
+       colHeaders:this.mObj[tab].headers1[0],
+       rowHeaders: true,
+       height: '100%',
+       stretchH: "all",
+       cells: (row, col) => {
+         var cellProp = {}
+         _.forEach([errcols[0]], (value, key) => {
+           if (col === value.cols && row === key) {
+             row1 = key
+             col1 = value.cols
+             // cellProp.className = 'error'
+             prop = cellProp
+           }
+         })
+         return cellProp
+       }
+     }))
       // ht.selectCell(row1,col1,row1,col1,true)
-      setTimeout(function(){ht.selectCell(row1,col1,row1,col1,true)},200)
+     setTimeout(function(){
+       ht.selectCell(row1,col1,row1,col1,true)
+     },200)
 
-      if(document.getElementById('example1')){
-        document.getElementById('example1').style.display = 'block'
-      }
-      $(".f-layout-copy").css("position","fixed");
+     if(document.getElementById('example1')){
+       document.getElementById('example1').style.display = 'block'
+     }
+     $(".f-layout-copy").css("position","fixed");
 
-      // document.getElementById('hot-display-license-info').style.display = 'none'
-    },
-    modifyData (tab) {
-      let schema = this.mObj[tab].schema
-      let colHeaders = this.mObj[tab].headers1[0]
-      let hotSettingsData = this.mObj[tab].data1
-      let errMsgArray = this.mObj[tab].errmsg
-      let userUploadedDataArr = this.mObj[tab].newUploadCSV
-      let newHotSettingsData = []
+     // document.getElementById('hot-display-license-info').style.display = 'none'
+   },
+   modifyData (tab) {
+       let schema = this.mObj[tab].schema
+       let colHeaders = this.mObj[tab].headers1[0]
+       let hotSettingsData = this.mObj[tab].data1
+       let errMsgArray = this.mObj[tab].errmsg
+       let userUploadedDataArr = this.mObj[tab].newUploadCSV
+       let newHotSettingsData = []
 
-      errMsgArray = []
-      var errcols = []
-      var self = this
-      _.forEach(hotSettingsData, (value, key) => {
-        let valueToBeValidated = _.object(colHeaders, value)
-        schema.validate(valueToBeValidated, (err, newP, errors) => {
-          if (err) {} else {
-            // if (errors.length) {
-            //     // errors_length = errors.length
-            //   newHotSettingsData.push(Object.values(value))
-            //   console.log("new...........",newHotSettingsData)
-            //   self.mObj[tab].data1 = newHotSettingsData
-            //   _.forEach(errors, (item) => {
-            //     errcols.push({
-            //       cols: _.indexOf(colHeaders, item.field),
-            //       rows: key
-            //     })
-            //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
-            //   })
-            //   self.mObj[tab].errmsg = errMsgArray
-            // }
-            // else {
+       errMsgArray = []
+       var errcols = []
+       var self = this
+       _.forEach(hotSettingsData, (value, key) => {
+         let valueToBeValidated = _.object(colHeaders, value)
+         schema.validate(valueToBeValidated, (err, newP, errors) => {
+           if (err) {} else {
+             // if (errors.length) {
+             //     // errors_length = errors.length
+             //   newHotSettingsData.push(Object.values(value))
+             //   console.log("new...........",newHotSettingsData)
+             //   self.mObj[tab].data1 = newHotSettingsData
+             //   _.forEach(errors, (item) => {
+             //     errcols.push({
+             //       cols: _.indexOf(colHeaders, item.field),
+             //       rows: key
+             //     })
+             //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
+             //   })
+             //   self.mObj[tab].errmsg = errMsgArray
+             // }
+             // else {
 
-              let modified_field = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(":") + 1);
-              modified_field = modified_field.trim()
+               let modified_field = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(":") + 1);
+               modified_field = modified_field.trim()
 
-              let modifiedField_data = newP[modified_field]
-              let modified_id = newP._id
+               let modifiedField_data = newP[modified_field]
+               let modified_id = newP._id
 
-              let new_arr = []
-              lodash.transform(userUploadedDataArr, function(result, n) {
-                  if (n._id == modified_id) {
-                      n[modified_field] =  modifiedField_data
-                  }
-                  new_arr.push(n)
-                  })
+               let new_arr = []
+               lodash.transform(userUploadedDataArr, function(result, n) {
+                   if (n._id == modified_id) {
+                       n[modified_field] =  modifiedField_data
+                   }
+                   new_arr.push(n)
+                   })
 
-              userUploadedDataArr = []
-              userUploadedDataArr = new_arr
+               userUploadedDataArr = []
+               userUploadedDataArr = new_arr
 
-            // }
-          }
-        })
-      })
+             // }
+           }
+         })
+       })
 
-      if (userUploadedDataArr !== undefined) {
-        self.mObj[tab].newUploadCSV =  userUploadedDataArr
-        if(errcols.length > 0){
-          $('table.htCore').each(function () {
-            this.remove()
-          })
-          if(document.getElementsByClassName('ht_master handsontable')[0]){
-            document.getElementsByClassName('ht_master handsontable')[0].remove()
-          }
+       if (userUploadedDataArr !== undefined) {
+         self.mObj[tab].newUploadCSV =  userUploadedDataArr
+         if(errcols.length > 0){
+           $('table.htCore').each(function () {
+             this.remove()
+           })
+           if(document.getElementsByClassName('ht_master handsontable')[0]){
+             document.getElementsByClassName('ht_master handsontable')[0].remove()
+           }
 
-          self.showerrmsg(errcols,tab)
-        }
-        else{
-          self.mObj[tab].errmsg = []
-          self.mObj[tab].showHandson = false
-          self.mObj[tab].errDisplay = false
-          $('table.htCore').each(function () {
-            this.remove()
-          })
-          if(document.getElementsByClassName('ht_master handsontable')[0]){
-            document.getElementsByClassName('ht_master handsontable')[0].remove()
-          }
 
-          self.ProceedToValidate(tab)
-        }
 
-      }
+           self.showerrmsg(errcols,tab)
+         }
+         else{
+           self.mObj[tab].errmsg = []
+           self.mObj[tab].showHandson = false
+           self.mObj[tab].errDisplay = false
+           $('table.htCore').each(function () {
+             this.remove()
+           })
+           if(document.getElementsByClassName('ht_master handsontable')[0]){
+             document.getElementsByClassName('ht_master handsontable')[0].remove()
+           }
 
-      if(document.getElementById('hot-display-license-info')){
-        document.getElementById('hot-display-license-info').style.display = 'none'
-      }
-    },
+           self.ProceedToValidate(tab)
+         }
+
+       }
+
+       if(document.getElementById('hot-display-license-info')){
+         document.getElementById('hot-display-license-info').style.display = 'none'
+       }
+     },
     saveData(tab){
       let self = this
       let CSVFileObj = {
@@ -3725,7 +3777,7 @@ export default {
                 self.mObj[self.activeTab].csv_arr = []
                 self.mObj[self.activeTab].mapping = []
                 self.mObj[self.activeTab].tab_flag = true
-                self.loadProcessing = false
+                // self.loadProcessing = false
 
 
                 // self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].newUploadCSV, function(element) {
@@ -3764,7 +3816,6 @@ export default {
               }
             }
             else if(message.stepStatus == "validation_completed" ){
-
                if(self.validating == true){
                  self.validating = false
                }
@@ -3853,7 +3904,7 @@ export default {
       self.$store.state.disableuser = true
       self.$store.state.disablesubscription = true
       notice_flag = true
-      self.loadProceed = false
+      // self.loadProceed = false
 
       api.request('get', '/uploader/' + id ).then(response => {
         if(response.data != null){
@@ -3946,6 +3997,7 @@ export default {
 
                   }
                   else if(response.data.stepStatus == 'validation_completed'){
+
                     this.validating = false
                     this.uploadStep = false
                     this.validateStep = true

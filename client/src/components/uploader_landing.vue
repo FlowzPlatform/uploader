@@ -249,7 +249,7 @@ export default {
                 }
               }
             }
-            
+
             this.job.push(data.data[0])
             this.loading = false
             this.show_table = true
