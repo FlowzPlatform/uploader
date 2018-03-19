@@ -45,7 +45,7 @@ var beforeFind = async function(hook){
     let uploaderData = await(hook.app.service('/uploader').get(hook.params.query["import_tracker_id"]))
     let user_data = await(axios.get(subscription_url + '/' + hook.params.query["subscriptionId"]))
     if(uploaderData.user_id == user_data.data.userId){
-      schemaData = await(hook.app.service('/uploader-schema').find({query:{"user_id":user_data.data.userId}}))
+      schemaData = await(hook.app.service('/uploader-schema').find({query:{"user_id":user_data.data.userId,$limit: 1000}}))
       hook.result = schemaData
     }
     else {
