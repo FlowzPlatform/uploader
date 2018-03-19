@@ -1656,6 +1656,7 @@ export default {
 
           let err_row = ''
           let err_col = ''
+          let err_arr = []
           var ht1 =  new Handsontable(cell1, { // eslint-disable-line
             data: self.error_data,
             colHeaders:Object.keys(self.error_data[0]),
@@ -1669,10 +1670,14 @@ export default {
               _.forEach(errcols, (value, key) => {
                 if (col === value.cols && row === key) {
                   err_row = key
+                  // err_row.push(key)
+                  // err_row = lodash.uniqBy(err_row)
                   err_col = col
+
                   cellProp.className = 'error'
                 }
               })
+
               return cellProp
             },
             afterChange: function(changes,source) {
@@ -1681,7 +1686,16 @@ export default {
               }
             }
           })
+
+          // ht1.selectCell(err_row[0],err_col,err_row[err_row.length-1],err_col,true)
           ht1.selectCell(err_row,err_col,err_row,err_col,true)
+
+
+
+          // setTimeout(function(){console.log("&&&&&&&&&&&&& err array ",err_arr)
+
+          // ht1.selectCells(err_arr)
+          // ht1.selectColumns(err_col,err_col)
 
           self.proceedNext = true
       },
@@ -2104,6 +2118,7 @@ export default {
     // },
     generateHeadersandMapping(tab){
       let self = this
+      self.map = false
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
       self.mObj[tab].newUploadCSV = []
 
@@ -3997,7 +4012,6 @@ export default {
 
                   }
                   else if(response.data.stepStatus == 'validation_completed'){
-
                     this.validating = false
                     this.uploadStep = false
                     this.validateStep = true
@@ -4015,7 +4029,6 @@ export default {
                     }
                   }
                   else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
-
                     this.uploadStep = false
                     this.validateStep = false
                     this.importStep = true
