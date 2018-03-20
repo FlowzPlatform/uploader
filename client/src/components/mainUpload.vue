@@ -2287,7 +2287,7 @@ export default {
     },
     async Proceed(tab){
       let self = this
-      $(".f-layout-copy").css("position","fixed");
+      // $(".f-layout-copy").css("position","fixed");
       self.proceedBtn = false
         if(map_flag == false){
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
@@ -3159,6 +3159,7 @@ export default {
         // self.$Modal.remove()
         self.mObj[tab].showHandson = false
         self.mObj[tab].load = true
+        $(".f-layout-copy").css("position","fixed");
         self.saveData(tab)
         // return 1
       }
