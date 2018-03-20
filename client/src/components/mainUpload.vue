@@ -1590,14 +1590,14 @@ export default {
                     this.validation_completed = true
                 })
                 .catch(error =>{
-
                 })
 
               }
             }
           })
           .catch(error =>{
-
+               console.log("error......",error)
+               self.sheetwiseValidation(key,data)
           })
       },
 
@@ -1607,6 +1607,7 @@ export default {
           let errcols = []
           self.error_data = []
           self.validation_err_fields = ''
+
           let name = sheet_name.replace(/\s/g, "")
           if(data.length != 0){
             for(let i=0;i<data[0].err_data.length;i++){
@@ -1689,6 +1690,7 @@ export default {
 
           // ht1.selectCell(err_row[0],err_col,err_row[err_row.length-1],err_col,true)
           ht1.selectCell(err_row,err_col,err_row,err_col,true)
+           $(".f-layout-copy").css("position","absolute");
 
 
 
@@ -1737,6 +1739,8 @@ export default {
         var validation_err = document.getElementById(name)
         table.deleteRow(validation_err.rowIndex + 1)
         table.deleteRow(validation_err.rowIndex + 1)
+
+        $(".f-layout-copy").css("position","fixed");
 
         validation_obj["ruleIndex"] = uploader_obj[prop_keys[0]]["currentRuleIndex"]
 
@@ -2283,6 +2287,7 @@ export default {
     },
     async Proceed(tab){
       let self = this
+      // $(".f-layout-copy").css("position","fixed");
       self.proceedBtn = false
         if(map_flag == false){
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
@@ -3154,6 +3159,7 @@ export default {
         // self.$Modal.remove()
         self.mObj[tab].showHandson = false
         self.mObj[tab].load = true
+        $(".f-layout-copy").css("position","fixed");
         self.saveData(tab)
         // return 1
       }
@@ -3314,6 +3320,7 @@ export default {
     AbortServerSideValidation(){
       let self = this
       self.showValidationTable = false
+      $(".f-layout-copy").css("position","fixed");
       self.val_data = []
       let obj1 = self.ModifyObj(uploader_obj)
       api.request('put','/uploader/' + id,obj1[0]).then(result =>{
@@ -3786,12 +3793,16 @@ export default {
               }
 
               if(message[name] && message[name].uploadStatus == "completed"){
+                self.mObj[self.activeTab].headerDisplay = false
+                self.mObj[self.activeTab].previewDisplay = false
+                self.mObj[self.activeTab].newSchemaDisplay = false
                 self.mObj[self.activeTab].load = false
                 self.mObj[self.activeTab].newUploadCSV = []
                 self.mObj[self.activeTab].uploadCSV = []
                 self.mObj[self.activeTab].csv_arr = []
                 self.mObj[self.activeTab].mapping = []
                 self.mObj[self.activeTab].tab_flag = true
+                $(".f-layout-copy").css("position","fixed");
                 // self.loadProcessing = false
 
 
@@ -3978,7 +3989,6 @@ export default {
                       }
                     }
                     self.$store.state.data = self.val_data
-
                   }
 
                   for(let i=0;i<rem_arr.length;i++){
@@ -4000,14 +4010,11 @@ export default {
                       else if(self.val_data.length > 0){
                         self.$store.state.validationStatus = true
                         // self.setValData(response.data,filtered_keys)
-
                       }
 
                     }
                     else if(!response.data.validate_flag){
-
                       self.setValData(response.data,filtered_keys)
-
                     }
 
                   }
@@ -4041,7 +4048,6 @@ export default {
                     }
                   }
                   else if(response.data.stepStatus == "import_completed"){
-
                     this.$router.push('/uploader')
                   }
         }
