@@ -3842,6 +3842,7 @@ export default {
               }
             }
             else if(message.stepStatus == "validation_completed" ){
+              console.log("called from feathers validation_completed .....")
                if(self.validating == true){
                  self.validating = false
                }
@@ -3852,6 +3853,7 @@ export default {
                  self.uploadStep = false
                }
                if(self.validateStep == false){
+                 console.log("validate step from feathers....",self.validateStep,self.importStep)
                  self.validateStep = true
                }
                 self.currentStep = 1
@@ -3859,6 +3861,7 @@ export default {
               self.validation_completed = true
             }
             else if(message.stepStatus == "import_in_progress" ){
+              console.log("called from feathers import_in_progress .....")
                if(self.showValidationTable == true){
                  self.showValidationTable = false
                }
@@ -3881,6 +3884,7 @@ export default {
                 self.import1 = false
             }
             else if(message.stepStatus == "import_to_confirm" || message.stepStatus == "import_to_confirm_in_progress"){
+              console.log("called from feathers import_to_confirm .....")
               if(self.showValidationTable == true){
                 self.showValidationTable = false
               }
@@ -3903,6 +3907,7 @@ export default {
 
 
               if(message.stepStatus == "import_to_confirm_in_progress"){
+                console.log("called from feathers import_to_confirm_in_progress .....")
                 self.abortImportBtn = false
                 self.import1 = true
                 self.importBtn = false
@@ -4019,6 +4024,7 @@ export default {
 
                   }
                   else if(response.data.stepStatus == 'validation_completed'){
+                    console.log("&&&&& validation_completed &&&&&&")
                     this.validating = false
                     this.uploadStep = false
                     this.validateStep = true
@@ -4027,6 +4033,7 @@ export default {
                     this.validation_completed = true
                   }
                   else if(response.data.stepStatus == 'import_in_progress'){
+                    console.log("&&&&& import_in_progress &&&&&&")
                     this.uploadStep = false
                     this.validateStep = false
                     this.importStep = true
@@ -4036,6 +4043,7 @@ export default {
                     }
                   }
                   else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
+                    console.log("&&&&& import_to_confirm &&&&&&")
                     this.uploadStep = false
                     this.validateStep = false
                     this.importStep = true
@@ -4043,6 +4051,7 @@ export default {
                     this.import1 = true
                     this.abortImportBtn = true
                     if(response.data.stepStatus == 'import_to_confirm_in_progress'){
+                      console.log("^^^^^ import_to_confirm_in_progress ^^^^^")
                       this.abortImportBtn = false
                       this.importBtn = false
                     }
