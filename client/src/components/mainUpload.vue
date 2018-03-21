@@ -3845,7 +3845,7 @@ export default {
               }
             }
             else if(message.stepStatus == "validation_completed" ){
-              console.log("called from feathers validation_completed .....")
+              console.log("called from feathers validation_completed .....",self.validateStep,self.importStep)
                if(self.validating == true){
                  self.validating = false
                }
@@ -3865,7 +3865,7 @@ export default {
               self.validation_completed = true
             }
             else if(message.stepStatus == "import_in_progress" ){
-              console.log("called from feathers import_in_progress .....")
+              console.log("called from feathers import_in_progress .....",self.validateStep,self.importStep)
                if(self.showValidationTable == true){
                  self.showValidationTable = false
                }
@@ -3874,13 +3874,16 @@ export default {
                }
                if(self.validation_data == false){
                  self.validation_data = true
+                 console.log("inside 11111",self.validateStep,self.importStep)
                }
                if(self.validateStep == true){
                   self.validateStep = false
+                  console.log("inside 22222......",self.validateStep,self.importStep)
                }
                if(self.importStep == false){
                  self.importStep = true
                  self.currentStep = 2
+                 console.log("inside 33333",self.validateStep,self.importStep)
                }
                if(self.abortImportBtn == true){
                  self.abortImportBtn = false
