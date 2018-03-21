@@ -754,6 +754,7 @@ export default {
          // loadProceed: false,
          abortImportBtn: false,
          calledfromModify: false,
+         calledFromAbort: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -3262,6 +3263,7 @@ export default {
     },
     abortImportConfirm(){
       let self = this
+      self.calledFromAbort = true
       self.importBtn = true
        let patch_obj = {
          "stepStatus": "validation_completed",
@@ -3272,6 +3274,7 @@ export default {
          self.validating = false
          self.validation_completed = true
          self.uploadStep = false
+         self.importStep = false
          self.validateStep = true
          self.currentStep = 1
        })
@@ -3852,9 +3855,10 @@ export default {
                if(self.uploadStep == true){
                  self.uploadStep = false
                }
-               if(self.validateStep == false){
-                 console.log("validate step from feathers....",self.validateStep,self.importStep)
+               if(self.validateStep == false && self.importStep == false){
+                 console.log("validate step from feathers before....",self.validateStep,self.importStep)
                  self.validateStep = true
+                 console.log("validate step from feathers.... after",self.validateStep,self.importStep)
                }
                 self.currentStep = 1
 
