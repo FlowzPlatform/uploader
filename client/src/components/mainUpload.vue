@@ -3274,8 +3274,8 @@ export default {
          self.validating = false
          self.validation_completed = true
          self.uploadStep = false
-         self.importStep = false
-         self.validateStep = true
+         // self.importStep = false
+         // self.validateStep = true
          self.currentStep = 1
        })
        .catch(error => {
@@ -3551,7 +3551,6 @@ export default {
           }
           socket.emit('pdmData', obj, (err, data) => {
             if (err) {
-
               self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
             }
           })
@@ -3855,12 +3854,13 @@ export default {
                if(self.uploadStep == true){
                  self.uploadStep = false
                }
-               if(self.validateStep == false && self.importStep == false){
+               if(self.validateStep == false && self.importStep == true && self.calledFromAbort == true){
                  console.log("validate step from feathers before....",self.validateStep,self.importStep)
                  self.validateStep = true
+                 self.currentStep = 1
+                 self.calledFromAbort = false
                  console.log("validate step from feathers.... after",self.validateStep,self.importStep)
                }
-                self.currentStep = 1
 
               self.validation_completed = true
             }
