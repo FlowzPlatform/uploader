@@ -1,7 +1,7 @@
 <template>
     <div>
       <div class="ivu-tabs-tabpane">
-              <div class="ivu-table-wrapper">
+              <div v-if="data3.length > 0" class="ivu-table-wrapper">
                 <div class="ivu-table ivu-table-small innertable">
                   <div class="ivu-table-header">
                     <table cellspacing="0" cellpadding="0" border="0" style="width:100%;">
@@ -63,7 +63,11 @@
                 </div>
               </div>
             </div>
+            <div v-else style="text-align:center;color:red;">
+              NO DATA
+            </div>
           </div>
+
         <!-- <Row class="expand-row" v-for="(item,index) in data3">
             <Col span="6">
                 <span class="expand-key">File Name: </span>
@@ -109,11 +113,12 @@ import lodash from 'lodash'
           }
         },
         mounted(){
-          for(var key in this.row) {
+            for(var key in this.row) {
               if (key == "ProductInformation" || key == "ProductPrice" || key == "ProductImprintData" || key == 'ProductImage' || key == 'ProductShipping' || key == 'ProductAdditionalCharges' || key == 'ProductVariationPrice') {
-                  this.data3.push({"name":key,"totalNoOfRecords":this.row[key].totalNoOfRecords,"uploadstatus" : this.row[key].uploadStatus,"validatestatus": this.row[key].validateStatus})
+                this.data3.push({"name":key,"totalNoOfRecords":this.row[key].totalNoOfRecords,"uploadstatus" : this.row[key].uploadStatus,"validatestatus": this.row[key].validateStatus})
               }
-          }
+            }
+
         }
     };
 </script>
