@@ -190,7 +190,6 @@ export default {
            }
          }
          else if(e){
-           console.log("++++++++++++++",e)
          }
        })
      }
