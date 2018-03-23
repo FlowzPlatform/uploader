@@ -17,9 +17,11 @@ const io = require('socket.io-client')
   // const socket = io(config.serverURI)
 let socket = io(config.socketURI, {reconnect: true})
 socket.on('connection', function (connect) {
+  console.log('connected...')
 })
 
 socket.on('disconnect', function (disconnect) {
+  console.log('disconnected....')
 })
   // if (process.env.NODE_ENV !== 'development') {
   //   socket = io(config.serverURI, { path: '/dbetl/socket.io' })
