@@ -33,6 +33,9 @@ export default {
       .then(response => {
         return response
       })
+      .catch(err => {
+        console.log("errr...",err)
+      })
       if(response.data.data.length != 0){
         list1.push({"value":state.subscription_list[key].value,"label":response.data.data[0].userId})
       }
@@ -52,6 +55,9 @@ export default {
          })
          .then(resp => {
            return resp
+         })
+         .catch(error => {
+           console.log("errr...",error)
          })
          if(resp.data.data[0].fullname){
           uniq_user_array.push({"user_id":uniq_user_id[i].label,"name":resp.data.data[0].fullname})

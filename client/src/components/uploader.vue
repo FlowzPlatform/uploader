@@ -177,15 +177,19 @@ export default {
      },
      getData(id){
        socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
-         if (data.data.length !== 0) {
-           this.showDiv = false
-           this.loading = false
-           this.$router.push('/landing/' + data.data[0].id)
+         if(data){
+           if (data.data.length !== 0) {
+             this.showDiv = false
+             this.loading = false
+             this.$router.push('/landing/' + data.data[0].id)
+           }
+           else {
+             this.showDiv = true
+             this.loading = false
+             this.$store.state.jobData = {}
+           }
          }
-         else {
-           this.showDiv = true
-           this.loading = false
-           this.$store.state.jobData = {}
+         else if(e){
          }
        })
      }

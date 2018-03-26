@@ -754,6 +754,7 @@ export default {
          // loadProceed: false,
          abortImportBtn: false,
          calledfromModify: false,
+         calledFromAbort: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -3262,6 +3263,7 @@ export default {
     },
     abortImportConfirm(){
       let self = this
+      self.calledFromAbort = true
       self.importBtn = true
        let patch_obj = {
          "stepStatus": "validation_completed",
@@ -3272,7 +3274,8 @@ export default {
          self.validating = false
          self.validation_completed = true
          self.uploadStep = false
-         self.validateStep = true
+         // self.importStep = false
+         // self.validateStep = true
          self.currentStep = 1
        })
        .catch(error => {
@@ -3548,7 +3551,6 @@ export default {
           }
           socket.emit('pdmData', obj, (err, data) => {
             if (err) {
-
               self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
             }
           })
@@ -3851,10 +3853,11 @@ export default {
                if(self.uploadStep == true){
                  self.uploadStep = false
                }
-               if(self.validateStep == false){
+               if(self.validateStep == false && self.importStep == true && self.calledFromAbort == true){
                  self.validateStep = true
+                 self.currentStep = 1
+                 self.calledFromAbort = false
                }
-                self.currentStep = 1
 
               self.validation_completed = true
             }
@@ -4036,6 +4039,7 @@ export default {
                     }
                   }
                   else if(response.data.stepStatus == 'import_to_confirm' || response.data.stepStatus == 'import_to_confirm_in_progress'){
+
                     this.uploadStep = false
                     this.validateStep = false
                     this.importStep = true
@@ -4043,6 +4047,7 @@ export default {
                     this.import1 = true
                     this.abortImportBtn = true
                     if(response.data.stepStatus == 'import_to_confirm_in_progress'){
+
                       this.abortImportBtn = false
                       this.importBtn = false
                     }
