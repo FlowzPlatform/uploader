@@ -622,6 +622,7 @@ import Vue from 'vue'
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.css'
 import VueCodeMirror from 'vue-codemirror'
+import $ from 'jquery';
 var moment = require('moment');
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
@@ -675,6 +676,11 @@ socket.on('response', (response) => {
         this.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
     })
   }
+})
+
+socket.on('err',(response) => {
+  console.log("+++++++++++ error",response.stdout)
+  toastr.error(response.stdout, "Error");
 })
 
 export default {
@@ -1041,7 +1047,14 @@ export default {
               dynamicTyping: true,
               encoding: "UTF-8",
               skipEmptyLines: true,
-              chunk: await (function(results, streamer){
+              chunk: await (function(results, streamer) {
+
+              // map the user selected headers -> results
+              // do the validation`
+              // send results to server
+              // if abort pressed, discard the stored data on server
+              // else commit the stored data on server for import / live
+
                 let res_arr = []
                 res_arr.push(results)
                 for(let i=0;i<res_arr.length;i++){
@@ -3515,7 +3528,6 @@ export default {
                   if (err) {
                     self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
                   }
-
                 })
               })
               .catch(error => {
