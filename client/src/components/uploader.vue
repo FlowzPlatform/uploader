@@ -171,6 +171,12 @@ export default {
                  duration: 3
                });
               }
+              else {
+                this.$Notice.error({
+                 title: error.response.data.message,
+                 duration: 3
+               });
+            }
             })
           }
        }

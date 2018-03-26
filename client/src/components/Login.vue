@@ -146,6 +146,7 @@ export default {
           this.loading = true
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
 						this.$Message.error(error.response.data)
+            this.loading = false
             return
           })
           if (auth) {
