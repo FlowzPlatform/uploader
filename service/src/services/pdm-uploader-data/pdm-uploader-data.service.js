@@ -8,6 +8,7 @@ let shell = require('shelljs');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const _ = require('lodash');
+let errors = require('@feathersjs/errors') ;
 const ProductInformationSchema = require('../../schema/product_information');
 const ProductPriceSchema = require('../../schema/product_price');
 const ProductImprintDataSchema = require('../../schema/product_imprint_data');
@@ -31,7 +32,7 @@ module.exports = function () {
   io.on('connection',function(socket) {
     socket.on('pdmData',async function( data){
           var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-          var cnn_with_mongo = await connectToMongo(url,data).then(res => {
+          var cnn_with_mongo = await connectToMongo(url,data,socket).then(res => {
             if(res.result){
               socket.emit('response',{stdout:res.result})
             }
@@ -41,7 +42,7 @@ module.exports = function () {
               }
             }
           }).catch(error => {
-            console.log("Errrr......",error)
+
             socket.emit('err',{stdout: 'Error in saving data'})
           })
   });
@@ -71,13 +72,13 @@ module.exports = function () {
   }
 };
 
-var connectToMongo = async function(url,data){
+var connectToMongo = async function(url,data,socket){
     var db = await (MongoClient.connect(url).then(res => {
-      console.log("res....",res)
       return res
     })
     .catch(err => {
        socket.emit('err',{stdout:'Unable to connect mongodb database.'})
+       // throw new errors.GeneralError(err);
     }))
 
     let collection_name = data.activetab.split(" ")
@@ -145,6 +146,7 @@ var connectToMongo = async function(url,data){
         var result = await (db.collection(collection_name).insert(data.newCSV).then(res => {
           return res
         }).catch(err => {
+        
           return err
         }))
         return result

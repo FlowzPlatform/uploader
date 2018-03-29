@@ -24,6 +24,7 @@ module.exports = function () {
  subscription.registerDynamicHooks(app, registerAppModule)
 
 
+
   // Check subscription
   // app.use(subscription.subscription);
   // subscription.secureService.validate = (route, params, secureRouteInfo) => {
