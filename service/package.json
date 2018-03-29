@@ -56,6 +56,7 @@
     "feathers-socketio": "^2.0.0",
     "feathers-swagger": "^0.5.0",
     "fibers": "^2.0.0",
+    "flowz-feathers-error": "file:///home/software/Desktop/flowz-feathers-error",
     "flowz-subscription": "^0.2.1",
     "fs": "0.0.1-security",
     "fs-blob-store": "^5.2.1",

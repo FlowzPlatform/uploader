@@ -156,9 +156,10 @@
                    </div>
                  </div>
              </div>
-             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:9%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn">
-              Proceed
+             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="ProceedLoading">Abort</Button>
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:10%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn" :loading="ProceedLoading">
+              <span v-if="ProceedLoading">Processing</span>
+              <span v-else>Proceed</span>
              </Button>
            </div>
 
@@ -632,11 +633,13 @@ import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
 
+
 Vue.use(VueCodeMirror)
 moment().format();
 var Schema = require('simpleschema')
 const uuidV1 = require('uuid/v1');
 let finalModifiedDataArray = []
+let globalValidateResolve = null
 let res
 let id
 let file
@@ -656,8 +659,9 @@ let cpage_array = []
 let mounted_flag = false
 let no_of_uplds = 0
 let notice_flag = true
-
-
+let complete_flag = true
+let totalRecords = 0
+let load_flag = true
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -668,20 +672,6 @@ if (process.env.NODE_ENV !== 'development') {
 
 const app = feathers().configure(socketio(socket))
 
-socket.on('response', (response) => {
-  if (response.stdout.ok == 1) {
-    api.request('patch', '/uploader/' + id,obj1).then(res => {
-    })
-    .catch(error => {
-        this.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-    })
-  }
-})
-
-socket.on('err',(response) => {
-  console.log("+++++++++++ error",response.stdout)
-  toastr.error(response.stdout, "Error");
-})
 
 export default {
     name: 'mainUpload',
@@ -761,6 +751,7 @@ export default {
          abortImportBtn: false,
          calledfromModify: false,
          calledFromAbort: false,
+         ProceedLoading: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -792,6 +783,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -830,6 +822,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -869,6 +862,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -906,6 +900,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -943,6 +938,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -980,6 +976,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -1017,6 +1014,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -1047,6 +1045,7 @@ export default {
               dynamicTyping: true,
               encoding: "UTF-8",
               skipEmptyLines: true,
+              preview: 5,
               chunk: await (function(results, streamer) {
 
               // map the user selected headers -> results
@@ -1055,12 +1054,7 @@ export default {
               // if abort pressed, discard the stored data on server
               // else commit the stored data on server for import / live
 
-                let res_arr = []
-                res_arr.push(results)
-                for(let i=0;i<res_arr.length;i++){
-                  self.mObj[tab].uploadCSV =  lodash.unionBy(self.mObj[tab].uploadCSV,res_arr[i].data)
-                }
-                // self.mObj[tab].uploadCSV = results.data
+                self.mObj[tab].uploadCSV = results.data
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
                 // self.loadProceed = false
@@ -1415,8 +1409,16 @@ export default {
         let self = this
           if(err_length != 0){
             if(self.mObj[self.activeTab].errDisplay == false ){
-              if(document.getElementById('example1') != null || document.getElementById('example1') != undefined ){
-                document.getElementById('example1').style.display = 'none'
+              if(document.getElementById('example1') != null || document.getElementById('example1') != undefined){
+                if(document.getElementById('example1').innerHTML == ""){
+                }
+                else{
+                  document.getElementById('example1').style.display = 'none'
+                }
+                 // document.getElementById('example1').innerHTML = ""
+              }
+              else{
+
               }
             }
             else if(self.mObj[self.activeTab].errDisplay == true ){
@@ -1503,14 +1505,13 @@ export default {
       mapHeader(sysHeader,csvHeader){
         let self = this
         let tab = self.activeTab
-        for(let i=0;i<5;i++){
+        for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
            for(let key in self.mObj[tab].uploadCSV[i]){
              if(key == csvHeader){
                 self.mObj[tab].newUploadCSV[i][sysHeader] = self.mObj[tab].uploadCSV[i][key]
               }
            }
          }
-
       },
 
       // Starts server side validation
@@ -1986,7 +1987,7 @@ export default {
                let schema_keys = _.keys(this.mObj[tab].schema.structure);
                if(this.mObj[tab].uploadCSV.length != 0){
                  this.mObj[tab].newUploadCSV = []
-                 for(let i=0;i<5;i++){
+                 for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
                    let obj = {}
                    for(let key in this.mObj[tab].uploadCSV[i]){
                      for(let j=0;j<this.mObj[tab].mapping.length;j++){
@@ -2150,7 +2151,7 @@ export default {
       if(self.mObj[tab].uploadCSV.length != 0){
         self.loadingdot = true
 
-        for(let i=0;i<5;i++){
+        for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
           let obj = {}
            for(let key in self.mObj[tab].uploadCSV[i]){
 
@@ -2231,24 +2232,29 @@ export default {
       map_flag = false
       this.modal1 = false
       this.proceedBtn = true
+      this.ProceedLoading = false
       continue_flag = false
     },
    async continuee(tab){
       // this.loadProcessing = true
-      let self = this
       continue_flag = true
       this.showContinue = false
       this.proceedBtn = true
-      await self.makeNewUploadCSVObj(tab)
-      await self.transformFromMapping(tab)
+      let self = this
+      await self.saveSchemaandMapping(tab)
+      await self.parseFile(tab)
+      // await self.makeNewUploadCSVObj(tab)
+      // await self.transformFromMapping(tab)
       self.modal1 = false
-      self.ProceedToValidate(tab)
+      self.ProceedLoading = true
+      // self.ProceedToValidate(tab)
     },
     cancel (){
       this.proceedBtn = true
       continue_flag = false
     },
-    transformFromMapping(tab){
+    transformFromMapping(tab) {
+      return new Promise(async (resolve,reject)=>{
       this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
        for(let k=0;k<this.mObj[tab].mapping.length;k++){
          if(this.mObj[tab].mapping[k].transform != ""){
@@ -2257,19 +2263,16 @@ export default {
            this.handleModalOk()
          }
        }
+       resolve('done')
+     })
     },
     async makeNewUploadCSVObj(tab){
+      return new Promise(async (resolve,reject)=>{
       let self = this
-       // self.loadProcessing = true
+      self.mObj[tab].newUploadCSV = []
+      self.mObj[tab].csv_arr = []
 
-      // errcols = []
-      // err_length = 0
-      // self.mObj[tab].data1 = []
-      // self.mObj[tab].headers1 = []
-      // self.mObj[tab].errmsg = []
-      // console.log("^^^^^^ schema_obj ^^^^^^^",schema_Obj)
-
-      for(let i=5 ;i< self.mObj[tab].uploadCSV.length;i++){
+      for(let i=0 ;i<self.mObj[tab].uploadCSV.length;i++){
         let obj = {}
          for(let key in self.mObj[tab].uploadCSV[i]){
 
@@ -2283,26 +2286,27 @@ export default {
            }
          }
          obj["_id"] = uuidV1()
-        //  await self.validateObj(schema_Obj,obj,tab,errcols,i)
          self.mObj[tab].newUploadCSV.push(obj)
-        //  console.log("%%%%%% newUploadCSV  full object %%%%%%",self.mObj[tab].newUploadCSV)
 
          this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
-         for(let k=0;k<this.mObj[tab].mapping.length;k++){
-           if(this.mObj[tab].mapping[k].transform != ""){
-             this.transformData = this.mObj[tab].mapping[k].transform
-             this.modelIndex = k
-             this.handleModalOk()
-           }
-         }
+         // for(let k=0;k<this.mObj[tab].mapping.length;k++){
+         //   if(this.mObj[tab].mapping[k].transform != ""){
+         //     this.transformData = this.mObj[tab].mapping[k].transform
+         //     this.modelIndex = k
+         //     this.handleModalOk()
+         //   }
+         // }
       }
-      return;
+      // return;
+      resolve('done')
+    })
     },
     async Proceed(tab){
       let self = this
       // $(".f-layout-copy").css("position","fixed");
-      self.proceedBtn = false
+
+      // self.proceedBtn = false
         if(map_flag == false){
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
             if(o.schemaObj.optional == false && o.csvHeader == ""){
@@ -2311,34 +2315,6 @@ export default {
           });
           if(check_headers.length != 0){
               self.modal1 = true
-              // this.$Modal.confirm({
-              //              title: 'Confirm',
-              //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
-              //              loading: true,
-              //              okText: 'Continue',
-              //              cancelText: 'Map',
-              //              onOk: async () => {
-              //                let self = this
-              //                // self.loadProcessing = true
-              //                continue_flag = true
-              //                self.showContinue = false
-              //                self.proceedBtn = true
-              //                await self.makeNewUploadCSVObj(tab)
-              //                await self.transformFromMapping(tab)
-              //                // self.modal1 = false
-              //                let res = await self.ProceedToValidate(tab)
-              //                 console.log("res....",res)
-              //                if(res){
-              //                  self.$Modal.remove()
-              //                }
-              //              },
-              //              onCancel: async() => {
-              //                map_flag = false
-              //                self.modal1 = false
-              //                self.proceedBtn = true
-              //                continue_flag = false
-              //              }
-              //            })
           }
           else{
              self.showContinue = true
@@ -2350,57 +2326,29 @@ export default {
                });
                if(optional_headers.length != 0){
                    self.modal1 = true
-                   // this.$Modal.confirm({
-                   //              title: 'Confirm',
-                   //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
-                   //              loading: true,
-                   //              okText: 'Continue',
-                   //              cancelText: 'Map',
-                   //              onOk: async () => {
-                   //                let self = this
-                   //                // self.loadProcessing = true
-                   //                continue_flag = true
-                   //                self.showContinue = false
-                   //                self.proceedBtn = true
-                   //                await self.makeNewUploadCSVObj(tab)
-                   //                await self.transformFromMapping(tab)
-                   //                // self.modal1 = false
-                   //                let res = await self.ProceedToValidate(tab)
-                   //                console.log("res....",res)
-                   //                if(res){
-                   //                  self.$Modal.remove()
-                   //                }
-                   //              },
-                   //              onCancel: async() => {
-                   //                map_flag = false
-                   //                self.modal1 = false
-                   //                self.proceedBtn = true
-                   //                continue_flag = false
-                   //              }
-                   //            })
                    continue_flag = true
                }
                else{
                   // self.loadProceed = true
-                    await self.makeNewUploadCSVObj(tab)
-                    await self.transformFromMapping(tab)
-                    self.ProceedToValidate(tab)
+                    self.ProceedLoading = true
+                    await self.saveSchemaandMapping(tab)
+                    await self.parseFile(tab)
                }
              }
              else{
 
                // self.loadProceed = true
-                 await self.makeNewUploadCSVObj(tab)
-                 await self.transformFromMapping(tab)
-                 self.ProceedToValidate(tab)
+                 self.ProceedLoading = true
+                 await self.saveSchemaandMapping(tab)
+                 await self.parseFile(tab)
              }
           }
         }
         else{
           // self.loadProceed = true
-            await self.makeNewUploadCSVObj(tab)
-            await self.transformFromMapping(tab)
-            self.ProceedToValidate(tab)
+            self.ProceedLoading = true
+            await self.saveSchemaandMapping(tab)
+            await self.parseFile(tab)
         }
     },
     // makeSchemaObj(tab){
@@ -2716,74 +2664,158 @@ export default {
     //
     //     return schema_Obj
     // },
-    // validateObj(schema_Obj,obj,tab,errcols,key){
-    //   let self = this
-    //   console.log("validating_obj called......")
-    //   self.mObj[tab].schema = new Schema(schema_Obj)
-    //   // err_length = 0
-    //   // self.mObj[tab].data1 = []
-    //   // self.mObj[tab].headers1 = []
-    //   // self.mObj[tab].errmsg = []
-    //
-    //   self.mObj[tab].schema.validate(obj, function (err, newP, errors) {
-    //
-    //     if (err) {
-    //       throw err
-    //     } else {
-    //       if (errors.length) {
-    //         console.log("errrorssssssss")
-    //         // err_length = errors.length
-    //         err_length = err_length + 1
-    //         let err_type = ''
-    //         if (!_.isEqual(Object.values(obj), [""])) {
-    //
-    //           self.mObj[tab].data1.push(Object.values(obj))
-    //           self.mObj[tab].headers1.push(Object.keys(obj))
-    //
-    //           // let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
-    //           _.forEach(errors, (item) => {
-    //             errcols.push({
-    //               cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
-    //               rows: key
-    //             })
-    //
-    //             for(let key in schema_Obj){
-    //               if(key == item.field){
-    //                 err_type = schema_Obj[key].type
-    //               }
-    //             }
-    //
-    //             if(item.message == "Error during casting"){
-    //               if(err_type == 'number'){
-    //                 self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
-    //               }
-    //               else if(err_type == 'string'){
-    //                 self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
-    //               }
-    //             }
-    //             else {
-    //               self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
-    //             }
-    //           })
-    //
-    //           console.log("errmsg .......", self.mObj[tab].errmsg,errcols)
-    //
-    //           // self.mObj[tab].headerDisplay = false
-    //           // self.mObj[tab].newSchemaDisplay = false
-    //           // self.mObj[tab].previewDisplay = false
-    //           // self.mObj[tab].uploadDisplay = false
-    //           // self.mObj[tab].showHandson = true
-    //           // self.mObj[tab].errDisplay = true
-    //           // self.loadProcessing = false
-    //           // self.showerrmsg(errcols,tab)
-    //         }
-    //       } else {
-    //
-    //       }
-    //     }
-    //   })
-    // },
+ parseFile(tab){
+    let self = this
+      Papa.parse(file, {
+        header: true,
+        dynamicTyping: true,
+        encoding: "UTF-8",
+        skipEmptyLines: true,
+        chunk: async function(results, streamer) {
+            if(results.data.length != 0){
+              totalRecords = totalRecords + results.data.length
+              streamer.pause()
+              self.mObj[tab].uploadCSV = []
+              self.mObj[tab].uploadCSV = results.data
+              await self.makeNewUploadCSVObj(tab)
+              await self.transformFromMapping(tab)
+              globalValidateResolve = null
+              await self.ProceedToValidate(tab)
+              await self.saveData(tab)
+              await self.socketResponse()
+              if(streamer.paused()) {
+                streamer.resume()
+              }
+              if(complete_flag == false){
+                complete_flag = true
+                await self.changeStatus(tab)
+              }
+
+            }
+        },
+        complete:async function(results, file) {
+          complete_flag = false
+          // if(self.mObj[tab].complete_flag == false){
+          //   self.mObj[tab].complete_flag = true
+          //
+          // }
+        }
+        })
+    },
+    socketResponse(){
+      return new Promise(async (resolve,reject)=>{
+        socket.removeListener('response');
+        socket.removeListener('err');
+
+        socket.on('response', (response) => {
+          if(response.stdout.ok == 1){
+            resolve(response)
+          }
+        })
+        socket.on('err',(response) => {
+          this.$Notice.error({title: 'Error!', desc: response.stdout})
+        })
+      })
+    },
+    changeStatus(tab){
+      if(this.mObj[tab].complete_flag == false){
+        let Tab = tab.replace(/\s/g, "")
+        obj1[Tab]["totalNoOfRecords"] = totalRecords
+        this.mObj[tab].complete_flag = true
+        api.request('patch', '/uploader/' + id,obj1).then(res => {
+          let self = this
+          this.ProceedLoading = false
+          this.proceedBtn = true
+          totalRecords = 0
+         })
+         .catch(error => {
+             this.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
+         })
+       }
+    },
+    saveSchemaandMapping(tab){
+      let self = this
+      let CSVFileObj = {
+        name : file.name,
+        size: file.size,
+        username: self.$store.state.user.email,
+        subscriptionId: self.$store.state.subscription_id,
+        import_tracker_id: id
+      }
+
+      let name = tab.replace(/\s/g, "")
+      obj1 = {}
+      obj1[name] = {
+        uploadStatus:"completed",
+        validateStatus: "pending",
+        uploadedAt: new Date()
+        // totalNoOfRecords: self.mObj[tab].newUploadCSV.length
+      }
+
+      if(self.mObj[tab].new_flag == 1){
+        let schemaobj = {
+          name : self.mObj[tab].selected_schema,
+          schema: self.mObj[tab].schema.structure,
+          username: self.$store.state.user.email,
+          subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id: id,
+          tabname: tab
+        }
+
+        api.request('post', '/uploader-schema/',schemaobj).then(res => {
+
+            schema_id = res.data.id
+
+            api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+              CSVFile_id = result.data.id
+
+              let mappingObj = {
+                mapping : self.mObj[tab].mapping,
+                fileTypeId : self.mObj[tab].selected_schema,
+                username : self.$store.state.user.email,
+                subscriptionId: self.$store.state.subscription_id,
+                import_tracker_id:id
+              }
+
+              api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
+              obj1[name]["id"] = CSVFile_id
+              obj1[name]["schema_id"] = schema_id
+              })
+              .catch(error => {
+                  self.$Notice.error({title: error.response.data.message })
+              })
+
+            })
+            .catch(error => {
+              self.$Notice.error({title: error.response.data.message })
+            })
+        })
+        .catch(error => {
+          if(error.response.data.className == 'general-error' && error.response.data.code == 500)
+            self.$Notice.error({title: error.response.data.message })
+          else
+            self.$Notice.error({title: error.response.data.message })
+           })
+
+      }
+      else {
+        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+          CSVFile_id = result.data.id
+          obj1[name]["id"] = CSVFile_id
+          obj1[name]["schema_id"] = schema_id
+      })
+      .catch(error => {
+          self.$Notice.error({title: error.response.data.message })
+      })
+    }
+    },
     ProceedToValidate(tab){
+      return new Promise(async (resolve,reject)=> {
+        let globalValidateResolveFlag = true
+        if (globalValidateResolve === null) {
+          globalValidateResolveFlag = false
+          globalValidateResolve = resolve;
+        }
       let self = this
       map_flag = false
 
@@ -2795,6 +2827,9 @@ export default {
       continue_flag = false
       self.showContinue = false
       let errcols = []
+      if(load_flag == false){
+        self.mObj[tab].load = true
+      }
       let dateValidatorFunc = function (obj, value, fieldName) {
               if(value != "" || value != undefined){
                let date = moment(value)
@@ -3105,79 +3140,151 @@ export default {
          err_length = 0
          self.mObj[tab].data1 = []
          self.mObj[tab].headers1 = []
-          self.mObj[tab].errmsg = []
-        _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
-          if(err_length > 0){
-            return false
-          }
-          self.mObj[tab].schema.validate(value, function (err, newP, errors) {
-
-            if (err) {
-              throw err
-            } else {
-              if (errors.length) {
-                err_length = errors.length
-                let err_type = ''
-                if (!_.isEqual(Object.values(value), [""])) {
-
-                  self.mObj[tab].data1.push(Object.values(value))
-                  self.mObj[tab].headers1.push(Object.keys(value))
-                  let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
-                  _.forEach(errors, (item) => {
-                    errcols.push({
-                      cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
-                      rows: key
-                    })
-
-                    for(let key in schema_Obj){
-                      if(key == item.field){
-                        err_type = schema_Obj[key].type
-                      }
-                    }
-
-                    if(item.message == "Error during casting"){
-                      if(err_type == 'number'){
-                        self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
-                      }
-                      else if(err_type == 'string'){
-                        self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
-                      }
-                    }
-                    else {
-                      self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
-                    }
-                  })
-
-                  self.mObj[tab].headerDisplay = false
-                  self.mObj[tab].newSchemaDisplay = false
-                  self.mObj[tab].previewDisplay = false
-                  self.mObj[tab].uploadDisplay = false
-                  // self.$Modal.remove()
-                  self.mObj[tab].showHandson = true
-                  self.mObj[tab].errDisplay = true
-                  self.showerrmsg(errcols,tab)
-                  // return 1
-                }
-              } else {
-                  // return 1
-              }
-            }
-          })
-        })
+        self.mObj[tab].errmsg = []
+        self.generateError(self.mObj[tab].newUploadCSV,self.mObj[tab].schema,schema_Obj,tab,errcols)
+        // _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
+        //     if(err_length > 0) {
+        //       return false
+        //     }
+        //   self.mObj[tab].schema.validate(value, function (err, newP, errors) {
+        //
+        //     if (err) {
+        //       throw err
+        //     } else {
+        //       if (errors.length) {
+        //         err_length = errors.length
+        //         let err_type = ''
+        //         if (!_.isEqual(Object.values(value), [""])) {
+        //
+        //           self.mObj[tab].data1.push(Object.values(value))
+        //           self.mObj[tab].headers1.push(Object.keys(value))
+        //           let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
+        //           _.forEach(errors, (item) => {
+        //             errcols.push({
+        //               cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
+        //               rows: key
+        //             })
+        //
+        //             for(let key in schema_Obj){
+        //               if(key == item.field){
+        //                 err_type = schema_Obj[key].type
+        //               }
+        //             }
+        //
+        //             if(item.message == "Error during casting"){
+        //               if(err_type == 'number'){
+        //                 self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
+        //               }
+        //               else if(err_type == 'string'){
+        //                 self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
+        //               }
+        //             }
+        //             else {
+        //               self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
+        //             }
+        //           })
+        //
+        //           self.mObj[tab].headerDisplay = false
+        //           self.mObj[tab].newSchemaDisplay = false
+        //           self.mObj[tab].previewDisplay = false
+        //           self.mObj[tab].uploadDisplay = false
+        //           self.mObj[tab].showHandson = true
+        //           self.mObj[tab].errDisplay = true
+        //           if(self.mObj[tab].load == true){
+        //             self.mObj[tab].load = false
+        //           }
+        //           console.log("err_length")
+        //           self.showerrmsg(errcols,tab)
+        //           // return
+        //         }
+        //       } else {
+        //           // return
+        //       }
+        //     }
+        //   })
+        // })
 
       if(err_length == 0){
         self.mObj[tab].headerDisplay = false
         self.mObj[tab].newSchemaDisplay = false
         self.mObj[tab].previewDisplay = false
         self.mObj[tab].uploadDisplay = false
-        // self.$Modal.remove()
         self.mObj[tab].showHandson = false
-        self.mObj[tab].load = true
         $(".f-layout-copy").css("position","fixed");
-        self.saveData(tab)
-        // return 1
+        globalValidateResolve("done")
+      } else {
+        if(globalValidateResolveFlag === true) {
+          resolve('done')
+        }
       }
     }
+  })
+    },
+     generateError(CSVdata,schema,schema_Obj,tab,errcols){
+      return new Promise(async (resolve,reject)=> {
+        let self = this
+      _.forEach(CSVdata, function (value, key) {
+          if(err_length > 0) {
+            return false
+          }
+        schema.validate(value, function (err, newP, errors) {
+
+          if (err) {
+            throw err
+          } else {
+            if (errors.length) {
+              err_length = errors.length
+              let err_type = ''
+              if (!_.isEqual(Object.values(value), [""])) {
+
+                self.mObj[tab].data1.push(Object.values(value))
+                self.mObj[tab].headers1.push(Object.keys(value))
+                let oldHeaders = _.keys(CSVdata)
+                _.forEach(errors, (item) => {
+                  errcols.push({
+                    cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
+                    rows: key
+                  })
+
+                  for(let key in schema_Obj){
+                    if(key == item.field){
+                      err_type = schema_Obj[key].type
+                    }
+                  }
+
+                  if(item.message == "Error during casting"){
+                    if(err_type == 'number'){
+                      self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
+                    }
+                    else if(err_type == 'string'){
+                      self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
+                    }
+                  }
+                  else {
+                    self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
+                  }
+                })
+
+                self.mObj[tab].headerDisplay = false
+                self.mObj[tab].newSchemaDisplay = false
+                self.mObj[tab].previewDisplay = false
+                self.mObj[tab].uploadDisplay = false
+                self.mObj[tab].showHandson = true
+                self.mObj[tab].errDisplay = true
+                if(self.mObj[tab].load == true){
+                  self.mObj[tab].load = false
+                }
+                self.showerrmsg(errcols,tab)
+                resolve(err_length)
+                // return
+              }
+            } else {
+                // return
+            }
+          }
+        })
+      })
+    })
     },
     Abort(tab){
       let self = this
@@ -3191,7 +3298,7 @@ export default {
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
-      // self.loadProcessing = false
+      totalRecords = 0      // self.loadProcessing = false
       // self.loadProceed = false
       $(".f-layout-copy").css("position","fixed");
     },
@@ -3212,6 +3319,7 @@ export default {
               this.mObj[tab].main_arr = []
               this.mObj[tab].headers = []
               this.mObj[tab].savePreviewDisplay = false
+              this.mObj[tab].complete_flag = false
               if(this.mObj[tab].headerDisplay == true){
                 this.mObj[tab].headerDisplay = false
               }
@@ -3237,11 +3345,13 @@ export default {
     AbortValidation(tab){
         let self = this
         self.proceedBtn = true
+        self.ProceedLoading = false
         self.mObj[tab].errmsg = []
         self.mObj[tab].uploadCSV = []
         self.mObj[tab].newUploadCSV = []
         self.mObj[tab].data1 = []
         self.mObj[tab].headers1 = []
+        totalRecords = 0
         $('table.htCore').each(function () {
           this.remove()
         })
@@ -3251,7 +3361,8 @@ export default {
         }
 
         if(document.getElementById('example1')){
-          document.getElementById('example1').style.display = 'none'
+          // document.getElementById('example1').style.display = 'none'
+          document.getElementById('example1').innerHTML = ""
         }
         self.mObj[tab].showHandson = false
         self.mObj[tab].errDisplay = false
@@ -3367,11 +3478,10 @@ export default {
          return cellProp
        }
      }))
-      // ht.selectCell(row1,col1,row1,col1,true)
-     setTimeout(function(){
-       ht.selectCell(row1,col1,row1,col1,true)
-     },200)
 
+      setTimeout(function(){
+        ht.selectCell(row1,col1,row1,col1,true)
+      },200)
      if(document.getElementById('example1')){
        document.getElementById('example1').style.display = 'block'
      }
@@ -3379,7 +3489,7 @@ export default {
 
      // document.getElementById('hot-display-license-info').style.display = 'none'
    },
-   modifyData (tab) {
+   async modifyData (tab) {
        let schema = this.mObj[tab].schema
        let colHeaders = this.mObj[tab].headers1[0]
        let hotSettingsData = this.mObj[tab].data1
@@ -3441,23 +3551,21 @@ export default {
            if(document.getElementsByClassName('ht_master handsontable')[0]){
              document.getElementsByClassName('ht_master handsontable')[0].remove()
            }
-
-
-
            self.showerrmsg(errcols,tab)
          }
          else{
            self.mObj[tab].errmsg = []
            self.mObj[tab].showHandson = false
            self.mObj[tab].errDisplay = false
+           self.mObj[tab].load = true
+           load_flag = false
            $('table.htCore').each(function () {
              this.remove()
            })
            if(document.getElementsByClassName('ht_master handsontable')[0]){
              document.getElementsByClassName('ht_master handsontable')[0].remove()
            }
-
-           self.ProceedToValidate(tab)
+           await self.ProceedToValidate(tab)
          }
 
        }
@@ -3468,109 +3576,21 @@ export default {
      },
     saveData(tab){
       let self = this
-      let CSVFileObj = {
-        name : file.name,
-        size: file.size,
-        totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
-        username: self.$store.state.user.email,
-        subscriptionId: self.$store.state.subscription_id,
-        import_tracker_id: id
-      }
+      self.mObj[tab].load = true
+      load_flag = true
+      var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
+        return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
+      });
 
-      let name = tab.replace(/\s/g, "")
-      obj1 = {}
-      obj1[name] = {
-        uploadStatus:"completed",
-        validateStatus: "pending",
-        uploadedAt: new Date(),
-        totalNoOfRecords: self.mObj[tab].newUploadCSV.length
+      let obj= {
+        "activetab" : tab,
+        "newCSV": newCSV
       }
-
-      if(self.mObj[tab].new_flag == 1){
-        let schemaobj = {
-          name : self.mObj[tab].selected_schema,
-          schema: self.mObj[tab].schema.structure,
-          username: self.$store.state.user.email,
-          subscriptionId: self.$store.state.subscription_id,
-          import_tracker_id: id,
-          tabname: tab
+      socket.emit('pdmData', obj, (err, data) => {
+        if (err) {
+          self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
         }
-
-        api.request('post', '/uploader-schema/',schemaobj).then(res => {
-
-            schema_id = res.data.id
-
-            api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-              CSVFile_id = result.data.id
-
-              let mappingObj = {
-                mapping : self.mObj[tab].mapping,
-                fileTypeId : self.mObj[tab].selected_schema,
-                username : self.$store.state.user.email,
-                subscriptionId: self.$store.state.subscription_id,
-                import_tracker_id:id
-              }
-
-              api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
-              obj1[name]["id"] = CSVFile_id
-              obj1[name]["schema_id"] = schema_id
-
-                var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-                  return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
-                });
-
-
-                let obj= {
-                  "activetab" : tab,
-                  "newCSV": newCSV
-                }
-                socket.emit('pdmData', obj, (err, data) => {
-                  if (err) {
-                    self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-                  }
-                })
-              })
-              .catch(error => {
-                  self.$Notice.error({title: 'Error!'})
-              })
-
-            })
-            .catch(error => {
-              self.$Notice.error({title: 'Error!'})
-            })
-        })
-        .catch(error => {
-          if(error.response.data.className == 'general-error' && error.response.data.code == 500)
-            self.$Notice.error({title: error.response.data.message })
-          else
-            self.$Notice.error({title: error.response.data.message })
-           })
-
-      }
-      else {
-        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-          CSVFile_id = result.data.id
-          obj1[name]["id"] = CSVFile_id
-          obj1[name]["schema_id"] = schema_id
-
-          var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-            return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
-          });
-
-          let obj= {
-            "activetab" : tab,
-            "newCSV": newCSV
-          }
-          socket.emit('pdmData', obj, (err, data) => {
-            if (err) {
-              self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-            }
-          })
       })
-      .catch(error => {
-          self.$Notice.error({title: error.response.data.message })
-      })
-    }
     self.proceedBtn = true
     if(self.mObj[tab].new_flag == 1){
       self.mObj[tab].new_flag = 0
