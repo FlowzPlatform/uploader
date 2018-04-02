@@ -1065,7 +1065,6 @@ export default {
                     my_flag = false
                     setTimeout(function(){self.mObj[tab].mapping = []
                       self.generateHeadersandMapping(tab)},1)
-
                   }
                 }
                 else{
@@ -2357,7 +2356,9 @@ export default {
               await self.makeNewUploadCSVObj(tab)
               await self.transformFromMapping(tab)
               globalValidateResolve = null
+              console.log("+++++++++ ProceedTovalidate before")
               await self.ProceedToValidate(tab)
+              console.log("+++++++++++++++ ProceedTovalidate after")
               await self.saveData(tab)
               await self.socketResponse()
               if(streamer.paused()) {

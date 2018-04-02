@@ -30,6 +30,10 @@ socket.on('disconnect', function (disconnect) {
 socket.on('reconnect', function (reconnect) {
   console.log('reconnected successfully ======>')
 })
+
+socket.on('error', function (error) {
+  console.log('err....', error)
+})
   // if (process.env.NODE_ENV !== 'development') {
   //   socket = io(config.serverURI, { path: '/dbetl/socket.io' })
   // } else {
