@@ -1,0 +1,14 @@
+<template>
+  <div class="dashboard">
+    Dashboard
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'dashboard',
+  mounted () {
+    this.$router.push('/uploader-joblist')
+  }
+}
+</script>
