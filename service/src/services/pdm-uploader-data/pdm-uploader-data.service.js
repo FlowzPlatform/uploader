@@ -8,7 +8,6 @@ let shell = require('shelljs');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const _ = require('lodash');
-let errors = require('@feathersjs/errors') ;
 const ProductInformationSchema = require('../../schema/product_information');
 const ProductPriceSchema = require('../../schema/product_price');
 const ProductImprintDataSchema = require('../../schema/product_imprint_data');
@@ -146,7 +145,7 @@ var connectToMongo = async function(url,data,socket){
         var result = await (db.collection(collection_name).insert(data.newCSV).then(res => {
           return res
         }).catch(err => {
-        
+
           return err
         }))
         return result

@@ -8,7 +8,6 @@ module.exports = function () {
   // in Express the order matters
   app = this; // eslint-disable-line no-unused-vars
 
-
   // check authentication
   app.use(authentication)
 

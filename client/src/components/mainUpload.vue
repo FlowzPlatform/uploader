@@ -458,7 +458,7 @@
                      <a href="javascript:void(0)" data-method="stripSpecialCharacter()" @click="transform">Stripe Special Character</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="formatDate('dd-mm-yyyy')" @click="transform">Date Format</a>
+                     <a href="javascript:void(0)" data-method="formatDate('mm-dd-yyyy')" @click="transform">Date Format</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="toDecimal(2)" @click="transform">Decimal</a>
@@ -2243,11 +2243,8 @@ export default {
       let self = this
       await self.saveSchemaandMapping(tab)
       await self.parseFile(tab)
-      // await self.makeNewUploadCSVObj(tab)
-      // await self.transformFromMapping(tab)
       self.modal1 = false
       self.ProceedLoading = true
-      // self.ProceedToValidate(tab)
     },
     cancel (){
       this.proceedBtn = true
@@ -2304,9 +2301,6 @@ export default {
     },
     async Proceed(tab){
       let self = this
-      // $(".f-layout-copy").css("position","fixed");
-
-      // self.proceedBtn = false
         if(map_flag == false){
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
             if(o.schemaObj.optional == false && o.csvHeader == ""){
@@ -2329,15 +2323,12 @@ export default {
                    continue_flag = true
                }
                else{
-                  // self.loadProceed = true
                     self.ProceedLoading = true
                     await self.saveSchemaandMapping(tab)
                     await self.parseFile(tab)
                }
              }
              else{
-
-               // self.loadProceed = true
                  self.ProceedLoading = true
                  await self.saveSchemaandMapping(tab)
                  await self.parseFile(tab)
@@ -2345,325 +2336,11 @@ export default {
           }
         }
         else{
-          // self.loadProceed = true
             self.ProceedLoading = true
             await self.saveSchemaandMapping(tab)
             await self.parseFile(tab)
         }
     },
-    // makeSchemaObj(tab){
-    //   console.log("++++++++makeSchemaObj called ++++++")
-    //   let self = this
-    //   // let errcols = []
-    //   let dateValidatorFunc = function (obj, value,fieldName) {
-    //           if(value != "" || value != undefined){
-    //            let date = moment(value)
-    //            let isValid = date.isValid()
-    //            if (isValid != true) return 'Invalid date. Please provide date in y-m-d format'
-    //            date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
-    //            return
-    //          }
-    //   }
-    //   let urlValidatorFunc = function (obj, value, fieldName) {
-    //
-    //             if (value != "" || value != undefined) {
-    //               let re = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/
-    //               if(re.test(value) !== true)
-    //               return 'Invalid url'
-    //               else
-    //               return
-    //             }
-    //           }
-    //
-    //   let emailValidatorFunc = function (obj, value, fieldName) {
-    //     if(value !== undefined || value !== ""){
-    //       let re = /\S+@\S+\.\S+/
-    //       if(re.test(value) !== true)
-    //       return  'Invalid email address'
-    //       else
-    //       return
-    //     }
-    //   }
-    //
-    //   let optionalValidatorFunc = function (obj, value, fieldName) {
-    //     if(value == '')
-    //       return  fieldName + ' cannot be left blank'
-    //       else
-    //       return
-    //
-    //   }
-    //
-    //
-    //   let phoneValidatorFunc = function (obj, value, fieldName) {
-    //     let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
-    //     if (value !== undefined || value !== "") {
-    //       if(re.test(value) !== true)
-    //       return 'Invalid phone number'
-    //       else
-    //       return
-    //     }
-    //   }
-    //
-    //   let pincodeValidatorFunc = function (obj, value, fieldName) {
-    //     let re = /^[0-9]{1,6}$/ // eslint-disable-line
-    //     if (value !== undefined || value !== "") {
-    //       if(re.test(value) !== true)
-    //       return 'Invalid pin-code'
-    //       else
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionDate = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = dateValidatorFunc(obj, value, fieldName)
-    //     var func4 =  defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionUrl = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = urlValidatorFunc(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionEmail = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = emailValidatorFunc(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionPhone = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = phoneValidatorFunc(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionPincode = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = getFunctionPincode(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionText = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func4 = maxLengthValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined){
-    //         return func3
-    //     } else if(func4 !== undefined){
-    //        return func4
-    //     }else if(func5 !== undefined){
-    //        return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let allowedValueValidatorFunc = function (obj, value, fieldName) {
-    //     var i
-    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //       if (fieldName === value) {
-    //         i = key
-    //       }
-    //     })
-    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
-    //       if (value !== undefined) {
-    //         let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
-    //         if(check != true)
-    //         return  'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
-    //         else {
-    //           return
-    //         }
-    //       }
-    //     }
-    //   }
-    //
-    //   let defaultValidatorFunc = function (obj, value, fieldName) {
-    //
-    //     var i
-    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //       if (fieldName === value) {
-    //         i = key
-    //       }
-    //     })
-    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== '' && self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== undefined ) {
-    //
-    //       if (value == "")
-    //         return  'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
-    //         else
-    //           return
-    //       }
-    //     }
-    //
-    //     let maxLengthValidatorFunc = function (obj, value, fieldName) {
-    //
-    //       var i
-    //       _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //         if (fieldName === value) {
-    //           i = key
-    //         }
-    //       })
-    //       if (self.mObj[self.activeTab].mapping[i].schemaObj.maxLength !== '') {
-    //         if (value !== undefined && typeof(value) == "string") {
-    //           let check = value.length
-    //           if(check != self.mObj[self.activeTab].mapping[i].schemaObj.maxLength)
-    //           return  'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength
-    //           else {
-    //             return
-    //           }
-    //         }
-    //       }
-    //       }
-    //
-    //   let regExValidatorFunc = function (obj, value, fieldName) {
-    //     var i
-    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //       if (fieldName === value) {
-    //         i = key
-    //       }
-    //     })
-    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.regEx !== '') {
-    //       if (value !== undefined) {
-    //         let pttrn = new RegExp(self.mObj[self.activeTab].mapping[i].schemaObj.regEx)
-    //         if (pttrn.test(value) === false && fieldName == 'max_imprint_color_allowed'){
-    //           return 'Decimal value not allowed'
-    //         }
-    //         else if(pttrn.test(value) === false && fieldName != 'max_imprint_color_allowed'){
-    //           return  'Value does not match with the regex'
-    //         }
-    //       }
-    //     }
-    //   }
-    //
-    //
-    //     let schema_Obj = {}
-    //     _.forEach(self.mObj[tab].mapping, function (value, key) {
-    //       console.log("mapping loop started ========")
-    //       if(value.schemaObj.optional == true){
-    //           if(value.schemaObj.type == 'date'){
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: dateValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if(value.schemaObj.type == 'url'){
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: urlValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if (value.schemaObj.type == 'email') {
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: emailValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if (value.schemaObj.type == 'phone') {
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: phoneValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if (value.schemaObj.type == 'pin-code') {
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: pincodeValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else{
-    //             schema_Obj[value.sysHeader] = {type: value.schemaObj.type,validator:regExValidatorFunc,label: value.schemaObj.type,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //       }
-    //       else if(value.schemaObj.optional == false) {
-    //         if(value.schemaObj.type == 'date'){
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionDate,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if(value.schemaObj.type == 'url'){
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionUrl,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if (value.schemaObj.type == 'email') {
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionEmail,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if (value.schemaObj.type == 'phone') {
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionPhone,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if (value.schemaObj.type == 'pin-code') {
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionPincode,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else{
-    //           schema_Obj[value.sysHeader] = {type: value.schemaObj.type,label: value.schemaObj.type,validator: getFunctionText,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //       }
-    //     })
-    //
-    //     return schema_Obj
-    // },
  parseFile(tab){
       let self = this
       Papa.LocalChunkSize = 2000000
@@ -3710,25 +3387,6 @@ export default {
         self.mObj[tab].savePreviewDisplay = true
       }
       return;
-
-    //  api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name).then(res => {
-    //    self.mObj[tab].newUploadCSV = res.data
-    //    self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-    //      return _.extend({}, element, {is_checked: false});
-    //    });
-    //    console.log("+++++++++++self.mObj[tab].newUploadCSV",self.mObj[tab].newUploadCSV)
-    //    self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
-    //    let loop = self.mObj[tab].newUploadCSV.length/5
-    //    for(let i=0;i<=loop;i++){
-    //      self.mObj[tab].mPage.push({'mCheck':false})
-    //    }
-    //
-    //    self.mObj[tab].headers = Object.keys(res.data[0])
-    //    self.map = true
-    //    self.mObj[tab].load =  false
-    //    self.mObj[tab].savePreviewDisplay = true
-    //    return;
-    // })
 },
   setValData(data,filtered_keys){
       uploader_obj = data
@@ -4235,53 +3893,15 @@ export default {
     padding: 10px 12px 10px 0;
     box-sizing: border-box;
 }
-/*.ivu-input {
-    display: inline-block;
-    margin-left: 68px;
-    width: 60%;
-    height: 32px;
-    line-height: 1.5;
-    padding: 4px 7px;
-    font-size: 12px;
-    border: 1px solid #dddee1;
-    border-radius: 4px;
-    color: #495060;
-    background-color: #fff;
-    background-image: none;
-    position: relative;
-    cursor: text;
-    transition: border .2s ease-in-out,background .2s ease-in-out,box-shadow .2s ease-in-out;
-    margin-top: 4%;
-}*/
-
-/*.ivu-btn-ghost {
-    color: #495060;
-    background-color: transparent;
-    border-color: #fff;
-    padding-left: 0px;
-    padding-right: 0px;
-}
-.ivu-btn-ghost:hover {
-    color: #495060;
-    background-color: transparent;
-    border-color: #fff;
-    padding-left: 0px;
-    padding-right: 0px;
-}
-*/
 .btnghost {
   color: #495060 !important;
   background-color: transparent !important;
   border-color: #fff !important;
-  /*padding-left: 0px !important;*/
-  /*padding-right: 0px !important;   */
 }
 .btnghost:hover {
     color: #495060 !important;
     background-color: transparent !important;
     border-color: #fff !important;
-    /*padding-left: 0px !important;*/
-    /*padding-right: 0px !important;*/
 }
 .ivu-upload-drag {
   background: #fff;
@@ -4292,7 +3912,6 @@ export default {
   position: relative;
   overflow: hidden;
   transition: border-color .2s ease;
-  /*margin-left: -3%;*/
 }
 .ivu-upload-drag:hover {
   background: #fff;
@@ -4323,7 +3942,6 @@ export default {
   margin-top: 6%;
   text-align:center;
   font-size: 15px;
-  /*margin-left: -3%;*/
 }
 .ivu-upload-list-file {
     padding: 4px;
@@ -4334,21 +3952,6 @@ export default {
     position: relative;
     display:none;
 }
-/*.ivu-btn-success {
-    margin-top: 60%;
-    color: #fff;
-    background-color: #1fb58f;
-    border-color: #1fb58f;
-    width: 152%;
-}
-.ivu-btn-success:disabled {
-    margin-top: 60%;
-    color: #fff;
-    background-color: #1fb58f;
-    border-color: #1fb58f;
-    width: 152%;
-}*/
-
 .ivu-table-cell {
   padding-left: 18px;
   padding-right: 18px;
@@ -4448,15 +4051,8 @@ export default {
   background-color: #fff !important;
   transition: background-color .2s ease-in-out;
   font-size: 13px !important;
-  /*padding: 9px !important;*/
 }
-/*.handsontable thead {
-    box-sizing: content-box;
-    -webkit-box-sizing: content-box;
-    background-color: #eee;
-    color: #fff;
-    font-size: 14px;
-}*/
+
 #example1 {
   width: 100%!important;
 }

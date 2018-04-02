@@ -16,6 +16,7 @@ const services = require('./services');
 const appHooks = require('./app.hooks');
 const rethinkdb = require('./rethinkdb');
 const subscription = require('flowz-subscription');
+const uws = require('uws');
 
 // const mongodb = require('./mongodb');
 const app = feathers();
