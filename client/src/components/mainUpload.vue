@@ -2665,7 +2665,8 @@ export default {
     //     return schema_Obj
     // },
  parseFile(tab){
-    let self = this
+      let self = this
+      Papa.LocalChunkSize = 2000000
       Papa.parse(file, {
         header: true,
         dynamicTyping: true,
