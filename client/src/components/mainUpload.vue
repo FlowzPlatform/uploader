@@ -3132,6 +3132,7 @@ export default {
       })
     },
     async showerrmsg (errcols,tab,schema) {
+      console.log("showerrmsg called...")
      var example1 = document.getElementById('example1')
      let row1
      let col1
@@ -3253,6 +3254,7 @@ export default {
      },
     saveData(tab){
       let self = this
+      console.log("saveData called...")
       self.mObj[tab].load = true
       load_flag = true
       var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
@@ -3263,8 +3265,11 @@ export default {
         "activetab" : tab,
         "newCSV": newCSV
       }
+      console.log("Data emitted...")
       socket.emit('pdmData', obj, (err, data) => {
+        console.log("Data emiited inside.....")
         if (err) {
+          console.log("err...",err)
           self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
         }
       })

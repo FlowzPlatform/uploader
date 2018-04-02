@@ -41,7 +41,6 @@ module.exports = function () {
               }
             }
           }).catch(error => {
-
             socket.emit('err',{stdout: 'Error in saving data'})
           })
   });
@@ -145,7 +144,6 @@ var connectToMongo = async function(url,data,socket){
         var result = await (db.collection(collection_name).insert(data.newCSV).then(res => {
           return res
         }).catch(err => {
-
           return err
         }))
         return result
