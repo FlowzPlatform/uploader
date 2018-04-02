@@ -2343,7 +2343,6 @@ export default {
     },
  parseFile(tab){
       let self = this
-      Papa.LocalChunkSize = 2000000
       Papa.parse(file, {
         header: true,
         dynamicTyping: true,
