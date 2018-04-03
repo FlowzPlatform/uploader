@@ -2342,12 +2342,14 @@ export default {
     },
  parseFile(tab){
       let self = this
+      Papa.LocalChunkSize = 2000000
       Papa.parse(file, {
         header: true,
         dynamicTyping: true,
         encoding: "UTF-8",
         skipEmptyLines: true,
         chunk: async function(results, streamer) {
+          console.log("results...",results)
             if(results.data.length != 0){
               totalRecords = totalRecords + results.data.length
               streamer.pause()
@@ -2386,6 +2388,7 @@ export default {
         socket.removeListener('err');
 
         socket.on('response', (response) => {
+          console.log("socket response...",response)
           if(response.stdout.ok == 1){
             resolve(response)
           }
@@ -3266,12 +3269,15 @@ export default {
         "activetab" : tab,
         "newCSV": newCSV
       }
-      console.log("Data emitted...")
+      console.log("Data emitted...",obj)
       socket.emit('pdmData', obj, (err, data) => {
         console.log("Data emiited inside.....")
         if (err) {
           console.log("err...",err)
           self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
+        }
+        if(data){
+          console.log("socket data.....",data)
         }
       })
     self.proceedBtn = true
