@@ -431,8 +431,8 @@
                  <codemirror v-model="transformData" :options="editorOptions"></codemirror>
              </Col>
              <Col span="6">
-               <div class="transform-method">
-                 <ul>
+               <div class="transform-method" style="padding: 0px 30px !important;">
+                 <ul style="list-style-type:disc;">
                    <li>
                      <a href="javascript:void(0)" data-method="toUpperCase()" @click="transform">UpperCase</a>
                    </li>
@@ -2342,7 +2342,7 @@ export default {
     },
  parseFile(tab){
       let self = this
-      Papa.LocalChunkSize = 2000000
+      Papa.LocalChunkSize = 3000000
       Papa.parse(file, {
         header: true,
         dynamicTyping: true,
