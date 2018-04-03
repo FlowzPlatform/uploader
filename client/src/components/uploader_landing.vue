@@ -345,7 +345,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 
 .upload-type > span{
   padding-right: 35px;
