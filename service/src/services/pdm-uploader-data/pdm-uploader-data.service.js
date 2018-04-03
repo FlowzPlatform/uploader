@@ -30,10 +30,10 @@ module.exports = function () {
   app.configure(socketio(function(io) {
   io.on('connection',function(socket) {
     socket.on('error', function (err) {
-         console.log("==================server=err=",err);
-       });
+        console.log("err...",err)
+    });
+    
     socket.on('pdmData',async function( data){
-      console.log("data....",data)
           var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
           var cnn_with_mongo = await connectToMongo(url,data,socket).then(res => {
             if(res.result){
@@ -45,7 +45,7 @@ module.exports = function () {
               }
             }
           }).catch(error => {
-            console.log("Error.....",error)
+
             socket.emit('err',{stdout: 'Error in saving data'})
           })
   });
