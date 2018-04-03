@@ -2358,9 +2358,7 @@ export default {
               await self.makeNewUploadCSVObj(tab)
               await self.transformFromMapping(tab)
               globalValidateResolve = null
-              console.log("+++++++++ ProceedTovalidate before")
               await self.ProceedToValidate(tab)
-              console.log("+++++++++++++++ ProceedTovalidate after")
               await self.saveData(tab)
               await self.socketResponse()
               if(streamer.paused()) {
@@ -3908,7 +3906,7 @@ export default {
   color: #495060 !important;
   background-color: transparent !important;
   border-color: #fff !important;
-  padding: 4px 16px !important;
+  padding: 4px 17px !important;
 }
 .btnghost:hover {
     color: #495060 !important;
