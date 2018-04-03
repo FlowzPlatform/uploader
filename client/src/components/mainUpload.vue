@@ -2342,7 +2342,7 @@ export default {
     },
  parseFile(tab){
       let self = this
-      Papa.LocalChunkSize = 3000000
+      Papa.LocalChunkSize = 1000000
       Papa.parse(file, {
         header: true,
         dynamicTyping: true,
@@ -3908,6 +3908,7 @@ export default {
   color: #495060 !important;
   background-color: transparent !important;
   border-color: #fff !important;
+  padding: 4px 16px !important;
 }
 .btnghost:hover {
     color: #495060 !important;
@@ -4310,5 +4311,7 @@ export default {
     width: 75% !important;
 }
 
-
+.ivu-poptip-body-content {
+  overflow: inherit !important;
+}
 </style>

@@ -45,6 +45,7 @@ module.exports = function () {
               }
             }
           }).catch(error => {
+            console.log("Error.....",error)
             socket.emit('err',{stdout: 'Error in saving data'})
           })
   });
