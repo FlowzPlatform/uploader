@@ -661,7 +661,7 @@ let no_of_uplds = 0
 let notice_flag = true
 let complete_flag = true
 let totalRecords = 0
-let load_flag = true
+
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -2364,14 +2364,15 @@ export default {
                 streamer.resume()
               }
               if(complete_flag == false){
+                await self.changeStatus(tab,streamer)
                 complete_flag = true
-                await self.changeStatus(tab)
               }
 
             }
         },
         complete:async function(results, file) {
           complete_flag = false
+          // await self.changeStatus(tab)
           // if(self.mObj[tab].complete_flag == false){
           //   self.mObj[tab].complete_flag = true
           //
@@ -2391,11 +2392,15 @@ export default {
         })
         socket.on('err',(response) => {
           this.$Notice.error({title: 'Error!', desc: response.stdout})
+          this.mObj[this.activeTab].load = false
+          this.mObj[this.activeTab].uploadDisplay = true
+          this.mObj[this.activeTab].newUploadCSV = []
+          this.mObj[this.activeTab].csv_arr = []
         })
       })
     },
-    changeStatus(tab){
-      if(this.mObj[tab].complete_flag == false){
+    changeStatus(tab,streamer){
+      if(this.mObj[tab].complete_flag == false && !streamer.paused()){
         let Tab = tab.replace(/\s/g, "")
         obj1[Tab]["totalNoOfRecords"] = totalRecords
         this.mObj[tab].complete_flag = true
@@ -2504,9 +2509,6 @@ export default {
       continue_flag = false
       self.showContinue = false
       let errcols = []
-      if(load_flag == false){
-        self.mObj[tab].load = true
-      }
       let dateValidatorFunc = function (obj, value, fieldName) {
               if(value != "" || value != undefined){
                let date = moment(value)
@@ -3028,6 +3030,7 @@ export default {
         self.mObj[tab].newUploadCSV = []
         self.mObj[tab].data1 = []
         self.mObj[tab].headers1 = []
+        complete_flag = true
         totalRecords = 0
         $('table.htCore').each(function () {
           this.remove()
@@ -3235,7 +3238,7 @@ export default {
            self.mObj[tab].showHandson = false
            self.mObj[tab].errDisplay = false
            self.mObj[tab].load = true
-           load_flag = false
+
            $('table.htCore').each(function () {
              this.remove()
            })
@@ -3254,7 +3257,6 @@ export default {
     saveData(tab){
       let self = this
       self.mObj[tab].load = true
-      load_flag = true
       var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
         return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
       });
