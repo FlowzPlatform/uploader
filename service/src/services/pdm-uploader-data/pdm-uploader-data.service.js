@@ -32,7 +32,7 @@ module.exports = function () {
     socket.on('error', function (err) {
         console.log("err...",err)
     });
-    
+
     socket.on('pdmData',async function( data){
           var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
           var cnn_with_mongo = await connectToMongo(url,data,socket).then(res => {

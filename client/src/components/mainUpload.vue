@@ -440,16 +440,16 @@
                      <a href="javascript:void(0)" data-method="toLowerCase()" @click="transform">LowerCase</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="ltrim()" @click="transform">Right Trim</a>
+                     <a href="javascript:void(0)" data-method="trimRight()" @click="transform">Right Trim</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="rtrim()" @click="transform">Left Trim</a>
+                     <a href="javascript:void(0)" data-method="trimLeft()" @click="transform">Left Trim</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="concate()" @click="transform">Concat</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="capitalize()" @click="transform" >Capitalize</a>
+                     <a href="javascript:void(0)" data-method="capitalize()" @click="transform">Capitalize</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="stripHTMLTags()" @click="transform">Stripe HTML Tags</a>
@@ -458,7 +458,7 @@
                      <a href="javascript:void(0)" data-method="stripSpecialCharacter()" @click="transform">Stripe Special Character</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="formatDate('mm-dd-yyyy')" @click="transform">Date Format</a>
+                     <a href="javascript:void(0)" data-method="formatDate('yyyy-mm-dd')" @click="transform">Date Format</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="toDecimal(2)" @click="transform">Decimal</a>
@@ -672,6 +672,79 @@ if (process.env.NODE_ENV !== 'development') {
 
 const app = feathers().configure(socketio(socket))
 
+
+// String.prototype.capitalize = function() {
+//   return this.charAt(0).toUpperCase() + this.slice(1);
+// }
+//
+// String.prototype.stripHTMLTags = function() {
+//     return this.replace(/<[^>]*>/g, '');
+// }
+//
+// String.prototype.stripSpecialCharacter = function() {
+//     return this.replace(/[\/\\#,+()$~%^'":*<>{}]/g, '');
+// }
+//
+//
+// String.prototype.concate = function(str) {
+//     return this.concat(str);
+// }
+//
+// String.prototype.formatDate = function (format) {
+//   console.log("format...",format,this)
+//   var date = new Date(this),
+//       day = date.getDate(),
+//       month = date.getMonth() + 1,
+//       year = date.getFullYear(),
+//       hours = date.getHours(),
+//       minutes = date.getMinutes(),
+//       seconds = date.getSeconds();
+//
+//   if (!format) {
+//       format = "mm/dd/yyyy";
+//   }
+//   format = format.replace("mm", month.toString().replace(/^(\d)$/, '0$1'));
+//   if (format.indexOf("yyyy") > -1) {
+//       format = format.replace("yyyy", year.toString());
+//   } else if (format.indexOf("yy") > -1) {
+//       format = format.replace("yy", year.toString().substr(2, 2));
+//   }
+//   format = format.replace("dd", day.toString().replace(/^(\d)$/, '0$1'));
+//   if (format.indexOf("t") > -1) {
+//       if (hours > 11) {
+//           format = format.replace("t", "pm");
+//       } else {
+//           format = format.replace("t", "am");
+//       }
+//   }
+//   if (format.indexOf("HH") > -1) {
+//       format = format.replace("HH", hours.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   if (format.indexOf("hh") > -1) {
+//       if (hours > 12) {
+//           hours -= 12;
+//       }
+//       if (hours === 0) {
+//           hours = 12;
+//       }
+//       format = format.replace("hh", hours.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   if (format.indexOf("mm") > -1) {
+//       format = format.replace("mm", minutes.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   if (format.indexOf("ss") > -1) {
+//       format = format.replace("ss", seconds.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   return format;
+// }
+//
+// String.prototype.toDecimal = function(precision) {
+//   return parseFloat(this).toFixed(precision);
+// }
+//
+// String.prototype.toInteger = function() {
+//   return parseInt(this);
+// };
 
 export default {
     name: 'mainUpload',
@@ -1466,10 +1539,12 @@ export default {
 
           self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].csv_arr, function (row, rinx) {
             return _.reduce(row, function (result, value, key) {
-              let inx = _.find(self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
-              if (inx.transform !== '') {
-                var s = new Function('row', inx.transform).call(self, row) // eslint-disable-line
-                result[key] = s
+
+              let inx = _.find(self.mObj[self.activeTab].mapping, (f) => {return (f.sysHeader == key) })
+              if (inx.transform != '') {
+                // var s = new Function('row', inx.transform).call(this, row)
+                result[key] = new Function('row', inx.transform).call(this, row) // eslint-disable-line
+                // result[key] = s
               } else {
                 result[key] = value
               }
@@ -3812,6 +3887,88 @@ export default {
       })
     }
 }
+
+
+
+String.prototype.capitalize = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
+String.prototype.stripHTMLTags = function() {
+    return this.replace(/<[^>]*>/g, '');
+}
+
+Number.prototype.toInteger = function() {
+  return parseInt(this);
+};
+
+String.prototype.stripSpecialCharacter = function() {
+    return this.replace(/[\/\\#,+()$~%^'":*<>{}]/g, '');
+}
+
+
+String.prototype.concate = function(str) {
+    return this.concat(str);
+}
+
+String.prototype.formatDate = function (format) {
+  if(this != ""){
+    var date = new Date(this),
+    day = date.getDate(),
+    month = date.getMonth() + 1,
+    year = date.getFullYear(),
+    hours = date.getHours(),
+    minutes = date.getMinutes(),
+    seconds = date.getSeconds();
+
+    if (!format) {
+      format = "mm/dd/yyyy";
+    }
+    format = format.replace("mm", month.toString().replace(/^(\d)$/, '0$1'));
+    if (format.indexOf("yyyy") > -1) {
+      format = format.replace("yyyy", year.toString());
+    } else if (format.indexOf("yy") > -1) {
+      format = format.replace("yy", year.toString().substr(2, 2));
+    }
+    format = format.replace("dd", day.toString().replace(/^(\d)$/, '0$1'));
+    if (format.indexOf("t") > -1) {
+      if (hours > 11) {
+        format = format.replace("t", "pm");
+      } else {
+        format = format.replace("t", "am");
+      }
+    }
+    if (format.indexOf("HH") > -1) {
+      format = format.replace("HH", hours.toString().replace(/^(\d)$/, '0$1'));
+    }
+    if (format.indexOf("hh") > -1) {
+      if (hours > 12) {
+        hours -= 12;
+      }
+      if (hours === 0) {
+        hours = 12;
+      }
+      format = format.replace("hh", hours.toString().replace(/^(\d)$/, '0$1'));
+    }
+    if (format.indexOf("mm") > -1) {
+      format = format.replace("mm", minutes.toString().replace(/^(\d)$/, '0$1'));
+    }
+    if (format.indexOf("ss") > -1) {
+      format = format.replace("ss", seconds.toString().replace(/^(\d)$/, '0$1'));
+    }
+    return format;
+  }
+  else if(this == ""){
+    return this
+  }
+}
+
+Number.prototype.toDecimal = function(precision) {
+  return parseFloat(this).toFixed(precision);
+}
+
+
+
 </script>
 <style>
 .vue-tabs .nav-stacked > li:before {
