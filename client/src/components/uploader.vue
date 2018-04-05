@@ -29,11 +29,13 @@
             <Button type="primary" size="large" class="custombtn" v-if="loadingBtn">Loading...</Button>
         </div>
         <Row>
+          <!-- <div   > -->
           <div id="dv" class="clearfix col-md-10 col-md-offset-1 col-sm-12 col-xs-12" style="display:none">
               <Button type="ghost" class="ghtbtn">×</Button>
               <img class="bulb" src="../assets/images/idea.png" />
               <p id="get"></p>
           </div>
+        <!-- </div> -->
         </Row>
 
         <div id="display-error" style="display:none">Please choose a method of your choice.</div>
@@ -104,7 +106,7 @@ export default {
        },
        //to hide the method hints(showHintsDiv)
        hide(){
-         document.getElementById("dv").style.display="none";
+         // document.getElementById("dv").style.display="none";
        },
        //to display proper hint according to method
        showHintsDiv(data){
@@ -171,6 +173,12 @@ export default {
                  duration: 3
                });
               }
+              else {
+                this.$Notice.error({
+                 title: error.response.data.message,
+                 duration: 3
+               });
+            }
             })
           }
        }
@@ -297,8 +305,6 @@ ul.mySection label:hover {
   }
   #dv {
   height: 185px;
-  margin-bottom: 19px;
-  width: 90px;
   width: 74%;
   margin-top: 2px;
   margin-bottom:20px !important;
@@ -307,6 +313,8 @@ ul.mySection label:hover {
   color: black;
   text-align: center;
   padding-top: 4px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media(max-width: 480px){
@@ -320,7 +328,7 @@ ul.mySection label:hover {
     margin-top: 100px !important;
     margin-left: auto;
     margin-right: auto;
-    text-align: -webkit-center !important;
+    text-align: center !important;
     border: 2px #7c7e86 dashed;
     width: 60%;
     margin-top:10px;

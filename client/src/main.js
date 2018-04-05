@@ -15,13 +15,24 @@ const hooks = require('feathers-hooks')
 const socketio = require('feathers-socketio/client')
 const io = require('socket.io-client')
   // const socket = io(config.serverURI)
-let socket = io(config.socketURI, {reconnect: true})
-socket.on('connection', function (connect) {
+let socket = io(config.socketURI, {reconnection: true})
+socket.on('connect', function (connect) {
   console.log('connected...')
 })
 
 socket.on('disconnect', function (disconnect) {
   console.log('disconnected....')
+  socket.on('connect', function (connect) {
+    console.log('connected again ...')
+  })
+})
+
+socket.on('reconnect', function (reconnect) {
+  console.log('reconnected successfully ======>')
+})
+
+socket.on('error', function (error) {
+  console.log('err....', error)
 })
   // if (process.env.NODE_ENV !== 'development') {
   //   socket = io(config.serverURI, { path: '/dbetl/socket.io' })

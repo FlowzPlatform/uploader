@@ -5,19 +5,19 @@
       </vue-particles>
       <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
-          <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="post">
+          <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="get">
             <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
           </form>
-          <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="post">
+          <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="get">
             <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
           </form>
-          <form id="form-twitter" name="form-twitter" :action="loginWithTwitterUrl" method="post">
+          <form id="form-twitter" name="form-twitter" :action="loginWithTwitterUrl" method="get">
             <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
           </form>
-          <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="post">
+          <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="get">
             <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
           </form>
-          <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="post">
+          <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="get">
             <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
           </form>
           <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
@@ -146,6 +146,7 @@ export default {
           this.loading = true
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
 						this.$Message.error(error.response.data)
+            this.loading = false
             return
           })
           if (auth) {
@@ -157,7 +158,6 @@ export default {
 						let location = psl.parse(window.location.hostname)    // get parent domain
 						location = location.domain === null ? location.input : location.domain
 						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
-
 						this.$router.push({path: '/'}) // Redirect to joblist
           }
           this.loading = false

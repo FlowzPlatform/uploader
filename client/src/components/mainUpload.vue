@@ -156,9 +156,10 @@
                    </div>
                  </div>
              </div>
-             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:9%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn">
-              Proceed
+             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="ProceedLoading">Abort</Button>
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:10%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn" :loading="ProceedLoading">
+              <span v-if="ProceedLoading">Processing</span>
+              <span v-else>Proceed</span>
              </Button>
            </div>
 
@@ -430,8 +431,8 @@
                  <codemirror v-model="transformData" :options="editorOptions"></codemirror>
              </Col>
              <Col span="6">
-               <div class="transform-method">
-                 <ul>
+               <div class="transform-method" style="padding: 0px 30px !important;">
+                 <ul style="list-style-type:disc;">
                    <li>
                      <a href="javascript:void(0)" data-method="toUpperCase()" @click="transform">UpperCase</a>
                    </li>
@@ -439,16 +440,16 @@
                      <a href="javascript:void(0)" data-method="toLowerCase()" @click="transform">LowerCase</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="ltrim()" @click="transform">Right Trim</a>
+                     <a href="javascript:void(0)" data-method="trimRight()" @click="transform">Right Trim</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="rtrim()" @click="transform">Left Trim</a>
+                     <a href="javascript:void(0)" data-method="trimLeft()" @click="transform">Left Trim</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="concate()" @click="transform">Concat</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="capitalize()" @click="transform" >Capitalize</a>
+                     <a href="javascript:void(0)" data-method="capitalize()" @click="transform">Capitalize</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="stripHTMLTags()" @click="transform">Stripe HTML Tags</a>
@@ -457,7 +458,7 @@
                      <a href="javascript:void(0)" data-method="stripSpecialCharacter()" @click="transform">Stripe Special Character</a>
                    </li>
                    <li>
-                     <a href="javascript:void(0)" data-method="formatDate('dd-mm-yyyy')" @click="transform">Date Format</a>
+                     <a href="javascript:void(0)" data-method="formatDate('yyyy-mm-dd')" @click="transform">Date Format</a>
                    </li>
                    <li>
                      <a href="javascript:void(0)" data-method="toDecimal(2)" @click="transform">Decimal</a>
@@ -622,6 +623,7 @@ import Vue from 'vue'
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.css'
 import VueCodeMirror from 'vue-codemirror'
+import $ from 'jquery';
 var moment = require('moment');
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
@@ -631,11 +633,13 @@ import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
 
+
 Vue.use(VueCodeMirror)
 moment().format();
 var Schema = require('simpleschema')
 const uuidV1 = require('uuid/v1');
 let finalModifiedDataArray = []
+let globalValidateResolve = null
 let res
 let id
 let file
@@ -655,7 +659,8 @@ let cpage_array = []
 let mounted_flag = false
 let no_of_uplds = 0
 let notice_flag = true
-
+let complete_flag = true
+let totalRecords = 0
 
 
 let socket
@@ -667,15 +672,79 @@ if (process.env.NODE_ENV !== 'development') {
 
 const app = feathers().configure(socketio(socket))
 
-socket.on('response', (response) => {
-  if (response.stdout.ok == 1) {
-    api.request('patch', '/uploader/' + id,obj1).then(res => {
-    })
-    .catch(error => {
-        this.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-    })
-  }
-})
+
+// String.prototype.capitalize = function() {
+//   return this.charAt(0).toUpperCase() + this.slice(1);
+// }
+//
+// String.prototype.stripHTMLTags = function() {
+//     return this.replace(/<[^>]*>/g, '');
+// }
+//
+// String.prototype.stripSpecialCharacter = function() {
+//     return this.replace(/[\/\\#,+()$~%^'":*<>{}]/g, '');
+// }
+//
+//
+// String.prototype.concate = function(str) {
+//     return this.concat(str);
+// }
+//
+// String.prototype.formatDate = function (format) {
+//   console.log("format...",format,this)
+//   var date = new Date(this),
+//       day = date.getDate(),
+//       month = date.getMonth() + 1,
+//       year = date.getFullYear(),
+//       hours = date.getHours(),
+//       minutes = date.getMinutes(),
+//       seconds = date.getSeconds();
+//
+//   if (!format) {
+//       format = "mm/dd/yyyy";
+//   }
+//   format = format.replace("mm", month.toString().replace(/^(\d)$/, '0$1'));
+//   if (format.indexOf("yyyy") > -1) {
+//       format = format.replace("yyyy", year.toString());
+//   } else if (format.indexOf("yy") > -1) {
+//       format = format.replace("yy", year.toString().substr(2, 2));
+//   }
+//   format = format.replace("dd", day.toString().replace(/^(\d)$/, '0$1'));
+//   if (format.indexOf("t") > -1) {
+//       if (hours > 11) {
+//           format = format.replace("t", "pm");
+//       } else {
+//           format = format.replace("t", "am");
+//       }
+//   }
+//   if (format.indexOf("HH") > -1) {
+//       format = format.replace("HH", hours.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   if (format.indexOf("hh") > -1) {
+//       if (hours > 12) {
+//           hours -= 12;
+//       }
+//       if (hours === 0) {
+//           hours = 12;
+//       }
+//       format = format.replace("hh", hours.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   if (format.indexOf("mm") > -1) {
+//       format = format.replace("mm", minutes.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   if (format.indexOf("ss") > -1) {
+//       format = format.replace("ss", seconds.toString().replace(/^(\d)$/, '0$1'));
+//   }
+//   return format;
+// }
+//
+// String.prototype.toDecimal = function(precision) {
+//   return parseFloat(this).toFixed(precision);
+// }
+//
+// String.prototype.toInteger = function() {
+//   return parseInt(this);
+// };
 
 export default {
     name: 'mainUpload',
@@ -755,6 +824,7 @@ export default {
          abortImportBtn: false,
          calledfromModify: false,
          calledFromAbort: false,
+         ProceedLoading: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -786,6 +856,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -824,6 +895,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -863,6 +935,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -900,6 +973,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -937,6 +1011,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -974,6 +1049,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -1011,6 +1087,7 @@ export default {
                   mPage:[],
                   cpage:1,
                   tab_flag:false,
+                  complete_flag: false,
                   schemaList: [
                             {
                                 value: '--Add new--',
@@ -1041,13 +1118,16 @@ export default {
               dynamicTyping: true,
               encoding: "UTF-8",
               skipEmptyLines: true,
-              chunk: await (function(results, streamer){
-                let res_arr = []
-                res_arr.push(results)
-                for(let i=0;i<res_arr.length;i++){
-                  self.mObj[tab].uploadCSV =  lodash.unionBy(self.mObj[tab].uploadCSV,res_arr[i].data)
-                }
-                // self.mObj[tab].uploadCSV = results.data
+              preview: 5,
+              chunk: await (function(results, streamer) {
+
+              // map the user selected headers -> results
+              // do the validation`
+              // send results to server
+              // if abort pressed, discard the stored data on server
+              // else commit the stored data on server for import / live
+
+                self.mObj[tab].uploadCSV = results.data
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
                 // self.loadProceed = false
@@ -1058,7 +1138,6 @@ export default {
                     my_flag = false
                     setTimeout(function(){self.mObj[tab].mapping = []
                       self.generateHeadersandMapping(tab)},1)
-
                   }
                 }
                 else{
@@ -1402,8 +1481,16 @@ export default {
         let self = this
           if(err_length != 0){
             if(self.mObj[self.activeTab].errDisplay == false ){
-              if(document.getElementById('example1') != null || document.getElementById('example1') != undefined ){
-                document.getElementById('example1').style.display = 'none'
+              if(document.getElementById('example1') != null || document.getElementById('example1') != undefined){
+                if(document.getElementById('example1').innerHTML == ""){
+                }
+                else{
+                  document.getElementById('example1').style.display = 'none'
+                }
+                 // document.getElementById('example1').innerHTML = ""
+              }
+              else{
+
               }
             }
             else if(self.mObj[self.activeTab].errDisplay == true ){
@@ -1452,10 +1539,12 @@ export default {
 
           self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].csv_arr, function (row, rinx) {
             return _.reduce(row, function (result, value, key) {
-              let inx = _.find(self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
-              if (inx.transform !== '') {
-                var s = new Function('row', inx.transform).call(self, row) // eslint-disable-line
-                result[key] = s
+
+              let inx = _.find(self.mObj[self.activeTab].mapping, (f) => {return (f.sysHeader == key) })
+              if (inx.transform != '') {
+                // var s = new Function('row', inx.transform).call(this, row)
+                result[key] = new Function('row', inx.transform).call(this, row) // eslint-disable-line
+                // result[key] = s
               } else {
                 result[key] = value
               }
@@ -1490,14 +1579,13 @@ export default {
       mapHeader(sysHeader,csvHeader){
         let self = this
         let tab = self.activeTab
-        for(let i=0;i<5;i++){
+        for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
            for(let key in self.mObj[tab].uploadCSV[i]){
              if(key == csvHeader){
                 self.mObj[tab].newUploadCSV[i][sysHeader] = self.mObj[tab].uploadCSV[i][key]
               }
            }
          }
-
       },
 
       // Starts server side validation
@@ -1973,7 +2061,7 @@ export default {
                let schema_keys = _.keys(this.mObj[tab].schema.structure);
                if(this.mObj[tab].uploadCSV.length != 0){
                  this.mObj[tab].newUploadCSV = []
-                 for(let i=0;i<5;i++){
+                 for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
                    let obj = {}
                    for(let key in this.mObj[tab].uploadCSV[i]){
                      for(let j=0;j<this.mObj[tab].mapping.length;j++){
@@ -2137,7 +2225,7 @@ export default {
       if(self.mObj[tab].uploadCSV.length != 0){
         self.loadingdot = true
 
-        for(let i=0;i<5;i++){
+        for(let i=0;i<self.mObj[tab].uploadCSV.length;i++){
           let obj = {}
            for(let key in self.mObj[tab].uploadCSV[i]){
 
@@ -2218,24 +2306,26 @@ export default {
       map_flag = false
       this.modal1 = false
       this.proceedBtn = true
+      this.ProceedLoading = false
       continue_flag = false
     },
    async continuee(tab){
       // this.loadProcessing = true
-      let self = this
       continue_flag = true
       this.showContinue = false
       this.proceedBtn = true
-      await self.makeNewUploadCSVObj(tab)
-      await self.transformFromMapping(tab)
+      let self = this
+      await self.saveSchemaandMapping(tab)
+      await self.parseFile(tab)
       self.modal1 = false
-      self.ProceedToValidate(tab)
+      self.ProceedLoading = true
     },
     cancel (){
       this.proceedBtn = true
       continue_flag = false
     },
-    transformFromMapping(tab){
+    transformFromMapping(tab) {
+      return new Promise(async (resolve,reject)=>{
       this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
        for(let k=0;k<this.mObj[tab].mapping.length;k++){
          if(this.mObj[tab].mapping[k].transform != ""){
@@ -2244,19 +2334,16 @@ export default {
            this.handleModalOk()
          }
        }
+       resolve('done')
+     })
     },
     async makeNewUploadCSVObj(tab){
+      return new Promise(async (resolve,reject)=>{
       let self = this
-       // self.loadProcessing = true
+      self.mObj[tab].newUploadCSV = []
+      self.mObj[tab].csv_arr = []
 
-      // errcols = []
-      // err_length = 0
-      // self.mObj[tab].data1 = []
-      // self.mObj[tab].headers1 = []
-      // self.mObj[tab].errmsg = []
-      // console.log("^^^^^^ schema_obj ^^^^^^^",schema_Obj)
-
-      for(let i=5 ;i< self.mObj[tab].uploadCSV.length;i++){
+      for(let i=0 ;i<self.mObj[tab].uploadCSV.length;i++){
         let obj = {}
          for(let key in self.mObj[tab].uploadCSV[i]){
 
@@ -2270,26 +2357,24 @@ export default {
            }
          }
          obj["_id"] = uuidV1()
-        //  await self.validateObj(schema_Obj,obj,tab,errcols,i)
          self.mObj[tab].newUploadCSV.push(obj)
-        //  console.log("%%%%%% newUploadCSV  full object %%%%%%",self.mObj[tab].newUploadCSV)
 
          this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
-         for(let k=0;k<this.mObj[tab].mapping.length;k++){
-           if(this.mObj[tab].mapping[k].transform != ""){
-             this.transformData = this.mObj[tab].mapping[k].transform
-             this.modelIndex = k
-             this.handleModalOk()
-           }
-         }
+         // for(let k=0;k<this.mObj[tab].mapping.length;k++){
+         //   if(this.mObj[tab].mapping[k].transform != ""){
+         //     this.transformData = this.mObj[tab].mapping[k].transform
+         //     this.modelIndex = k
+         //     this.handleModalOk()
+         //   }
+         // }
       }
-      return;
+      // return;
+      resolve('done')
+    })
     },
     async Proceed(tab){
       let self = this
-      // $(".f-layout-copy").css("position","fixed");
-      self.proceedBtn = false
         if(map_flag == false){
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
             if(o.schemaObj.optional == false && o.csvHeader == ""){
@@ -2298,34 +2383,6 @@ export default {
           });
           if(check_headers.length != 0){
               self.modal1 = true
-              // this.$Modal.confirm({
-              //              title: 'Confirm',
-              //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
-              //              loading: true,
-              //              okText: 'Continue',
-              //              cancelText: 'Map',
-              //              onOk: async () => {
-              //                let self = this
-              //                // self.loadProcessing = true
-              //                continue_flag = true
-              //                self.showContinue = false
-              //                self.proceedBtn = true
-              //                await self.makeNewUploadCSVObj(tab)
-              //                await self.transformFromMapping(tab)
-              //                // self.modal1 = false
-              //                let res = await self.ProceedToValidate(tab)
-              //                 console.log("res....",res)
-              //                if(res){
-              //                  self.$Modal.remove()
-              //                }
-              //              },
-              //              onCancel: async() => {
-              //                map_flag = false
-              //                self.modal1 = false
-              //                self.proceedBtn = true
-              //                continue_flag = false
-              //              }
-              //            })
           }
           else{
              self.showContinue = true
@@ -2337,440 +2394,185 @@ export default {
                });
                if(optional_headers.length != 0){
                    self.modal1 = true
-                   // this.$Modal.confirm({
-                   //              title: 'Confirm',
-                   //              content: '<p slot="header" style="color:#f60;text-align:center;font-size:20px"><Icon type="information-circled"></Icon><span>Some of your headers are not mapped ...</span></p><div style="text-align:center"><p style="font-size:15px">Want to map headers or Continue as it is ?</p><p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p></div>',
-                   //              loading: true,
-                   //              okText: 'Continue',
-                   //              cancelText: 'Map',
-                   //              onOk: async () => {
-                   //                let self = this
-                   //                // self.loadProcessing = true
-                   //                continue_flag = true
-                   //                self.showContinue = false
-                   //                self.proceedBtn = true
-                   //                await self.makeNewUploadCSVObj(tab)
-                   //                await self.transformFromMapping(tab)
-                   //                // self.modal1 = false
-                   //                let res = await self.ProceedToValidate(tab)
-                   //                console.log("res....",res)
-                   //                if(res){
-                   //                  self.$Modal.remove()
-                   //                }
-                   //              },
-                   //              onCancel: async() => {
-                   //                map_flag = false
-                   //                self.modal1 = false
-                   //                self.proceedBtn = true
-                   //                continue_flag = false
-                   //              }
-                   //            })
                    continue_flag = true
                }
                else{
-                  // self.loadProceed = true
-                    await self.makeNewUploadCSVObj(tab)
-                    await self.transformFromMapping(tab)
-                    self.ProceedToValidate(tab)
+                    self.ProceedLoading = true
+                    await self.saveSchemaandMapping(tab)
+                    await self.parseFile(tab)
                }
              }
              else{
-
-               // self.loadProceed = true
-                 await self.makeNewUploadCSVObj(tab)
-                 await self.transformFromMapping(tab)
-                 self.ProceedToValidate(tab)
+                 self.ProceedLoading = true
+                 await self.saveSchemaandMapping(tab)
+                 await self.parseFile(tab)
              }
           }
         }
         else{
-          // self.loadProceed = true
-            await self.makeNewUploadCSVObj(tab)
-            await self.transformFromMapping(tab)
-            self.ProceedToValidate(tab)
+            self.ProceedLoading = true
+            await self.saveSchemaandMapping(tab)
+            await self.parseFile(tab)
         }
     },
-    // makeSchemaObj(tab){
-    //   console.log("++++++++makeSchemaObj called ++++++")
-    //   let self = this
-    //   // let errcols = []
-    //   let dateValidatorFunc = function (obj, value,fieldName) {
-    //           if(value != "" || value != undefined){
-    //            let date = moment(value)
-    //            let isValid = date.isValid()
-    //            if (isValid != true) return 'Invalid date. Please provide date in y-m-d format'
-    //            date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
-    //            return
-    //          }
-    //   }
-    //   let urlValidatorFunc = function (obj, value, fieldName) {
-    //
-    //             if (value != "" || value != undefined) {
-    //               let re = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/
-    //               if(re.test(value) !== true)
-    //               return 'Invalid url'
-    //               else
-    //               return
-    //             }
-    //           }
-    //
-    //   let emailValidatorFunc = function (obj, value, fieldName) {
-    //     if(value !== undefined || value !== ""){
-    //       let re = /\S+@\S+\.\S+/
-    //       if(re.test(value) !== true)
-    //       return  'Invalid email address'
-    //       else
-    //       return
-    //     }
-    //   }
-    //
-    //   let optionalValidatorFunc = function (obj, value, fieldName) {
-    //     if(value == '')
-    //       return  fieldName + ' cannot be left blank'
-    //       else
-    //       return
-    //
-    //   }
-    //
-    //
-    //   let phoneValidatorFunc = function (obj, value, fieldName) {
-    //     let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
-    //     if (value !== undefined || value !== "") {
-    //       if(re.test(value) !== true)
-    //       return 'Invalid phone number'
-    //       else
-    //       return
-    //     }
-    //   }
-    //
-    //   let pincodeValidatorFunc = function (obj, value, fieldName) {
-    //     let re = /^[0-9]{1,6}$/ // eslint-disable-line
-    //     if (value !== undefined || value !== "") {
-    //       if(re.test(value) !== true)
-    //       return 'Invalid pin-code'
-    //       else
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionDate = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = dateValidatorFunc(obj, value, fieldName)
-    //     var func4 =  defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionUrl = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = urlValidatorFunc(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionEmail = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = emailValidatorFunc(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionPhone = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = phoneValidatorFunc(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionPincode = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = getFunctionPincode(obj, value, fieldName)
-    //     var func4 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined) {
-    //       return func3
-    //     } else if(func4 !== undefined){
-    //       return func4
-    //     }else if(func5 !== undefined){
-    //       return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let getFunctionText = function (obj, value, fieldName) {
-    //     var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-    //     var func2 = regExValidatorFunc(obj, value, fieldName)
-    //     var func3 = defaultValidatorFunc(obj, value, fieldName)
-    //     var func4 = maxLengthValidatorFunc(obj, value, fieldName)
-    //     var func5 = optionalValidatorFunc(obj,value,fieldName)
-    //     if (func1 !== undefined) {
-    //       return func1
-    //     } else if (func2 !== undefined) {
-    //       return func2
-    //     } else if (func3 !== undefined){
-    //         return func3
-    //     } else if(func4 !== undefined){
-    //        return func4
-    //     }else if(func5 !== undefined){
-    //        return func5
-    //     }else {
-    //       return
-    //     }
-    //   }
-    //
-    //   let allowedValueValidatorFunc = function (obj, value, fieldName) {
-    //     var i
-    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //       if (fieldName === value) {
-    //         i = key
-    //       }
-    //     })
-    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
-    //       if (value !== undefined) {
-    //         let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
-    //         if(check != true)
-    //         return  'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
-    //         else {
-    //           return
-    //         }
-    //       }
-    //     }
-    //   }
-    //
-    //   let defaultValidatorFunc = function (obj, value, fieldName) {
-    //
-    //     var i
-    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //       if (fieldName === value) {
-    //         i = key
-    //       }
-    //     })
-    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== '' && self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== undefined ) {
-    //
-    //       if (value == "")
-    //         return  'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
-    //         else
-    //           return
-    //       }
-    //     }
-    //
-    //     let maxLengthValidatorFunc = function (obj, value, fieldName) {
-    //
-    //       var i
-    //       _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //         if (fieldName === value) {
-    //           i = key
-    //         }
-    //       })
-    //       if (self.mObj[self.activeTab].mapping[i].schemaObj.maxLength !== '') {
-    //         if (value !== undefined && typeof(value) == "string") {
-    //           let check = value.length
-    //           if(check != self.mObj[self.activeTab].mapping[i].schemaObj.maxLength)
-    //           return  'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength
-    //           else {
-    //             return
-    //           }
-    //         }
-    //       }
-    //       }
-    //
-    //   let regExValidatorFunc = function (obj, value, fieldName) {
-    //     var i
-    //     _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-    //       if (fieldName === value) {
-    //         i = key
-    //       }
-    //     })
-    //     if (self.mObj[self.activeTab].mapping[i].schemaObj.regEx !== '') {
-    //       if (value !== undefined) {
-    //         let pttrn = new RegExp(self.mObj[self.activeTab].mapping[i].schemaObj.regEx)
-    //         if (pttrn.test(value) === false && fieldName == 'max_imprint_color_allowed'){
-    //           return 'Decimal value not allowed'
-    //         }
-    //         else if(pttrn.test(value) === false && fieldName != 'max_imprint_color_allowed'){
-    //           return  'Value does not match with the regex'
-    //         }
-    //       }
-    //     }
-    //   }
-    //
-    //
-    //     let schema_Obj = {}
-    //     _.forEach(self.mObj[tab].mapping, function (value, key) {
-    //       console.log("mapping loop started ========")
-    //       if(value.schemaObj.optional == true){
-    //           if(value.schemaObj.type == 'date'){
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: dateValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if(value.schemaObj.type == 'url'){
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: urlValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if (value.schemaObj.type == 'email') {
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: emailValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if (value.schemaObj.type == 'phone') {
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: phoneValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else if (value.schemaObj.type == 'pin-code') {
-    //             schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: pincodeValidatorFunc,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //           else{
-    //             schema_Obj[value.sysHeader] = {type: value.schemaObj.type,validator:regExValidatorFunc,label: value.schemaObj.type,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //           }
-    //       }
-    //       else if(value.schemaObj.optional == false) {
-    //         if(value.schemaObj.type == 'date'){
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionDate,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if(value.schemaObj.type == 'url'){
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionUrl,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if (value.schemaObj.type == 'email') {
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionEmail,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if (value.schemaObj.type == 'phone') {
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionPhone,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else if (value.schemaObj.type == 'pin-code') {
-    //           schema_Obj[value.sysHeader] = {type: "string",label: value.schemaObj.type,validator: getFunctionPincode,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //         else{
-    //           schema_Obj[value.sysHeader] = {type: value.schemaObj.type,label: value.schemaObj.type,validator: getFunctionText,optional:value.schemaObj.optional,allowedValues:value.schemaObj.allowedValues,defaultValue:value.schemaObj.defaultValues,maxLength: value.schemaObj.maxLength}
-    //         }
-    //       }
-    //     })
-    //
-    //     return schema_Obj
-    // },
-    // validateObj(schema_Obj,obj,tab,errcols,key){
-    //   let self = this
-    //   console.log("validating_obj called......")
-    //   self.mObj[tab].schema = new Schema(schema_Obj)
-    //   // err_length = 0
-    //   // self.mObj[tab].data1 = []
-    //   // self.mObj[tab].headers1 = []
-    //   // self.mObj[tab].errmsg = []
-    //
-    //   self.mObj[tab].schema.validate(obj, function (err, newP, errors) {
-    //
-    //     if (err) {
-    //       throw err
-    //     } else {
-    //       if (errors.length) {
-    //         console.log("errrorssssssss")
-    //         // err_length = errors.length
-    //         err_length = err_length + 1
-    //         let err_type = ''
-    //         if (!_.isEqual(Object.values(obj), [""])) {
-    //
-    //           self.mObj[tab].data1.push(Object.values(obj))
-    //           self.mObj[tab].headers1.push(Object.keys(obj))
-    //
-    //           // let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
-    //           _.forEach(errors, (item) => {
-    //             errcols.push({
-    //               cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
-    //               rows: key
-    //             })
-    //
-    //             for(let key in schema_Obj){
-    //               if(key == item.field){
-    //                 err_type = schema_Obj[key].type
-    //               }
-    //             }
-    //
-    //             if(item.message == "Error during casting"){
-    //               if(err_type == 'number'){
-    //                 self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
-    //               }
-    //               else if(err_type == 'string'){
-    //                 self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
-    //               }
-    //             }
-    //             else {
-    //               self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
-    //             }
-    //           })
-    //
-    //           console.log("errmsg .......", self.mObj[tab].errmsg,errcols)
-    //
-    //           // self.mObj[tab].headerDisplay = false
-    //           // self.mObj[tab].newSchemaDisplay = false
-    //           // self.mObj[tab].previewDisplay = false
-    //           // self.mObj[tab].uploadDisplay = false
-    //           // self.mObj[tab].showHandson = true
-    //           // self.mObj[tab].errDisplay = true
-    //           // self.loadProcessing = false
-    //           // self.showerrmsg(errcols,tab)
-    //         }
-    //       } else {
-    //
-    //       }
-    //     }
-    //   })
-    // },
+ parseFile(tab){
+      let self = this
+      Papa.LocalChunkSize = 1000000
+      Papa.parse(file, {
+        header: true,
+        dynamicTyping: true,
+        encoding: "UTF-8",
+        skipEmptyLines: true,
+        chunk: async function(results, streamer) {
+            if(results.data.length != 0){
+              totalRecords = totalRecords + results.data.length
+              streamer.pause()
+              self.mObj[tab].uploadCSV = []
+              self.mObj[tab].uploadCSV = results.data
+              await self.makeNewUploadCSVObj(tab)
+              await self.transformFromMapping(tab)
+              globalValidateResolve = null
+              await self.ProceedToValidate(tab)
+              await self.saveData(tab)
+              await self.socketResponse()
+              if(streamer.paused()) {
+                streamer.resume()
+              }
+              if(complete_flag == false){
+                await self.changeStatus(tab,streamer)
+                complete_flag = true
+              }
+
+            }
+        },
+        complete:async function(results, file) {
+          complete_flag = false
+          // await self.changeStatus(tab)
+          // if(self.mObj[tab].complete_flag == false){
+          //   self.mObj[tab].complete_flag = true
+          //
+          // }
+        }
+        })
+    },
+    socketResponse(){
+      return new Promise(async (resolve,reject)=>{
+        socket.removeListener('response');
+        socket.removeListener('err');
+
+        socket.on('response', (response) => {
+          if(response.stdout.ok == 1){
+            resolve(response)
+          }
+        })
+        socket.on('err',(response) => {
+          this.$Notice.error({title: 'Error!', desc: response.stdout})
+          this.mObj[this.activeTab].load = false
+          this.mObj[this.activeTab].uploadDisplay = true
+          this.mObj[this.activeTab].newUploadCSV = []
+          this.mObj[this.activeTab].csv_arr = []
+        })
+      })
+    },
+    changeStatus(tab,streamer){
+      if(this.mObj[tab].complete_flag == false && !streamer.paused()){
+        let Tab = tab.replace(/\s/g, "")
+        obj1[Tab]["totalNoOfRecords"] = totalRecords
+        this.mObj[tab].complete_flag = true
+        api.request('patch', '/uploader/' + id,obj1).then(res => {
+          let self = this
+          this.ProceedLoading = false
+          this.proceedBtn = true
+          totalRecords = 0
+         })
+         .catch(error => {
+             this.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
+         })
+       }
+    },
+    saveSchemaandMapping(tab){
+      let self = this
+      let CSVFileObj = {
+        name : file.name,
+        size: file.size,
+        username: self.$store.state.user.email,
+        subscriptionId: self.$store.state.subscription_id,
+        import_tracker_id: id
+      }
+
+      let name = tab.replace(/\s/g, "")
+      obj1 = {}
+      obj1[name] = {
+        uploadStatus:"completed",
+        validateStatus: "pending",
+        uploadedAt: new Date()
+        // totalNoOfRecords: self.mObj[tab].newUploadCSV.length
+      }
+
+      if(self.mObj[tab].new_flag == 1){
+        let schemaobj = {
+          name : self.mObj[tab].selected_schema,
+          schema: self.mObj[tab].schema.structure,
+          username: self.$store.state.user.email,
+          subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id: id,
+          tabname: tab
+        }
+
+        api.request('post', '/uploader-schema/',schemaobj).then(res => {
+
+            schema_id = res.data.id
+
+            api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+              CSVFile_id = result.data.id
+
+              let mappingObj = {
+                mapping : self.mObj[tab].mapping,
+                fileTypeId : self.mObj[tab].selected_schema,
+                username : self.$store.state.user.email,
+                subscriptionId: self.$store.state.subscription_id,
+                import_tracker_id:id
+              }
+
+              api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
+              obj1[name]["id"] = CSVFile_id
+              obj1[name]["schema_id"] = schema_id
+              })
+              .catch(error => {
+                  self.$Notice.error({title: error.response.data.message })
+              })
+
+            })
+            .catch(error => {
+              self.$Notice.error({title: error.response.data.message })
+            })
+        })
+        .catch(error => {
+          if(error.response.data.className == 'general-error' && error.response.data.code == 500)
+            self.$Notice.error({title: error.response.data.message })
+          else
+            self.$Notice.error({title: error.response.data.message })
+           })
+
+      }
+      else {
+        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+          CSVFile_id = result.data.id
+          obj1[name]["id"] = CSVFile_id
+          obj1[name]["schema_id"] = schema_id
+      })
+      .catch(error => {
+          self.$Notice.error({title: error.response.data.message })
+      })
+    }
+    },
     ProceedToValidate(tab){
+      return new Promise(async (resolve,reject)=> {
+        let globalValidateResolveFlag = true
+        if (globalValidateResolve === null) {
+          globalValidateResolveFlag = false
+          globalValidateResolve = resolve;
+        }
       let self = this
       map_flag = false
 
@@ -3092,79 +2894,151 @@ export default {
          err_length = 0
          self.mObj[tab].data1 = []
          self.mObj[tab].headers1 = []
-          self.mObj[tab].errmsg = []
-        _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
-          if(err_length > 0){
-            return false
-          }
-          self.mObj[tab].schema.validate(value, function (err, newP, errors) {
-
-            if (err) {
-              throw err
-            } else {
-              if (errors.length) {
-                err_length = errors.length
-                let err_type = ''
-                if (!_.isEqual(Object.values(value), [""])) {
-
-                  self.mObj[tab].data1.push(Object.values(value))
-                  self.mObj[tab].headers1.push(Object.keys(value))
-                  let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
-                  _.forEach(errors, (item) => {
-                    errcols.push({
-                      cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
-                      rows: key
-                    })
-
-                    for(let key in schema_Obj){
-                      if(key == item.field){
-                        err_type = schema_Obj[key].type
-                      }
-                    }
-
-                    if(item.message == "Error during casting"){
-                      if(err_type == 'number'){
-                        self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
-                      }
-                      else if(err_type == 'string'){
-                        self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
-                      }
-                    }
-                    else {
-                      self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
-                    }
-                  })
-
-                  self.mObj[tab].headerDisplay = false
-                  self.mObj[tab].newSchemaDisplay = false
-                  self.mObj[tab].previewDisplay = false
-                  self.mObj[tab].uploadDisplay = false
-                  // self.$Modal.remove()
-                  self.mObj[tab].showHandson = true
-                  self.mObj[tab].errDisplay = true
-                  self.showerrmsg(errcols,tab)
-                  // return 1
-                }
-              } else {
-                  // return 1
-              }
-            }
-          })
-        })
+        self.mObj[tab].errmsg = []
+        self.generateError(self.mObj[tab].newUploadCSV,self.mObj[tab].schema,schema_Obj,tab,errcols)
+        // _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
+        //     if(err_length > 0) {
+        //       return false
+        //     }
+        //   self.mObj[tab].schema.validate(value, function (err, newP, errors) {
+        //
+        //     if (err) {
+        //       throw err
+        //     } else {
+        //       if (errors.length) {
+        //         err_length = errors.length
+        //         let err_type = ''
+        //         if (!_.isEqual(Object.values(value), [""])) {
+        //
+        //           self.mObj[tab].data1.push(Object.values(value))
+        //           self.mObj[tab].headers1.push(Object.keys(value))
+        //           let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
+        //           _.forEach(errors, (item) => {
+        //             errcols.push({
+        //               cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
+        //               rows: key
+        //             })
+        //
+        //             for(let key in schema_Obj){
+        //               if(key == item.field){
+        //                 err_type = schema_Obj[key].type
+        //               }
+        //             }
+        //
+        //             if(item.message == "Error during casting"){
+        //               if(err_type == 'number'){
+        //                 self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
+        //               }
+        //               else if(err_type == 'string'){
+        //                 self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
+        //               }
+        //             }
+        //             else {
+        //               self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
+        //             }
+        //           })
+        //
+        //           self.mObj[tab].headerDisplay = false
+        //           self.mObj[tab].newSchemaDisplay = false
+        //           self.mObj[tab].previewDisplay = false
+        //           self.mObj[tab].uploadDisplay = false
+        //           self.mObj[tab].showHandson = true
+        //           self.mObj[tab].errDisplay = true
+        //           if(self.mObj[tab].load == true){
+        //             self.mObj[tab].load = false
+        //           }
+        //           console.log("err_length")
+        //           self.showerrmsg(errcols,tab)
+        //           // return
+        //         }
+        //       } else {
+        //           // return
+        //       }
+        //     }
+        //   })
+        // })
 
       if(err_length == 0){
         self.mObj[tab].headerDisplay = false
         self.mObj[tab].newSchemaDisplay = false
         self.mObj[tab].previewDisplay = false
         self.mObj[tab].uploadDisplay = false
-        // self.$Modal.remove()
         self.mObj[tab].showHandson = false
-        self.mObj[tab].load = true
         $(".f-layout-copy").css("position","fixed");
-        self.saveData(tab)
-        // return 1
+        globalValidateResolve("done")
+      } else {
+        if(globalValidateResolveFlag === true) {
+          resolve('done')
+        }
       }
     }
+  })
+    },
+     generateError(CSVdata,schema,schema_Obj,tab,errcols){
+      return new Promise(async (resolve,reject)=> {
+        let self = this
+      _.forEach(CSVdata, function (value, key) {
+          if(err_length > 0) {
+            return false
+          }
+        schema.validate(value, function (err, newP, errors) {
+
+          if (err) {
+            throw err
+          } else {
+            if (errors.length) {
+              err_length = errors.length
+              let err_type = ''
+              if (!_.isEqual(Object.values(value), [""])) {
+
+                self.mObj[tab].data1.push(Object.values(value))
+                self.mObj[tab].headers1.push(Object.keys(value))
+                let oldHeaders = _.keys(CSVdata)
+                _.forEach(errors, (item) => {
+                  errcols.push({
+                    cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
+                    rows: key
+                  })
+
+                  for(let key in schema_Obj){
+                    if(key == item.field){
+                      err_type = schema_Obj[key].type
+                    }
+                  }
+
+                  if(item.message == "Error during casting"){
+                    if(err_type == 'number'){
+                      self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
+                    }
+                    else if(err_type == 'string'){
+                      self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
+                    }
+                  }
+                  else {
+                    self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
+                  }
+                })
+
+                self.mObj[tab].headerDisplay = false
+                self.mObj[tab].newSchemaDisplay = false
+                self.mObj[tab].previewDisplay = false
+                self.mObj[tab].uploadDisplay = false
+                self.mObj[tab].showHandson = true
+                self.mObj[tab].errDisplay = true
+                if(self.mObj[tab].load == true){
+                  self.mObj[tab].load = false
+                }
+                self.showerrmsg(errcols,tab)
+                resolve(err_length)
+                // return
+              }
+            } else {
+                // return
+            }
+          }
+        })
+      })
+    })
     },
     Abort(tab){
       let self = this
@@ -3178,7 +3052,7 @@ export default {
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
-      // self.loadProcessing = false
+      totalRecords = 0      // self.loadProcessing = false
       // self.loadProceed = false
       $(".f-layout-copy").css("position","fixed");
     },
@@ -3199,6 +3073,7 @@ export default {
               this.mObj[tab].main_arr = []
               this.mObj[tab].headers = []
               this.mObj[tab].savePreviewDisplay = false
+              this.mObj[tab].complete_flag = false
               if(this.mObj[tab].headerDisplay == true){
                 this.mObj[tab].headerDisplay = false
               }
@@ -3224,11 +3099,14 @@ export default {
     AbortValidation(tab){
         let self = this
         self.proceedBtn = true
+        self.ProceedLoading = false
         self.mObj[tab].errmsg = []
         self.mObj[tab].uploadCSV = []
         self.mObj[tab].newUploadCSV = []
         self.mObj[tab].data1 = []
         self.mObj[tab].headers1 = []
+        complete_flag = true
+        totalRecords = 0
         $('table.htCore').each(function () {
           this.remove()
         })
@@ -3238,7 +3116,8 @@ export default {
         }
 
         if(document.getElementById('example1')){
-          document.getElementById('example1').style.display = 'none'
+          // document.getElementById('example1').style.display = 'none'
+          document.getElementById('example1').innerHTML = ""
         }
         self.mObj[tab].showHandson = false
         self.mObj[tab].errDisplay = false
@@ -3354,11 +3233,10 @@ export default {
          return cellProp
        }
      }))
-      // ht.selectCell(row1,col1,row1,col1,true)
-     setTimeout(function(){
-       ht.selectCell(row1,col1,row1,col1,true)
-     },200)
 
+      setTimeout(function(){
+        ht.selectCell(row1,col1,row1,col1,true)
+      },200)
      if(document.getElementById('example1')){
        document.getElementById('example1').style.display = 'block'
      }
@@ -3366,7 +3244,7 @@ export default {
 
      // document.getElementById('hot-display-license-info').style.display = 'none'
    },
-   modifyData (tab) {
+   async modifyData (tab) {
        let schema = this.mObj[tab].schema
        let colHeaders = this.mObj[tab].headers1[0]
        let hotSettingsData = this.mObj[tab].data1
@@ -3428,23 +3306,21 @@ export default {
            if(document.getElementsByClassName('ht_master handsontable')[0]){
              document.getElementsByClassName('ht_master handsontable')[0].remove()
            }
-
-
-
            self.showerrmsg(errcols,tab)
          }
          else{
            self.mObj[tab].errmsg = []
            self.mObj[tab].showHandson = false
            self.mObj[tab].errDisplay = false
+           self.mObj[tab].load = true
+
            $('table.htCore').each(function () {
              this.remove()
            })
            if(document.getElementsByClassName('ht_master handsontable')[0]){
              document.getElementsByClassName('ht_master handsontable')[0].remove()
            }
-
-           self.ProceedToValidate(tab)
+           await self.ProceedToValidate(tab)
          }
 
        }
@@ -3455,110 +3331,26 @@ export default {
      },
     saveData(tab){
       let self = this
-      let CSVFileObj = {
-        name : file.name,
-        size: file.size,
-        totalNoOfRecords: self.mObj[tab].newUploadCSV.length,
-        username: self.$store.state.user.email,
-        subscriptionId: self.$store.state.subscription_id,
-        import_tracker_id: id
+      self.mObj[tab].load = true
+      var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
+        return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
+      });
+
+      let obj= {
+        "activetab" : tab,
+        "newCSV": newCSV
       }
 
-      let name = tab.replace(/\s/g, "")
-      obj1 = {}
-      obj1[name] = {
-        uploadStatus:"completed",
-        validateStatus: "pending",
-        uploadedAt: new Date(),
-        totalNoOfRecords: self.mObj[tab].newUploadCSV.length
-      }
+      socket.emit('pdmData', obj, (err, data) => {
 
-      if(self.mObj[tab].new_flag == 1){
-        let schemaobj = {
-          name : self.mObj[tab].selected_schema,
-          schema: self.mObj[tab].schema.structure,
-          username: self.$store.state.user.email,
-          subscriptionId: self.$store.state.subscription_id,
-          import_tracker_id: id,
-          tabname: tab
+        if (err) {
+          console.log("err...",err)
+          self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
         }
+        if(data){
 
-        api.request('post', '/uploader-schema/',schemaobj).then(res => {
-
-            schema_id = res.data.id
-
-            api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-              CSVFile_id = result.data.id
-
-              let mappingObj = {
-                mapping : self.mObj[tab].mapping,
-                fileTypeId : self.mObj[tab].selected_schema,
-                username : self.$store.state.user.email,
-                subscriptionId: self.$store.state.subscription_id,
-                import_tracker_id:id
-              }
-
-              api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
-              obj1[name]["id"] = CSVFile_id
-              obj1[name]["schema_id"] = schema_id
-
-                var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-                  return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
-                });
-
-
-                let obj= {
-                  "activetab" : tab,
-                  "newCSV": newCSV
-                }
-                socket.emit('pdmData', obj, (err, data) => {
-                  if (err) {
-                    self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-                  }
-
-                })
-              })
-              .catch(error => {
-                  self.$Notice.error({title: 'Error!'})
-              })
-
-            })
-            .catch(error => {
-              self.$Notice.error({title: 'Error!'})
-            })
-        })
-        .catch(error => {
-          if(error.response.data.className == 'general-error' && error.response.data.code == 500)
-            self.$Notice.error({title: error.response.data.message })
-          else
-            self.$Notice.error({title: error.response.data.message })
-           })
-
-      }
-      else {
-        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-          CSVFile_id = result.data.id
-          obj1[name]["id"] = CSVFile_id
-          obj1[name]["schema_id"] = schema_id
-
-          var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-            return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
-          });
-
-          let obj= {
-            "activetab" : tab,
-            "newCSV": newCSV
-          }
-          socket.emit('pdmData', obj, (err, data) => {
-            if (err) {
-              self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-            }
-          })
+        }
       })
-      .catch(error => {
-          self.$Notice.error({title: error.response.data.message })
-      })
-    }
     self.proceedBtn = true
     if(self.mObj[tab].new_flag == 1){
       self.mObj[tab].new_flag = 0
@@ -3677,25 +3469,6 @@ export default {
         self.mObj[tab].savePreviewDisplay = true
       }
       return;
-
-    //  api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name).then(res => {
-    //    self.mObj[tab].newUploadCSV = res.data
-    //    self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-    //      return _.extend({}, element, {is_checked: false});
-    //    });
-    //    console.log("+++++++++++self.mObj[tab].newUploadCSV",self.mObj[tab].newUploadCSV)
-    //    self.mObj[tab].main_arr = lodash.chunk(self.mObj[tab].newUploadCSV, 5);
-    //    let loop = self.mObj[tab].newUploadCSV.length/5
-    //    for(let i=0;i<=loop;i++){
-    //      self.mObj[tab].mPage.push({'mCheck':false})
-    //    }
-    //
-    //    self.mObj[tab].headers = Object.keys(res.data[0])
-    //    self.map = true
-    //    self.mObj[tab].load =  false
-    //    self.mObj[tab].savePreviewDisplay = true
-    //    return;
-    // })
 },
   setValData(data,filtered_keys){
       uploader_obj = data
@@ -4114,6 +3887,88 @@ export default {
       })
     }
 }
+
+
+
+String.prototype.capitalize = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
+String.prototype.stripHTMLTags = function() {
+    return this.replace(/<[^>]*>/g, '');
+}
+
+Number.prototype.toInteger = function() {
+  return parseInt(this);
+};
+
+String.prototype.stripSpecialCharacter = function() {
+    return this.replace(/[\/\\#,+()$~%^'":*<>{}]/g, '');
+}
+
+
+String.prototype.concate = function(str) {
+    return this.concat(str);
+}
+
+String.prototype.formatDate = function (format) {
+  if(this != ""){
+    var date = new Date(this),
+    day = date.getDate(),
+    month = date.getMonth() + 1,
+    year = date.getFullYear(),
+    hours = date.getHours(),
+    minutes = date.getMinutes(),
+    seconds = date.getSeconds();
+
+    if (!format) {
+      format = "mm/dd/yyyy";
+    }
+    format = format.replace("mm", month.toString().replace(/^(\d)$/, '0$1'));
+    if (format.indexOf("yyyy") > -1) {
+      format = format.replace("yyyy", year.toString());
+    } else if (format.indexOf("yy") > -1) {
+      format = format.replace("yy", year.toString().substr(2, 2));
+    }
+    format = format.replace("dd", day.toString().replace(/^(\d)$/, '0$1'));
+    if (format.indexOf("t") > -1) {
+      if (hours > 11) {
+        format = format.replace("t", "pm");
+      } else {
+        format = format.replace("t", "am");
+      }
+    }
+    if (format.indexOf("HH") > -1) {
+      format = format.replace("HH", hours.toString().replace(/^(\d)$/, '0$1'));
+    }
+    if (format.indexOf("hh") > -1) {
+      if (hours > 12) {
+        hours -= 12;
+      }
+      if (hours === 0) {
+        hours = 12;
+      }
+      format = format.replace("hh", hours.toString().replace(/^(\d)$/, '0$1'));
+    }
+    if (format.indexOf("mm") > -1) {
+      format = format.replace("mm", minutes.toString().replace(/^(\d)$/, '0$1'));
+    }
+    if (format.indexOf("ss") > -1) {
+      format = format.replace("ss", seconds.toString().replace(/^(\d)$/, '0$1'));
+    }
+    return format;
+  }
+  else if(this == ""){
+    return this
+  }
+}
+
+Number.prototype.toDecimal = function(precision) {
+  return parseFloat(this).toFixed(precision);
+}
+
+
+
 </script>
 <style>
 .vue-tabs .nav-stacked > li:before {
@@ -4202,53 +4057,16 @@ export default {
     padding: 10px 12px 10px 0;
     box-sizing: border-box;
 }
-/*.ivu-input {
-    display: inline-block;
-    margin-left: 68px;
-    width: 60%;
-    height: 32px;
-    line-height: 1.5;
-    padding: 4px 7px;
-    font-size: 12px;
-    border: 1px solid #dddee1;
-    border-radius: 4px;
-    color: #495060;
-    background-color: #fff;
-    background-image: none;
-    position: relative;
-    cursor: text;
-    transition: border .2s ease-in-out,background .2s ease-in-out,box-shadow .2s ease-in-out;
-    margin-top: 4%;
-}*/
-
-/*.ivu-btn-ghost {
-    color: #495060;
-    background-color: transparent;
-    border-color: #fff;
-    padding-left: 0px;
-    padding-right: 0px;
-}
-.ivu-btn-ghost:hover {
-    color: #495060;
-    background-color: transparent;
-    border-color: #fff;
-    padding-left: 0px;
-    padding-right: 0px;
-}
-*/
 .btnghost {
   color: #495060 !important;
   background-color: transparent !important;
   border-color: #fff !important;
-  /*padding-left: 0px !important;*/
-  /*padding-right: 0px !important;   */
+  padding: 4px 17px !important;
 }
 .btnghost:hover {
     color: #495060 !important;
     background-color: transparent !important;
     border-color: #fff !important;
-    /*padding-left: 0px !important;*/
-    /*padding-right: 0px !important;*/
 }
 .ivu-upload-drag {
   background: #fff;
@@ -4259,7 +4077,6 @@ export default {
   position: relative;
   overflow: hidden;
   transition: border-color .2s ease;
-  /*margin-left: -3%;*/
 }
 .ivu-upload-drag:hover {
   background: #fff;
@@ -4290,7 +4107,6 @@ export default {
   margin-top: 6%;
   text-align:center;
   font-size: 15px;
-  /*margin-left: -3%;*/
 }
 .ivu-upload-list-file {
     padding: 4px;
@@ -4301,21 +4117,6 @@ export default {
     position: relative;
     display:none;
 }
-/*.ivu-btn-success {
-    margin-top: 60%;
-    color: #fff;
-    background-color: #1fb58f;
-    border-color: #1fb58f;
-    width: 152%;
-}
-.ivu-btn-success:disabled {
-    margin-top: 60%;
-    color: #fff;
-    background-color: #1fb58f;
-    border-color: #1fb58f;
-    width: 152%;
-}*/
-
 .ivu-table-cell {
   padding-left: 18px;
   padding-right: 18px;
@@ -4415,15 +4216,8 @@ export default {
   background-color: #fff !important;
   transition: background-color .2s ease-in-out;
   font-size: 13px !important;
-  /*padding: 9px !important;*/
 }
-/*.handsontable thead {
-    box-sizing: content-box;
-    -webkit-box-sizing: content-box;
-    background-color: #eee;
-    color: #fff;
-    font-size: 14px;
-}*/
+
 #example1 {
   width: 100%!important;
 }
@@ -4670,5 +4464,7 @@ export default {
     width: 75% !important;
 }
 
-
+.ivu-poptip-body-content {
+  overflow: inherit !important;
+}
 </style>

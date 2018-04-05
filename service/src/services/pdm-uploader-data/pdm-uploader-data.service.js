@@ -29,11 +29,29 @@ module.exports = function () {
 
   app.configure(socketio(function(io) {
   io.on('connection',function(socket) {
+    socket.on('error', function (err) {
+        console.log("err...",err)
+    });
+
     socket.on('pdmData',async function( data){
           var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-          var cnn_with_mongo = await connectToMongo(url,data)
-          socket.emit('response',{stdout:cnn_with_mongo.result})
+          var cnn_with_mongo = await connectToMongo(url,data,socket).then(res => {
+            if(res.result){
+              socket.emit('response',{stdout:res.result})
+            }
+            else{
+              if(res.message){
+                socket.emit('err',{stdout: res.message})
+              }
+            }
+          }).catch(error => {
+
+            socket.emit('err',{stdout: 'Error in saving data'})
+          })
   });
+
+
+
   });
   io.use(function (socket, next) {
    // Exposing a request property to services and hooks
@@ -60,8 +78,15 @@ module.exports = function () {
   }
 };
 
-var connectToMongo = async function(url,data){
-  var db = await (MongoClient.connect(url))
+var connectToMongo = async function(url,data,socket){
+    var db = await (MongoClient.connect(url).then(res => {
+      return res
+    })
+    .catch(err => {
+       socket.emit('err',{stdout:'Unable to connect mongodb database.'})
+       // throw new errors.GeneralError(err);
+    }))
+
     let collection_name = data.activetab.split(" ")
     collection_name = data.activetab.split(" ")
     let prod_name = collection_name[0]
@@ -116,11 +141,19 @@ var connectToMongo = async function(url,data){
        let index = _.findIndex(response, function(o) { return o.name == collection_name; });
         if(index == -1){
           var response = await db.createCollection(collection_name)
-          var result = await (db.collection(collection_name).insert(data.newCSV))
+          var result = await (db.collection(collection_name).insert(data.newCSV)).then(res => {
+            return res
+          }).catch(err => {
+            return err
+          })
           return result
       }
       else{
-        var result = await (db.collection(collection_name).insert(data.newCSV))
+        var result = await (db.collection(collection_name).insert(data.newCSV).then(res => {
+          return res
+        }).catch(err => {
+          return err
+        }))
         return result
       }
 }
