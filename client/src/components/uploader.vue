@@ -189,10 +189,8 @@ export default {
        }
      },
      getData(id){
-       console.log("called....")
        socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
-         console.log("data",data)
-         console.log("e",e)
+
          if(data){
            if (data.data.length !== 0) {
              this.showDiv = false
@@ -206,7 +204,6 @@ export default {
            }
          }
          else if(e){
-           console.log(e)
          }
        })
      }

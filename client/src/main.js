@@ -134,9 +134,8 @@ router.beforeEach((to, from, next) => {
         store.commit('SET_USER', response)
         next()
       }).catch(error => {
-        console.log('&&&error', error.response)
+        // console.log('&&&error', error.response)
         if (error.response.status === 401) {
-          console.log('inside....')
           router.app.$cookie.delete('auth_token', { domain: location })
           toastr.error('User authentication failed')
         }
