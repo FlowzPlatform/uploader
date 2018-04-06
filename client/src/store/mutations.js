@@ -2,6 +2,8 @@
 import axios from 'axios'
 import config from '@/config'
 import _ from 'lodash'
+import $ from 'jquery';
+
 export default {
   TOGGLE_LOADING (state) {
     state.callingAPI = !state.callingAPI
@@ -31,10 +33,19 @@ export default {
         }
       })
       .then(response => {
+        console.log("response....",response)
         return response
       })
       .catch(err => {
-        console.log("errr...",err)
+        if(err.message == "Network Error"){
+          toastr.error("Api service unavailable")
+        }
+        else if(err.response != undefined){
+          toastr.error(err.response.data.message)
+        }
+        else{
+          toastr.error(err.response.data.message)
+        }
       })
       if(response.data.data.length != 0){
         list1.push({"value":state.subscription_list[key].value,"label":response.data.data[0].userId})
@@ -57,7 +68,7 @@ export default {
            return resp
          })
          .catch(error => {
-           console.log("errr...",error)
+           console.log("errr3w21321312313...",error)
          })
          if(resp.data.data[0].fullname){
           uniq_user_array.push({"user_id":uniq_user_id[i].label,"name":resp.data.data[0].fullname})
