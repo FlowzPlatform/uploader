@@ -61,6 +61,7 @@ export default {
         throw new Error('Network error!')
       }
     }).catch(error => {
+      console.log('errror.....', error)
       throw error
     })
   },

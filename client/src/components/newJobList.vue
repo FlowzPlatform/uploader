@@ -339,4 +339,7 @@ export default {
 <style>
 .jobtable .ivu-table-body table {width: 100% !important;}
 .jobtable .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
+.jobtable .ivu-table .ivu-table-tip {overflow-x: hidden;}
+
+
 </style>

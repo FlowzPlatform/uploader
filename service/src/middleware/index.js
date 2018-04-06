@@ -1,6 +1,7 @@
 const subscription = require('flowz-subscription');
 module.exports.subscription = subscription
 const authentication = require('../authentication')
+// const flowzError = require('flowz-error-handler');
 
 let app = undefined;
 module.exports = function () {
@@ -32,7 +33,9 @@ module.exports = function () {
   //     resolve(data)
   //   });
   // };
+  // app.use(flowzError());
 };
+
 
 
 
