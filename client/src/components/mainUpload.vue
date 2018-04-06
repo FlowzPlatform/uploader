@@ -126,7 +126,7 @@
               <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
                <div class="schema-form ivu-table-wrapper">
                  <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
-                   <div class="ivu-table-body">
+                   <div class="ivu-table-body" style="overflow:auto !important">
                      <table style="min-width:1077px;overflow-x: auto;">
                        <thead>
                          <tr>
@@ -1454,6 +1454,13 @@ export default {
           }
           self.delete1 = true
         })
+        .catch(error =>{
+          self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+            })
+        })
 
 
       },
@@ -1639,7 +1646,21 @@ export default {
               }
               self.sheetwiseValidation(prop_keys[0],uploader_obj)
             })
+            .catch(err=>{
+              self.$Notice.error({
+               title: err.response.data.name,
+               desc: err.response.data.message,
+               duration: 10
+           })
+         })
           })
+          .catch(error =>{
+            self.$Notice.error({
+             title: error.response.data.name,
+             desc: error.response.data.message,
+             duration: 10
+         })
+       })
         }
       },
 
@@ -1679,14 +1700,23 @@ export default {
                     this.validation_completed = true
                 })
                 .catch(error =>{
+                    self.$Notice.error({
+                     title: error.response.data.name,
+                     desc: error.response.data.message,
+                     duration: 10
+                 })
                 })
 
               }
             }
           })
           .catch(error =>{
-               console.log("error......",error)
-               self.sheetwiseValidation(key,data)
+                self.$Notice.error({
+                 title: error.response.data.name,
+                 desc: error.response.data.message,
+                 duration: 10
+             })
+             self.sheetwiseValidation(key,data)
           })
       },
 
@@ -1812,9 +1842,13 @@ export default {
         api.request('patch', '/uploader-validation/'+ id,update_obj).then(res => {
 
         })
-        .catch(error => {
-
-        })
+        .catch(error =>{
+          this.$Notice.error({
+           title: error.response.data.name,
+           desc: error.response.data.message,
+           duration: 10
+       })
+     })
 
       }
     },
@@ -1866,9 +1900,13 @@ export default {
             }
           }
         })
-        .catch(error => {
-           this.proceedToNext()
-        })
+        .catch(error =>{
+          this.$Notice.error({
+           title: error.response.data.name,
+           desc: error.response.data.message,
+           duration: 10
+       })
+     })
 
       },
 
@@ -2485,10 +2523,14 @@ export default {
           this.proceedBtn = true
           totalRecords = 0
          })
-         .catch(error => {
-             this.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-         })
-       }
+         .catch(error =>{
+           self.$Notice.error({
+            title: error.response.data.name,
+            desc: error.response.data.message,
+            duration: 10
+        })
+      })
+    }
     },
     saveSchemaandMapping(tab){
       let self = this
@@ -2538,14 +2580,22 @@ export default {
               obj1[name]["id"] = CSVFile_id
               obj1[name]["schema_id"] = schema_id
               })
-              .catch(error => {
-                  self.$Notice.error({title: error.response.data.message })
-              })
+              .catch(error =>{
+                self.$Notice.error({
+                 title: error.response.data.name,
+                 desc: error.response.data.message,
+                 duration: 10
+             })
+           })
 
             })
-            .catch(error => {
-              self.$Notice.error({title: error.response.data.message })
-            })
+            .catch(error =>{
+              self.$Notice.error({
+               title: error.response.data.name,
+               desc: error.response.data.message,
+               duration: 10
+           })
+         })
         })
         .catch(error => {
           if(error.response.data.className == 'general-error' && error.response.data.code == 500)
@@ -2561,9 +2611,13 @@ export default {
           obj1[name]["id"] = CSVFile_id
           obj1[name]["schema_id"] = schema_id
       })
-      .catch(error => {
-          self.$Notice.error({title: error.response.data.message })
-      })
+      .catch(error =>{
+        self.$Notice.error({
+         title: error.response.data.name,
+         desc: error.response.data.message,
+         duration: 10
+     })
+   })
     }
     },
     ProceedToValidate(tab){
@@ -3091,6 +3145,13 @@ export default {
             })
           }
         })
+        .catch(error =>{
+          self.$Notice.error({
+           title: error.response.data.name,
+           desc: error.response.data.message,
+           duration: 10
+       })
+     })
       })
       .catch(error => {
         console.log("error............",error)
@@ -3137,8 +3198,14 @@ export default {
          api.request('put','/uploader/' + id,obj[0]).then(result =>{
             self.setPage(obj[1],obj[2],result.data)
          })
-
        })
+       .catch(error =>{
+         self.$Notice.error({
+          title: error.response.data.name,
+          desc: error.response.data.message,
+          duration: 10
+      })
+    })
     },
     abortImportConfirm(){
       let self = this
@@ -3157,8 +3224,13 @@ export default {
          // self.validateStep = true
          self.currentStep = 1
        })
-       .catch(error => {
-       })
+       .catch(error =>{
+         self.$Notice.error({
+          title: error.response.data.name,
+          desc: error.response.data.message,
+          duration: 10
+      })
+    })
     },
     abortImportInProgress(){
       let self = this
@@ -3208,6 +3280,13 @@ export default {
       api.request('put','/uploader/' + id,obj1[0]).then(result =>{
          self.setPage(obj1[1],obj1[2],result.data)
       })
+      .catch(error =>{
+        self.$Notice.error({
+         title: error.response.data.name,
+         desc: error.response.data.message,
+         duration: 10
+     })
+   })
     },
     async showerrmsg (errcols,tab,schema) {
      var example1 = document.getElementById('example1')
@@ -3830,6 +3909,13 @@ export default {
                   }
         }
       })
+      .catch(error =>{
+        this.$Notice.error({
+         title: error.response.data.name,
+         desc: error.response.data.message,
+         duration: 10
+     })
+   })
 
       socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
         if(res){

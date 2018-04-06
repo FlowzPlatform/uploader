@@ -212,8 +212,14 @@ export default {
           })
           .catch(error => {
             self.$Notice.error({
-              title: 'Something bad happened.Please try again later'
-            });
+                     title: error.response.data.name,
+                     desc: error.response.data.message,
+                     duration: 10
+            })
+            self.modal1 = false
+            // self.$Notice.error({
+            //   title: 'Something bad happened.Please try again later'
+            // });
           })
       },
       //converts into uppercase

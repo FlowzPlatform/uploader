@@ -167,24 +167,30 @@ export default {
             })
             .catch(error =>{
               this.loadingBtn = false
-              if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
-                this.$Notice.error({
-                 title: error.response.data.message,
-                 duration: 3
-               });
-              }
-              else {
-                this.$Notice.error({
-                 title: error.response.data.message,
-                 duration: 3
-               });
-            }
+              this.$Notice.error({
+                     title: error.response.data.name,
+                     desc: error.response.data.message,
+                     duration: 10
+              })
+            //   if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
+            //     this.$Notice.error({
+            //      title: error.response.data.message,
+            //      duration: 3
+            //    });
+            //   }
+            //   else {
+            //     this.$Notice.error({
+            //      title: error.response.data.message,
+            //      duration: 3
+            //    });
+            // }
             })
           }
        }
      },
      getData(id){
        socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
+
          if(data){
            if (data.data.length !== 0) {
              this.showDiv = false
