@@ -1,0 +1,8 @@
+2018-03-28T15:25:43.168093577 0.042661s notice: Recursively removing directory /home/software/New_Uploader/uploader/service/rethinkdb_data/tmp
+2018-03-28T15:25:43.195237397 0.069867s notice: Initializing directory /home/software/New_Uploader/uploader/service/rethinkdb_data
+2018-03-28T15:25:43.195524046 0.070092s info: Creating a default database for your convenience. (This is because you ran 'rethinkdb' without 'create', 'serve', or '--join', and the directory '/home/software/New_Uploader/uploader/service/rethinkdb_data' did not already exist or is empty.)
+2018-03-28T15:25:43.195659424 0.070227s notice: Running rethinkdb 2.3.5 (GCC 5.4.0)...
+2018-03-28T15:25:43.202967251 0.077536s notice: Running on Linux 4.4.0-116-generic x86_64
+2018-03-28T15:25:43.203010084 0.077577s notice: Loading data from directory /home/software/New_Uploader/uploader/service/rethinkdb_data
+2018-03-28T15:25:43.376016620 0.250586s info: Automatically using cache size of 2170 MB
+2018-03-28T15:25:43.376446955 0.251014s error: TCP socket creation failed for port 29015: Address already in use.
