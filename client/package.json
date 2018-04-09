@@ -80,8 +80,8 @@
     "vue2-dropzone": "^3.0.4",
     "vuebar": "0.0.17",
     "vuedraggable": "^2.14.1",
-    "vuex": "^2.4.0",
-    "vuex-persistedstate": "^2.0.0",
+    "vuex": "2.4.0",
+    "vuex-persistedstate": "2.0.0",
     "vuex-router-sync": "^4.3.2",
     "x2js": "^3.1.1",
     "xmlhttprequest": "^1.8.0"
