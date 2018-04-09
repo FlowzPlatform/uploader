@@ -1133,23 +1133,23 @@ export default {
                 // self.loadProceed = false
                 // self.mObj[tab].load = true
                 if(self.mObj[tab].new_flag == 1){
-                  if(my_flag == true){
+                  // if(my_flag == true){
                     self.mObj[tab].load = true
-                    my_flag = false
+                    // my_flag = false
                     setTimeout(function(){self.mObj[tab].mapping = []
                       self.generateHeadersandMapping(tab)},1)
-                  }
+                  // }
                 }
                 else{
-                  if(my_flag == true){
+                  // if(my_flag == true){
                     self.mObj[tab].load = true
-                    my_flag = false
+                    // my_flag = false
                     if(self.mObj[tab].newSchemaDisplay == true){
                       self.mObj[tab].newSchemaDisplay = false
                     }
                     self.mObj[tab].mapping = []
                     self.getMapping(tab)
-                  }
+                  // }
                 }
               })
             })
@@ -1711,12 +1711,23 @@ export default {
             }
           })
           .catch(error =>{
-                self.$Notice.error({
-                 title: error.response.data.name,
-                 desc: error.response.data.message,
-                 duration: 10
-             })
-             self.sheetwiseValidation(key,data)
+            if(error.response.data.code == 500){
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+            else if(error.response.data.code == 504){
+              self.sheetwiseValidation(key,data)
+            }
+            else{
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
           })
       },
 
@@ -1939,13 +1950,13 @@ export default {
                   })
                 }
                else {
-                 this.$Notice.error({
-                  title: 'Error in importing data'
-                });
+                 self.$Notice.error({
+                   title: error.response.data.name,
+                   desc: error.response.data.message,
+                   duration: 10
+                 })
                }
                })
-
-        //
       },
       convert(item){
         item = item.replace(/([A-Z])/g, ' $1').trim()
@@ -2350,10 +2361,10 @@ export default {
    async continuee(tab){
       // this.loadProcessing = true
       continue_flag = true
-      this.showContinue = false
       this.proceedBtn = true
       let self = this
       await self.saveSchemaandMapping(tab)
+      this.showContinue = false
       await self.parseFile(tab)
       self.modal1 = false
       self.ProceedLoading = true
@@ -2507,6 +2518,7 @@ export default {
           this.$Notice.error({title: 'Error!', desc: response.stdout})
           this.mObj[this.activeTab].load = false
           this.mObj[this.activeTab].uploadDisplay = true
+          this.ProceedLoading = false
           this.mObj[this.activeTab].newUploadCSV = []
           this.mObj[this.activeTab].csv_arr = []
         })
@@ -2533,6 +2545,7 @@ export default {
     }
     },
     saveSchemaandMapping(tab){
+      return new Promise(async (resolve,reject)=> {
       let self = this
       let CSVFileObj = {
         name : file.name,
@@ -2566,6 +2579,7 @@ export default {
             schema_id = res.data.id
 
             api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+              console.log("%%%%",result)
               CSVFile_id = result.data.id
 
               let mappingObj = {
@@ -2579,6 +2593,7 @@ export default {
               api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
               obj1[name]["id"] = CSVFile_id
               obj1[name]["schema_id"] = schema_id
+              resolve('done')
               })
               .catch(error =>{
                 self.$Notice.error({
@@ -2598,11 +2613,12 @@ export default {
          })
         })
         .catch(error => {
-          if(error.response.data.className == 'general-error' && error.response.data.code == 500)
-            self.$Notice.error({title: error.response.data.message })
-          else
-            self.$Notice.error({title: error.response.data.message })
-           })
+          self.$Notice.error({
+           title: error.response.data.name,
+           desc: error.response.data.message,
+           duration: 10
+         })
+       })
 
       }
       else {
@@ -2610,6 +2626,7 @@ export default {
           CSVFile_id = result.data.id
           obj1[name]["id"] = CSVFile_id
           obj1[name]["schema_id"] = schema_id
+          resolve('done')
       })
       .catch(error =>{
         self.$Notice.error({
@@ -2619,6 +2636,8 @@ export default {
      })
    })
     }
+
+  })
     },
     ProceedToValidate(tab){
       return new Promise(async (resolve,reject)=> {
@@ -3146,7 +3165,7 @@ export default {
           }
         })
         .catch(error =>{
-          self.$Notice.error({
+          this.$Notice.error({
            title: error.response.data.name,
            desc: error.response.data.message,
            duration: 10
@@ -3154,7 +3173,11 @@ export default {
      })
       })
       .catch(error => {
-        console.log("error............",error)
+          this.$Notice.error({
+           title: error.response.data.name,
+           desc: error.response.data.message,
+           duration: 10
+       })
       })
     },
     AbortValidation(tab){
@@ -3411,6 +3434,7 @@ export default {
     saveData(tab){
       let self = this
       self.mObj[tab].load = true
+      console.log("csvFileId....",CSVFile_id)
       var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
         return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
       });
@@ -3525,7 +3549,16 @@ export default {
     self.mObj[tab].load = true
     let table_name = "uploader" + tabname.charAt(0).toUpperCase() + tabname.substr(1).toLowerCase()
 
-    let res = await(api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name))
+    let res = await(api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + table_name).then(res => {
+      return res
+    })
+    .catch(error => {
+         self.$Notice.error({
+          title: error.response.data.name,
+          desc: error.response.data.message,
+          duration: 10
+        })
+    }))
 
     self.mObj[tab].newUploadCSV = res.data
       self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
