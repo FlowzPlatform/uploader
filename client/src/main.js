@@ -8,7 +8,7 @@ import { sync } from 'vuex-router-sync'
 import routes from './router'
 import store from './store'
 import config from '@/config'
-import toastr from 'toastr'
+// import toastr from 'toastr'
 
 // Include and set up feathers client
 const Feathers = require('feathers/client')
@@ -137,7 +137,7 @@ router.beforeEach((to, from, next) => {
         // console.log('&&&error', error.response)
         if (error.response.status === 401) {
           router.app.$cookie.delete('auth_token', { domain: location })
-          toastr.error('User authentication failed')
+          // toastr.error('User authentication failed')
         }
         // window.console.log('Not authenticated')
         next({
