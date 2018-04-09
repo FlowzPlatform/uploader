@@ -121,6 +121,4 @@ var deleteFromMongo = async function(url,hook){
   }))
     hook.result = result
   }
-
-
 }
