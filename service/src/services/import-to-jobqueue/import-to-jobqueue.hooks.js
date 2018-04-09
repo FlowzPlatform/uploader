@@ -101,7 +101,7 @@ async function beforeCreate(hook) {
 
     try {
         axios.post(base_url,hook.data).then(res => {
-          console.log("res....",res)
+          console.log("import-to-jobqueue res....",res)
           if(res.status == 200){
             let import_obj = {
               stepStatus : "import_in_progress"
