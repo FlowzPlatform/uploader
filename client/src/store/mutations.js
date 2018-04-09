@@ -33,7 +33,7 @@ export default {
         }
       })
       .then(response => {
-        console.log("response....",response)
+        // console.log("response....",response)
         return response
       })
       .catch(err => {
@@ -68,7 +68,6 @@ export default {
            return resp
          })
          .catch(error => {
-           console.log("errr3w21321312313...",error)
          })
          if(resp.data.data[0].fullname){
           uniq_user_array.push({"user_id":uniq_user_id[i].label,"name":resp.data.data[0].fullname})
