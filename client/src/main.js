@@ -19,18 +19,18 @@ const io = require('socket.io-client')
   // const socket = io(config.serverURI)
 let socket = io(config.socketURI, {reconnection: true})
 socket.on('connect', function (connect) {
-  console.log('connected...')
+  // console.log('connected...')
 })
 
 socket.on('disconnect', function (disconnect) {
-  console.log('disconnected....')
+  // console.log('disconnected....')
   socket.on('connect', function (connect) {
-    console.log('connected again ...')
+    // console.log('connected again ...')
   })
 })
 
 socket.on('reconnect', function (reconnect) {
-  console.log('reconnected successfully ======>')
+  // console.log('reconnected successfully ======>')
 })
 
 socket.on('error', function (error) {

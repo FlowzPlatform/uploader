@@ -114,10 +114,12 @@ async function beforeCreate(hook) {
           }
         })
         .catch(error => {
-          throw new errors.GeneralError('Import not completed');
+          // console.log("^^^^^^^",error)
+          // throw new errors.GeneralError('Import not completed');
         })
   } catch (err) {
-      throw new errors.GeneralError('Import not completed');
+    // console.log("%%%%%",err)
+      // throw new errors.GeneralError('Import not completed');
   }
 
 }
