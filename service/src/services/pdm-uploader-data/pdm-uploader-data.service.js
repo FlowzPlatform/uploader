@@ -144,15 +144,15 @@ var connectToMongo = async function(url,data,socket){
        let index = _.findIndex(response, function(o) { return o.name == collection_name; });
        if(index == -1){
          var response = await db.createCollection(collection_name)
-         var result = await (db.collection(collection_name).insert(data.newCSV)).then(res => {
+         var result = await (db.collection(collection_name).insertMany(data.newCSV).then(res => {
            return res
          }).catch(err => {
            return err
-         })
+         }))
          return result
        }
        else{
-         var result = await (db.collection(collection_name).insert(data.newCSV).then(res => {
+         var result = await (db.collection(collection_name).insertMany(data.newCSV).then(res => {
            return res
          }).catch(err => {
            return err

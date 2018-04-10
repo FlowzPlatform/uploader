@@ -156,7 +156,7 @@
                    </div>
                  </div>
              </div>
-             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="ProceedLoading">Abort</Button>
+             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
              <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:10%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn" :loading="ProceedLoading">
               <span v-if="ProceedLoading">Processing</span>
               <span v-else>Proceed</span>
@@ -1109,9 +1109,9 @@ export default {
         }
         else{
 
-          self.mObj[tab].load = true
           // self.loadProcessing = false
           self.mObj[tab].uploadDisplay = false
+          self.mObj[tab].load = true
           let my_flag = true
             Papa.parse(file, {
               header: true,
@@ -1130,14 +1130,15 @@ export default {
                 self.mObj[tab].uploadCSV = results.data
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
-                // self.loadProceed = false
-                // self.mObj[tab].load = true
+                self.mObj[tab].load = true
                 if(self.mObj[tab].new_flag == 1){
                   // if(my_flag == true){
                     self.mObj[tab].load = true
                     // my_flag = false
-                    setTimeout(function(){self.mObj[tab].mapping = []
-                      self.generateHeadersandMapping(tab)},1)
+                    setTimeout(function(){
+                      self.mObj[tab].mapping = []
+                      self.generateHeadersandMapping(tab)
+                    },1)
                   // }
                 }
                 else{
@@ -1929,6 +1930,7 @@ export default {
         }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
+
                 if(res.data){
                      this.showValidationTable = false
                      this.validation_completed = false
@@ -2579,7 +2581,7 @@ export default {
             schema_id = res.data.id
 
             api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-              console.log("%%%%",result)
+
               CSVFile_id = result.data.id
 
               let mappingObj = {
@@ -3434,7 +3436,7 @@ export default {
     saveData(tab){
       let self = this
       self.mObj[tab].load = true
-      console.log("csvFileId....",CSVFile_id)
+
       var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
         return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
       });
