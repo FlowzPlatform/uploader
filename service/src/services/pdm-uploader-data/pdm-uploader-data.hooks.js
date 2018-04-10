@@ -71,11 +71,12 @@ var connectToMongo = async function(url,hook){
 
     let tables = hook.params.query.tables
     if(db){
-      var result = await (db.collection(tables).find({"import-tracker_id":hook.params.query.import_tracker_id}).toArray()).then(res => {
+      var result = await (db.collection(tables).find({"import-tracker_id":hook.params.query.import_tracker_id}).toArray().then(res => {
         return res
-      }).then(error => {
+      }).catch(error => {
+        console.log("error..",error)
         throw new errors.GeneralError('Unable to find data');
-      })
+      }))
       hook.result = result
     }
 }
