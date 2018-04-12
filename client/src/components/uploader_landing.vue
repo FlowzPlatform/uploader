@@ -211,15 +211,20 @@ export default {
             self.$router.push('/uploader')
           })
           .catch(error => {
-            self.$Notice.error({
-                     title: error.response.data.name,
-                     desc: error.response.data.message,
-                     duration: 10
-            })
+            if(error.response){
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+            else if(error.message == 'Network Error'){
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
             self.modal1 = false
-            // self.$Notice.error({
-            //   title: 'Something bad happened.Please try again later'
-            // });
           })
       },
       //converts into uppercase
@@ -240,39 +245,47 @@ export default {
         this.$router.push('/upload/' + this.$route.params.id)
       },
       findData(sub_id){
+        if(this.$store.state.disconnect == false){
+          socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
+            if(data.data.length != 0){
+              this.$store.state.jobData = data.data[0]
 
-        socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
-          if(data.data.length != 0){
-            this.$store.state.jobData = data.data[0]
+              let tab_array = ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"]
+              for(let i=0;i<tab_array.length;i++){
+                for(let key in data.data[0]){
+                  if(tab_array[i] == key){
+                    let prod_data = data.data[0][key]
+                    delete data.data[0][key]
+                    data.data[0][tab_array[i]] = prod_data
+                  }
+                }
+              }
 
-            let tab_array = ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"]
-            for(let i=0;i<tab_array.length;i++){
-              for(let key in data.data[0]){
-                if(tab_array[i] == key){
-                  let prod_data = data.data[0][key]
-                  delete data.data[0][key]
-                  data.data[0][tab_array[i]] = prod_data
+              this.job.push(data.data[0])
+              this.loading = false
+              this.show_table = true
+              this.keys = Object.keys(this.job[0])
+              for(let i=0 ;i<this.keys.length;i++){
+                if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
+                this.keys[i] == 'ProductVariationPrice'){
+                  this.show = true
                 }
               }
             }
-
-            this.job.push(data.data[0])
-            this.loading = false
-            this.show_table = true
-            this.keys = Object.keys(this.job[0])
-            for(let i=0 ;i<this.keys.length;i++){
-              if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
-              this.keys[i] == 'ProductVariationPrice'){
-                this.show = true
-              }
+            else{
+              this.$Notice.info({
+                title: 'No Data Available',
+              });
             }
-          }
-          else{
-            this.$Notice.info({
-                     title: 'No Data Available',
-             });
-          }
-        })
+          })
+        }
+        else if(this.$store.state.disconnect == true){
+          this.loading = false
+          this.$Notice.error({
+            title: 'Service unavailable',
+            duration: 10
+          })
+        }
       }
     },
     mounted(){

@@ -20,7 +20,8 @@
   "approvar_table": "approvalClass",
   "mongodb": "MONGO_DB",
   "mongodb_host": "mongodb_host",
-  "mongodb_port": "mongodb_host",
+  "mongodb_port": "mongodb_port",
+  "mongodb_database": "mongodb_database",
   "jobqueueUrl": "jobqueueUrl",
   "importToConfirmUrl": "",
   "rethinkdb": {

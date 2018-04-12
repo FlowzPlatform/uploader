@@ -8,7 +8,8 @@ import { sync } from 'vuex-router-sync'
 import routes from './router'
 import store from './store'
 import config from '@/config'
-// import toastr from 'toastr'
+
+import toastr from 'toastr'
 
 // Include and set up feathers client
 const Feathers = require('feathers/client')
@@ -19,18 +20,17 @@ const io = require('socket.io-client')
   // const socket = io(config.serverURI)
 let socket = io(config.socketURI, {reconnection: true})
 socket.on('connect', function (connect) {
-  // console.log('connected...')
+  store.commit('SET_DISCONNECT', false)
 })
 
 socket.on('disconnect', function (disconnect) {
-  // console.log('disconnected....')
+  store.commit('SET_DISCONNECT', true)
   socket.on('connect', function (connect) {
-    // console.log('connected again ...')
+    store.commit('SET_DISCONNECT', false)
   })
 })
 
 socket.on('reconnect', function (reconnect) {
-  // console.log('reconnected successfully ======>')
 })
 
 socket.on('error', function (error) {
@@ -133,11 +133,15 @@ router.beforeEach((to, from, next) => {
       store.dispatch('authenticate', token).then(response => {
         store.commit('SET_USER', response)
         next()
-      }).catch(error => {
-        // console.log('&&&error', error.response)
+      })
+      .catch(error => {
         if (error.response.status === 401) {
           router.app.$cookie.delete('auth_token', { domain: location })
-          // toastr.error('User authentication failed')
+          toastr.error('User authentication failed')
+        } else if (error.response.data) {
+          toastr.error(error.response.data.message)
+        } else if (error.message === 'Network Error') {
+          toastr.error('API Service unavailable')
         }
         // window.console.log('Not authenticated')
         next({

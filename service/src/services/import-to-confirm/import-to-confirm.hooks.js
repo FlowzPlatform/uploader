@@ -77,7 +77,7 @@ async function beforeCreate(hook) {
   try {
     let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
     if(tdata.stepStatus == 'import_to_confirm'){
-      axios.post(base_url, hook.data).then(res => {
+      await axios.post(base_url, hook.data).then(res => {
         console.log("Import-to-confirm res....",res)
         if(res.status == 200){
           let confirm_obj = {
@@ -91,11 +91,16 @@ async function beforeCreate(hook) {
         }
       })
       .catch(error => {
-        throw new errors.GeneralError('Import not completed');
+        if(error.response.status == 502 && error.response.data.message == "An invalid response was received from the upstream server"){
+          throw new errors.BadGateway('JobQueue not running')
+        }
+        else {
+          throw error
+        }
       })
    }
   } catch (err) {
-       throw new errors.GeneralError('Import not completed');
+      throw err
   }
 
 }
