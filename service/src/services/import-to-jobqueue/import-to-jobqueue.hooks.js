@@ -45,9 +45,6 @@ module.exports = {
   }
 };
 
-
-
-
 async function beforeCreate(hook) {
   let base_url = app.get("jobqueueUrl")
   module.exports.authorization = this.authorization
@@ -100,8 +97,7 @@ async function beforeCreate(hook) {
   }
 
     try {
-        axios.post(base_url,hook.data).then(res => {
-          console.log("import-to-jobqueue res....",res)
+        await axios.post(base_url,hook.data).then(res => {
           if(res.status == 200){
             let import_obj = {
               stepStatus : "import_in_progress"
@@ -114,12 +110,15 @@ async function beforeCreate(hook) {
           }
         })
         .catch(error => {
-          // console.log("^^^^^^^",error)
-          // throw new errors.GeneralError('Import not completed');
+          if(error.response.status == 502 && error.response.data.message == "An invalid response was received from the upstream server"){
+            throw new errors.BadGateway('JobQueue not running')
+          }
+          else{
+            throw error
+          }
         })
   } catch (err) {
-    // console.log("%%%%%",err)
-      // throw new errors.GeneralError('Import not completed');
+    throw err;
   }
 
 }

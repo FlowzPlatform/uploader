@@ -145,7 +145,25 @@ export default {
         if (valid) {
           this.loading = true
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
-						this.$Message.error(error.response.data)
+            if(error.response.data.name != undefined && error.response.data.message != undefined){
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+            else if(error.message == 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+            else {
+              this.$Notice.error({
+                title: error.response.data,
+                duration: 10
+              })
+            }
             this.loading = false
             return
           })

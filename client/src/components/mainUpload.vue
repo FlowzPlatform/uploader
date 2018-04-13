@@ -662,7 +662,6 @@ let notice_flag = true
 let complete_flag = true
 let totalRecords = 0
 
-
 let socket
 if (process.env.NODE_ENV !== 'development') {
   socket = io(config.socketURI,{reconnect: true})
@@ -671,80 +670,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 const app = feathers().configure(socketio(socket))
-
-
-// String.prototype.capitalize = function() {
-//   return this.charAt(0).toUpperCase() + this.slice(1);
-// }
-//
-// String.prototype.stripHTMLTags = function() {
-//     return this.replace(/<[^>]*>/g, '');
-// }
-//
-// String.prototype.stripSpecialCharacter = function() {
-//     return this.replace(/[\/\\#,+()$~%^'":*<>{}]/g, '');
-// }
-//
-//
-// String.prototype.concate = function(str) {
-//     return this.concat(str);
-// }
-//
-// String.prototype.formatDate = function (format) {
-//   console.log("format...",format,this)
-//   var date = new Date(this),
-//       day = date.getDate(),
-//       month = date.getMonth() + 1,
-//       year = date.getFullYear(),
-//       hours = date.getHours(),
-//       minutes = date.getMinutes(),
-//       seconds = date.getSeconds();
-//
-//   if (!format) {
-//       format = "mm/dd/yyyy";
-//   }
-//   format = format.replace("mm", month.toString().replace(/^(\d)$/, '0$1'));
-//   if (format.indexOf("yyyy") > -1) {
-//       format = format.replace("yyyy", year.toString());
-//   } else if (format.indexOf("yy") > -1) {
-//       format = format.replace("yy", year.toString().substr(2, 2));
-//   }
-//   format = format.replace("dd", day.toString().replace(/^(\d)$/, '0$1'));
-//   if (format.indexOf("t") > -1) {
-//       if (hours > 11) {
-//           format = format.replace("t", "pm");
-//       } else {
-//           format = format.replace("t", "am");
-//       }
-//   }
-//   if (format.indexOf("HH") > -1) {
-//       format = format.replace("HH", hours.toString().replace(/^(\d)$/, '0$1'));
-//   }
-//   if (format.indexOf("hh") > -1) {
-//       if (hours > 12) {
-//           hours -= 12;
-//       }
-//       if (hours === 0) {
-//           hours = 12;
-//       }
-//       format = format.replace("hh", hours.toString().replace(/^(\d)$/, '0$1'));
-//   }
-//   if (format.indexOf("mm") > -1) {
-//       format = format.replace("mm", minutes.toString().replace(/^(\d)$/, '0$1'));
-//   }
-//   if (format.indexOf("ss") > -1) {
-//       format = format.replace("ss", seconds.toString().replace(/^(\d)$/, '0$1'));
-//   }
-//   return format;
-// }
-//
-// String.prototype.toDecimal = function(precision) {
-//   return parseFloat(this).toFixed(precision);
-// }
-//
-// String.prototype.toInteger = function() {
-//   return parseInt(this);
-// };
 
 export default {
     name: 'mainUpload',
@@ -1456,11 +1381,19 @@ export default {
           self.delete1 = true
         })
         .catch(error =>{
-          self.$Notice.error({
-                title: error.response.data.name,
-                desc: error.response.data.message,
-                duration: 10
+          if(error.response){
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
             })
+          }
+          else if(error.message == 'Network Error'){
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
         })
 
 
@@ -1480,9 +1413,6 @@ export default {
       changeIndex(files){
         let newIndex = files.replace(/ /g,"_");
         return newIndex
-      },
-      tabClick(){
-
       },
       //Manages the client side validation handson table in different tabs
       hideHandson(){
@@ -1606,16 +1536,23 @@ export default {
            });
         }
         else{
-          self.uploadStep = false
-          self.validateStep = true
-          self.currentStep = 1
-          $(".f-layout-copy").css("position","fixed");
-          let obj2 = {
-            "stepStatus": "validation_running"
-          }
+          // self.uploadStep = false
+          // self.validateStep = true
+          // self.currentStep = 1
+          // $(".f-layout-copy").css("position","fixed");
+          // let obj2 = {
+          //   "stepStatus": "validation_running"
+          // }
 
           api.request('get', '/uploader/'+ id).then(response => {
             uploader_obj = response.data
+            self.uploadStep = false
+            self.validateStep = true
+            self.currentStep = 1
+            $(".f-layout-copy").css("position","fixed");
+            let obj2 = {
+              "stepStatus": "validation_running"
+            }
             api.request('patch', '/uploader/'+ id,obj2).then(res => {
 
                 uploader_obj = res.data
@@ -1648,19 +1585,35 @@ export default {
               self.sheetwiseValidation(prop_keys[0],uploader_obj)
             })
             .catch(err=>{
-              self.$Notice.error({
-               title: err.response.data.name,
-               desc: err.response.data.message,
-               duration: 10
-           })
+              if(err.response){
+                self.$Notice.error({
+                  title: err.response.data.name,
+                  desc: err.response.data.message,
+                  duration: 10
+                })
+              }
+              else if(err.message == 'Network Error'){
+                this.$Notice.error({
+                  title: 'API Service unavailable',
+                  duration: 10
+                })
+              }
          })
           })
           .catch(error =>{
-            self.$Notice.error({
-             title: error.response.data.name,
-             desc: error.response.data.message,
-             duration: 10
-         })
+            if(error.response){
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+            else if(error.message == 'Network Error'){
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
        })
         }
       },
@@ -1701,31 +1654,46 @@ export default {
                     this.validation_completed = true
                 })
                 .catch(error =>{
+                  if(error.response){
                     self.$Notice.error({
-                     title: error.response.data.name,
-                     desc: error.response.data.message,
-                     duration: 10
-                 })
+                      title: error.response.data.name,
+                      desc: error.response.data.message,
+                      duration: 10
+                    })
+                  }
+                  else if(error.message == 'Network Error'){
+                    this.$Notice.error({
+                      title: 'API Service unavailable',
+                      duration: 10
+                    })
+                  }
                 })
-
               }
             }
           })
           .catch(error =>{
-            if(error.response.data.code == 500){
-              self.$Notice.error({
-                title: error.response.data.name,
-                desc: error.response.data.message,
-                duration: 10
-              })
+            if(error.response){
+              if(error.response.data.code == 500){
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+              else if(error.response.data.code == 504){
+                self.sheetwiseValidation(key,data)
+              }
+              else{
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
             }
-            else if(error.response.data.code == 504){
-              self.sheetwiseValidation(key,data)
-            }
-            else{
+            else if(error.message == 'Network Error'){
               self.$Notice.error({
-                title: error.response.data.name,
-                desc: error.response.data.message,
+                title: 'API Service unavailable',
                 duration: 10
               })
             }
@@ -1855,11 +1823,19 @@ export default {
 
         })
         .catch(error =>{
-          this.$Notice.error({
-           title: error.response.data.name,
-           desc: error.response.data.message,
-           duration: 10
-       })
+          if(error.response){
+            this.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          }
+          else if(error.message == 'Network Error'){
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
      })
 
       }
@@ -1909,28 +1885,50 @@ export default {
                 // this.$store.state.data = []
                 this.validation_completed = true
               })
+              .catch(error => {
+                if(error.response){
+                  this.$Notice.error({
+                    title: error.response.data.name,
+                    desc: error.response.data.message,
+                    duration: 10
+                  })
+                }
+                else if(error.message == 'Network Error'){
+                  this.$Notice.error({
+                    title: 'API Service unavailable',
+                    duration: 10
+                  })
+                }
+              })
             }
           }
         })
         .catch(error =>{
-          this.$Notice.error({
-           title: error.response.data.name,
-           desc: error.response.data.message,
-           duration: 10
-       })
+          if(error.response){
+            this.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          }
+          else if(error.message == 'Network Error'){
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
      })
 
       },
 
       // Puts a entry in the jobqueue
       importToPDM(){
-
+        let self = this
         let jobQueue_obj = {
           "importTrackerId":id
         }
 
               api.request('post', '/import-to-jobqueue/',jobQueue_obj).then(res => {
-
                 if(res.data){
                      this.showValidationTable = false
                      this.validation_completed = false
@@ -1945,19 +1943,19 @@ export default {
 
               })
               .catch(error => {
-                if(error.response.data.className == 'general-error'){
+                if(error.response){
                   self.$Notice.error({
-                    title: error.response.data.message,
-                    desc: "Please try again..."
+                    title: error.response.data.name,
+                    desc: error.response.data.message,
+                    duration: 10
                   })
                 }
-               else {
-                 self.$Notice.error({
-                   title: error.response.data.name,
-                   desc: error.response.data.message,
-                   duration: 10
-                 })
-               }
+                else {
+                  self.$Notice.error({
+                    title: 'API Service unavailable',
+                    duration: 10
+                  })
+                }
                })
       },
       convert(item){
@@ -1967,6 +1965,7 @@ export default {
 
       // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
       importToConfirm(){
+        let self = this
         this.abortImportBtn = false
         let jobQueue_obj = {
           "importTrackerId":id
@@ -1978,33 +1977,20 @@ export default {
           }
         })
         .catch(error => {
-          if(error.response.data.className == 'general-error'){
-            self.importBtn = true
+          if(error.response){
             self.$Notice.error({
-              title: error.response.data.message,
-              desc: "Please try again..."
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
             })
           }
-         else{
-           this.$Notice.error({
-            title: 'Error in import to confirm'
-          });
-         }
-
+          else{
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
         })
-
-        // let importobj = {
-        //   'stepStatus': "import_to_confirm_in_progress"
-        // }
-        //
-        // api.request('patch', '/uploader/' + id,importobj).then(result => {
-        //   this.importBtn = false
-        // })
-        // .catch(error => {
-        //     this.$Notice.error({
-        //      title: 'Error'
-        //    });
-        // })
       },
       mapType(sysHeader,type){
 
@@ -2051,42 +2037,43 @@ export default {
 
         }
         else{
-          // this.loadingdot = true
-          //
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
-          socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
-            if(res){
-              this.existingSchemaData = res.data
-              let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
-              if(currentschema.length != 0){
+          if(this.$store.state.disconnect == false){
+            socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
+              if(res){
+                this.existingSchemaData = res.data
+                let currentschema = _.filter(this.existingSchemaData, function(o) { return o.name == currentSelectedSchema; });
+                if(currentschema.length != 0){
 
-                schema_id = currentschema[0].id
-                this.mObj[tab].schema = new Schema(currentschema[0].schema)
+                  schema_id = currentschema[0].id
+                  this.mObj[tab].schema = new Schema(currentschema[0].schema)
 
-                this.mObj[tab].display = false
+                  this.mObj[tab].display = false
 
-                if(this.mObj[tab].uploadDisplay){
-                  this.mObj[tab].newSchemaDisplay = false
-                  this.mObj[tab].headerDisplay = false
+                  if(this.mObj[tab].uploadDisplay){
+                    this.mObj[tab].newSchemaDisplay = false
+                    this.mObj[tab].headerDisplay = false
+                  }
+                  else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
+                    this.mObj[tab].newSchemaDisplay = false
+                    this.mObj[tab].headerDisplay = false
+                  }
+                  else{
+                    this.mObj[tab].newSchemaDisplay = false
+                    this.mObj[tab].headerDisplay = true
+                  }
+                  this.getMapping(tab)
                 }
-                else if(this.mObj[tab].savePreviewDisplay && !this.mObj[tab].headerDisplay && !this.mObj[tab].newSchemaDisplay){
-                  this.mObj[tab].newSchemaDisplay = false
-                  this.mObj[tab].headerDisplay = false
-                }
-                else{
-                  this.mObj[tab].newSchemaDisplay = false
-                  this.mObj[tab].headerDisplay = true
-                }
-                this.getMapping(tab)
               }
-            }
-            else{
-                this.$Notice.error({
-                 title: e.response.data.message
-               });
-            }
-          })
+            })
+          }
+          else if(this.$store.state.disconnect == true){
+            this.$Notice.error({
+              title: 'Service unavailable',
+              duration: 10
+            })
+          }
 
 
         }
@@ -2106,61 +2093,65 @@ export default {
           this.map = true
           this.mObj[tab].mapping = []
 
-           socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id},async (e, data) => {
-             if(data){
-               this.mObj[tab].mapping = data.data[0].mapping
-               let schema_keys = _.keys(this.mObj[tab].schema.structure);
-               if(this.mObj[tab].uploadCSV.length != 0){
-                 this.mObj[tab].newUploadCSV = []
-                 for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
-                   let obj = {}
-                   for(let key in this.mObj[tab].uploadCSV[i]){
-                     for(let j=0;j<this.mObj[tab].mapping.length;j++){
-                       if(this.mObj[tab].mapping[j].csvHeader == key){
-                         obj[this.mObj[tab].mapping[j].sysHeader] = this.mObj[tab].uploadCSV[i][key]
-                       }
-                       else if(!obj.hasOwnProperty(this.mObj[tab].mapping[j].sysHeader)){
-                         obj[this.mObj[tab].mapping[j].sysHeader] = ''
-                       }
-                     }
-                   }
-                   obj["_id"] = uuidV1()
-                  //  await self.validateObj(schema_Obj,obj,tab,errcols,i)
-                   this.mObj[tab].newUploadCSV.push(obj)
 
-                   this.mObj[tab].load = false
-                   $(".f-layout-copy").css("position","absolute");
-                   if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
-                     self.mObj[tab].previewDisplay = true
-                     self.mObj[tab].headerDisplay = true
-                   }
-                   this.loadingdot = false
-                 }
+          if(this.$store.state.disconnect == false){
+            socket.emit('uploader-csv-file-mapping::find', {"fileTypeId" : this.mObj[tab].selected_schema,"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id},async (e, data) => {
+              if(data){
+                this.mObj[tab].mapping = data.data[0].mapping
+                let schema_keys = _.keys(this.mObj[tab].schema.structure);
+                if(this.mObj[tab].uploadCSV.length != 0){
+                  this.mObj[tab].newUploadCSV = []
+                  for(let i=0;i<this.mObj[tab].uploadCSV.length;i++){
+                    let obj = {}
+                    for(let key in this.mObj[tab].uploadCSV[i]){
+                      for(let j=0;j<this.mObj[tab].mapping.length;j++){
+                        if(this.mObj[tab].mapping[j].csvHeader == key){
+                          obj[this.mObj[tab].mapping[j].sysHeader] = this.mObj[tab].uploadCSV[i][key]
+                        }
+                        else if(!obj.hasOwnProperty(this.mObj[tab].mapping[j].sysHeader)){
+                          obj[this.mObj[tab].mapping[j].sysHeader] = ''
+                        }
+                      }
+                    }
+                    obj["_id"] = uuidV1()
+                    //  await self.validateObj(schema_Obj,obj,tab,errcols,i)
+                    this.mObj[tab].newUploadCSV.push(obj)
+
+                    this.mObj[tab].load = false
+                    $(".f-layout-copy").css("position","absolute");
+                    if(this.mObj[tab].savePreviewDisplay == false && this.mObj[tab].load == false && this.mObj[tab].errDisplay == false){
+                      self.mObj[tab].previewDisplay = true
+                      self.mObj[tab].headerDisplay = true
+                    }
+                    this.loadingdot = false
+                  }
 
 
-                 let index = this.mObj[tab].newUploadCSV.length - 1
-                //  this.mObj[tab].newUploadCSV.splice(index, 1)
-                 this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
+                  let index = this.mObj[tab].newUploadCSV.length - 1
+                  //  this.mObj[tab].newUploadCSV.splice(index, 1)
+                  this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
-                 for(let k=0;k<this.mObj[tab].mapping.length;k++){
-                   if(this.mObj[tab].mapping[k].transform != ""){
-                     this.transformData = this.mObj[tab].mapping[k].transform
-                     this.modelIndex = k
-                     this.handleModalOk()
-                   }
-                 }
-               }
-               else{
-                 this.loadingdot = false
-               }
-             }
-             else{
-               this.$Notice.error({
-                title: e.response.data.message
-              });
-             }
+                  for(let k=0;k<this.mObj[tab].mapping.length;k++){
+                    if(this.mObj[tab].mapping[k].transform != ""){
+                      this.transformData = this.mObj[tab].mapping[k].transform
+                      this.modelIndex = k
+                      this.handleModalOk()
+                    }
+                  }
+                }
+                else{
+                  this.loadingdot = false
+                }
+              }
+            })
+          }
+          else if(this.$store.state.disconnect == true){
+            this.$Notice.error({
+              title: 'Service unavailable',
+              duration: 10
+            })
+          }
 
-           })
          }
          else if(this.mObj[tab].selected_schema == '--Add new--'){
            this.mObj[tab].display = true
@@ -2207,59 +2198,6 @@ export default {
           }
         }
       },
-    //   upldCSV(tab){
-    //     let self = this
-    //
-    //     $(document).ready(function () {
-    //       $('#csv-file').bind("change",function () {
-    //         let fileChooser = document.getElementById('csv-file')
-    //         file = fileChooser.files[0]
-    //
-    //         let file_ext = file.name.split('.').pop()
-    //         if(file_ext != 'csv'){
-    //           self.$Notice.error({title: 'Only CSV files are allowed',duration: 20})
-    //         }
-    //         else{
-    //           self.mObj[tab].load = true
-    //           self.mObj[tab].uploadDisplay = false
-    //             Papa.parse(file, {
-    //               header: true,
-    //               dynamicTyping: true,
-    //               encoding: "UTF-8",
-    //               skipEmptyLines: false,
-    //               chunk: function(results, streamer){
-    //                 self.mObj[tab].uploadCSV = results.data
-    //                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
-    //                 self.mObj[tab].headers.push("_id")
-    //                 if(self.mObj[tab].new_flag == 1){
-    //
-    //                   self.mObj[tab].load = true
-    //                   self.mObj[tab].mapping = []
-    //                   self.generateHeadersandMapping(tab)
-    //                 }
-    //                 else{
-    //
-    //                   self.mObj[tab].load = true
-    //                   if(self.mObj[tab].newSchemaDisplay == true){
-    //                     self.mObj[tab].newSchemaDisplay = false
-    //                   }
-    //
-    //
-    //                   self.mObj[tab].mapping = []
-    //
-    //                   self.getMapping(tab)
-    //                   // self.mObj[tab].previewDisplay = true
-    //                   // self.mObj[tab].headerDisplay = true
-    //                 }
-    //               }
-    //             })
-    //
-    //         }
-    //
-    //         })
-    //         $('#csv-file').unbind("change",function () {})
-    //         })
-    // },
     generateHeadersandMapping(tab){
       let self = this
       self.map = false
@@ -2507,24 +2445,33 @@ export default {
         })
     },
     socketResponse(){
-      return new Promise(async (resolve,reject)=>{
-        socket.removeListener('response');
-        socket.removeListener('err');
+      if(this.$store.state.disconnect == false){
+        return new Promise(async (resolve,reject)=>{
+          socket.removeListener('response');
+          socket.removeListener('err');
 
-        socket.on('response', (response) => {
-          if(response.stdout.ok == 1){
-            resolve(response)
-          }
+          socket.on('response', (response) => {
+            if(response.stdout.ok == 1){
+              resolve(response)
+            }
+          })
+          socket.on('err',(response) => {
+            this.$Notice.error({title: 'Error!', desc: response.stdout})
+            this.mObj[this.activeTab].load = false
+            this.mObj[this.activeTab].newUploadCSV = []
+            this.mObj[this.activeTab].uploadCSV = []
+            this.mObj[this.activeTab].csv_arr = []
+            this.mObj[this.activeTab].uploadDisplay = true
+            this.ProceedLoading = false
+          })
         })
-        socket.on('err',(response) => {
-          this.$Notice.error({title: 'Error!', desc: response.stdout})
-          this.mObj[this.activeTab].load = false
-          this.mObj[this.activeTab].uploadDisplay = true
-          this.ProceedLoading = false
-          this.mObj[this.activeTab].newUploadCSV = []
-          this.mObj[this.activeTab].csv_arr = []
+      }
+      else if(this.$store.state.disconnect == true) {
+        this.$Notice.error({
+          title: 'Service unavailable',
+          duration: 10
         })
-      })
+      }
     },
     changeStatus(tab,streamer){
       if(this.mObj[tab].complete_flag == false && !streamer.paused()){
@@ -2538,11 +2485,19 @@ export default {
           totalRecords = 0
          })
          .catch(error =>{
-           self.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
-        })
+           if(error.response){
+             self.$Notice.error({
+               title: error.response.data.name,
+               desc: error.response.data.message,
+               duration: 10
+             })
+           }
+           else if(error.message == 'Network Error'){
+             self.$Notice.error({
+               title: 'API Service unavailable',
+               duration: 10
+             })
+           }
       })
     }
     },
@@ -2598,28 +2553,52 @@ export default {
               resolve('done')
               })
               .catch(error =>{
-                self.$Notice.error({
-                 title: error.response.data.name,
-                 desc: error.response.data.message,
-                 duration: 10
-             })
+                if(error.response){
+                  self.$Notice.error({
+                    title: error.response.data.name,
+                    desc: error.response.data.message,
+                    duration: 10
+                  })
+                }
+                else if(error.message == 'Network Error'){
+                  this.$Notice.error({
+                    title: 'API Service unavailable',
+                    duration: 10
+                  })
+                }
            })
 
             })
             .catch(error =>{
-              self.$Notice.error({
-               title: error.response.data.name,
-               desc: error.response.data.message,
-               duration: 10
-           })
+              if(error.response){
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+              else if(error.message == 'Network Error'){
+                this.$Notice.error({
+                  title: 'API Service unavailable',
+                  duration: 10
+                })
+              }
          })
         })
         .catch(error => {
-          self.$Notice.error({
-           title: error.response.data.name,
-           desc: error.response.data.message,
-           duration: 10
-         })
+          if(error.response){
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          }
+          else if(error.message == 'Network Error'){
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
        })
 
       }
@@ -2631,11 +2610,19 @@ export default {
           resolve('done')
       })
       .catch(error =>{
-        self.$Notice.error({
-         title: error.response.data.name,
-         desc: error.response.data.message,
-         duration: 10
-     })
+        if(error.response){
+          self.$Notice.error({
+            title: error.response.data.name,
+            desc: error.response.data.message,
+            duration: 10
+          })
+        }
+        else if(error.message == 'Network Error'){
+          this.$Notice.error({
+            title: 'API Service unavailable',
+            duration: 10
+          })
+        }
    })
     }
 
@@ -3127,8 +3114,7 @@ export default {
       self.mObj[tab].newSchemaDisplay = false
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
-      totalRecords = 0      // self.loadProcessing = false
-      // self.loadProceed = false
+      totalRecords = 0
       $(".f-layout-copy").css("position","fixed");
     },
     abortUploadedRecords(tab){
@@ -3167,19 +3153,35 @@ export default {
           }
         })
         .catch(error =>{
-          this.$Notice.error({
-           title: error.response.data.name,
-           desc: error.response.data.message,
-           duration: 10
-       })
+          if(error.response){
+            this.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          }
+          else if(error.message == 'Network Error'){
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
      })
       })
       .catch(error => {
+        if(error.response){
           this.$Notice.error({
-           title: error.response.data.name,
-           desc: error.response.data.message,
-           duration: 10
-       })
+            title: error.response.data.name,
+            desc: error.response.data.message,
+            duration: 10
+          })
+        }
+        else{
+          this.$Notice.error({
+            title: 'API Service unavailable',
+            duration: 10
+          })
+        }
       })
     },
     AbortValidation(tab){
@@ -3211,25 +3213,53 @@ export default {
       },
     abortImport(){
        let self = this
-       self.showValidationTable = false
-       self.validation_data = true
-       self.validation_completed = false
-       self.val_data = []
-       self.$store.state.data = []
+       // self.showValidationTable = false
+       // self.validation_data = true
+       // self.validation_completed = false
+       // self.val_data = []
+       // self.$store.state.data = []
       //  self.mObj["Product Information"].newUploadCSV = []
       //  self.mObj["Product Price"].newUploadCSV = []
        api.request('get', '/uploader/' + id).then(response => {
+         self.showValidationTable = false
+         self.validation_data = true
+         self.validation_completed = false
+         self.val_data = []
+         self.$store.state.data = []
          let obj = self.ModifyObj(response.data)
          api.request('put','/uploader/' + id,obj[0]).then(result =>{
             self.setPage(obj[1],obj[2],result.data)
          })
+         .catch(error => {
+           if(error.response){
+             self.$Notice.error({
+               title: error.response.data.name,
+               desc: error.response.data.message,
+               duration: 10
+             })
+           }
+           else if(error.message == 'Network Error'){
+             self.$Notice.error({
+               title: 'API Service unavailable',
+               duration: 10
+             })
+           }
+         })
        })
        .catch(error =>{
-         self.$Notice.error({
-          title: error.response.data.name,
-          desc: error.response.data.message,
-          duration: 10
-      })
+         if(error.response){
+           self.$Notice.error({
+             title: error.response.data.name,
+             desc: error.response.data.message,
+             duration: 10
+           })
+         }
+         else if(error.message == 'Network Error'){
+           self.$Notice.error({
+             title: 'API Service unavailable',
+             duration: 10
+           })
+         }
     })
     },
     abortImportConfirm(){
@@ -3250,11 +3280,19 @@ export default {
          self.currentStep = 1
        })
        .catch(error =>{
-         self.$Notice.error({
-          title: error.response.data.name,
-          desc: error.response.data.message,
-          duration: 10
-      })
+         if(error.response){
+           self.$Notice.error({
+             title: error.response.data.name,
+             desc: error.response.data.message,
+             duration: 10
+           })
+         }
+         else if(error.message == 'Network Error'){
+           self.$Notice.error({
+             title: 'API Service unavailable',
+             duration: 10
+           })
+         }
     })
     },
     abortImportInProgress(){
@@ -3298,19 +3336,30 @@ export default {
     },
     AbortServerSideValidation(){
       let self = this
-      self.showValidationTable = false
-      $(".f-layout-copy").css("position","fixed");
-      self.val_data = []
+      // self.showValidationTable = false
+      // $(".f-layout-copy").css("position","fixed");
+      // self.val_data = []
       let obj1 = self.ModifyObj(uploader_obj)
       api.request('put','/uploader/' + id,obj1[0]).then(result =>{
-         self.setPage(obj1[1],obj1[2],result.data)
+        self.showValidationTable = false
+        $(".f-layout-copy").css("position","fixed");
+        self.val_data = []
+        self.setPage(obj1[1],obj1[2],result.data)
       })
       .catch(error =>{
-        self.$Notice.error({
-         title: error.response.data.name,
-         desc: error.response.data.message,
-         duration: 10
-     })
+        if(error.response){
+          self.$Notice.error({
+            title: error.response.data.name,
+            desc: error.response.data.message,
+            duration: 10
+          })
+        }
+        else if(error.message == 'Network Error'){
+          self.$Notice.error({
+            title: 'API Service unavailable',
+            duration: 10
+          })
+        }
    })
     },
     async showerrmsg (errcols,tab,schema) {
@@ -3437,29 +3486,32 @@ export default {
       let self = this
       self.mObj[tab].load = true
 
-      var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
-        return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
-      });
+      if(this.$store.state.disconnect == false){
+        var newCSV = _.map(self.mObj[tab].newUploadCSV, function(element) {
+          return _.extend({}, element, {username: self.$store.state.user.email,"import-tracker_id":id,"fileID":CSVFile_id});
+        });
 
-      let obj= {
-        "activetab" : tab,
-        "newCSV": newCSV
+        let obj= {
+          "activetab" : tab,
+          "newCSV": newCSV
+        }
+
+        socket.emit('pdmData', obj, (err, data) => {
+          if(data){
+
+          }
+        })
+        self.proceedBtn = true
+        if(self.mObj[tab].new_flag == 1){
+          self.mObj[tab].new_flag = 0
+        }
       }
-
-      socket.emit('pdmData', obj, (err, data) => {
-
-        if (err) {
-          console.log("err...",err)
-          self.$Notice.error({title: 'Error!', desc: 'Error in saving the data!'})
-        }
-        if(data){
-
-        }
-      })
-    self.proceedBtn = true
-    if(self.mObj[tab].new_flag == 1){
-      self.mObj[tab].new_flag = 0
-    }
+      else if(this.$store.state.disconnect == true){
+        self.$Notice.error({
+          title: 'Service unavailable',
+          duration: 10
+        })
+      }
   },
   setprogress(message){
     let self = this
@@ -3467,7 +3519,6 @@ export default {
     self.val_data = self.$store.state.data
     let progress_obj = _.filter(self.val_data, {'name':prop_keys[0]});
     progress_obj[0].progress = Math.round(message[prop_keys[0]].currentRuleIndex / message[prop_keys[0]].ruleIndex * 100);
-
   },
 
   setPage(keys,filtered_keys,response){
@@ -3555,11 +3606,19 @@ export default {
       return res
     })
     .catch(error => {
-         self.$Notice.error({
+      if(error.response){
+        self.$Notice.error({
           title: error.response.data.name,
           desc: error.response.data.message,
           duration: 10
         })
+      }
+      else if(error.message == 'Network Error'){
+        self.$Notice.error({
+          title: 'API Service unavailable',
+          duration: 10
+        })
+      }
     }))
 
     self.mObj[tab].newUploadCSV = res.data
@@ -3942,70 +4001,141 @@ export default {
                   else if(response.data.stepStatus == "import_completed"){
                     this.$router.push('/uploader')
                   }
+
+
+                  if(this.$store.state.disconnect == false){
+                    socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
+                      if(res){
+                        self.existingSchemaData = res.data[0]
+                        let schemaNames = lodash.groupBy(res.data,"tabname");
+                        let schemavalue = lodash.isEmpty(schemaNames)
+
+                        if(schemavalue != true){
+                          _.forEach(schemaNames,(value,key) => {
+                            for(let i=0;i<value.length;i++){
+                              if(key != undefined){
+                                self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
+                              }
+                            }
+                          })
+                          for(let i=0;i<self.fileTypes.length;i++){
+
+                            self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
+                            let new_index = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value == '--Add new--'; });
+                            self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(new_index,1)[0]);
+                          }
+
+                          for(let i=0;i<self.fileTypes.length;i++){
+                            if(self.mObj[self.fileTypes[i]].schemaList[0].value == '--Add new--'){
+                              self.mObj[self.fileTypes[i]].display = true
+                            }
+                          }
+                        }
+
+
+                        if(schemavalue == true){
+                          for(let i=0;i<self.fileTypes.length;i++){
+                            self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
+                            self.mObj[self.fileTypes[i]].display = true
+                          }
+                          self.loading = false
+                          for(let i=0;i<self.fileTypes.length;i++){
+                            self.mObj[self.fileTypes[i]].uploadDisplay = true
+                          }
+                        }
+                        else{
+                          for(let i=0;i<self.fileTypes.length;i++){
+                            self.mObj[self.fileTypes[i]].selected_schema = self.mObj[self.fileTypes[i]].schemaList[0].value
+                          }
+                          self.loading = false
+                        }
+
+                      }
+                    })
+                  }
+                  else if(this.$store.state.disconnect == true){
+                      this.$Notice.error({
+                        title: 'Service unavailable',
+                        duration: 10
+                      })
+                  }
         }
       })
       .catch(error =>{
-        this.$Notice.error({
-         title: error.response.data.name,
-         desc: error.response.data.message,
-         duration: 10
-     })
+        if(error.response){
+          this.$Notice.error({
+            title: error.response.data.name,
+            desc: error.response.data.message,
+            duration: 10
+          })
+        }
+        else if(error.message == 'Network Error'){
+          this.$Notice.error({
+            title: 'API Service unavailable',
+            duration: 10
+          })
+        }
    })
 
-      socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
-        if(res){
-          self.existingSchemaData = res.data[0]
-          let schemaNames = lodash.groupBy(res.data,"tabname");
-          let schemavalue = lodash.isEmpty(schemaNames)
-
-          if(schemavalue != true){
-            _.forEach(schemaNames,(value,key) => {
-              for(let i=0;i<value.length;i++){
-                if(key != undefined){
-                  self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
-                }
-              }
-            })
-            for(let i=0;i<self.fileTypes.length;i++){
-
-              self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
-              let new_index = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value == '--Add new--'; });
-              self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(new_index,1)[0]);
-            }
-
-            for(let i=0;i<self.fileTypes.length;i++){
-              if(self.mObj[self.fileTypes[i]].schemaList[0].value == '--Add new--'){
-                self.mObj[self.fileTypes[i]].display = true
-              }
-            }
-          }
-
-
-          if(schemavalue == true){
-            for(let i=0;i<self.fileTypes.length;i++){
-              self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
-              self.mObj[self.fileTypes[i]].display = true
-            }
-            self.loading = false
-            for(let i=0;i<self.fileTypes.length;i++){
-              self.mObj[self.fileTypes[i]].uploadDisplay = true
-            }
-          }
-          else{
-            for(let i=0;i<self.fileTypes.length;i++){
-              self.mObj[self.fileTypes[i]].selected_schema = self.mObj[self.fileTypes[i]].schemaList[0].value
-            }
-            self.loading = false
-          }
-
-        }
-        else {
-          this.$Notice.error({
-           title: e.response.data.message
-         });
-        }
-
-      })
+      // if(this.$store.state.disconnect == false){
+      //   socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
+      //     if(res){
+      //       self.existingSchemaData = res.data[0]
+      //       let schemaNames = lodash.groupBy(res.data,"tabname");
+      //       let schemavalue = lodash.isEmpty(schemaNames)
+      //
+      //       if(schemavalue != true){
+      //         _.forEach(schemaNames,(value,key) => {
+      //           for(let i=0;i<value.length;i++){
+      //             if(key != undefined){
+      //               self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
+      //             }
+      //           }
+      //         })
+      //         for(let i=0;i<self.fileTypes.length;i++){
+      //
+      //           self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
+      //           let new_index = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value == '--Add new--'; });
+      //           self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(new_index,1)[0]);
+      //         }
+      //
+      //         for(let i=0;i<self.fileTypes.length;i++){
+      //           if(self.mObj[self.fileTypes[i]].schemaList[0].value == '--Add new--'){
+      //             self.mObj[self.fileTypes[i]].display = true
+      //           }
+      //         }
+      //       }
+      //
+      //
+      //       if(schemavalue == true){
+      //         for(let i=0;i<self.fileTypes.length;i++){
+      //           self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
+      //           self.mObj[self.fileTypes[i]].display = true
+      //         }
+      //         self.loading = false
+      //         for(let i=0;i<self.fileTypes.length;i++){
+      //           self.mObj[self.fileTypes[i]].uploadDisplay = true
+      //         }
+      //       }
+      //       else{
+      //         for(let i=0;i<self.fileTypes.length;i++){
+      //           self.mObj[self.fileTypes[i]].selected_schema = self.mObj[self.fileTypes[i]].schemaList[0].value
+      //         }
+      //         self.loading = false
+      //       }
+      //
+      //     }
+      //   })
+      // }
+      // else if(this.$store.state.disconnect == true){
+      //   console.log("^^^^^^^ error_flag",error_flag)
+      //   if(error_flag == false){
+      //     this.$Notice.error({
+      //       title: 'Service unavailable',
+      //       duration: 10
+      //     })
+      //   }
+      // }
     }
 }
 

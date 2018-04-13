@@ -110,7 +110,7 @@ export default {
           modelAuthentication.register(this.formRegister).then(response => {
             if (response) {
               this.loading = false
-              this.$Message.success('User successfuly registered!')
+              this.$Message.success(response.message)
               this.formRegister.firstname = ""
               this.formRegister.lastname = ""
               this.formRegister.email = ""
@@ -123,7 +123,11 @@ export default {
             }
           })
           .catch(e => {
-            this.$Message.error(e.response.data)
+            this.$Notice.error({
+              title: e.response.data.name,
+              message: e.response.data.message,
+              duration:10
+            })
             this.loading = false
           })
         } else {

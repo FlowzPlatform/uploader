@@ -19,6 +19,7 @@ const ProductAdditionalChargeSchema = require('../../schema/product_additional_c
 
 config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
 config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
+config1.mongodb_database = process.env.mongodb_database ? process.env.mongodb_database : 'pdmuploader'
 config1.username = process.env.username ? process.env.username : null
 config1.password = process.env.password ? process.env.password : null
 
@@ -34,8 +35,8 @@ module.exports = function () {
     });
 
     socket.on('pdmData',async function( data){
-          var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-             // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
+          var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
+             // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
           var cnn_with_mongo = await connectToMongo(url,data,socket).then(res => {
             if(res !== undefined){
               if(res.result){
@@ -87,7 +88,8 @@ var connectToMongo = async function(url,data,socket){
       return res
     })
     .catch(err => {
-       socket.emit('err',{stdout:'Unable to connect mongodb database.'})
+      console.log("err....",err)
+       socket.emit('err',{stdout:'Mongodb Service unavailable'})
     }))
 
     let collection_name = data.activetab.split(" ")
@@ -147,6 +149,10 @@ var connectToMongo = async function(url,data,socket){
          var result = await (db.collection(collection_name).insertMany(data.newCSV).then(res => {
            return res
          }).catch(err => {
+           console.log("error....",err)
+           if(err.code == '12501' || err.message == 'quota exceeded'){
+              var res1 = await(db.command({repairDatabase:1}))
+           }
            return err
          }))
          return result
@@ -155,6 +161,10 @@ var connectToMongo = async function(url,data,socket){
          var result = await (db.collection(collection_name).insertMany(data.newCSV).then(res => {
            return res
          }).catch(err => {
+           console.log("error....",err)
+           if(err.code == '12501' || err.message == 'quota exceeded'){
+              var res1 = await(db.command({repairDatabase:1}))
+           }
            return err
          }))
          return result
