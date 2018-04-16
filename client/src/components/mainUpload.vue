@@ -45,7 +45,7 @@
                            <div class="api" slot="content">
                              <Form inline>
                                <FormItem>
-                                   <Input type="text" v-model="mObj[activeTab].new_schema" @on-enter="validateSchema(activeTab,mObj[activeTab].new_schema)">
+                                   <Input type="text" v-model="mObj[activeTab].new_schema">
                                    </Input>
                                </FormItem>
                                   <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
@@ -79,13 +79,12 @@
                   </div>
               </div>
 
-              <div v-if="showWebImage" id="upload-image-zone">
+              <!-- <div v-if="showWebImage" id="upload-image-zone">
                 <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
                   <span class="dz-message">Mass image upload<br/>
                       <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
                   </span>
                   <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
-                  <!-- <input type="button" onclick="alert('No server URL for upload specified, modify code.');" value="Upload"/> -->
                </form>
                <Button type="primary" style="margin-top:0px;color: #fff;margin-top:14px;float:right;padding: 6px 30px;margin-left:1%" @click="Back(activeTab)">Back</Button>
                <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)">Abort</Button>
@@ -96,7 +95,7 @@
                <div id="dirinfo">
                  <Table border :columns="dircols" :data="dirinfo"></Table>
                </div>
-             </div>
+             </div> -->
 
 
 
@@ -1129,29 +1128,27 @@ export default {
 
         }
       },
-      async handleImageChange(e,tab){
-        let self = this
-        const reader  = new FileReader();
-        // console.log("files....",e.target.files)
-         let fileList = e.target.files
-
-         for(let i=0; i<fileList.length; i++){
-           let fileSize = 0;
-           if (fileList[i].size > 1024 * 1024)
-               fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-           else
-               fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
-
-          self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":""})
-
-          reader.readAsDataURL(fileList[i]);
-          let uri = await self.retResult(reader)
-
-          api.request('post', '/upload-image/',{uri:uri,file_name:fileList[i].name,import_tracker_id:id}).then(response => {
-            // console.log("upload-image response .....",response)
-            // self.uploadList.push(response.data)
-          });
-         }
+      // async handleImageChange(e,tab){
+      //   let self = this
+      //   const reader  = new FileReader();
+      //   // console.log("files....",e.target.files)
+      //    let fileList = e.target.files
+      //
+      //    for(let i=0; i<fileList.length; i++){
+      //      let fileSize = 0;
+      //      if (fileList[i].size > 1024 * 1024)
+      //          fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+      //      else
+      //          fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
+      //
+      //     self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":""})
+      //
+      //     reader.readAsDataURL(fileList[i]);
+      //     let uri = await self.retResult(reader)
+      //
+      //     api.request('post', '/upload-image/',{uri:uri,file_name:fileList[i].name,import_tracker_id:id}).then(response => {
+      //     });
+      //    }
 
          // console.log("%%%%% self.dirinfo %%%%",self.dirinfo)
          // var dirinfo = '<table class="zaklad"><tr><th>File name</th><th>Path</th><th>Size</th><th>Type</th><th>Status</th></tr>';
@@ -1165,21 +1162,19 @@ export default {
          // }
          // dirinfo += '</table>';
          // document.getElementById('dirinfo').innerHTML = dirinfo;
-      },
-      Next(tab){
-        let self = this
-        // console.log("^^^^",self.activeTab)
-        self.mObj[tab].previewDisplay = false
-        self.mObj[tab].headerDisplay = false
-        self.showWebImage = true
-      },
-      Back(tab){
-        // console.log("back called..")
-        let self = this
-        self.showWebImage = false
-        self.mObj[tab].previewDisplay = true
-        self.mObj[tab].headerDisplay = true
-      },
+      // },
+      // Next(tab){
+      //   let self = this
+      //   self.mObj[tab].previewDisplay = false
+      //   self.mObj[tab].headerDisplay = false
+      //   self.showWebImage = true
+      // },
+      // Back(tab){
+      //   let self = this
+      //   self.showWebImage = false
+      //   self.mObj[tab].previewDisplay = true
+      //   self.mObj[tab].headerDisplay = true
+      // },
       handleView (item) {
         let self = this
         self.imgpath = item.file_path;
