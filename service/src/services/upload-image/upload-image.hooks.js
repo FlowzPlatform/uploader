@@ -60,13 +60,12 @@ module.exports = {
 let resp = {}
 function beforeCreate  (hook) {
   let file_name = hook.data.file_name.split(".");
-  cloudinary.v2.uploader.upload(hook.data.uri,{public_id: file_name[0]},function(err,result){
-   console.log("result....",result)
+  console.log("file_name .....",file_name)
+  cloudinary.v2.uploader.upload(hook.data.uri,{public_id: file_name[0],resource_type: "raw",folder:'product_images/'+ id + '/'},function(err,result){
+   console.log("cloudinary result....",result)
    hook.data.file_path = result.secure_url
    resp = result
  });
-
- //       //  hook.result.file_path = result.secure_url
 }
 
 async function afterCreate(hook){
