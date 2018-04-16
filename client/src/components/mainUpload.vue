@@ -79,7 +79,7 @@
                   </div>
               </div>
 
-              <!-- <div v-if="showWebImage" id="upload-image-zone">
+              <div v-if="showWebImage" id="upload-image-zone">
                 <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
                   <span class="dz-message">Mass image upload<br/>
                       <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
@@ -95,7 +95,7 @@
                <div id="dirinfo">
                  <Table border :columns="dircols" :data="dirinfo"></Table>
                </div>
-             </div> -->
+             </div>
 
 
 
@@ -181,7 +181,7 @@
               <span v-if="ProceedLoading">Processing</span>
               <span v-else>Proceed</span>
              </Button>
-             <!-- <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button> -->
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
            </div>
 
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
@@ -690,6 +690,8 @@ if (process.env.NODE_ENV !== 'development') {
   socket = io(config.socketURI,{reconnect: true})
 }
 
+let cloudinary_url = config.cloudinaryUrl
+
 const app = feathers().configure(socketio(socket))
 
 export default {
@@ -785,9 +787,57 @@ export default {
                     },
                     {
                         title: 'Status',
-                        key: 'status'
+                        key: 'status',
+                        render: (h, params) => {
+                          if (params.row.status == 'success') {
+                            return h('div', [
+                                h('i-circle', {
+                                  props: {
+                                    percent: 100,
+                                    size: 30,
+                                    strokeColor: '#5cb85c'
+                                  }
+                                }, [
+                                  h('Icon', {
+                                    props: {
+                                      type: 'ios-checkmark-empty',
+                                      size: 20
+                                    },
+                                    style: {
+                                      color: '#5cb85c'
+                                    }
+                                  })
+                                ])
+                            ]);
+                          } else if (params.row.status == 'error') {
+                            return h('div', [
+                                h('i-circle', {
+                                  props: {
+                                    percent: 100,
+                                    size: 30,
+                                    strokeColor: '#ff5500'
+                                  }
+                                }, [
+                                  h('Icon', {
+                                    props: {
+                                      type: 'ios-close-empty',
+                                      size: 20
+                                    },
+                                    style: {
+                                      color: '#ff5500'
+                                    }
+                                  })
+                                ])
+                            ]);
+                          } else {
+                            console.log("params.row.status",params.row.status)
+                            return h('div',params.row.status)
+                          }
+
+                        }
                     }
                 ],
+         secure_url_arr: [],
          abortImportBtn: false,
          calledfromModify: false,
          calledFromAbort: false,
@@ -1099,9 +1149,9 @@ export default {
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
                 self.mObj[tab].load = true
-                // if(tab == "Product Image"){
-                //   self.nextBtn = true
-                // }
+                if(tab == "Product Image"){
+                  self.nextBtn = true
+                }
                 if(self.mObj[tab].new_flag == 1){
                   // if(my_flag == true){
                     self.mObj[tab].load = true
@@ -1128,53 +1178,67 @@ export default {
 
         }
       },
-      // async handleImageChange(e,tab){
-      //   let self = this
-      //   const reader  = new FileReader();
-      //   // console.log("files....",e.target.files)
-      //    let fileList = e.target.files
-      //
-      //    for(let i=0; i<fileList.length; i++){
-      //      let fileSize = 0;
-      //      if (fileList[i].size > 1024 * 1024)
-      //          fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-      //      else
-      //          fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
-      //
-      //     self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":""})
-      //
-      //     reader.readAsDataURL(fileList[i]);
-      //     let uri = await self.retResult(reader)
-      //
-      //     api.request('post', '/upload-image/',{uri:uri,file_name:fileList[i].name,import_tracker_id:id}).then(response => {
-      //     });
-      //    }
+      async handleImageChange(e,tab){
+        let self = this
+        const reader  = new FileReader();
+        // console.log("files....",e.target.files)
+         let fileList = e.target.files
 
-         // console.log("%%%%% self.dirinfo %%%%",self.dirinfo)
-         // var dirinfo = '<table class="zaklad"><tr><th>File name</th><th>Path</th><th>Size</th><th>Type</th><th>Status</th></tr>';
-         // for (var i = 0, file; file = fileList[i]; i++) {
-         //     var fileSize = 0;
-         //     if (file.size > 1024 * 1024)
-         //         fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-         //     else
-         //         fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
-         //     dirinfo += '<tr><td>' + file.name + '<td>' + file.webkitRelativePath + '<td>' + fileSize + '<td>' + file.type + '<td>' + '' + '</tr>';
-         // }
-         // dirinfo += '</table>';
-         // document.getElementById('dirinfo').innerHTML = dirinfo;
-      // },
-      // Next(tab){
-      //   let self = this
-      //   self.mObj[tab].previewDisplay = false
-      //   self.mObj[tab].headerDisplay = false
-      //   self.showWebImage = true
-      // },
-      // Back(tab){
-      //   let self = this
-      //   self.showWebImage = false
-      //   self.mObj[tab].previewDisplay = true
-      //   self.mObj[tab].headerDisplay = true
-      // },
+         for(let i=0; i<fileList.length; i++){
+           let fileSize = 0;
+           if (fileList[i].size > 1024 * 1024)
+               fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+           else
+               fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
+
+          self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":"Loading..."})
+
+          reader.readAsDataURL(fileList[i]);
+          let uri = await self.retResult(reader)
+          let image_res = self.saveImageToCloudinary(uri,fileList[i].name,i)
+         }
+      },
+      saveImageToCloudinary(uri,filename,i){
+        let self = this
+          axios.post(cloudinary_url,{"file":{"url":uri,"filename":filename},"folder":"product_images/" + id + "/"}).then(response => {
+            console.log("response...",response)
+            self.secure_url_arr.push({"file_name":filename,"secure_url":response.data.secure_url})
+            self.dirinfo[i].status = 'success'
+            return response
+          })
+          .catch(err => {
+            if(err.response){
+              self.$Notice.error({
+                title: err.response.data.name,
+                desc: err.response.data.message,
+                duration: 10
+              })
+              return 'error';
+            }
+            else if(err.message == 'Network Error'){
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+              return 'error';
+            }
+            else {
+              return 'error';
+            }
+          })
+      },
+      Next(tab){
+        let self = this
+        self.mObj[tab].previewDisplay = false
+        self.mObj[tab].headerDisplay = false
+        self.showWebImage = true
+      },
+      Back(tab){
+        let self = this
+        self.showWebImage = false
+        self.mObj[tab].previewDisplay = true
+        self.mObj[tab].headerDisplay = true
+      },
       handleView (item) {
         let self = this
         self.imgpath = item.file_path;
@@ -2511,6 +2575,9 @@ export default {
               streamer.pause()
               self.mObj[tab].uploadCSV = []
               self.mObj[tab].uploadCSV = results.data
+              if(tab == "Product Image"){
+                await self.insertImageUrl(tab)
+              }
               await self.makeNewUploadCSVObj(tab)
               await self.transformFromMapping(tab)
               globalValidateResolve = null
@@ -2593,6 +2660,25 @@ export default {
            }
       })
     }
+    },
+    insertImageUrl(tab){
+      return new Promise(async (resolve,reject)=> {
+      let self = this
+      lodash.map(self.mObj[tab].uploadCSV, function(item) {
+         console.log("item.....",item)
+         console.log("self.secure_url_arr....",self.secure_url_arr)
+         let obj = lodash.find(self.secure_url_arr, {file_name: item.Web_Image_1})
+         console.log('obj', obj)
+         if (obj !== undefined) {
+             item.secure_url = obj.secure_url
+             return item
+         } else {
+             return item
+         }
+       })
+       console.log("insertimageUrl................",self.mObj[tab].uploadCSV)
+       resolve('done')
+     })
     },
     saveSchemaandMapping(tab){
       return new Promise(async (resolve,reject)=> {
@@ -3197,6 +3283,11 @@ export default {
     },
     Abort(tab){
       let self = this
+
+      if(tab == "Product Image"){
+        self.showWebImage = false
+        self.dirinfo = []
+      }
       self.proceedBtn = true
       continue_flag = false
       self.showContinue = false
@@ -3835,6 +3926,11 @@ export default {
               }
 
               if(message[name] && message[name].uploadStatus == "completed"){
+
+                if(self.activeTab == "Product Image"){
+                  self.showWebImage = false
+                  self.nextBtn = false
+                }
                 self.mObj[self.activeTab].headerDisplay = false
                 self.mObj[self.activeTab].previewDisplay = false
                 self.mObj[self.activeTab].newSchemaDisplay = false
