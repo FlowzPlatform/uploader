@@ -160,7 +160,7 @@ var connectToMongo = async function(url,data,socket){
        else{
          var result = await (db.collection(collection_name).insertMany(data.newCSV).then(res => {
            return res
-         }).catch(err => {
+         }).catch(async function(err){
            console.log("error....",err)
            if(err.code == '12501' || err.message == 'quota exceeded'){
               var res1 = await(db.command({repairDatabase:1}))

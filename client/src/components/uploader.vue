@@ -31,7 +31,7 @@
         <Row>
           <!-- <div   > -->
           <div id="dv" class="clearfix col-md-10 col-md-offset-1 col-sm-12 col-xs-12" style="display:none">
-              <Button type="ghost" class="ghtbtn">×</Button>
+              <!-- <Button type="ghost" class="ghtbtn">×</Button> -->
               <img class="bulb" src="../assets/images/idea.png" />
               <p id="get"></p>
           </div>
