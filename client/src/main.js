@@ -8,7 +8,6 @@ import { sync } from 'vuex-router-sync'
 import routes from './router'
 import store from './store'
 import config from '@/config'
-
 import toastr from 'toastr'
 
 // Include and set up feathers client

@@ -78,7 +78,6 @@ async function beforeCreate(hook) {
     let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
     if(tdata.stepStatus == 'import_to_confirm'){
       await axios.post(base_url, hook.data).then(res => {
-        console.log("Import-to-confirm res....",res)
         if(res.status == 200){
           let confirm_obj = {
             stepStatus : "import_to_confirm_in_progress"

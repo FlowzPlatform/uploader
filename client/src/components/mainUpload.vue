@@ -79,7 +79,27 @@
                   </div>
               </div>
 
-              <div v-if="showWebImage">
+              <!-- <div v-if="showWebImage" id="upload-image-zone">
+                <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
+                  <span class="dz-message">Mass image upload<br/>
+                      <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
+                  </span>
+                  <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
+               </form>
+               <Button type="primary" style="margin-top:0px;color: #fff;margin-top:14px;float:right;padding: 6px 30px;margin-left:1%" @click="Back(activeTab)">Back</Button>
+               <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)">Abort</Button>
+               <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)"  :disabled="!proceedBtn" :loading="ProceedLoading">
+                <span v-if="ProceedLoading">Processing</span>
+                <span v-else>Proceed</span>
+               </Button>
+               <div id="dirinfo">
+                 <Table border :columns="dircols" :data="dirinfo"></Table>
+               </div>
+             </div> -->
+
+
+
+              <!-- <div v-if="showWebImage">
                 <div id="upload-csv-zone">
                   <div class="file-zone" @click="upldImage()">
                       <span class="dz-message">Drop images here<br/>
@@ -101,7 +121,7 @@
 
             <Modal title="View Image" v-model="visible">
               <img :src="imgpath" v-if="visible" style="width: 100%">
-           </Modal>
+           </Modal> -->
 
             <!-- <div v-if="showWebImage">
           <form action="/">
@@ -156,11 +176,12 @@
                    </div>
                  </div>
              </div>
-             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;width:7%" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;width:10%" @click="Proceed(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay" :disabled="!proceedBtn" :loading="ProceedLoading">
+             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)" v-if="(mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay) && !nextBtn" :disabled="!proceedBtn" :loading="ProceedLoading">
               <span v-if="ProceedLoading">Processing</span>
               <span v-else>Proceed</span>
              </Button>
+             <!-- <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button> -->
            </div>
 
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
@@ -744,12 +765,34 @@ export default {
              parallelUploads: 5
          },
          showContinue: false,
-         // loadProcessing: false,
-         // loadProceed: false,
+         dirinfo: [],
+         dircols: [
+                    {
+                        title: 'FileName',
+                        key: 'name'
+                    },
+                    {
+                        title: 'Path',
+                        key: 'path'
+                    },
+                    {
+                        title: 'Size',
+                        key: 'size'
+                    },
+                    {
+                        title: 'Type',
+                        key: 'type'
+                    },
+                    {
+                        title: 'Status',
+                        key: 'status'
+                    }
+                ],
          abortImportBtn: false,
          calledfromModify: false,
          calledFromAbort: false,
          ProceedLoading: false,
+         nextBtn: false,
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -1056,6 +1099,9 @@ export default {
                 self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
                 self.mObj[tab].headers.push("_id")
                 self.mObj[tab].load = true
+                // if(tab == "Product Image"){
+                //   self.nextBtn = true
+                // }
                 if(self.mObj[tab].new_flag == 1){
                   // if(my_flag == true){
                     self.mObj[tab].load = true
@@ -1082,6 +1128,53 @@ export default {
 
         }
       },
+      // async handleImageChange(e,tab){
+      //   let self = this
+      //   const reader  = new FileReader();
+      //   // console.log("files....",e.target.files)
+      //    let fileList = e.target.files
+      //
+      //    for(let i=0; i<fileList.length; i++){
+      //      let fileSize = 0;
+      //      if (fileList[i].size > 1024 * 1024)
+      //          fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+      //      else
+      //          fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
+      //
+      //     self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":""})
+      //
+      //     reader.readAsDataURL(fileList[i]);
+      //     let uri = await self.retResult(reader)
+      //
+      //     api.request('post', '/upload-image/',{uri:uri,file_name:fileList[i].name,import_tracker_id:id}).then(response => {
+      //     });
+      //    }
+
+         // console.log("%%%%% self.dirinfo %%%%",self.dirinfo)
+         // var dirinfo = '<table class="zaklad"><tr><th>File name</th><th>Path</th><th>Size</th><th>Type</th><th>Status</th></tr>';
+         // for (var i = 0, file; file = fileList[i]; i++) {
+         //     var fileSize = 0;
+         //     if (file.size > 1024 * 1024)
+         //         fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+         //     else
+         //         fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
+         //     dirinfo += '<tr><td>' + file.name + '<td>' + file.webkitRelativePath + '<td>' + fileSize + '<td>' + file.type + '<td>' + '' + '</tr>';
+         // }
+         // dirinfo += '</table>';
+         // document.getElementById('dirinfo').innerHTML = dirinfo;
+      // },
+      // Next(tab){
+      //   let self = this
+      //   self.mObj[tab].previewDisplay = false
+      //   self.mObj[tab].headerDisplay = false
+      //   self.showWebImage = true
+      // },
+      // Back(tab){
+      //   let self = this
+      //   self.showWebImage = false
+      //   self.mObj[tab].previewDisplay = true
+      //   self.mObj[tab].headerDisplay = true
+      // },
       handleView (item) {
         let self = this
         self.imgpath = item.file_path;
@@ -3108,6 +3201,7 @@ export default {
       continue_flag = false
       self.showContinue = false
       self.mObj[tab].load = false
+      self.nextBtn = false
       self.mObj[tab].uploadCSV = []
       self.mObj[tab].newUploadCSV = []
       self.mObj[tab].headerDisplay = false
@@ -4222,6 +4316,15 @@ Number.prototype.toDecimal = function(precision) {
 
 </script>
 <style>
+table.zaklad {
+           border-collapse: collapse;
+           margin: 5px;
+       }
+
+ table.zaklad th, table.zaklad td {
+     border: solid 1px black;
+     padding: 4px;
+ }
 .vue-tabs .nav-stacked > li:before {
     position: absolute;
     background-color: #494E6B;
@@ -4403,13 +4506,29 @@ Number.prototype.toDecimal = function(precision) {
   margin-bottom: 15px;
 }
 
+#upload-image-zone>.file-zone {
+  border: 2px dashed #494e6b;
+  position: relative;
+  margin-bottom: 15px;
+}
+
 #upload-csv-zone>.file-zone>input[type="file"] {
   width: 100%;
   height: 200px;
   opacity: 0;
 }
 
+#upload-image-zone>.file-zone>input[type="file"] {
+  width: 100%;
+  height: 200px;
+  opacity: 0;
+}
+
 #upload-csv-zone .dz-spinner {
+  display: none;
+}
+
+#upload-image-zone .dz-spinner {
   display: none;
 }
 
@@ -4435,6 +4554,17 @@ Number.prototype.toDecimal = function(precision) {
   display: block;
 }
 
+#upload-image-zone .dz-message {
+  position: absolute;
+  font-weight: 500;
+  font-size: 25px;
+  top: 35%;
+  text-align: center;
+  width: 100%;
+  color: #98878f;
+  display: block;
+}
+
 #upload-csv-zone .dz-message>small {
   font-size: 60%;
   color: #bbb;
@@ -4442,6 +4572,10 @@ Number.prototype.toDecimal = function(precision) {
 
 #upload-csv-zone.onprogress .dz-message {
   display: none;
+}
+
+#dirinfo {
+  padding-top: 6%;
 }
 
 .ivu-table-wrapper {
