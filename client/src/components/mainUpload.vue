@@ -93,8 +93,17 @@
                 <span v-else>Proceed</span>
                </Button>
                <div id="dirinfo">
-                 <Table border :columns="dircols" :data="dirinfo"></Table>
+                 <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
                </div>
+               <div v-if="image_err.length != 0" style="margin-top:12px;">
+                 <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
+                 <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
+                 <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
+                   <Row>
+                     <Col span="5" v-for="(item,index) in image_err">{{item}}</Col>
+                   </Row>
+                 </div>
+              </div>
              </div>
 
 
@@ -146,7 +155,7 @@
               <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
                <div class="schema-form ivu-table-wrapper">
                  <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
-                   <div class="ivu-table-body" style="overflow:auto !important">
+                   <div class="ivu-table-body" style="overflow:auto !important;">
                      <table style="min-width:1077px;overflow-x: auto;">
                        <thead>
                          <tr>
@@ -771,23 +780,28 @@ export default {
          dircols: [
                     {
                         title: 'FileName',
-                        key: 'name'
+                        key: 'name',
+                        align: 'center'
                     },
                     {
                         title: 'Path',
-                        key: 'path'
+                        key: 'path',
+                        align: 'center'
                     },
                     {
                         title: 'Size',
-                        key: 'size'
+                        key: 'size',
+                        align: 'center'
                     },
                     {
                         title: 'Type',
-                        key: 'type'
+                        key: 'type',
+                        align: 'center'
                     },
                     {
                         title: 'Status',
                         key: 'status',
+                        align: 'center',
                         render: (h, params) => {
                           if (params.row.status == 'success') {
                             return h('div', [
@@ -830,7 +844,6 @@ export default {
                                 ])
                             ]);
                           } else {
-                            console.log("params.row.status",params.row.status)
                             return h('div',params.row.status)
                           }
 
@@ -838,6 +851,7 @@ export default {
                     }
                 ],
          secure_url_arr: [],
+         image_err:[],
          abortImportBtn: false,
          calledfromModify: false,
          calledFromAbort: false,
@@ -1191,17 +1205,17 @@ export default {
            else
                fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
 
-          self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":"Loading..."})
+          self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":"Uploading..."})
 
           reader.readAsDataURL(fileList[i]);
           let uri = await self.retResult(reader)
-          let image_res = self.saveImageToCloudinary(uri,fileList[i].name,i)
+          let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1)
          }
+          $(".f-layout-copy").css("position","absolute");
       },
       saveImageToCloudinary(uri,filename,i){
         let self = this
           axios.post(cloudinary_url,{"file":{"url":uri,"filename":filename},"folder":"product_images/" + id + "/"}).then(response => {
-            console.log("response...",response)
             self.secure_url_arr.push({"file_name":filename,"secure_url":response.data.secure_url})
             self.dirinfo[i].status = 'success'
             return response
@@ -1230,8 +1244,10 @@ export default {
       Next(tab){
         let self = this
         self.mObj[tab].previewDisplay = false
+        self.mObj[tab].newSchemaDisplay = false
         self.mObj[tab].headerDisplay = false
         self.showWebImage = true
+        $(".f-layout-copy").css("position","fixed");
       },
       Back(tab){
         let self = this
@@ -2460,6 +2476,9 @@ export default {
       continue_flag = true
       this.proceedBtn = true
       let self = this
+      if(tab == "Product Image"){
+        await self.checkImg(tab)
+      }
       await self.saveSchemaandMapping(tab)
       this.showContinue = false
       await self.parseFile(tab)
@@ -2488,14 +2507,15 @@ export default {
       let self = this
       self.mObj[tab].newUploadCSV = []
       self.mObj[tab].csv_arr = []
-
       for(let i=0 ;i<self.mObj[tab].uploadCSV.length;i++){
         let obj = {}
          for(let key in self.mObj[tab].uploadCSV[i]){
-
            for(let j=0;j<self.mObj[tab].mapping.length;j++){
              if(self.mObj[tab].mapping[j]["csvHeader"] == key){
                  obj[self.mObj[tab].mapping[j]["sysHeader"]] = self.mObj[tab].uploadCSV[i][key]
+             }
+             else if(key.search('secure_url') !== undefined && key.search('secure_url') !== -1){
+               obj[key] = self.mObj[tab].uploadCSV[i][key]
              }
              else if(!obj.hasOwnProperty(self.mObj[tab].mapping[j]["sysHeader"])){
                   obj[self.mObj[tab].mapping[j]["sysHeader"]] = ''
@@ -2504,7 +2524,6 @@ export default {
          }
          obj["_id"] = uuidV1()
          self.mObj[tab].newUploadCSV.push(obj)
-
          this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
          // for(let k=0;k<this.mObj[tab].mapping.length;k++){
@@ -2544,12 +2563,18 @@ export default {
                }
                else{
                     self.ProceedLoading = true
+                    if(tab == 'Product Image'){
+                      await self.checkImg(tab)
+                    }
                     await self.saveSchemaandMapping(tab)
                     await self.parseFile(tab)
                }
              }
              else{
                  self.ProceedLoading = true
+                 if(tab == 'Product Image'){
+                   await self.checkImg(tab)
+                 }
                  await self.saveSchemaandMapping(tab)
                  await self.parseFile(tab)
              }
@@ -2557,6 +2582,9 @@ export default {
         }
         else{
             self.ProceedLoading = true
+            if(tab == 'Product Image'){
+              await self.checkImg(tab)
+            }
             await self.saveSchemaandMapping(tab)
             await self.parseFile(tab)
         }
@@ -2582,6 +2610,9 @@ export default {
               await self.transformFromMapping(tab)
               globalValidateResolve = null
               await self.ProceedToValidate(tab)
+              if(tab == "Product Image"){
+                await self.ValidateImages(tab)
+              }
               await self.saveData(tab)
               await self.socketResponse()
               if(streamer.paused()) {
@@ -2661,24 +2692,82 @@ export default {
       })
     }
     },
+    checkImg(tab){
+      return new Promise(async(resolve,reject)=> {
+        if(this.dirinfo.length == 0){
+          this.ProceedLoading = false
+          this.modal1 = false
+          this.$Notice.error({
+            title: 'Please upload Images',
+            desc: 'Cannot proceed without uploading images',
+            duration: 5
+          })
+        }
+        else if(this.dirinfo.length != 0){
+          resolve('done')
+        }
+      })
+    },
     insertImageUrl(tab){
       return new Promise(async (resolve,reject)=> {
       let self = this
-      lodash.map(self.mObj[tab].uploadCSV, function(item) {
-         console.log("item.....",item)
-         console.log("self.secure_url_arr....",self.secure_url_arr)
-         let obj = lodash.find(self.secure_url_arr, {file_name: item.Web_Image_1})
-         console.log('obj', obj)
-         if (obj !== undefined) {
-             item.secure_url = obj.secure_url
-             return item
-         } else {
-             return item
+      for (let [inx, item] of self.mObj[tab].uploadCSV.entries()) {
+       for (let k in item) {
+         let n = k.search('Web_Image')
+         if (n !== undefined && n !== -1) {
+           let check = lodash.find(self.secure_url_arr, {file_name: item[k]})
+           if (check !== undefined) {
+             let abc = k.split('_')
+             item['secure_url_' + abc[2]] = check['secure_url']
+           }
          }
-       })
-       console.log("insertimageUrl................",self.mObj[tab].uploadCSV)
+       }
+      }
+
+      // lodash.map(self.mObj[tab].uploadCSV, function(item) {
+      //    console.log("item.....",item)
+      //    console.log("self.secure_url_arr....",self.secure_url_arr)
+      //    let obj = lodash.find(self.secure_url_arr, {file_name: item.Web_Image_1})
+      //    console.log('obj', obj)
+      //    if (obj !== undefined) {
+      //        item.secure_url = obj.secure_url
+      //        return item
+      //    } else {
+      //        return item
+      //    }
+      //  })
+      //  console.log("insertimageUrl................",self.mObj[tab].uploadCSV)
        resolve('done')
      })
+    },
+    ValidateImages(tab){
+      return new Promise(async(resolve,reject)=> {
+        let self = this
+        self.image_err = []
+        for(let [inx,item] of self.mObj[tab].newUploadCSV.entries()){
+          for(let k in item){
+              if(k.search('web_image') != undefined && k.search('web_image') != -1){
+                if(item[k] !== ""){
+                  let obj = lodash.find(self.dirinfo,{name: item[k]})
+                  if(obj == undefined){
+                    self.image_err.push(item[k])
+                  }
+                }
+              }
+          }
+        }
+        if(self.image_err.length != 0){
+          if(self.mObj[tab].load == true){
+            self.mObj[tab].load = false
+            self.showWebImage = true
+          }
+          self.ProceedLoading = false
+          $(".f-layout-copy").css("position","absolute");
+        }
+        else{
+          resolve('done')
+        }
+      })
     },
     saveSchemaandMapping(tab){
       return new Promise(async (resolve,reject)=> {
@@ -3266,6 +3355,10 @@ export default {
                 self.mObj[tab].uploadDisplay = false
                 self.mObj[tab].showHandson = true
                 self.mObj[tab].errDisplay = true
+
+                if(tab == "Product Image"){
+                  self.showWebImage = false
+                }
                 if(self.mObj[tab].load == true){
                   self.mObj[tab].load = false
                 }
@@ -3287,6 +3380,7 @@ export default {
       if(tab == "Product Image"){
         self.showWebImage = false
         self.dirinfo = []
+        self.image_err = []
       }
       self.proceedBtn = true
       continue_flag = false
@@ -4947,5 +5041,11 @@ table.zaklad {
 
 .ivu-poptip-body-content {
   overflow: inherit !important;
+}
+
+.dirinfo1 .ivu-table-body{
+  overflow-x: hidden !important;
+  overflow-y: auto;
+  max-height: 250px;
 }
 </style>
