@@ -172,56 +172,67 @@ export default {
         self.chunkData = []
         let filtered_records
 
-        if(this.$store.state.selectedUserName != "All"){
-          if(self.$store.state.user_detail_list.length != 0){
-            filtered_records = lodash.filter(self.$store.state.user_detail_list, function(o) { if(o.name == self.$store.state.selectedUserName){
-              return o.label
-            } });
-            id1 = filtered_records[0].label
+        if(this.$store.state.disconnect == false){
+
+          if(this.$store.state.selectedUserName != "All"){
+            if(self.$store.state.user_detail_list.length != 0){
+              filtered_records = lodash.filter(self.$store.state.user_detail_list, function(o) { if(o.name == self.$store.state.selectedUserName){
+                return o.label
+              } });
+              id1 = filtered_records[0].label
+            }
+
           }
 
-        }
-
-        if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id != "All"){
-          socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id},async (e, data) => {
-            self.cpage = 1
-            if(data){
-              if(data.data.length != 0){
+          if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id != "All"){
+            socket.emit('uploader::find', {"user_id":id1,"subscriptionId":this.$store.state.subscription_id},async (e, data) => {
+              self.cpage = 1
+              if(data){
+                if(data.data.length != 0){
                   await self.renderData(data.data)
+                }
+                else{
+                  self.loading = false
+                }
               }
-              else{
-                self.loading = false
+            })
+          }
+          else if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id == "All"){
+            socket.emit('uploader::find', {"user_id":id1,"role":"other"}, async (e, data) => {
+              self.cpage = 1
+              if(data){
+                if(data.data.length != 0){
+                  await self.renderData(data.data)
+                }
+                else{
+                  self.loading = false
+                }
               }
-            }
+            })
+          }
+          else {
+
+            socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"},async (e, data) => {
+              self.cpage = 1
+              if(data){
+                if(data.data.length != 0){
+                  await self.renderData(data.data)
+                }
+                else{
+                  self.loading = false
+                }
+              }
+            })
+          }
+        }
+        else if(this.$store.state.disconnect == true){
+          self.loading = false
+          self.$Notice.error({
+            title: 'Service unavailable',
+            duration: 10
           })
         }
-        else if(this.$store.state.selectedUserName != "All" && this.$store.state.subscription_id == "All"){
-          socket.emit('uploader::find', {"user_id":id1,"role":"other"}, async (e, data) => {
-            self.cpage = 1
-            if(data){
-              if(data.data.length != 0){
-                await self.renderData(data.data)
-              }
-              else{
-                self.loading = false
-              }
-            }
-            })
-        }
-        else {
 
-          socket.emit('uploader::find', {"user_id":this.$store.state.userid,"role":"other"},async (e, data) => {
-            self.cpage = 1
-            if(data){
-              if(data.data.length != 0){
-                 await self.renderData(data.data)
-              }
-              else{
-                self.loading = false
-              }
-            }
-            })
-        }
 
 
       }

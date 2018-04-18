@@ -31,7 +31,7 @@
         <Row>
           <!-- <div   > -->
           <div id="dv" class="clearfix col-md-10 col-md-offset-1 col-sm-12 col-xs-12" style="display:none">
-              <Button type="ghost" class="ghtbtn">×</Button>
+              <!-- <Button type="ghost" class="ghtbtn">×</Button> -->
               <img class="bulb" src="../assets/images/idea.png" />
               <p id="get"></p>
           </div>
@@ -146,19 +146,6 @@ export default {
               subscriptionId: this.$store.state.subscription_id
             }
 
-            // if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
-            //   obj["username"] = this.$store.state.user.firstname
-            // }
-            // else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
-            //   obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
-            // }
-            // else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
-            //   obj["username"] = this.$store.state.user.lastname
-            // }
-            // else if(this.$store.state.user.email){
-            //     obj["username"] = this.$store.state.user.email
-            // }
-
             api.request('post', '/uploader', obj).then(res => {
               id = res.data.id
               this.$store.state.disableuser = true
@@ -167,45 +154,49 @@ export default {
             })
             .catch(error =>{
               this.loadingBtn = false
-              this.$Notice.error({
-                     title: error.response.data.name,
-                     desc: error.response.data.message,
-                     duration: 10
-              })
-            //   if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
-            //     this.$Notice.error({
-            //      title: error.response.data.message,
-            //      duration: 3
-            //    });
-            //   }
-            //   else {
-            //     this.$Notice.error({
-            //      title: error.response.data.message,
-            //      duration: 3
-            //    });
-            // }
+              if(error.response){
+                this.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+              else if(error.message == 'Network Error'){
+                this.$Notice.error({
+                  title: 'API Service unavailable',
+                  duration: 10
+                })
+              }
+
             })
           }
        }
      },
      getData(id){
-       socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
+      if(this.$store.state.disconnect == false){
+        socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
 
-         if(data){
-           if (data.data.length !== 0) {
-             this.showDiv = false
-             this.loading = false
-             this.$router.push('/landing/' + data.data[0].id)
-           }
-           else {
-             this.showDiv = true
-             this.loading = false
-             this.$store.state.jobData = {}
-           }
-         }
-         else if(e){
-         }
-       })
+          if(data){
+            if (data.data.length !== 0) {
+              this.showDiv = false
+              this.loading = false
+              this.$router.push('/landing/' + data.data[0].id)
+            }
+            else {
+              this.showDiv = true
+              this.loading = false
+              this.$store.state.jobData = {}
+            }
+          }
+        })
+      }
+      else if(this.$store.state.disconnect == true){
+        this.loading = false
+        this.$Notice.error({
+          title: 'Service unavailable',
+          duration: 10
+        })
+      }
      }
     },
     mounted(){

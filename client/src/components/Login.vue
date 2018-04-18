@@ -7,18 +7,23 @@
         <Col :span="6" offset="1">
           <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="get">
             <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
+            <input type="hidden" name="failure_url" :value="facebookSuccessCallbackUrl">
           </form>
           <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="get">
             <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
+            <input type="hidden" name="failure_url" :value="googleSuccessCallbackUrl">
           </form>
           <form id="form-twitter" name="form-twitter" :action="loginWithTwitterUrl" method="get">
             <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
+            <input type="hidden" name="failure_url" :value="twitterSuccessCallbackUrl">
           </form>
           <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="get">
             <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
+            <input type="hidden" name="failure_url" :value="linkedinSuccessCallbackUrl">
           </form>
           <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="get">
             <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
+            <input type="hidden" name="failure_url" :value="githubSuccessCallbackUrl">
           </form>
           <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
             <FormItem class="animate0 bounceIn">
@@ -145,7 +150,25 @@ export default {
         if (valid) {
           this.loading = true
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
-						this.$Message.error(error.response.data)
+            if(error.response.data.name != undefined && error.response.data.message != undefined){
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+            else if(error.message == 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+            else {
+              this.$Notice.error({
+                title: error.response.data,
+                duration: 10
+              })
+            }
             this.loading = false
             return
           })
