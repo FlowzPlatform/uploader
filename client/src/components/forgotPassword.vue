@@ -98,7 +98,12 @@ export default {
                })
                .catch(function(error) {
                   self.loading = false
-                  self.$message.error("Email is incorrect");
+                  if(error.response){
+                    self.$message.error(error.response.data);
+                  }
+                  else if(error.message){
+                    self.$message.error(error.message);
+                  }
                });
 
         } else {
