@@ -45,8 +45,7 @@
                            <div class="api" slot="content">
                              <Form inline>
                                <FormItem>
-                                   <Input type="text" v-model="mObj[activeTab].new_schema">
-                                   </Input>
+                                   <Input type="text" v-model="mObj[activeTab].new_schema" @on-enter="validateSchema(activeTab,mObj[activeTab].new_schema)"></Input>
                                </FormItem>
                                   <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
                                   <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
@@ -2348,7 +2347,7 @@ export default {
         else{
           let flag = false
           for(let i=0;i<this.mObj[tab].schemaList.length;i++){
-            if(this.mObj[tab].schemaList.value == schema){
+            if(this.mObj[tab].schemaList[i].value == schema){
               this.$Notice.error({
                      title: 'This mapping name already exists',
                      duration: 5
@@ -2470,6 +2469,12 @@ export default {
       this.proceedBtn = true
       this.ProceedLoading = false
       continue_flag = false
+
+      if(tab == "Product Image"){
+        this.showWebImage = false
+        this.mObj[tab].previewDisplay = true
+        this.mObj[tab].headerDisplay = true
+      }
     },
    async continuee(tab){
       // this.loadProcessing = true
@@ -2478,12 +2483,13 @@ export default {
       let self = this
       if(tab == "Product Image"){
         await self.checkImg(tab)
+        await self.ValidateImages(tab)
       }
-      await self.saveSchemaandMapping(tab)
       this.showContinue = false
-      await self.parseFile(tab)
       self.modal1 = false
       self.ProceedLoading = true
+      await self.saveSchemaandMapping(tab)
+      await self.parseFile(tab)
     },
     cancel (){
       this.proceedBtn = true
@@ -2541,6 +2547,9 @@ export default {
     async Proceed(tab){
       let self = this
         if(map_flag == false){
+          if(tab == 'Product Image'){
+            await self.checkImg(tab)
+          }
           let check_headers = _.filter(self.mObj[tab].mapping, function(o) {
             if(o.schemaObj.optional == false && o.csvHeader == ""){
               return o.csvHeader == "";
@@ -2563,8 +2572,8 @@ export default {
                }
                else{
                     self.ProceedLoading = true
-                    if(tab == 'Product Image'){
-                      await self.checkImg(tab)
+                    if(tab == "Product Image"){
+                      await self.ValidateImages(tab)
                     }
                     await self.saveSchemaandMapping(tab)
                     await self.parseFile(tab)
@@ -2572,8 +2581,8 @@ export default {
              }
              else{
                  self.ProceedLoading = true
-                 if(tab == 'Product Image'){
-                   await self.checkImg(tab)
+                 if(tab == "Product Image"){
+                   await self.ValidateImages(tab)
                  }
                  await self.saveSchemaandMapping(tab)
                  await self.parseFile(tab)
@@ -2584,6 +2593,7 @@ export default {
             self.ProceedLoading = true
             if(tab == 'Product Image'){
               await self.checkImg(tab)
+              await self.ValidateImages(tab)
             }
             await self.saveSchemaandMapping(tab)
             await self.parseFile(tab)
@@ -2609,10 +2619,10 @@ export default {
               await self.makeNewUploadCSVObj(tab)
               await self.transformFromMapping(tab)
               globalValidateResolve = null
+              // if(tab == "Product Image"){
+              //   await self.ValidateImages(tab)
+              // }
               await self.ProceedToValidate(tab)
-              if(tab == "Product Image"){
-                await self.ValidateImages(tab)
-              }
               await self.saveData(tab)
               await self.socketResponse()
               if(streamer.paused()) {
@@ -2723,20 +2733,6 @@ export default {
          }
        }
       }
-
-      // lodash.map(self.mObj[tab].uploadCSV, function(item) {
-      //    console.log("item.....",item)
-      //    console.log("self.secure_url_arr....",self.secure_url_arr)
-      //    let obj = lodash.find(self.secure_url_arr, {file_name: item.Web_Image_1})
-      //    console.log('obj', obj)
-      //    if (obj !== undefined) {
-      //        item.secure_url = obj.secure_url
-      //        return item
-      //    } else {
-      //        return item
-      //    }
-      //  })
-      //  console.log("insertimageUrl................",self.mObj[tab].uploadCSV)
        resolve('done')
      })
     },
@@ -2744,9 +2740,9 @@ export default {
       return new Promise(async(resolve,reject)=> {
         let self = this
         self.image_err = []
-        for(let [inx,item] of self.mObj[tab].newUploadCSV.entries()){
+        for(let [inx,item] of self.mObj[tab].uploadCSV.entries()){
           for(let k in item){
-              if(k.search('web_image') != undefined && k.search('web_image') != -1){
+              if(k.search('Web_Image') != undefined && k.search('Web_Image') != -1){
                 if(item[k] !== ""){
                   let obj = lodash.find(self.dirinfo,{name: item[k]})
                   if(obj == undefined){
@@ -2757,10 +2753,11 @@ export default {
           }
         }
         if(self.image_err.length != 0){
-          if(self.mObj[tab].load == true){
-            self.mObj[tab].load = false
+          // if(self.mObj[tab].load == true){
+          //   self.mObj[tab].load = false
+            self.modal1 = false
             self.showWebImage = true
-          }
+          // }
           self.ProceedLoading = false
           $(".f-layout-copy").css("position","absolute");
         }
@@ -2855,11 +2852,16 @@ export default {
         })
         .catch(error => {
           if(error.response){
-            self.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
+            if(error.response.data.message == 'GeneralError: This mapping name already exists'){
+             resolve('done')
+            }
+            else{
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
           }
           else if(error.message == 'Network Error'){
             this.$Notice.error({
@@ -3412,6 +3414,10 @@ export default {
               this.mObj[tab].filter_flag = false
               this.mObj[tab].main_arr = []
               this.mObj[tab].headers = []
+               if(tab == "Product Image"){
+                 this.dirinfo = []
+                 this.image_err = []
+               }
               this.mObj[tab].savePreviewDisplay = false
               this.mObj[tab].complete_flag = false
               if(this.mObj[tab].headerDisplay == true){
@@ -3472,6 +3478,8 @@ export default {
         self.mObj[tab].newUploadCSV = []
         self.mObj[tab].data1 = []
         self.mObj[tab].headers1 = []
+        self.dirinfo = []
+        self.image_err = []
         complete_flag = true
         totalRecords = 0
         $('table.htCore').each(function () {
@@ -5046,6 +5054,6 @@ table.zaklad {
 .dirinfo1 .ivu-table-body{
   overflow-x: hidden !important;
   overflow-y: auto;
-  max-height: 250px;
+  max-height: 200px;
 }
 </style>
