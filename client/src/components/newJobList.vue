@@ -3,7 +3,7 @@
     <h2 class="listUpld">List of Uploads</h2><br>
     <Table :columns="columns1" :data="chunkData[cpage-1]" class="jobtable"></Table>
     <div class="pagination">
-      <Page :total="data2.length" :current="cpage" @on-change="changePage" :page-size=10></Page>
+      <Page :total="data2.length" :current="cpage" @on-change="changePage" :page-size=10 show-total></Page>
     </div>
     <Spin fix v-if="loading">
        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
@@ -167,6 +167,7 @@ export default {
         self.chunkData = lodash.chunk(self.data2, 10);
       },
       getJobDetails(){
+        console.log("$$$$$$$$")
         let self = this
         self.data2 = []
         self.chunkData = []
@@ -268,7 +269,6 @@ export default {
     },
     watch:{
       '$store.state.subscription_id': function (id) {
-
         let self = this
         self.loading = true
         self.$store.commit('SET_STORED_SUB_ID',id)
@@ -287,7 +287,7 @@ export default {
       },
       '$store.state.subscription_name':function(name){
         let self = this
-      }
+      },
     },
     mounted(){
       var self = this
@@ -303,6 +303,7 @@ export default {
           this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
       }
       if(this.$store.state.storedUsername != ""){
+        console.log("%%%%%%%%")
         let sub_id = lodash.findIndex(self.$store.state.user_detail_list, function(o) { return o.name == self.$store.state.storedUsername; })
         if(sub_id != -1){
            self.selected_user = self.$store.state.user_detail_list[sub_id].name
@@ -351,6 +352,13 @@ export default {
 .jobtable .ivu-table-body table {width: 100% !important;}
 .jobtable .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
 .jobtable .ivu-table .ivu-table-tip {overflow-x: hidden;}
-
+.pagination .ivu-page-total {
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    margin-right: 10px;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
 
 </style>

@@ -174,23 +174,6 @@ import config from '@/config'
                }
              }
            }
-          //  else if(list.length == 0){
-          //     console.log("else called")
-          //    if(this.$store.state.user_list.length != 0){
-          //      if(this.$store.state.storedUsername != ""){
-          //        console.log("++++++++++ 153",this.$store.state.user_list)
-          //        this.selected_user = this.$store.state.storedUsername
-          //        this.$store.state.storedUsername = this.selected_user
-          //        this.$store.commit('SET_STOREDUSERNAME', this.selected_user)
-          //      }
-          //      else{
-          //        console.log("++++++++++ 158",this.$store.state.user_list)
-          //        this.selected_user = this.$store.state.user_list[0].label
-          //        this.$store.state.storedUsername = this.selected_user
-          //        this.$store.commit('SET_STOREDUSERNAME', this.selected_user)
-          //      }
-          //    }
-          //  }
        },
        'selected_user':function(user){
          if(user != ""){

@@ -1194,7 +1194,6 @@ export default {
       async handleImageChange(e,tab){
         let self = this
         const reader  = new FileReader();
-        // console.log("files....",e.target.files)
          let fileList = e.target.files
 
          for(let i=0; i<fileList.length; i++){
@@ -1208,11 +1207,11 @@ export default {
 
           reader.readAsDataURL(fileList[i]);
           let uri = await self.retResult(reader)
-          let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1)
+          let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
          }
           $(".f-layout-copy").css("position","absolute");
       },
-      saveImageToCloudinary(uri,filename,i){
+      saveImageToCloudinary(uri,filename,i,length){
         let self = this
           axios.post(cloudinary_url,{"file":{"url":uri,"filename":filename},"folder":"product_images/" + id + "/"}).then(response => {
             self.secure_url_arr.push({"file_name":filename,"secure_url":response.data.secure_url})
@@ -2209,6 +2208,7 @@ export default {
 
         }
         else{
+
           let currentSelectedSchema = this.mObj[tab].selected_schema
           this.existingSchemaData = []
           if(this.$store.state.disconnect == false){
@@ -2371,17 +2371,11 @@ export default {
         }
       },
     generateHeadersandMapping(tab){
+
       let self = this
       self.map = false
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
       self.mObj[tab].newUploadCSV = []
-
-      // errcols = []
-      // err_length = 0
-      // self.mObj[tab].data1 = []
-      // self.mObj[tab].headers1 = []
-      // self.mObj[tab].errmsg = []
-      // schema_Obj = await this.makeSchemaObj(tab)
 
       if(self.mObj[tab].uploadCSV.length != 0){
         self.loadingdot = true
@@ -2477,7 +2471,6 @@ export default {
       }
     },
    async continuee(tab){
-      // this.loadProcessing = true
       continue_flag = true
       this.proceedBtn = true
       let self = this
@@ -4329,6 +4322,7 @@ export default {
                           for(let i=0;i<self.fileTypes.length;i++){
                             self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
                             self.mObj[self.fileTypes[i]].display = true
+                            self.mObj[self.fileTypes[i]].new_flag = 1
                           }
                           self.loading = false
                           for(let i=0;i<self.fileTypes.length;i++){
