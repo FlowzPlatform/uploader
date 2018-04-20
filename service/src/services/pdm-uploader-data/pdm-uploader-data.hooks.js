@@ -4,14 +4,20 @@ var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const _ = require('lodash');
 let errors = require('@feathersjs/errors') ;
-if (process.env.mongodb_host)
-    config1.mongodb_host = process.env.mongodb_host
-if (process.env.mongodb_port)
-    config1.mongodb_port = process.env.mongodb_port
-if (process.env.username)
-    config1.username = process.env.username
-if (process.env.password)
-    config1.password = process.env.password
+// if (process.env.mongodb_host)
+//     config1.mongodb_host = process.env.mongodb_host
+// if (process.env.mongodb_port)
+//     config1.mongodb_port = process.env.mongodb_port
+// if (process.env.username)
+//     config1.username = process.env.username
+// if (process.env.password)
+//     config1.password = process.env.password
+
+config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
+config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
+config1.mongodb_database = process.env.mongodb_database ? process.env.mongodb_database : 'pdmuploader'
+config1.username = process.env.username ? process.env.username : null
+config1.password = process.env.password ? process.env.password : null
 
 
 module.exports = {
@@ -52,7 +58,7 @@ module.exports = {
 
 var beforeFind = async function(hook) {
     // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-    var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
+    var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database ;
     var cnn_with_mongo = await connectToMongo(url,hook).then(res => {
 
     })
@@ -66,7 +72,7 @@ var connectToMongo = async function(url,hook){
     return res
   })
   .catch(error => {
-    throw new errors.GeneralError('Unable to connect to Mongodb');
+    throw new errors.GeneralError('Mongodb Service unavailable');
   }))
 
     let tables = hook.params.query.tables
@@ -83,7 +89,7 @@ var connectToMongo = async function(url,hook){
 
 var beforeRemove = async function(hook) {
     // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-    var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
+    var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
     var cnn_with_mongo = await deleteFromMongo(url,hook).then(res => {
 
     })
@@ -96,7 +102,7 @@ var deleteFromMongo = async function(url,hook){
   var db = await (MongoClient.connect(url).then(res => {
     return res
   }).catch(error => {
-     throw new errors.GeneralError('Unable to connect to Mongodb');
+     throw new errors.GeneralError('Mongodb Service unavailable');
   }))
 
   let sheet_name = hook.params.query.sheet_name

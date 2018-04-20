@@ -33,18 +33,14 @@ export default {
         }
       })
       .then(response => {
-        // console.log("response....",response)
         return response
       })
       .catch(err => {
         if(err.message == "Network Error"){
-          // toastr.error("Api service unavailable")
+          toastr.error("API Service unavailable")
         }
         else if(err.response != undefined){
-          // toastr.error(err.response.data.message)
-        }
-        else{
-          // toastr.error(err.response.data.message)
+          toastr.error(err.response.data.message)
         }
       })
       if(response.data.data.length != 0){
@@ -94,10 +90,9 @@ export default {
   //  setTimeout(function(){
      state.user_detail_list = list1
   //  },4500)
-
-
-
-
+  },
+  SET_DISCONNECT (state,value) {
+    state.disconnect = value
   },
   SET_TOKEN (state, token) {
     state.token = token

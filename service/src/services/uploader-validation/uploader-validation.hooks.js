@@ -11,6 +11,7 @@ const config1 = require('../../../config/default.json');
 let errors = require('@feathersjs/errors') ;
 config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
 config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
+config1.mongodb_database = process.env.mongodb_database ? process.env.mongodb_database : 'pdmuploader'
 config1.username = process.env.username ? process.env.username : null
 config1.password = process.env.password ? process.env.password : null
 
@@ -52,7 +53,7 @@ module.exports = {
 
 var beforeCreate = async function(hook){
   // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
+  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
   var cnn_with_mongo = await connectToMongo(hook,url).then(res => {
     return res
   })
@@ -66,7 +67,7 @@ var connectToMongo = async function(hook,url){
     return res
   })
   .catch(err => {
-    throw new errors.GeneralError('Unable to connect to Mongodb');
+    throw new errors.GeneralError('Mongodb Service unavailable');
   }))
 
   let collection_name = hook.data.sheet_name.split(" ")
@@ -163,7 +164,7 @@ var connectToMongo = async function(hook,url){
 
 var beforePatch= async function(hook){
   // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
+  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
   var cnn_with_mongo = await UpdateInMongo(hook,url).then(res => {
     return res
   })
@@ -177,7 +178,7 @@ var UpdateInMongo = async function(hook,url){
     return res
   })
   .catch(err => {
-    throw new errors.GeneralError('Unable to connect to Mongodb');
+    throw new errors.GeneralError('Mongodb Service unavailable');
   }))
   let collection_name = hook.data.sheet_name.split(" ")
   let prod_name = collection_name[0]
