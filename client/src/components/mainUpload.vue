@@ -1203,7 +1203,12 @@ export default {
            else
                fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
 
-          self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":"Uploading..."})
+          if(fileList[i].type != undefined && fileList[i].type != ""){
+            self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":"Uploading..."})
+          }
+          else if(fileList[i].type == undefined || fileList.type == ""){
+            self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"status":"Uploading"})
+          }
 
           reader.readAsDataURL(fileList[i]);
           let uri = await self.retResult(reader)
@@ -2476,7 +2481,7 @@ export default {
       let self = this
       if(tab == "Product Image"){
         await self.checkImg(tab)
-        await self.ValidateImages(tab)
+        // await self.ValidateImages(tab)
       }
       this.showContinue = false
       self.modal1 = false
@@ -2489,6 +2494,7 @@ export default {
       continue_flag = false
     },
     transformFromMapping(tab) {
+      console.log("called......")
       return new Promise(async (resolve,reject)=>{
       this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
        for(let k=0;k<this.mObj[tab].mapping.length;k++){
@@ -2523,6 +2529,7 @@ export default {
          }
          obj["_id"] = uuidV1()
          self.mObj[tab].newUploadCSV.push(obj)
+         console.log("newuplod....",self.mObj[tab].newUploadCSV)
          this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
          // for(let k=0;k<this.mObj[tab].mapping.length;k++){
@@ -2565,18 +2572,18 @@ export default {
                }
                else{
                     self.ProceedLoading = true
-                    if(tab == "Product Image"){
-                      await self.ValidateImages(tab)
-                    }
+                    // if(tab == "Product Image"){
+                    //   await self.ValidateImages(tab)
+                    // }
                     await self.saveSchemaandMapping(tab)
                     await self.parseFile(tab)
                }
              }
              else{
                  self.ProceedLoading = true
-                 if(tab == "Product Image"){
-                   await self.ValidateImages(tab)
-                 }
+                 // if(tab == "Product Image"){
+                 //   await self.ValidateImages(tab)
+                 // }
                  await self.saveSchemaandMapping(tab)
                  await self.parseFile(tab)
              }
@@ -2586,13 +2593,14 @@ export default {
             self.ProceedLoading = true
             if(tab == 'Product Image'){
               await self.checkImg(tab)
-              await self.ValidateImages(tab)
+              // await self.ValidateImages(tab)
             }
             await self.saveSchemaandMapping(tab)
             await self.parseFile(tab)
         }
     },
  parseFile(tab){
+   console.log("parse file called.....")
       let self = this
       Papa.LocalChunkSize = 1000000
       Papa.parse(file, {
@@ -2612,9 +2620,9 @@ export default {
               await self.makeNewUploadCSVObj(tab)
               await self.transformFromMapping(tab)
               globalValidateResolve = null
-              // if(tab == "Product Image"){
-              //   await self.ValidateImages(tab)
-              // }
+              if(tab == "Product Image"){
+                await self.ValidateImages(tab)
+              }
               await self.ProceedToValidate(tab)
               await self.saveData(tab)
               await self.socketResponse()
@@ -2668,8 +2676,10 @@ export default {
       }
     },
     changeStatus(tab,streamer){
+      console.log("tab...",tab)
       if(this.mObj[tab].complete_flag == false && !streamer.paused()){
         let Tab = tab.replace(/\s/g, "")
+        console.log("Tab....",Tab)
         obj1[Tab]["totalNoOfRecords"] = totalRecords
         this.mObj[tab].complete_flag = true
         api.request('patch', '/uploader/' + id,obj1).then(res => {
@@ -2733,9 +2743,9 @@ export default {
       return new Promise(async(resolve,reject)=> {
         let self = this
         self.image_err = []
-        for(let [inx,item] of self.mObj[tab].uploadCSV.entries()){
+        for(let [inx,item] of self.mObj[tab].newUploadCSV.entries()){
           for(let k in item){
-              if(k.search('Web_Image') != undefined && k.search('Web_Image') != -1){
+              if(k.search('web_image') != undefined && k.search('web_image') != -1){
                 if(item[k] !== ""){
                   let obj = lodash.find(self.dirinfo,{name: item[k]})
                   if(obj == undefined){
@@ -2759,27 +2769,9 @@ export default {
         }
       })
     },
-    saveSchemaandMapping(tab){
-      return new Promise(async (resolve,reject)=> {
+    saveSchema(tab,name){
       let self = this
-      let CSVFileObj = {
-        name : file.name,
-        size: file.size,
-        username: self.$store.state.user.email,
-        subscriptionId: self.$store.state.subscription_id,
-        import_tracker_id: id
-      }
-
-      let name = tab.replace(/\s/g, "")
-      obj1 = {}
-      obj1[name] = {
-        uploadStatus:"completed",
-        validateStatus: "pending",
-        uploadedAt: new Date()
-        // totalNoOfRecords: self.mObj[tab].newUploadCSV.length
-      }
-
-      if(self.mObj[tab].new_flag == 1){
+      return new Promise(async(resolve,reject) => {
         let schemaobj = {
           name : self.mObj[tab].selected_schema,
           schema: self.mObj[tab].schema.structure,
@@ -2789,63 +2781,153 @@ export default {
           tabname: tab
         }
 
+        let name = tab.replace(/\s/g, "")
+
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
-
-            schema_id = res.data.id
-
-            api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-
-              CSVFile_id = result.data.id
-
-              let mappingObj = {
-                mapping : self.mObj[tab].mapping,
-                fileTypeId : self.mObj[tab].selected_schema,
-                username : self.$store.state.user.email,
-                subscriptionId: self.$store.state.subscription_id,
-                import_tracker_id:id
-              }
-
-              api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
-              obj1[name]["id"] = CSVFile_id
-              obj1[name]["schema_id"] = schema_id
-              resolve('done')
-              })
-              .catch(error =>{
-                if(error.response){
-                  self.$Notice.error({
-                    title: error.response.data.name,
-                    desc: error.response.data.message,
-                    duration: 10
-                  })
-                }
-                else if(error.message == 'Network Error'){
-                  this.$Notice.error({
-                    title: 'API Service unavailable',
-                    duration: 10
-                  })
-                }
-           })
-
+          console.log("schema saved.....",res)
+          obj1 = {}
+          obj1[name] = {
+            uploadStatus:"completed",
+            validateStatus: "pending",
+            uploadedAt: new Date()
+          }
+          schema_id = res.data.id
+          obj1[name]["schema_id"] = schema_id
+          resolve ('done')
+      })
+      .catch(error => {
+        if(error.response){
+          if(error.response.data.message == 'This mapping name already exists'){
+            resolve('done')
+          }
+          else{
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
             })
-            .catch(error =>{
-              if(error.response){
-                self.$Notice.error({
-                  title: error.response.data.name,
-                  desc: error.response.data.message,
-                  duration: 10
-                })
-              }
-              else if(error.message == 'Network Error'){
-                this.$Notice.error({
-                  title: 'API Service unavailable',
-                  duration: 10
-                })
-              }
-         })
+          }
+        }
+        else if(error.message == 'Network Error'){
+          this.$Notice.error({
+            title: 'API Service unavailable',
+            duration: 10
+          })
+        }
+      })
+    })
+    },
+    saveCSVFiles(tab,name){
+      let self = this
+      return new Promise(async(resolve,reject) => {
+        let CSVFileObj = {
+          name : file.name,
+          size: file.size,
+          username: self.$store.state.user.email,
+          subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id: id
+        }
+
+        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+          console.log("csv file saved....",result)
+          CSVFile_id = result.data.id
+          obj1[name]["id"] = CSVFile_id
+          resolve('done')
         })
-        .catch(error => {
+        .catch(error =>{
           if(error.response){
-            if(error.response.data.message == 'GeneralError: This mapping name already exists'){
+            console.log("error.response...",error.response)
+            if(error.response.data.message == 'This csv file entry already exists'){
+             obj1[name]["id"] = error.response.data.data.CSVFileId
+             obj1[name]["schema_id"] = schema_id
+             resolve('done')
+            }
+            else{
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+          }
+          else if(error.message == 'Network Error'){
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+     })
+      })
+    },
+    saveOnlyCSVFiles(tab,name){
+      let self = this
+      return new Promise(async (resolve,reject)=>{
+        let CSVFileObj = {
+          name : file.name,
+          size: file.size,
+          username: self.$store.state.user.email,
+          subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id: id
+        }
+        obj1 = {}
+        obj1[name] = {
+          uploadStatus:"completed",
+          validateStatus: "pending",
+          uploadedAt: new Date()
+        }
+
+        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+          console.log("uploader csv only files saved....",result)
+
+          CSVFile_id = result.data.id
+          obj1[name]["id"] = CSVFile_id
+          obj1[name]["schema_id"] = schema_id
+          resolve('done')
+      })
+      .catch(error =>{
+        if(error.response){
+          console.log("error.response...",error.response)
+          if(error.response.data.message == 'This csv file entry already exists'){
+            obj1[name]["id"] = error.response.data.data.CSVFileId
+           obj1[name]["schema_id"] = schema_id
+           resolve('done')
+          }
+          else{
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          }
+        }
+        else if(error.message == 'Network Error'){
+          this.$Notice.error({
+            title: 'API Service unavailable',
+            duration: 10
+          })
+        }
+   })
+      })
+    },
+    saveMapping(tab,name){
+      let self = this
+      return new Promise(async(resolve,reject) =>{
+        let mappingObj = {
+          mapping : self.mObj[tab].mapping,
+          fileTypeId : self.mObj[tab].selected_schema,
+          username : self.$store.state.user.email,
+          subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id:id
+        }
+
+        api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
+          console.log("^^^^^^ mapping saved",response)
+          resolve('done')
+        })
+        .catch(error =>{
+          if(error.response){
+            console.log("error.response...",error.response)
+            if(error.response.data.message == 'This csv file mapping already exists'){
              resolve('done')
             }
             else{
@@ -2863,35 +2945,27 @@ export default {
             })
           }
        })
+      })
+    },
+    saveSchemaandMapping(tab){
+      return new Promise(async (resolve,reject)=> {
+      let self = this
+      let name = tab.replace(/\s/g, "")
 
+      if(self.mObj[tab].new_flag == 1){
+          let schema_res = await self.saveSchema(tab,name)
+          let csv_files_res = await self.saveCSVFiles(tab,name)
+          let mapping_res = await self.saveMapping(tab,name)
+          resolve('done')
       }
       else {
-        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-          CSVFile_id = result.data.id
-          obj1[name]["id"] = CSVFile_id
-          obj1[name]["schema_id"] = schema_id
+          let csv_files_res = await self.saveOnlyCSVFiles(tab,name)
           resolve('done')
-      })
-      .catch(error =>{
-        if(error.response){
-          self.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
-          })
-        }
-        else if(error.message == 'Network Error'){
-          this.$Notice.error({
-            title: 'API Service unavailable',
-            duration: 10
-          })
-        }
-   })
-    }
-
+      }
   })
     },
     ProceedToValidate(tab){
+      console.log("called.....proceedtovalidate")
       return new Promise(async (resolve,reject)=> {
         let globalValidateResolveFlag = true
         if (globalValidateResolve === null) {
@@ -2944,7 +3018,6 @@ export default {
           return  fieldName + ' cannot be left blank'
           else
           return
-
       }
 
 
@@ -3371,13 +3444,13 @@ export default {
     },
     Abort(tab){
       let self = this
-
       if(tab == "Product Image"){
         self.showWebImage = false
         self.dirinfo = []
         self.image_err = []
       }
       self.proceedBtn = true
+      self.ProceedLoading = false
       continue_flag = false
       self.showContinue = false
       self.mObj[tab].load = false
@@ -3643,6 +3716,7 @@ export default {
    })
     },
     async showerrmsg (errcols,tab,schema) {
+      console.log("showerr_msg called...")
      var example1 = document.getElementById('example1')
      let row1
      let col1
