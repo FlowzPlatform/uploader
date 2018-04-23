@@ -167,7 +167,6 @@ export default {
         self.chunkData = lodash.chunk(self.data2, 10);
       },
       getJobDetails(){
-        console.log("$$$$$$$$")
         let self = this
         self.data2 = []
         self.chunkData = []
@@ -303,7 +302,6 @@ export default {
           this.$store.state.user_list.splice(0,0,{"value":"All","label":"All"})
       }
       if(this.$store.state.storedUsername != ""){
-        console.log("%%%%%%%%")
         let sub_id = lodash.findIndex(self.$store.state.user_detail_list, function(o) { return o.name == self.$store.state.storedUsername; })
         if(sub_id != -1){
            self.selected_user = self.$store.state.user_detail_list[sub_id].name

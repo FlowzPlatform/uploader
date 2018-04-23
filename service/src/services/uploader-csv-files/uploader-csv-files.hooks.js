@@ -52,8 +52,6 @@ var beforeCreate = async function(hook){
         hook.data["user_id"] = user_data.data.userId
       }
       else if(csvData.data.length > 0){
-        // hook.errors.response.data["id"] = csvData.data[0].id
-        console.log("&&&&&&&",csvData.data[0].id)
         throw new errors.GeneralError('This csv file entry already exists',{CSVFileId: csvData.data[0].id});
       }
     }

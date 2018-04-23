@@ -5,10 +5,10 @@
       </vue-particles>
       <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
-          <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="get">
+          <!-- <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="get">
             <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="facebookSuccessCallbackUrl">
-          </form>
+          </form> -->
           <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="get">
             <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
             <input type="hidden" name="failure" :value="googleSuccessCallbackUrl">
@@ -17,10 +17,10 @@
             <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="twitterSuccessCallbackUrl">
           </form>
-          <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="get">
+          <!-- <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="get">
             <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="linkedinSuccessCallbackUrl">
-          </form>
+          </form> -->
           <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="get">
             <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="githubSuccessCallbackUrl">
@@ -55,12 +55,12 @@
 						<FormItem  class="animate4 bounceIn redirectlink">
 							<Row>
 								<Col style="float:left;">
-                  <Tooltip content="Facebook">
+                  <!-- <Tooltip content="Facebook">
                     <span @click="handleFacebook" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 1s;animation-delay: 1s;-moz-animation-delay: 1s;">
                       <i class="fa fa-square-o fa-stack-2x"></i>
                       <i class="fa fa-facebook fa-stack-1x"></i>
                     </span>
-                  </Tooltip>
+                  </Tooltip> -->
                   <Tooltip content="Google">
                     <span @click="handleGoogle" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 2s;animation-delay: 2s;-moz-animation-delay: 2s;">
                       <i class="fa fa-square-o fa-stack-2x"></i>
@@ -79,12 +79,12 @@
                       <i class="fa fa-github fa-stack-1x"></i>
                     </span>
                   </Tooltip>
-                  <Tooltip content="Linkedin">
+                  <!-- <Tooltip content="Linkedin">
                     <span @click="handleLinkedin" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 3.5s;animation-delay: 3.5s;-moz-animation-delay: 3.5s;">
                       <i class="fa fa-square-o fa-stack-2x"></i>
                       <i class="fa fa-linkedin fa-stack-1x"></i>
                     </span>
-                  </Tooltip>
+                  </Tooltip> -->
 								</Col>
 								<Col  style="float:right;">
                   <router-link to="/forgot-password" >Forgot Password</router-link>

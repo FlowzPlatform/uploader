@@ -856,6 +856,8 @@ export default {
          calledFromAbort: false,
          ProceedLoading: false,
          nextBtn: false,
+         batchsize: 6,
+         image_batch: [],
           mObj:{
           'Product Information':{
                   selected_schema: '',
@@ -1196,7 +1198,7 @@ export default {
         const reader  = new FileReader();
          let fileList = e.target.files
 
-         for(let i=0; i<fileList.length; i++){
+         for(let i=0; i<fileList.length; i++){``
            let fileSize = 0;
            if (fileList[i].size > 1024 * 1024)
                fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
@@ -1212,37 +1214,43 @@ export default {
 
           reader.readAsDataURL(fileList[i]);
           let uri = await self.retResult(reader)
-          let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
+          self.image_batch.push({"file":{"url":uri,"filename":fileList[i].name},"folder":"product_images/" + id + "/"})
+          // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
          }
+         console.log("image_batch.....",self.image_batch)
           $(".f-layout-copy").css("position","absolute");
       },
       saveImageToCloudinary(uri,filename,i,length){
         let self = this
-          axios.post(cloudinary_url,{"file":{"url":uri,"filename":filename},"folder":"product_images/" + id + "/"}).then(response => {
-            self.secure_url_arr.push({"file_name":filename,"secure_url":response.data.secure_url})
-            self.dirinfo[i].status = 'success'
-            return response
-          })
-          .catch(err => {
-            if(err.response){
-              self.$Notice.error({
-                title: err.response.data.name,
-                desc: err.response.data.message,
-                duration: 10
-              })
-              return 'error';
-            }
-            else if(err.message == 'Network Error'){
-              self.$Notice.error({
-                title: 'API Service unavailable',
-                duration: 10
-              })
-              return 'error';
-            }
-            else {
-              return 'error';
-            }
-          })
+
+        socket.emit('pdmimages',{"file":{"url":uri,"filename":filename},"folder":"product_images/" + id + "/"}, (err,data) => {
+
+        })
+          // axios.post(cloudinary_url,{"file":{"url":uri,"filename":filename},"folder":"product_images/" + id + "/"}).then(response => {
+          //   self.secure_url_arr.push({"file_name":filename,"secure_url":response.data.secure_url})
+          //   self.dirinfo[i].status = 'success'
+          //   return response
+          // })
+          // .catch(err => {
+          //   if(err.response){
+          //     self.$Notice.error({
+          //       title: err.response.data.name,
+          //       desc: err.response.data.message,
+          //       duration: 10
+          //     })
+          //     return 'error';
+          //   }
+          //   else if(err.message == 'Network Error'){
+          //     self.$Notice.error({
+          //       title: 'API Service unavailable',
+          //       duration: 10
+          //     })
+          //     return 'error';
+          //   }
+          //   else {
+          //     return 'error';
+          //   }
+          // })
       },
       Next(tab){
         let self = this
@@ -2494,7 +2502,6 @@ export default {
       continue_flag = false
     },
     transformFromMapping(tab) {
-      console.log("called......")
       return new Promise(async (resolve,reject)=>{
       this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
        for(let k=0;k<this.mObj[tab].mapping.length;k++){
@@ -2529,7 +2536,6 @@ export default {
          }
          obj["_id"] = uuidV1()
          self.mObj[tab].newUploadCSV.push(obj)
-         console.log("newuplod....",self.mObj[tab].newUploadCSV)
          this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
          // for(let k=0;k<this.mObj[tab].mapping.length;k++){
@@ -2600,7 +2606,6 @@ export default {
         }
     },
  parseFile(tab){
-   console.log("parse file called.....")
       let self = this
       Papa.LocalChunkSize = 1000000
       Papa.parse(file, {
@@ -2676,10 +2681,8 @@ export default {
       }
     },
     changeStatus(tab,streamer){
-      console.log("tab...",tab)
       if(this.mObj[tab].complete_flag == false && !streamer.paused()){
         let Tab = tab.replace(/\s/g, "")
-        console.log("Tab....",Tab)
         obj1[Tab]["totalNoOfRecords"] = totalRecords
         this.mObj[tab].complete_flag = true
         api.request('patch', '/uploader/' + id,obj1).then(res => {
@@ -2756,11 +2759,12 @@ export default {
           }
         }
         if(self.image_err.length != 0){
-          // if(self.mObj[tab].load == true){
-          //   self.mObj[tab].load = false
+          if(self.mObj[tab].load == true){
+            self.mObj[tab].load = false
+          }
             self.modal1 = false
             self.showWebImage = true
-          // }
+
           self.ProceedLoading = false
           $(".f-layout-copy").css("position","absolute");
         }
@@ -2784,7 +2788,6 @@ export default {
         let name = tab.replace(/\s/g, "")
 
         api.request('post', '/uploader-schema/',schemaobj).then(res => {
-          console.log("schema saved.....",res)
           obj1 = {}
           obj1[name] = {
             uploadStatus:"completed",
@@ -2829,15 +2832,14 @@ export default {
         }
 
         api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-          console.log("csv file saved....",result)
           CSVFile_id = result.data.id
           obj1[name]["id"] = CSVFile_id
           resolve('done')
         })
         .catch(error =>{
           if(error.response){
-            console.log("error.response...",error.response)
             if(error.response.data.message == 'This csv file entry already exists'){
+             CSVFile_id = error.response.data.data.CSVFileId
              obj1[name]["id"] = error.response.data.data.CSVFileId
              obj1[name]["schema_id"] = schema_id
              resolve('done')
@@ -2877,7 +2879,6 @@ export default {
         }
 
         api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-          console.log("uploader csv only files saved....",result)
 
           CSVFile_id = result.data.id
           obj1[name]["id"] = CSVFile_id
@@ -2886,9 +2887,9 @@ export default {
       })
       .catch(error =>{
         if(error.response){
-          console.log("error.response...",error.response)
           if(error.response.data.message == 'This csv file entry already exists'){
-            obj1[name]["id"] = error.response.data.data.CSVFileId
+           CSVFile_id = error.response.data.data.CSVFileId
+           obj1[name]["id"] = error.response.data.data.CSVFileId
            obj1[name]["schema_id"] = schema_id
            resolve('done')
           }
@@ -2921,12 +2922,10 @@ export default {
         }
 
         api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
-          console.log("^^^^^^ mapping saved",response)
           resolve('done')
         })
         .catch(error =>{
           if(error.response){
-            console.log("error.response...",error.response)
             if(error.response.data.message == 'This csv file mapping already exists'){
              resolve('done')
             }
@@ -2962,10 +2961,9 @@ export default {
           let csv_files_res = await self.saveOnlyCSVFiles(tab,name)
           resolve('done')
       }
-  })
+    })
     },
     ProceedToValidate(tab){
-      console.log("called.....proceedtovalidate")
       return new Promise(async (resolve,reject)=> {
         let globalValidateResolveFlag = true
         if (globalValidateResolve === null) {
@@ -3716,7 +3714,6 @@ export default {
    })
     },
     async showerrmsg (errcols,tab,schema) {
-      console.log("showerr_msg called...")
      var example1 = document.getElementById('example1')
      let row1
      let col1
@@ -3903,42 +3900,36 @@ export default {
       }
       if(Object.keys(response).indexOf("ProductPrice") >= 0){
           self.mObj['Product Price'].tab_flag = true
-        // self.arrangeTab("ProductPrice",response.id)
       }
       else{
         self.mObj["Product Price"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductImprintData") >= 0){
         self.mObj['Product Imprint Data'].tab_flag = true
-        // self.arrangeTab("ProductImprintData",response.id)
       }
       else{
         self.mObj["Product Imprint Data"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductShipping") >= 0){
         self.mObj['Product Shipping'].tab_flag = true
-        // self.arrangeTab("ProductShipping",response.id)
       }
       else{
         self.mObj["Product Shipping"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductImage") >= 0){
         self.mObj['Product Image'].tab_flag = true
-        // self.arrangeTab("ProductImage",response.id)
       }
       else{
         self.mObj["Product Image"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductAdditionalCharges") >= 0){
         self.mObj['Product Additional Charges'].tab_flag = true
-        // self.arrangeTab("ProductAdditionalCharges",response.id)
       }
       else{
         self.mObj["Product Additional Charges"].uploadDisplay = true
       }
       if(Object.keys(response).indexOf("ProductVariationPrice") >= 0){
         self.mObj['Product Variation Price'].tab_flag = true
-        // self.arrangeTab("ProductVariationPrice",response.id)
       }
       else{
         self.mObj["Product Variation Price"].uploadDisplay = true
@@ -4231,6 +4222,21 @@ export default {
       }
     }
   },
+    watch:{
+      'image_batch': function (batch) {
+        console.log("image_list.....",batch)
+        let self = this
+        if(batch.length == self.batchsize){
+          socket.emit('pdmimages',batch,(err,data) => {
+
+          })
+
+          self.image_batch.splice(0,self.batchsize)
+
+          console.log("spliced image_batch.....",self.image_batch)
+        }
+      }
+    },
     mounted(){
       let self = this
       id = self.$route.params.id
@@ -4496,6 +4502,28 @@ export default {
       //     })
       //   }
       // }
+
+      socket.on('img_res', (response) => {
+        console.log("response....",response)
+        for(let [inx,item] of response.entries()){
+          console.log("item.....",item)
+          self.secure_url_arr.push({"file_name":item.file_name,"secure_url":item.secure_url})
+          let index = lodash.findIndex(self.dirinfo, {name: item.file_name})
+          console.log("index....",index)
+          self.dirinfo[index].status = 'success'
+        }
+      })
+
+      socket.on('img_err', (response) => {
+        console.log("response....",response)
+        self.$Notice.error({title: 'Error!', desc: response})
+        // self.secure_url_arr.push({"file_name":response.file_name,"secure_url":response.secure_url})
+        // let index = lodash.findIndex(self.dirinfo, {name: response.file_name})
+        // console.log("index....",index)
+        // self.dirinfo[index].status = 'success'
+      })
+
+
     }
 }
 

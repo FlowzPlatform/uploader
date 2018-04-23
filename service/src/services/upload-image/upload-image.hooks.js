@@ -27,7 +27,7 @@ module.exports = {
     find: [],
     get: [],
     create: [
-       hook => beforeCreate(hook)
+       // hook => beforeCreate(hook)
     ],
     update: [],
     patch: [],
