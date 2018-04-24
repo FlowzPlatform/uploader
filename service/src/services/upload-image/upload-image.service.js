@@ -63,6 +63,7 @@ module.exports = function () {
         }
         console.log('%%%%%% image_response %%%%%%',image_response)
         socket.emit('img_res',image_response)
+        image_response = []
         resolve('done')
       })
     });

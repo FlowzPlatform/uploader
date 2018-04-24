@@ -690,6 +690,7 @@ let no_of_uplds = 0
 let notice_flag = true
 let complete_flag = true
 let totalRecords = 0
+let isDone = false
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -1198,7 +1199,7 @@ export default {
         const reader  = new FileReader();
          let fileList = e.target.files
 
-         for(let i=0; i<fileList.length; i++){``
+         for(let i=0; i<fileList.length; i++){
            let fileSize = 0;
            if (fileList[i].size > 1024 * 1024)
                fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
@@ -1216,8 +1217,11 @@ export default {
           let uri = await self.retResult(reader)
           self.image_batch.push({"file":{"url":uri,"filename":fileList[i].name},"folder":"product_images/" + id + "/"})
           // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
+          if(i == fileList.length - 1){
+            isDone = true
+          }
          }
-         console.log("image_batch.....",self.image_batch)
+
           $(".f-layout-copy").css("position","absolute");
       },
       saveImageToCloudinary(uri,filename,i,length){
@@ -2758,6 +2762,9 @@ export default {
               }
           }
         }
+        if(self.image_err.length < 5){
+          isDone = true
+        }
         if(self.image_err.length != 0){
           if(self.mObj[tab].load == true){
             self.mObj[tab].load = false
@@ -4226,15 +4233,25 @@ export default {
       'image_batch': function (batch) {
         console.log("image_list.....",batch)
         let self = this
-        if(batch.length == self.batchsize){
-          socket.emit('pdmimages',batch,(err,data) => {
 
-          })
+        if(batch.length >= 5){
+          let batch_chunk = lodash.chunk(batch,5);
 
-          self.image_batch.splice(0,self.batchsize)
-
-          console.log("spliced image_batch.....",self.image_batch)
+          for(let i=0 ;i<batch_chunk.length ;i++){
+            socket.emit('pdmimages',batch_chunk[i],(err,data) => {
+            })
+            self.image_batch.splice(0,5)
+            console.log("spliced image_batch.....",self.image_batch)
+          }
         }
+
+        if(isDone == true && batch.length < 5 && batch.length != 0){
+          console.log( "watch second if called...")
+          socket.emit('pdmimages',batch,(err,data) => {
+          })
+          self.image_batch.splice(0,5)
+        }
+
       }
     },
     mounted(){
@@ -4517,10 +4534,6 @@ export default {
       socket.on('img_err', (response) => {
         console.log("response....",response)
         self.$Notice.error({title: 'Error!', desc: response})
-        // self.secure_url_arr.push({"file_name":response.file_name,"secure_url":response.secure_url})
-        // let index = lodash.findIndex(self.dirinfo, {name: response.file_name})
-        // console.log("index....",index)
-        // self.dirinfo[index].status = 'success'
       })
 
 

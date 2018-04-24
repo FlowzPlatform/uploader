@@ -163,6 +163,15 @@ export const ProductInformationSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    tags:{
+      type: "string",
+      label: "tags",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     search_keyword: {
         type: "string",
         label: "Search Keyword",
