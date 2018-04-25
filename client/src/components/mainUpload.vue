@@ -436,7 +436,7 @@
          <div id="example1" class="hot handsontable htColumnHeaders" style="overflow-x: auto"></div>
          <table>
            <tr>
-           <td class="ivu-table-row" style="color:red;font-size:14px;">{{mObj[activeTab].errmsg[0]}}</td>
+           <td class="ivu-table-row" style="color:red;font-size:14px;word-break:break-word;">{{mObj[activeTab].errmsg[0]}}</td>
          </tr>
          </table>
          <div id="hot-preview" v-if="mObj[activeTab].showHandson">
@@ -619,6 +619,7 @@
       <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
       </Card>
     </template>
+    <!-- {{getValue()}} -->
    </div>
 </template>
 
@@ -1067,6 +1068,10 @@ export default {
     }
   },
     methods:{
+      getValue() {
+        let tab = this.activeTab
+        return Object.keys(this.mObj[tab].schema.structure)
+      },
       async handleFileChange (e,tab) {
         let self = this
         file =  e.target.files[0]
@@ -2101,30 +2106,32 @@ export default {
             this.mObj[tab].headerDisplay = false
             this.mObj[tab].newSchemaDisplay = true
           }
-
-          if(tab == 'Product Information'){
-            this.mObj[tab].schema = ProductInformationSchema
-          }
-          else if(tab == 'Product Price'){
-            this.mObj[tab].schema = ProductPricingSchema
-          }
-          else if(tab == 'Product Imprint Data'){
-            this.mObj[tab].schema = ProductImprintDataSchema
-          }
-          else if(tab == 'Product Image'){
-            this.mObj[tab].schema = ProductImagesSchema
-          }
-          else if(tab == 'Product Shipping'){
-            this.mObj[tab].schema = ProductShippingSchema
-          }
-          else if(tab == 'Product Additional Charges'){
-            this.mObj[tab].schema = ProductAdditionalChargesSchema
-
-          }
-          else if(tab == 'Product Variation Price'){
-            this.mObj[tab].schema = ProductVariationSchema
-
-          }
+          this.mObj[tab].schema = []
+          this.SchemaValue(tab)
+          // if(tab == 'Product Information'){
+          //   this.mObj[tab].schema = lodash.cloneDeep(ProductInformationSchema)
+          //   console.log("this.mObj[tab].schema",this.mObj[tab].schema)
+          // }
+          // else if(tab == 'Product Price'){
+          //   this.mObj[tab].schema = lodash.cloneDeep(ProductPricingSchema)
+          // }
+          // else if(tab == 'Product Imprint Data'){
+          //   this.mObj[tab].schema = lodash.cloneDeep(ProductImprintDataSchema)
+          // }
+          // else if(tab == 'Product Image'){
+          //   this.mObj[tab].schema = lodash.cloneDeep(ProductImagesSchema)
+          // }
+          // else if(tab == 'Product Shipping'){
+          //   this.mObj[tab].schema = lodash.cloneDeep(ProductShippingSchema)
+          // }
+          // else if(tab == 'Product Additional Charges'){
+          //   this.mObj[tab].schema = lodash.cloneDeep(ProductAdditionalChargesSchema)
+          //
+          // }
+          // else if(tab == 'Product Variation Price'){
+          //   this.mObj[tab].schema = lodash.cloneDeep(ProductVariationSchema)
+          //
+          // }
 
           let mapObj = this.generateHeadersandMapping(tab)
 
@@ -2169,6 +2176,30 @@ export default {
           }
 
 
+        }
+      },
+      SchemaValue(tab){
+        if(tab == 'Product Information'){
+          this.mObj[tab].schema = lodash.cloneDeep(ProductInformationSchema)
+        }
+        else if(tab == 'Product Price'){
+          this.mObj[tab].schema = lodash.cloneDeep(ProductPricingSchema)
+        }
+        else if(tab == 'Product Imprint Data'){
+          this.mObj[tab].schema = lodash.cloneDeep(ProductImprintDataSchema)
+        }
+        else if(tab == 'Product Image'){
+          this.mObj[tab].schema = lodash.cloneDeep(ProductImagesSchema)
+        }
+        else if(tab == 'Product Shipping'){
+          this.mObj[tab].schema = lodash.cloneDeep(ProductShippingSchema)
+        }
+        else if(tab == 'Product Additional Charges'){
+          this.mObj[tab].schema = lodash.cloneDeep(ProductAdditionalChargesSchema)
+
+        }
+        else if(tab == 'Product Variation Price'){
+          this.mObj[tab].schema = lodash.cloneDeep(ProductVariationSchema)
         }
       },
       async getMapping(tab){
@@ -2278,7 +2309,6 @@ export default {
             }
           }
           if(flag == false){
-
              this.mObj[tab].poptip_display = false
              this.mObj[tab].display = false
              this.mObj[tab].schemaList.push({"value" : schema,"label": schema})
@@ -2287,13 +2317,13 @@ export default {
              this.mObj[tab].schemaList.splice(this.mObj[tab].schemaList.length-1,0,this.mObj[tab].schemaList.splice(new_index,1)[0]);
              this.mObj[tab].selected_schema = schema
              this.mObj[tab].new_flag = 1
-
           }
         }
       },
     generateHeadersandMapping(tab){
       let self = this
-      self.map = false
+      // self.map = false
+      self.SchemaValue(tab)
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
       self.mObj[tab].newUploadCSV = []
 
@@ -2381,7 +2411,14 @@ export default {
             return self.mObj[tab].mapping;
         }
         else{
+
            self.loadingdot = false
+           if(self.mObj[tab].newSchemaDisplay == true){
+             self.mObj[tab].newSchemaDisplay = false
+           }
+           if(self.mObj[tab].headerDisplay == true){
+             self.mObj[tab].headerDisplay = false
+           }
         }
     },
     mapHeaders(tab){
@@ -2595,96 +2632,100 @@ export default {
     }
     },
     saveSchemaandMapping(tab){
-      return new Promise(async (resolve,reject)=> {
-      let self = this
-      let CSVFileObj = {
-        name : file.name,
-        size: file.size,
+          return new Promise(async (resolve,reject)=> {
+          let self = this
+          let name = tab.replace(/\s/g, "")
+
+          if(self.mObj[tab].new_flag == 1){
+              let schema_res = await self.saveSchema(tab,name)
+              let csv_files_res = await self.saveCSVFiles(tab,name)
+              let mapping_res = await self.saveMapping(tab,name)
+              resolve('done')
+          }
+          else {
+              let csv_files_res = await self.saveOnlyCSVFiles(tab,name)
+              resolve('done')
+          }
+        })
+      },
+    saveSchema(tab,name){
+    let self = this
+    return new Promise(async(resolve,reject) => {
+      let schemaobj = {
+        name : self.mObj[tab].selected_schema,
+        schema: self.mObj[tab].schema.structure,
         username: self.$store.state.user.email,
         subscriptionId: self.$store.state.subscription_id,
-        import_tracker_id: id
+        import_tracker_id: id,
+        tabname: tab
       }
 
       let name = tab.replace(/\s/g, "")
-      obj1 = {}
-      obj1[name] = {
-        uploadStatus:"completed",
-        validateStatus: "pending",
-        uploadedAt: new Date()
-        // totalNoOfRecords: self.mObj[tab].newUploadCSV.length
-      }
 
-      if(self.mObj[tab].new_flag == 1){
-        let schemaobj = {
-          name : self.mObj[tab].selected_schema,
-          schema: self.mObj[tab].schema.structure,
+      api.request('post', '/uploader-schema/',schemaobj).then(res => {
+        obj1 = {}
+        obj1[name] = {
+          uploadStatus:"completed",
+          validateStatus: "pending",
+          uploadedAt: new Date()
+        }
+        schema_id = res.data.id
+        obj1[name]["schema_id"] = schema_id
+        resolve ('done')
+    })
+    .catch(error => {
+      if(error.response){
+        if(error.response.data.message == 'This mapping name already exists'){
+          resolve('done')
+        }
+        else{
+          self.$Notice.error({
+            title: error.response.data.name,
+            desc: error.response.data.message,
+            duration: 10
+          })
+        }
+      }
+      else if(error.message == 'Network Error'){
+        this.$Notice.error({
+          title: 'API Service unavailable',
+          duration: 10
+        })
+      }
+    })
+  })
+  },
+  saveCSVFiles(tab,name){
+      let self = this
+      return new Promise(async(resolve,reject) => {
+        let CSVFileObj = {
+          name : file.name,
+          size: file.size,
           username: self.$store.state.user.email,
           subscriptionId: self.$store.state.subscription_id,
-          import_tracker_id: id,
-          tabname: tab
+          import_tracker_id: id
         }
 
-        api.request('post', '/uploader-schema/',schemaobj).then(res => {
-
-            schema_id = res.data.id
-
-            api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
-
-              CSVFile_id = result.data.id
-
-              let mappingObj = {
-                mapping : self.mObj[tab].mapping,
-                fileTypeId : self.mObj[tab].selected_schema,
-                username : self.$store.state.user.email,
-                subscriptionId: self.$store.state.subscription_id,
-                import_tracker_id:id
-              }
-
-              api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
-              obj1[name]["id"] = CSVFile_id
-              obj1[name]["schema_id"] = schema_id
-              resolve('done')
-              })
-              .catch(error =>{
-                if(error.response){
-                  self.$Notice.error({
-                    title: error.response.data.name,
-                    desc: error.response.data.message,
-                    duration: 10
-                  })
-                }
-                else if(error.message == 'Network Error'){
-                  this.$Notice.error({
-                    title: 'API Service unavailable',
-                    duration: 10
-                  })
-                }
-           })
-
-            })
-            .catch(error =>{
-              if(error.response){
-                self.$Notice.error({
-                  title: error.response.data.name,
-                  desc: error.response.data.message,
-                  duration: 10
-                })
-              }
-              else if(error.message == 'Network Error'){
-                this.$Notice.error({
-                  title: 'API Service unavailable',
-                  duration: 10
-                })
-              }
-         })
+        api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+          CSVFile_id = result.data.id
+          obj1[name]["id"] = CSVFile_id
+          resolve('done')
         })
-        .catch(error => {
+        .catch(error =>{
           if(error.response){
-            self.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
+            if(error.response.data.message == 'This csv file entry already exists'){
+             CSVFile_id = error.response.data.data.CSVFileId
+             obj1[name]["id"] = error.response.data.data.CSVFileId
+             obj1[name]["schema_id"] = schema_id
+             resolve('done')
+            }
+            else{
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
           }
           else if(error.message == 'Network Error'){
             this.$Notice.error({
@@ -2692,11 +2733,28 @@ export default {
               duration: 10
             })
           }
-       })
+     })
+      })
+    },
+    saveOnlyCSVFiles(tab,name){
+      let self = this
+      return new Promise(async (resolve,reject)=>{
+        let CSVFileObj = {
+          name : file.name,
+          size: file.size,
+          username: self.$store.state.user.email,
+          subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id: id
+        }
+        obj1 = {}
+        obj1[name] = {
+          uploadStatus:"completed",
+          validateStatus: "pending",
+          uploadedAt: new Date()
+        }
 
-      }
-      else {
         api.request('post', '/uploader-csv-files/',CSVFileObj).then(result => {
+
           CSVFile_id = result.data.id
           obj1[name]["id"] = CSVFile_id
           obj1[name]["schema_id"] = schema_id
@@ -2704,11 +2762,19 @@ export default {
       })
       .catch(error =>{
         if(error.response){
-          self.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
-          })
+          if(error.response.data.message == 'This csv file entry already exists'){
+           CSVFile_id = error.response.data.data.CSVFileId
+           obj1[name]["id"] = error.response.data.data.CSVFileId
+           obj1[name]["schema_id"] = schema_id
+           resolve('done')
+          }
+          else{
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          }
         }
         else if(error.message == 'Network Error'){
           this.$Notice.error({
@@ -2717,9 +2783,43 @@ export default {
           })
         }
    })
-    }
+      })
+    },
+    saveMapping(tab,name){
+      let self = this
+      return new Promise(async(resolve,reject) =>{
+        let mappingObj = {
+          mapping : self.mObj[tab].mapping,
+          fileTypeId : self.mObj[tab].selected_schema,
+          username : self.$store.state.user.email,
+          subscriptionId: self.$store.state.subscription_id,
+          import_tracker_id:id
+        }
 
-  })
+        api.request('post', '/uploader-csv-file-mapping/' ,mappingObj).then(response => {
+          resolve('done')
+        })
+        .catch(error =>{
+          if(error.response){
+            if(error.response.data.message == 'This csv file mapping already exists'){
+             resolve('done')
+            }
+            else{
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+          }
+          else if(error.message == 'Network Error'){
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+       })
+      })
     },
     ProceedToValidate(tab){
       return new Promise(async (resolve,reject)=> {
@@ -2732,8 +2832,8 @@ export default {
       map_flag = false
 
       if(self.mObj[tab].selected_schema == '--Add new--'){
-        self.proceedBtn = true
         self.$Notice.error({title: 'Please enter a valid mapping name',duration: 5})
+        self.proceedBtn = true
       }
       else {
       continue_flag = false
@@ -2932,12 +3032,27 @@ export default {
           }
         })
         if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
-          if (value !== undefined) {
-            let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
-            if(check != true)
-            return  'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
-            else {
-              return
+          if(fieldName == 'available_currencies'){
+            let value = obj["available_currencies"].split('|')
+            let arr = lodash.cloneDeep(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues)
+            for(let i=0;i<value.length;i++){
+              let check = _.includes(arr, value[i])
+              if(check != true){
+                return  'System allowedvalues are ' + arr
+              }
+              else {
+              }
+            }
+            return
+          }
+          else{
+            if (value !== undefined) {
+              let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
+              if(check != true)
+              return  'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
+              else {
+                return
+              }
             }
           }
         }
@@ -4131,6 +4246,7 @@ export default {
                           for(let i=0;i<self.fileTypes.length;i++){
                             self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
                             self.mObj[self.fileTypes[i]].display = true
+                            self.mObj[self.fileTypes[i]].new_flag = 1
                           }
                           self.loading = false
                           for(let i=0;i<self.fileTypes.length;i++){
