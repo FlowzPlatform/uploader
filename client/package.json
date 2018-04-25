@@ -33,7 +33,6 @@
     "element-ui": "^1.4.12",
     "feathers-hooks": "^2.1.0",
     "feathers-socketio": "^2.0.0",
-    "fs": "0.0.1-security",
     "grapesjs": "^0.10.7",
     "grapesjs-blocks-basic": "^0.1.1",
     "grapesjs-mjml": "0.0.8",
