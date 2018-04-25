@@ -132,7 +132,12 @@ var connectToMongo = async function(url,data,socket){
         for(let schema_key in schemarules){
           if(key == schema_key && schemarules[schema_key] == "string"){
             if(typeof(data.newCSV[i][key]) != "string"){
-              data.newCSV[i][key] =  data.newCSV[i][key].toString()
+              if(data.newCSV[i][key] != null){
+                data.newCSV[i][key] =  data.newCSV[i][key].toString()
+              }
+              else if(data.newCSV[i][key] == null){
+                data.newCSV[i][key] = ""
+              }
             }
           }
         }
