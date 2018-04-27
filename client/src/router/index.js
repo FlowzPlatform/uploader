@@ -20,6 +20,8 @@ import Register from '@/components/Register'
 // import createRecord from '@/components/createRecord'
 import EmailVerification from '@/components/EmailVerification'
 import Uploader from '@/components/uploader'
+import pdmlist from '@/components/pdmlist'
+import pdmedit from '@/components/pdmedit'
 import uploaderLanding from '@/components/uploader_landing'
 import mainUpload from '@/components/mainUpload'
 import newJoblist from '@/components/newJobList'
@@ -46,6 +48,19 @@ const routes = [{
     path: '/uploader',
     name: 'Uploader',
     component: Uploader
+  },
+  {
+    path: '/pdm',
+    name: 'pdmlist',
+    component: pdmlist
+  }, {
+    path: '/pdm/:id',
+    name: 'pdmedit',
+    component: pdmedit,
+    props: {
+      id: Text,
+      required: false
+    }
   }, {
     path: '/landing/:id',
     name: 'uploaderLanding',

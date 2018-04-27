@@ -9,6 +9,12 @@
         <Col span="20">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
+                  <router-link to="/pdm">
+                        <Menu-item name="1">
+                            <Icon type="navicon-round" :size="14"></Icon>
+                            &nbsp;PDM
+                        </Menu-item>
+                    </router-link>
                     <router-link to="/uploader-joblist">
                         <Menu-item name="1">
                             <Icon type="navicon-round" :size="14"></Icon>
