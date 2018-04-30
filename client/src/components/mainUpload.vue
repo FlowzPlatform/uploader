@@ -86,11 +86,7 @@
                 <span v-if="ProceedLoading">Processing</span>
                 <span v-else>Proceed</span>
                </Button>
-               <div id="dirinfo">
-                 <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
-                 <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
-               </div>
-               <div v-if="image_err.length != 0" style="margin-top:12px;">
+               <div v-if="image_err.length != 0" style="margin-top:7%;">
                  <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
                  <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
                  <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
@@ -99,6 +95,10 @@
                    </Row>
                  </div>
               </div>
+               <div id="dirinfo">
+                 <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
+                 <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
+               </div>
              </div>
 
               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
@@ -772,6 +772,10 @@ export default {
                                     percent: 100,
                                     size: 30,
                                     strokeColor: '#5cb85c'
+                                  },
+                                  style: {
+                                    marginTop: '10px',
+                                    marginLeft: '45px'
                                   }
                                 }, [
                                   h('Icon', {
@@ -783,15 +787,45 @@ export default {
                                       color: '#5cb85c'
                                     }
                                   })
-                                ])
+                                ]),
+                                 h('Tooltip', {
+                                    props: {
+                                      content: 'Delete image from Cloudinary',
+                                      placement: 'top'
+                                    }
+                                  }, [
+                                    h('Button',{
+                                      props: {
+                                        type: 'ghost',
+                                        icon: 'trash-a',
+                                        shape: 'circle',
+                                        size: 'large'
+                                      },
+                                      style: {
+                                        color: '#ed3f14',
+                                        marginLeft: '10px',
+                                        border: 'none',
+                                        marginTop: '-23px'
+                                      },
+                                      on: {
+                                        click: () => {
+                                          this.deleteImage(params.row)      // delete image from cloudinary
+                                        }
+                                      }
+                                    })
+                                  ])
                             ]);
-                          } else if (params.row.status == 'error') {
+                          } else if (params.row.status == 'error' || params.row.status == 'deleted') {
                             return h('div', [
                                 h('i-circle', {
                                   props: {
                                     percent: 100,
                                     size: 30,
                                     strokeColor: '#ff5500'
+                                  },
+                                  style: {
+                                    marginTop: '10px',
+                                    marginLeft: '45px'
                                   }
                                 }, [
                                   h('Icon', {
@@ -803,12 +837,37 @@ export default {
                                       color: '#ff5500'
                                     }
                                   })
-                                ])
+                                ]),
+                               h('Tooltip', {
+                                    props: {
+                                      content: 'Delete image from list',
+                                      placement: 'top'
+                                    }
+                                  }, [
+                                    h('Button',{
+                                      props: {
+                                        type: 'ghost',
+                                        icon: 'trash-a',
+                                        shape: 'circle',
+                                        size: 'large'
+                                      },
+                                      style: {
+                                        color: '#ed3f14',
+                                        marginLeft: '10px',
+                                        border: 'none',
+                                        marginTop: '-23px'
+                                      },
+                                      on: {
+                                        click: () => {
+                                          this.deleteImageFromList(params.row)      // delete image from cloudinary
+                                        }
+                                      }
+                                    })
+                                  ])
                             ]);
                           } else {
                             return h('div',params.row.status)
                           }
-
                         }
                     }
                 ],
@@ -1153,41 +1212,44 @@ export default {
       async handleImageChange(e,tab){
         let self = this
         const reader  = new FileReader();
-         let fileList = e.target.files
-         self.total_image = fileList.length
+        let fileList = e.target.files
 
          if(fileList.length < 10){
            isDone = true
          }
 
          for(let i=0; i<fileList.length; i++){
-           let fileSize = 0;
-           if (fileList[i].size > 1024 * 1024)
-               fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-           else
-               fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
+           let value = lodash.find(self.dirinfo,{"name":fileList[i].name})
+           console.log("value...",value)
+           if(value == undefined){
+             let fileSize = 0;
+             if (fileList[i].size > 1024 * 1024)
+             fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+             else
+             fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
 
-          if(fileList[i].type != undefined && fileList[i].type != ""){
-            self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":"Uploading..."})
-          }
-          else if(fileList[i].type == undefined || fileList.type == ""){
-            self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"status":"Uploading"})
-          }
+             if(fileList[i].type != undefined && fileList[i].type != ""){
+               self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":"Uploading..."})
+             }
+             else if(fileList[i].type == undefined || fileList.type == ""){
+               self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"status":"Uploading"})
+             }
 
-          reader.readAsDataURL(fileList[i]);
-          let uri = await self.retResult(reader)
-          self.image_batch.push({"file":{"url":uri,"filename":fileList[i].name},"folder":"product_images/" + id + "/"})
-          // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
-          if(i == fileList.length - 1){
-            isDone = true
-          }
+             reader.readAsDataURL(fileList[i]);
+             let uri = await self.retResult(reader)
+             self.image_batch.push({"file":{"url":uri,"filename":fileList[i].name},"folder":"product_images/" + id + "/"})
+             // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
+             if(i == fileList.length - 1){
+               isDone = true
+             }
+
+             self.total_image = self.dirinfo.length
+           }
          }
 
           $(".f-layout-copy").css("position","absolute");
       },
       saveImageToCloudinary(uri,filename,i,length){
-        let self = this
-
         socket.emit('pdmimages',{"file":{"url":uri,"filename":filename},"folder":"product_images/" + id + "/"}, (err,data) => {
 
         })
@@ -2073,29 +2135,32 @@ export default {
             this.mObj[tab].newSchemaDisplay = true
           }
 
-          if(tab == 'Product Information'){
-            this.mObj[tab].schema = ProductInformationSchema
-          }
-          else if(tab == 'Product Price'){
-            this.mObj[tab].schema = ProductPricingSchema
-          }
-          else if(tab == 'Product Imprint Data'){
-            this.mObj[tab].schema = ProductImprintDataSchema
-          }
-          else if(tab == 'Product Image'){
-            this.mObj[tab].schema = ProductImagesSchema
-          }
-          else if(tab == 'Product Shipping'){
-            this.mObj[tab].schema = ProductShippingSchema
-          }
-          else if(tab == 'Product Additional Charges'){
-            this.mObj[tab].schema = ProductAdditionalChargesSchema
+          this.mObj[tab].schema = []
+          this.SchemaValue(tab)
 
-          }
-          else if(tab == 'Product Variation Price'){
-            this.mObj[tab].schema = ProductVariationSchema
+          // if(tab == 'Product Information'){
+          //   this.mObj[tab].schema = ProductInformationSchema
+          // }
+          // else if(tab == 'Product Price'){
+          //   this.mObj[tab].schema = ProductPricingSchema
+          // }
+          // else if(tab == 'Product Imprint Data'){
+          //   this.mObj[tab].schema = ProductImprintDataSchema
+          // }
+          // else if(tab == 'Product Image'){
+          //   this.mObj[tab].schema = ProductImagesSchema
+          // }
+          // else if(tab == 'Product Shipping'){
+          //   this.mObj[tab].schema = ProductShippingSchema
+          // }
+          // else if(tab == 'Product Additional Charges'){
+          //   this.mObj[tab].schema = ProductAdditionalChargesSchema
 
-          }
+          // }
+          // else if(tab == 'Product Variation Price'){
+          //   this.mObj[tab].schema = ProductVariationSchema
+
+          // }
 
           let mapObj = this.generateHeadersandMapping(tab)
 
@@ -2141,6 +2206,23 @@ export default {
           }
 
 
+        }
+      },
+      SchemaValue (tab) {
+        if (tab === 'Product Information') {
+          this.mObj[tab].schema = lodash.cloneDeep(ProductInformationSchema)
+        } else if (tab === 'Product Price') {
+          this.mObj[tab].schema = lodash.cloneDeep(ProductPricingSchema)
+        } else if (tab === 'Product Imprint Data') {
+          this.mObj[tab].schema = lodash.cloneDeep(ProductImprintDataSchema)
+        } else if (tab === 'Product Image') {
+          this.mObj[tab].schema = lodash.cloneDeep(ProductImagesSchema)
+        } else if (tab === 'Product Shipping') {
+          this.mObj[tab].schema = lodash.cloneDeep(ProductShippingSchema)
+        } else if (tab === 'Product Additional Charges') {
+          this.mObj[tab].schema = lodash.cloneDeep(ProductAdditionalChargesSchema)
+        } else if (tab === 'Product Variation Price') {
+          this.mObj[tab].schema = lodash.cloneDeep(ProductVariationSchema)
         }
       },
       async getMapping(tab){
@@ -2266,6 +2348,7 @@ export default {
 
       let self = this
       self.map = false
+      self.SchemaValue(tab)
       let schema_keys = _.keys(self.mObj[tab].schema.structure);
       self.mObj[tab].newUploadCSV = []
 
@@ -2610,11 +2693,13 @@ export default {
           }
             self.modal1 = false
             self.showWebImage = true
+            $("#dirinfo").css("padding-top","3%");
 
           self.ProceedLoading = false
           $(".f-layout-copy").css("position","absolute");
         }
         else{
+          $("#dirinfo").css("padding-top","6%");
           resolve('done')
         }
       })
@@ -3019,16 +3104,28 @@ export default {
           }
         })
         if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
-          if (value !== undefined) {
-            let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
-            if(check != true)
-            return  'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues
-            else {
-              return
+          if (fieldName === 'available_currencies') {
+            let value = obj['available_currencies'].split('|')
+            let arr = lodash.cloneDeep(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues)
+            for (let i = 0; i < value.length; i++) {
+              let check = _.includes(arr, value[i])
+              if (check !== true) {
+                return 'System allowedvalues are ' + arr
+              } else {
+              }
+            }
+            return
+          } else {
+            if (value !== undefined) {
+              let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
+              if (check !== true) { return 'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues } else {
+                return
+              }
             }
           }
         }
       }
+
 
       let defaultValidatorFunc = function (obj, value, fieldName) {
 
@@ -3231,6 +3328,9 @@ export default {
         self.showWebImage = false
         self.dirinfo = []
         self.image_err = []
+        self.total_image = 0
+        self.img_no = 0
+        isDone = false
       }
       self.proceedBtn = true
       self.ProceedLoading = false
@@ -3245,14 +3345,18 @@ export default {
       self.mObj[tab].previewDisplay = false
       self.mObj[tab].uploadDisplay = true
       totalRecords = 0
-      self.total_image = 0
-      self.img_no = 0
-      isDone = false
       $(".f-layout-copy").css("position","fixed");
     },
-    abortUploadedRecords(tab){
+    async abortUploadedRecords(tab){
       this.deleteRecModal = false
       let tab_name = tab.replace(/ /g,"")
+
+      if(tab == "Product Image"){
+        this.dirinfo = []
+        this.image_err = []
+        await this.deleteFromCloudinary(id)
+      }
+
       api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab).then(res => {
 
         api.request('get','/uploader/'+ this.$route.params.id).then(res => {
@@ -3266,10 +3370,8 @@ export default {
               this.mObj[tab].filter_flag = false
               this.mObj[tab].main_arr = []
               this.mObj[tab].headers = []
-               if(tab == "Product Image"){
-                 this.dirinfo = []
-                 this.image_err = []
-               }
+              this.img_no = 0
+              this.total_image = 0
               this.mObj[tab].savePreviewDisplay = false
               this.mObj[tab].complete_flag = false
               if(this.mObj[tab].headerDisplay == true){
@@ -3321,8 +3423,68 @@ export default {
         }
       })
     },
-    AbortValidation(tab){
+    deleteFromCloudinary(id){
+      return new Promise((resolve,reject) => {
+        let resource = 'product_images/'+this.$route.params.id
+        api.request('delete', '/upload-image/?resource=' + resource).then(response => {
+          console.log("delete response.....",response)
+          resolve(response)
+        })
+        .catch(error => {
+          if(error.response){
+            this.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          }
+          else{
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
+      })
+    },
+    deleteImage(imgdata){
+      let self = this
+      console.log("&&&&",imgdata._index)
+      let resource = 'product_images/'+this.$route.params.id+'/'+imgdata.name
+      api.request('delete','/upload-image/?resource=' + resource).then(response => {
+        let indx = lodash.findIndex(self.secure_url_arr,{"file_name":imgdata.name})
+        console.log("**********",indx)
+        self.secure_url_arr.splice(indx,1)
+        console.log("====================> secure_url_arr <==================",self.secure_url_arr)
+        self.dirinfo[imgdata._index]["status"] = "deleted"
+        self.img_no--
+      })
+    },
+    deleteImageFromList(imgdata){
+      let self = this
+      console.log("&&&&& imgdata...",imgdata)
+      if(imgdata.status == "error"){
+        let indx = lodash.findIndex(self.secure_url_arr,{"file_name":imgdata.name})
+        console.log("**********",indx)
+        self.secure_url_arr.splice(indx,1)
+        console.log("====================> secure_url_arr <==================",self.secure_url_arr)
+        self.dirinfo.splice(imgdata._index,1)
+      }
+      else if(imgdata.status == "deleted"){
+        self.dirinfo.splice(imgdata._index,1)
+      }
+    },
+    async AbortValidation(tab){
         let self = this
+        if(tab == "Product Image"){
+          self.dirinfo = []
+          self.image_err = []
+          totalRecords = 0
+          isDone = false
+          self.total_image = 0
+          self.img_no = 0
+          await self.deleteFromCloudinary(id)
+        }
         self.proceedBtn = true
         self.ProceedLoading = false
         self.mObj[tab].errmsg = []
@@ -3330,13 +3492,7 @@ export default {
         self.mObj[tab].newUploadCSV = []
         self.mObj[tab].data1 = []
         self.mObj[tab].headers1 = []
-        self.dirinfo = []
-        self.image_err = []
         complete_flag = true
-        totalRecords = 0
-        isDone = false
-        self.total_image = 0
-        self.img_no = 0
         $('table.htCore').each(function () {
           this.remove()
         })
@@ -3618,6 +3774,9 @@ export default {
      },
     saveData(tab){
       let self = this
+      if(tab == 'Product Image'){
+        self.showWebImage = false
+      }
       self.mObj[tab].load = true
 
       if(this.$store.state.disconnect == false){
@@ -4010,11 +4169,11 @@ export default {
         let self = this
 
         if(batch.length >= 10){
-          let batch_chunk = lodash.chunk(batch,10);
-          console.log("batch_chunk....",batch_chunk)
+          let batchChunk = lodash.chunk(batch,10);
+          console.log("batch_chunk....",batchChunk)
 
-          for(let i=0 ;i<batch_chunk.length ;i++){
-            socket.emit('pdmimages',batch_chunk[i],(err,data) => {
+          for(let i=0 ;i<batchChunk.length ;i++){
+            socket.emit('pdmimages',batchChunk[i],(err,data) => {
             })
             self.image_batch.splice(0,10)
           }
@@ -4296,22 +4455,18 @@ export default {
 
       socket.on('img_res', (response) => {
         for(let [inx,item] of response.entries()){
-          self.secure_url_arr.push({"file_name":item.file_name,"secure_url":item.secure_url})
-          let index = lodash.findIndex(self.dirinfo, {name: item.file_name})
-          self.dirinfo[index].status = 'success'
-          self.img_no ++
+          if(item.hasOwnProperty("iserror")){
+            let index = lodash.findIndex(self.dirinfo, {name: item.filename})
+            self.dirinfo[index].status = 'error'
+          }
+          else{
+            self.secure_url_arr.push({"file_name":item.file_name,"secure_url":item.secure_url})
+            let index = lodash.findIndex(self.dirinfo, {name: item.file_name})
+            self.dirinfo[index].status = 'success'
+            self.img_no ++
+          }
         }
       })
-
-      socket.on('img_err', (response) => {
-        console.log("response....",response)
-        for(let [inx,item] of response.entries()){
-          let index = lodash.findIndex(self.dirinfo, {name: item.filename})
-          self.dirinfo[index].status = 'error'
-        }
-      })
-
-
     }
 }
 

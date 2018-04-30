@@ -13,8 +13,6 @@ let cloudname = ''
 let apikey = ''
 let apisecret = ''
 let response
-let image_response = []
-let image_err = []
 if(process.env.cloudname){
   cloudname = process.env.cloudname
 }
@@ -47,57 +45,13 @@ module.exports = function () {
     socket.on('pdmimages',async function(data) {
       let promiseAll = []
         for(let item of data){
-          // let imgupld_res = await uploadImage(item).then(res => {
-          //   if(res.hasOwnProperty('iserror')){
-          //     image_err.push(res)
-          //   }
-          //   else{
-          //     image_response.push(res)
-          //   }
-          // })
           promiseAll.push(uploadImage(item))
         }
 
         Promise.all(promiseAll).then(function(values) {
-          console.log(values);
           socket.emit('img_res',values)
         });
 
-
-        // if(image_response.length != 0){
-        //   socket.emit('img_res',image_response)
-        //   image_response = []
-        // }
-        //
-        // if(image_err.length != 0){
-        //   console.log("image_err.length +++",image_err.length)
-        //   socket.emit('img_err',image_err)
-        //   image_err = []
-        // }
-
-
-      // return new Promise(async(resolve,reject) => {
-      //   for(let i=0 ;i<data.length ;i++){
-      //     await cloudinary.v2.uploader.upload(data[i].file.url,
-      //       { public_id: data[i].file.filename, resource_type: "raw",folder: data[i].folder},
-      //       function(error, result) {
-      //         if(error){
-      //           console.log('&&&&&&&&&&',error)
-      //           socket.emit('img_err',error)
-      //         }
-      //         else{
-      //           console.log("result....",result)
-      //           result.file_name = data[i].file.filename
-      //           image_response.push(result)
-      //           // socket.emit('img_res',result)
-      //         }
-      //       });
-      //   }
-      //   console.log('%%%%%% image_response %%%%%%',image_response)
-      //   socket.emit('img_res',image_response)
-      //   image_response = []
-      //   resolve('done')
-      // })
     });
 
   });
@@ -133,7 +87,6 @@ var uploadImage = async function(data){
       { public_id: data.file.filename, resource_type: "raw",folder: data.folder},
       function(error, result) {
         if(error){
-          // console.log('&&&&&&&&&&',error)
           resolve({"iserror":true,"msg_error":error,"filename":data.file.filename})
         }
         else{
@@ -145,7 +98,6 @@ var uploadImage = async function(data){
   return Promise.resolve(_promise).then(res => {
     return res;
   }).catch(err => {
-    // console.log("err....",err)
     return err;
   })
 }
