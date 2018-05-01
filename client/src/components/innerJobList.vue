@@ -89,38 +89,36 @@
     </div>
 </template>
 <script>
-/*eslint-disable*/
 import lodash from 'lodash'
-    export default {
-        name: 'innerJoblist',
-        props: {
-            row: Object
-        },
-        data () {
-            return {
-                data3: []
-            }
-        },
-        methods:{
-          //converts into uppercase and trims space
-          convert(item){
-            item = item.replace(/([A-Z])/g, ' $1').trim()
-            return item
-          },
-          capitalize(item){
-            item = lodash.capitalize(item)
-            return item
-          }
-        },
-        mounted(){
-            for(var key in this.row) {
-              if (key == "ProductInformation" || key == "ProductPrice" || key == "ProductImprintData" || key == 'ProductImage' || key == 'ProductShipping' || key == 'ProductAdditionalCharges' || key == 'ProductVariationPrice') {
-                this.data3.push({"name":key,"totalNoOfRecords":this.row[key].totalNoOfRecords,"uploadstatus" : this.row[key].uploadStatus,"validatestatus": this.row[key].validateStatus})
-              }
-            }
-
-        }
-    };
+export default {
+  name: 'innerJoblist',
+  props: {
+    row: Object
+  },
+  data () {
+    return {
+      data3: []
+    }
+  },
+  methods: {
+          // converts into uppercase and trims space
+    convert (item) {
+      item = item.replace(/([A-Z])/g, ' $1').trim()
+      return item
+    },
+    capitalize (item) {
+      item = lodash.capitalize(item)
+      return item
+    }
+  },
+  mounted () {
+    for (var key in this.row) {
+      if (key === 'ProductInformation' || key === 'ProductPrice' || key === 'ProductImprintData' || key === 'ProductImage' || key === 'ProductShipping' || key === 'ProductAdditionalCharges' || key === 'ProductVariationPrice') {
+        this.data3.push({'name': key, 'totalNoOfRecords': this.row[key].totalNoOfRecords, 'uploadstatus': this.row[key].uploadStatus, 'validatestatus': this.row[key].validateStatus})
+      }
+    }
+  }
+}
 </script>
 <style scoped>
     .expand-row{

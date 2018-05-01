@@ -3,7 +3,6 @@ import _ from 'lodash'
 import axios from 'axios'
 import config from '@/config'
 // import state from './state'
-/*eslint-disable*/
 export default {
   getSchema ({ commit }) {
     commit('SET_SCHEMA', [])
@@ -12,6 +11,7 @@ export default {
         commit('SET_SCHEMA', _.reject(response.data, { 'isdeleted': true }))
       })
       .catch(error => {
+        console.log('error...', error)
         commit('SET_SCHEMA', [])
       })
   },
@@ -22,6 +22,7 @@ export default {
         commit('SET_SETTINGS', response.data)
       })
       .catch(error => {
+        console.log('error', error)
         // commit('SET_SETTINGS', [])
       })
   },
