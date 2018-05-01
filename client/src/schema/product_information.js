@@ -209,7 +209,6 @@ export const ProductInformationSchema = new Schema({
     defaultValue: '',
     maxLength: '',
     regEx: ''
-
   },
   matrix_price: {
     type: 'string',

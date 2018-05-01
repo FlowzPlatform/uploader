@@ -36,7 +36,8 @@ var temp = {
   forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
   flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
   crmUrl: 'https://www.crm.' + domainkey,
-  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
+  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
+  cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -64,7 +65,8 @@ if (process.env.MYENV !== 'development') {
     forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
     flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
     crmUrl: 'https://www.crm.' + domainkey,
-    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
+    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
+    cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload'
   }
 }
 

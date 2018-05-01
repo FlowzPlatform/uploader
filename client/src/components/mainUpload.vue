@@ -45,8 +45,7 @@
                            <div class="api" slot="content">
                              <Form inline>
                                <FormItem>
-                                   <Input type="text" v-model="mObj[activeTab].new_schema">
-                                   </Input>
+                                   <Input type="text" v-model="mObj[activeTab].new_schema" @on-enter="validateSchema(activeTab,mObj[activeTab].new_schema)"></Input>
                                </FormItem>
                                   <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
                                   <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
@@ -79,7 +78,7 @@
                   </div>
               </div>
 
-              <!-- <div v-if="showWebImage" id="upload-image-zone">
+              <div v-if="showWebImage" id="upload-image-zone">
                 <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
                   <span class="dz-message">Mass image upload<br/>
                       <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
@@ -92,44 +91,20 @@
                 <span v-if="ProceedLoading">Processing</span>
                 <span v-else>Proceed</span>
                </Button>
-               <div id="dirinfo">
-                 <Table border :columns="dircols" :data="dirinfo"></Table>
-               </div>
-             </div> -->
-
-
-
-              <!-- <div v-if="showWebImage">
-                <div id="upload-csv-zone">
-                  <div class="file-zone" @click="upldImage()">
-                      <span class="dz-message">Drop images here<br/>
-                          <small>(only jpg,png and gif files are valid.)</small>
-                      </span>
-                      <input type="file" id="image-file" name="images" multiple accept='image/*'/>
-                  </div>
+               <div v-if="image_err.length != 0" style="margin-top:7%;">
+                 <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
+                 <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
+                 <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
+                   <Row>
+                     <Col span="5" v-for="(item,index) in image_err">{{item}}</Col>
+                   </Row>
+                 </div>
               </div>
-              <div class="demo-upload-list" v-for="item in uploadList">
-                <template>
-                    <img :src="item.file_path">
-                    <div class="demo-upload-list-cover">
-                        <Icon type="ios-eye-outline" @click.native="handleView(item)"></Icon>
-                        <Icon type="ios-trash-outline"></Icon>
-                    </div>
-                </template>
-            </div>
-            </div>
-
-            <Modal title="View Image" v-model="visible">
-              <img :src="imgpath" v-if="visible" style="width: 100%">
-           </Modal> -->
-
-            <!-- <div v-if="showWebImage">
-          <form action="/">
-            <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions" @vdropzone-file-added="upldImage"></vue-dropzone>
-          </form>
-            </div> -->
-
-
+               <div id="dirinfo">
+                 <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
+                 <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
+               </div>
+             </div>
 
               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
                         <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
@@ -146,7 +121,7 @@
               <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
                <div class="schema-form ivu-table-wrapper">
                  <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
-                   <div class="ivu-table-body" style="overflow:auto !important">
+                   <div class="ivu-table-body" style="overflow:auto !important;">
                      <table style="min-width:1077px;overflow-x: auto;">
                        <thead>
                          <tr>
@@ -181,7 +156,7 @@
               <span v-if="ProceedLoading">Processing</span>
               <span v-else>Proceed</span>
              </Button>
-             <!-- <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button> -->
+             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
            </div>
 
            <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
@@ -377,7 +352,7 @@
                      <td class="">
                        <div class="ivu-table-cell">
                          <Select v-model="item.schemaObj.type">
-                             <Option v-for="type in types" :value="type" :key="type" @on-change="mapType(item.sysHeader,type)">{{ type}}</Option>
+                             <Option v-for="type in types" :value="type" :key="type">{{ type}}</Option>
                          </Select>
                        </div>
                      </td>
@@ -674,6 +649,7 @@ let cpageArray = []
 let noticeFlag = true
 let completeFlag = true
 let totalRecords = 0
+let isDone = false
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -817,6 +793,7 @@ export default {
           tab_flag: false,
           complete_flag: false,
           schemaList: [
+
             {
               value: '--Add new--',
               label: '--Add new--'
@@ -1085,6 +1062,7 @@ export default {
               // send results to server
               // if abort pressed, discard the stored data on server
               // else commit the stored data on server for import / live
+
 
             self.mObj[tab].uploadCSV = results.data
             self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
@@ -1523,7 +1501,6 @@ export default {
         this.mObj[this.activeTab].mapping[this.modelIndex].transformMethod = ''
       }
       var self = this
-
       self.mObj[self.activeTab].newUploadCSV = _.map(self.mObj[self.activeTab].csv_arr, function (row, rinx) {
         return _.reduce(row, function (result, value, key) {
           let inx = _.find(self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
@@ -1904,11 +1881,13 @@ export default {
             let updatedObj = {
               stepStatus: 'validation_completed'
             }
+
             api.request('patch', '/uploader/' + id, updatedObj).then(res => {
                 // this.showValidationTable = false
                 // this.$store.state.data = []
               this.validation_completed = true
             })
+
               .catch(error => {
                 if (error.response) {
                   this.$Notice.error({
@@ -2009,9 +1988,9 @@ export default {
             })
           }
         })
+
     },
     mapType (sysHeader, type) {
-
     },
     changeSchema (tab, value) {
       if (value === '--Add new--') {
@@ -2025,6 +2004,7 @@ export default {
           this.mObj[tab].headerDisplay = false
           this.mObj[tab].newSchemaDisplay = true
         }
+
         this.mObj[tab].schema = []
         this.SchemaValue(tab)
           // if(tab === 'Product Information'){
@@ -2087,6 +2067,7 @@ export default {
             duration: 10
           })
         }
+
       }
     },
     SchemaValue (tab) {
@@ -2203,6 +2184,7 @@ export default {
             flag = true
           }
         }
+
         if (flag === false) {
           this.mObj[tab].poptip_display = false
           this.mObj[tab].display = false
@@ -2230,6 +2212,7 @@ export default {
       // schemaObj = await this.makeSchemaObj(tab)
 
       if (self.mObj[tab].uploadCSV.length !== 0) {
+
         self.loadingdot = true
 
         for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
@@ -2316,6 +2299,7 @@ export default {
       this.modal1 = false
       this.proceedBtn = true
       this.ProceedLoading = false
+
       continueFlag = false
     },
     async continuee (tab) {
@@ -2323,11 +2307,15 @@ export default {
       continueFlag = true
       this.proceedBtn = true
       let self = this
-      await self.saveSchemaandMapping(tab)
+      if(tab == "Product Image"){
+        await self.checkImg(tab)
+        // await self.ValidateImages(tab)
+      }
       this.showContinue = false
-      await self.parseFile(tab)
       self.modal1 = false
       self.ProceedLoading = true
+      await self.saveSchemaandMapping(tab)
+      await self.parseFile(tab)
     },
     cancel () {
       this.proceedBtn = true
@@ -2346,6 +2334,7 @@ export default {
         resolve('done')
       })
     },
+
     async makeNewUploadCSVObj (tab) {
       return new Promise(async (resolve, reject) => {
         let self = this
@@ -2368,6 +2357,7 @@ export default {
 
           this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
+
          // for(let k=0;k<this.mObj[tab].mapping.length;k++){
          //   if(this.mObj[tab].mapping[k].transform !== ""){
          //     this.transformData = this.mObj[tab].mapping[k].transform
@@ -2382,6 +2372,7 @@ export default {
     },
     async Proceed (tab) {
       let self = this
+
       if (mapFlag === false) {
         let checkHeaders = _.filter(self.mObj[tab].mapping, function (o) {
           if (o.schemaObj.optional === false && o.csvHeader === '') {
@@ -2426,6 +2417,7 @@ export default {
         dynamicTyping: true,
         encoding: 'UTF-8',
         skipEmptyLines: true,
+
         chunk: async function (results, streamer) {
           if (results.data.length !== 0) {
             totalRecords = totalRecords + results.data.length
@@ -2447,6 +2439,7 @@ export default {
             }
           }
         },
+
         complete: async function (results, file) {
           completeFlag = false
           // await self.changeStatus(tab)
@@ -2528,6 +2521,7 @@ export default {
         }
       })
     },
+
     saveSchema (tab, name) {
       let self = this
       return new Promise(async(resolve, reject) => {
@@ -2539,6 +2533,7 @@ export default {
           import_tracker_id: id,
           tabname: tab
         }
+
 
         let name = tab.replace(/\s/g, '')
 
@@ -2655,6 +2650,7 @@ export default {
             duration: 10
           })
         }
+
       })
       })
     },
@@ -2689,6 +2685,7 @@ export default {
               duration: 10
             })
           }
+
         })
       })
     },
@@ -2770,7 +2767,6 @@ export default {
               return
             }
           }
-
           let getFunctionUrl = function (obj, value, fieldName) {
             var func1 = allowedValueValidatorFunc(obj, value, fieldName)
             var func2 = regExValidatorFunc(obj, value, fieldName)
@@ -2791,7 +2787,6 @@ export default {
               return
             }
           }
-
           let getFunctionEmail = function (obj, value, fieldName) {
             var func1 = allowedValueValidatorFunc(obj, value, fieldName)
             var func2 = regExValidatorFunc(obj, value, fieldName)
@@ -3111,7 +3106,6 @@ export default {
                       self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
                     }
                   })
-
                   self.mObj[tab].headerDisplay = false
                   self.mObj[tab].newSchemaDisplay = false
                   self.mObj[tab].previewDisplay = false
@@ -3135,7 +3129,16 @@ export default {
     },
     Abort (tab) {
       let self = this
+      if(tab == "Product Image"){
+        self.showWebImage = false
+        self.dirinfo = []
+        self.image_err = []
+        self.total_image = 0
+        self.img_no = 0
+        isDone = false
+      }
       self.proceedBtn = true
+
       continueFlag = false
       self.showContinue = false
       self.mObj[tab].load = false
@@ -3164,6 +3167,8 @@ export default {
               this.mObj[tab].filter_flag = false
               this.mObj[tab].main_arr = []
               this.mObj[tab].headers = []
+              this.img_no = 0
+              this.total_image = 0
               this.mObj[tab].savePreviewDisplay = false
               this.mObj[tab].complete_flag = false
               if (this.mObj[tab].headerDisplay === true) {
@@ -3212,6 +3217,7 @@ export default {
         }
       })
     },
+
     AbortValidation (tab) {
       let self = this
       self.proceedBtn = true
@@ -3230,7 +3236,6 @@ export default {
       if (document.getElementsByClassName('ht_master handsontable')[0]) {
         document.getElementsByClassName('ht_master handsontable')[0].remove()
       }
-
       if (document.getElementById('example1')) {
           // document.getElementById('example1').style.display = 'none'
         document.getElementById('example1').innerHTML = ''
@@ -3509,6 +3514,9 @@ export default {
     },
     saveData (tab) {
       let self = this
+      if(tab == 'Product Image'){
+        self.showWebImage = false
+      }
       self.mObj[tab].load = true
 
       if (this.$store.state.disconnect === false) {
@@ -3571,6 +3579,7 @@ export default {
       } else {
         self.mObj['Product Information'].uploadDisplay = true
       }
+
       if (Object.keys(response).indexOf('ProductPrice') >= 0) {
         self.mObj['Product Price'].tab_flag = true
         // self.arrangeTab("ProductPrice",response.id)
@@ -3744,6 +3753,7 @@ export default {
               })
             }
 
+
             if (message[name] && message[name].uploadStatus === 'completed') {
               self.mObj[self.activeTab].headerDisplay = false
               self.mObj[self.activeTab].previewDisplay = false
@@ -3868,6 +3878,7 @@ export default {
       }
     }
   },
+
   mounted () {
     let self = this
     id = self.$route.params.id
@@ -4725,5 +4736,11 @@ table.zaklad {
 
 .ivu-poptip-body-content {
   overflow: inherit !important;
+}
+
+.dirinfo1 .ivu-table-body{
+  overflow-x: hidden !important;
+  overflow-y: auto;
+  max-height: 200px;
 }
 </style>

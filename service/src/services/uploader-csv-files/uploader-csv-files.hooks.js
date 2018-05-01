@@ -1,5 +1,6 @@
 let async = require('asyncawait/async');
 let await = require('asyncawait/await');
+let errors = require('@feathersjs/errors') ;
 let axios = require('axios');
 let errors = require('@feathersjs/errors') ;
 let domainkey = process.env.domainKey ? process.env.domainKey : 'flowzcluster.tk'

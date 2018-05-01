@@ -3,7 +3,7 @@
     <h2 class="listUpld">List of Uploads</h2><br>
     <Table :columns="columns1" :data="chunkData[cpage-1]" class="jobtable"></Table>
     <div class="pagination">
-      <Page :total="data2.length" :current="cpage" @on-change="changePage" :page-size=10></Page>
+      <Page :total="data2.length" :current="cpage" @on-change="changePage" :page-size=10 show-total></Page>
     </div>
     <Spin fix v-if="loading">
        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
@@ -256,6 +256,7 @@ export default {
         self.loading = true
         self.data2 = []
         self.chunkData = []
+
         self.getJobDetails()
       }
     },
@@ -325,6 +326,13 @@ export default {
 .jobtable .ivu-table-body table {width: 100% !important;}
 .jobtable .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
 .jobtable .ivu-table .ivu-table-tip {overflow-x: hidden;}
-
+.pagination .ivu-page-total {
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    margin-right: 10px;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
 
 </style>

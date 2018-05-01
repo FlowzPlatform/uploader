@@ -9,6 +9,7 @@ var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const config1 = require('../../../config/default.json');
 let errors = require('@feathersjs/errors') ;
+let axios = require('axios');
 config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
 config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
 config1.mongodb_database = process.env.mongodb_database ? process.env.mongodb_database : 'pdmuploader'
@@ -104,7 +105,7 @@ var connectToMongo = async function(hook,url){
   let err_obj = {"err_data":'',"err_fields":[]}
   let rule_value
   let uploader_obj = await(hook.app.service('/uploader').get(hook.data.id))
-  if(uploader_obj[hook.data.key].hasOwnProperty("currentRuleIndex")){
+  if(uploader_obj[hook.data.key].hasOwnProperty("currentRuleIndex") && uploader_obj[hook.data.key]["currentRuleIndex"] != 0){
     rule_value = uploader_obj[hook.data.key]["currentRuleIndex"] - 1
   }
   else{
@@ -121,6 +122,23 @@ var connectToMongo = async function(hook,url){
           .catch(err => {
             console.log("error in finding data from collection =======>",err)
           }))
+
+          if(hook.data.sheet_name == "Product Image"){
+            if(query_result.length != 0 && j != 0){
+              var cloud_res = await checkImage(query_result,rules[j].columnName).then(response => {
+                return response
+              })
+              .catch(err => {
+                console.log("err",err)
+              })
+              if(cloud_res == 'done'){
+                query_result = []
+              }
+              else{
+                query_result = cloud_res
+              }
+            }
+          }
           // uploader_obj = await(hook.app.service('/uploader').get(hook.data.id))
           let obj = uploader_obj[hook.data.key]
           delete uploader_obj[hook.data.key]
@@ -201,4 +219,34 @@ var UpdateInMongo = async function(hook,url){
   }))
 
    hook.result = query_result
+}
+
+var checkImage = async function(imagedata,colname){
+  return new Promise(async(resolve,reject) => {
+      let img_err_data = []
+      for(let i=0;i<imagedata.length;i++){
+        let secure_url = imagedata[i][colname]
+        var image_res = await(axios.get(secure_url).then(res => {
+          return res
+        })
+        .catch(err => {
+          if(err.response.status == 404){
+            img_err_data.push(imagedata[i])
+            return err.response
+          }
+          else{
+            console.log("err..",err)
+            return err
+          }
+        })
+        )
+      }
+
+      if(img_err_data.length != 0){
+        resolve(img_err_data)
+      }
+      else if(img_err_data.length == 0){
+        resolve('done')
+      }
+  })
 }
