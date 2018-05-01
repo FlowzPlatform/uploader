@@ -57,23 +57,19 @@
 </template>
 
 <script>
-/*eslint-disable*/
 import modelAuthentication from '@/api/authentication'
 // import lodash from 'lodash'
 export default {
   name: 'Register',
   data () {
     const emailValidator = (rule, value, callback) => {
-                if (value == '') {
-                    callback(new Error('Please enter email'));
-                } else if (value != '') {
-                  let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
-                  if(re.test(value) != true)
-                    callback(new Error('Please enter correct email'));
-                  else
-                    callback()
-                }
-            };
+      if (value === '') {
+        callback(new Error('Please enter email'))
+      } else if (value !== '') {
+        let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
+        if (re.test(value) !== true) { callback(new Error('Please enter correct email')) } else { callback() }
+      }
+    }
 
     return {
       loading: false,
@@ -87,20 +83,20 @@ export default {
       },
       ruleRegister: {
         firstname: [
-          { required: true, message: 'Please enter Firstname', trigger: 'blur'}
+          {required: true, message: 'Please enter Firstname', trigger: 'blur'}
         ],
         lastname: [
           {required: true, message: 'Please enter Lastname', trigger: 'blur'}
         ],
         email: [
-          {validator:emailValidator,trigger: 'blur'}
+          {validator: emailValidator, trigger: 'blur'}
         ],
         password: [
           {required: true, message: 'Please enter password', trigger: 'blur'}
         ]
-      },
-  }
-},
+      }
+    }
+  },
   methods: {
     handleSubmit (name) {
       let self = this
@@ -111,13 +107,13 @@ export default {
             if (response) {
               this.loading = false
               this.$Message.success(response.message)
-              this.formRegister.firstname = ""
-              this.formRegister.lastname = ""
-              this.formRegister.email = ""
-              this.formRegister.password = ""
-              setTimeout(function(){
+              this.formRegister.firstname = ''
+              this.formRegister.lastname = ''
+              this.formRegister.email = ''
+              this.formRegister.password = ''
+              setTimeout(function () {
                 self.$router.push('/Login')
-              },1700)
+              }, 1700)
             } else {
               this.loading = false
             }
@@ -126,18 +122,18 @@ export default {
             this.$Notice.error({
               title: e.response.data.name,
               message: e.response.data.message,
-              duration:10
+              duration: 10
             })
             this.loading = false
           })
         } else {
-          // if(lodash.isEmpty(this.$refs[name].model["firstname"]) == true && lodash.isEmpty(this.$refs[name].model["lastname"]) == true && lodash.isEmpty(this.$refs[name].model["email"]) == true && lodash.isEmpty(this.$refs[name].model["password"]) == true){
+          // if(lodash.isEmpty(this.$refs[name].model["firstname"]) === true && lodash.isEmpty(this.$refs[name].model["lastname"]) === true && lodash.isEmpty(this.$refs[name].model["email"]) === true && lodash.isEmpty(this.$refs[name].model["password"]) === true){
           //   this.$Message.error('Please fill your details to register!')
           // }
         }
       })
     }
-}
+  }
 }
 </script>
 <style>

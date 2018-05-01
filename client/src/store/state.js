@@ -1,4 +1,3 @@
-/*eslint-disable*/
 export default {
   callingAPI: false,
   serverURI: 'http://10.110.1.136:8080',

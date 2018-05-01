@@ -8,10 +8,10 @@
           <!-- <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="get">
             <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="facebookSuccessCallbackUrl">
-          </form> -->
+          </form>
           <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="get">
             <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
-            <input type="hidden" name="failure" :value="googleSuccessCallbackUrl">
+            <input type="hidden" name="failure_url" :value="googleSuccessCallbackUrl">
           </form>
           <form id="form-twitter" name="form-twitter" :action="loginWithTwitterUrl" method="get">
             <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
@@ -20,7 +20,7 @@
           <!-- <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="get">
             <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="linkedinSuccessCallbackUrl">
-          </form> -->
+          </form>
           <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="get">
             <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="githubSuccessCallbackUrl">
@@ -108,10 +108,8 @@
 </template>
 
 <script>
-/*eslint-disable*/
 // import axios from 'axios'
 import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
 import config from '@/config'
 import psl from 'psl'
 export default {
@@ -132,16 +130,16 @@ export default {
           { required: true, message: 'Please enter password.', trigger: 'blur' }
         ]
       },
-      facebookSuccessCallbackUrl : config.facebookSuccessCallbackUrl,
-      googleSuccessCallbackUrl : config.googleSuccessCallbackUrl,
-      loginWithFacebookUrl : config.loginWithFacebookUrl,
-      loginWithGoogleUrl : config.loginWithGoogleUrl,
-      twitterSuccessCallbackUrl : config.twitterSuccessCallbackUrl,
-      loginWithTwitterUrl : config.loginWithTwitterUrl,
-      linkedinSuccessCallbackUrl : config.linkedinSuccessCallbackUrl,
-      loginWithLinkedinUrl : config.loginWithLinkedinUrl,
-      githubSuccessCallbackUrl : config.githubSuccessCallbackUrl,
-      loginWithGithubUrl : config.loginWithGithubUrl
+      facebookSuccessCallbackUrl: config.facebookSuccessCallbackUrl,
+      googleSuccessCallbackUrl: config.googleSuccessCallbackUrl,
+      loginWithFacebookUrl: config.loginWithFacebookUrl,
+      loginWithGoogleUrl: config.loginWithGoogleUrl,
+      twitterSuccessCallbackUrl: config.twitterSuccessCallbackUrl,
+      loginWithTwitterUrl: config.loginWithTwitterUrl,
+      linkedinSuccessCallbackUrl: config.linkedinSuccessCallbackUrl,
+      loginWithLinkedinUrl: config.loginWithLinkedinUrl,
+      githubSuccessCallbackUrl: config.githubSuccessCallbackUrl,
+      loginWithGithubUrl: config.loginWithGithubUrl
     }
   },
   methods: {
@@ -150,20 +148,18 @@ export default {
         if (valid) {
           this.loading = true
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
-            if(error.response.data.name != undefined && error.response.data.message != undefined){
+            if (error.response.data.name !== undefined && error.response.data.message !== undefined) {
               this.$Notice.error({
                 title: error.response.data.name,
                 desc: error.response.data.message,
                 duration: 10
               })
-            }
-            else if(error.message == 'Network Error') {
+            } else if (error.message === 'Network Error') {
               this.$Notice.error({
                 title: 'API Service unavailable',
                 duration: 10
               })
-            }
-            else {
+            } else {
               this.$Notice.error({
                 title: error.response.data,
                 duration: 10
@@ -174,14 +170,14 @@ export default {
           })
           if (auth) {
             this.$store.commit('SET_TOKEN', auth.logintoken)
-            this.$store.commit('SET_STORED_SUB_NAME',"")
-            this.$store.commit('SET_STORED_SUB_ID',"")
-            this.$store.commit('SET_STOREDUSERNAME',"")
-						// Token Store in cookie
-						let location = psl.parse(window.location.hostname)    // get parent domain
-						location = location.domain === null ? location.input : location.domain
-						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
-						this.$router.push({path: '/'}) // Redirect to joblist
+            this.$store.commit('SET_STORED_SUB_NAME', '')
+            this.$store.commit('SET_STORED_SUB_ID', '')
+            this.$store.commit('SET_STOREDUSERNAME', '')
+            // Token Store in cookie
+            let location = psl.parse(window.location.hostname)    // get parent domain
+            location = location.domain === null ? location.input : location.domain
+            this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
+            this.$router.push({path: '/'}) // Redirect to joblist
           }
           this.loading = false
         } else {
@@ -189,7 +185,7 @@ export default {
         }
       })
     },
-		handleFacebook () {
+    handleFacebook () {
       document.getElementById('form-facebook').submit()
     },
     handleGoogle () {
@@ -209,7 +205,7 @@ export default {
     var mainDiv = document.getElementById('main-panel')
     let self = this
     mainDiv.onkeypress = function (e) {
-      if (e.key == 'Enter') self.handleSubmit('formLogin')
+      if (e.key === 'Enter') self.handleSubmit('formLogin')
     }
   }
 }
