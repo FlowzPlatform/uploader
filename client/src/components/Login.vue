@@ -5,10 +5,10 @@
       </vue-particles>
       <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
-          <!-- <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="get">
+         <!--  <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="get">
             <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="facebookSuccessCallbackUrl">
-          </form>
+          </form> -->
           <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="get">
             <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="googleSuccessCallbackUrl">
@@ -17,10 +17,10 @@
             <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="twitterSuccessCallbackUrl">
           </form>
-          <!-- <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="get">
+         <!--  <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="get">
             <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="linkedinSuccessCallbackUrl">
-          </form>
+          </form> -->
           <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="get">
             <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
             <input type="hidden" name="failure_url" :value="githubSuccessCallbackUrl">
@@ -34,7 +34,7 @@
                   <h1>Login</h1>
                 </div>
               </div>
-              <!-- <div style="text-align: center;">
+             <!--  <div style="text-align: center;">
                 <img src="../assets/images/logo.png" style="width:60%;"/>
               </div> -->
             </FormItem>
@@ -55,7 +55,7 @@
 						<FormItem  class="animate4 bounceIn redirectlink">
 							<Row>
 								<Col style="float:left;">
-                  <!-- <Tooltip content="Facebook">
+                 <!--  <Tooltip content="Facebook">
                     <span @click="handleFacebook" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 1s;animation-delay: 1s;-moz-animation-delay: 1s;">
                       <i class="fa fa-square-o fa-stack-2x"></i>
                       <i class="fa fa-facebook fa-stack-1x"></i>

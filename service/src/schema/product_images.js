@@ -59,6 +59,8 @@ const ProductImageSchema = {
 
     secure_url_7:"string",
 
+    image_color_code_7: "string",
+
     color_8:"string",
 
     web_image_8:"string",
