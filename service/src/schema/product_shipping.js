@@ -44,6 +44,8 @@
     qty_1_min:"number",
 
     qty_1_max:"number",
+    
+    qty_2_min:"number",
 
     qty_2_max:"number",
 
