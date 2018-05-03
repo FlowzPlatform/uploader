@@ -142,7 +142,6 @@ var connectToMongo = async function(url,data,socket){
           }
           else if(key == schema_key && schemarules[schema_key] != "string"){
             if(data.newCSV[i][key] == null){
-              console.log("caleed......",key)
               data.newCSV[i][key] = ""
             }
           }

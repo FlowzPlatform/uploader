@@ -78,7 +78,7 @@
                   </div>
               </div>
 
-              <div v-if="showWebImage" id="upload-image-zone">
+             <div v-if="showWebImage" id="upload-image-zone">
                 <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
                   <span class="dz-message">Mass image upload<br/>
                       <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
@@ -91,7 +91,7 @@
                 <span v-if="ProceedLoading">Processing</span>
                 <span v-else>Proceed</span>
                </Button>
-               <div v-if="image_err.length != 0" style="margin-top:7%;">
+               <div v-if="image_err.length !== 0" style="margin-top:7%;">
                  <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
                  <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
                  <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
@@ -736,30 +736,145 @@ export default {
       dircols: [
         {
           title: 'FileName',
-          key: 'name'
+          key: 'name',
+          align: 'center'
         },
         {
           title: 'Path',
-          key: 'path'
+          key: 'path',
+          align: 'center'
         },
         {
           title: 'Size',
-          key: 'size'
+          key: 'size',
+          align: 'center'
         },
         {
           title: 'Type',
-          key: 'type'
+          key: 'type',
+          align: 'center'
         },
         {
           title: 'Status',
-          key: 'status'
+          key: 'status',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.status === 'success') {
+              return h('div', [
+                h('i-circle', {
+                  props: {
+                    percent: 100,
+                    size: 30,
+                    strokeColor: '#5cb85c'
+                  },
+                  style: {
+                    marginTop: '10px',
+                    marginLeft: '45px'
+                  }
+                }, [
+                  h('Icon', {
+                    props: {
+                      type: 'ios-checkmark-empty',
+                      size: 20
+                    },
+                    style: {
+                      color: '#5cb85c'
+                    }
+                  })
+                ]),
+                h('Tooltip', {
+                  props: {
+                    content: 'Delete image from Cloudinary',
+                    placement: 'top'
+                  }
+                }, [
+                  h('Button', {
+                    props: {
+                      type: 'ghost',
+                      icon: 'trash-a',
+                      shape: 'circle',
+                      size: 'large'
+                    },
+                    style: {
+                      color: '#ed3f14',
+                      marginLeft: '10px',
+                      border: 'none',
+                      marginTop: '-23px'
+                    },
+                    on: {
+                      click: () => {
+                        this.deleteImage(params.row)      // delete image from cloudinary
+                      }
+                    }
+                  })
+                ])
+              ])
+            } else if (params.row.status === 'error' || params.row.status === 'deleted') {
+              return h('div', [
+                h('i-circle', {
+                  props: {
+                    percent: 100,
+                    size: 30,
+                    strokeColor: '#ff5500'
+                  },
+                  style: {
+                    marginTop: '10px',
+                    marginLeft: '45px'
+                  }
+                }, [
+                  h('Icon', {
+                    props: {
+                      type: 'ios-close-empty',
+                      size: 20
+                    },
+                    style: {
+                      color: '#ff5500'
+                    }
+                  })
+                ]),
+                h('Tooltip', {
+                  props: {
+                    content: 'Delete image from list',
+                    placement: 'top'
+                  }
+                }, [
+                  h('Button', {
+                    props: {
+                      type: 'ghost',
+                      icon: 'trash-a',
+                      shape: 'circle',
+                      size: 'large'
+                    },
+                    style: {
+                      color: '#ed3f14',
+                      marginLeft: '10px',
+                      border: 'none',
+                      marginTop: '-23px'
+                    },
+                    on: {
+                      click: () => {
+                        this.deleteImageFromList(params.row)      // delete image from cloudinary
+                      }
+                    }
+                  })
+                ])
+              ])
+            } else {
+              return h('div', params.row.status)
+            }
+          }
         }
       ],
+      secure_url_arr: [],
+      image_err: [],
       abortImportBtn: false,
       calledfromModify: false,
       calledFromAbort: false,
       ProceedLoading: false,
       nextBtn: false,
+      image_batch: [],
+      total_image: 0,
+      img_no: 0,
       mObj: {
         'Product Information': {
           selected_schema: '',
@@ -1038,6 +1153,20 @@ export default {
       let tab = this.activeTab
       return Object.keys(this.mObj[tab].schema.structure)
     },
+    Next (tab) {
+      let self = this
+      self.mObj[tab].previewDisplay = false
+      self.mObj[tab].newSchemaDisplay = false
+      self.mObj[tab].headerDisplay = false
+      self.showWebImage = true
+      $('.f-layout-copy').css('position', 'fixed')
+    },
+    Back (tab) {
+      let self = this
+      self.showWebImage = false
+      self.mObj[tab].previewDisplay = true
+      self.mObj[tab].headerDisplay = true
+    },
     async handleFileChange (e, tab) {
       let self = this
       file = e.target.files[0]
@@ -1063,14 +1192,13 @@ export default {
               // if abort pressed, discard the stored data on server
               // else commit the stored data on server for import / live
 
-
             self.mObj[tab].uploadCSV = results.data
             self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
             self.mObj[tab].headers.push('_id')
             self.mObj[tab].load = true
-                // if(tab === "Product Image"){
-                //   self.nextBtn = true
-                // }
+            if (tab === 'Product Image') {
+              self.nextBtn = true
+            }
             if (self.mObj[tab].new_flag === 1) {
                   // if(my_flag === true){
               self.mObj[tab].load = true
@@ -1095,53 +1223,79 @@ export default {
         })
       }
     },
-      // async handleImageChange(e,tab){
-      //   let self = this
-      //   const reader  = new FileReader();
-      //   // console.log("files....",e.target.files)
-      //    let fileList = e.target.files
-      //
-      //    for(let i=0; i<fileList.length; i++){
-      //      let fileSize = 0;
-      //      if (fileList[i].size > 1024 * 1024)
-      //          fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-      //      else
-      //          fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB';
-      //
-      //     self.dirinfo.push({"name":fileList[i].name,"path":fileList[i].webkitRelativePath,"size":fileSize,"type":fileList[i].type,"status":""})
-      //
-      //     reader.readAsDataURL(fileList[i]);
-      //     let uri = await self.retResult(reader)
-      //
-      //     api.request('post', '/upload-image/',{uri:uri,file_name:fileList[i].name,import_tracker_id:id}).then(response => {
-      //     });
-      //    }
+    insertImageUrl (tab) {
+      return new Promise(async (resolve, reject) => {
+        let self = this
+        for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
+          for (let k in self.mObj[tab].uploadCSV[i]) {
+            let n = k.search('Web_Image')
+            if (n !== undefined && n !== -1 && n !== null) {
+              let check = lodash.find(self.secure_url_arr, {file_name: self.mObj[tab].uploadCSV[i][k]})
+              if (check !== undefined) {
+                let abc = k.split('_')
+                self.mObj[tab].uploadCSV[i]['secure_url_' + abc[2]] = check['secure_url']
+              }
+            }
+          }
+        }
+        resolve('done')
+      })
+    },
+    deleteImage (imgdata) {
+      let self = this
+      let resource = 'product_images/' + this.$route.params.id + '/' + imgdata.name
+      api.request('delete', '/upload-image/?resource=' + resource).then(response => {
+        let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
+        self.secure_url_arr.splice(indx, 1)
+        self.dirinfo[imgdata._index]['status'] = 'deleted'
+        self.img_no--
+      })
+    },
+    deleteImageFromList (imgdata) {
+      let self = this
+      if (imgdata.status === 'error') {
+        let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
+        self.secure_url_arr.splice(indx, 1)
+        self.dirinfo.splice(imgdata._index, 1)
+      } else if (imgdata.status === 'deleted') {
+        self.dirinfo.splice(imgdata._index, 1)
+      }
+    },
+    async handleImageChange (e, tab) {
+      let self = this
+      const reader = new FileReader()
+      let fileList = e.target.files
 
-         // console.log("%%%%% self.dirinfo %%%%",self.dirinfo)
-         // var dirinfo = '<table class="zaklad"><tr><th>File name</th><th>Path</th><th>Size</th><th>Type</th><th>Status</th></tr>';
-         // for (var i = 0, file; file = fileList[i]; i++) {
-         //     var fileSize = 0;
-         //     if (file.size > 1024 * 1024)
-         //         fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-         //     else
-         //         fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
-         //     dirinfo += '<tr><td>' + file.name + '<td>' + file.webkitRelativePath + '<td>' + fileSize + '<td>' + file.type + '<td>' + '' + '</tr>';
-         // }
-         // dirinfo += '</table>';
-         // document.getElementById('dirinfo').innerHTML = dirinfo;
-      // },
-      // Next(tab){
-      //   let self = this
-      //   self.mObj[tab].previewDisplay = false
-      //   self.mObj[tab].headerDisplay = false
-      //   self.showWebImage = true
-      // },
-      // Back(tab){
-      //   let self = this
-      //   self.showWebImage = false
-      //   self.mObj[tab].previewDisplay = true
-      //   self.mObj[tab].headerDisplay = true
-      // },
+      if (fileList.length < 10) {
+        isDone = true
+      }
+
+      for (let i = 0; i < fileList.length; i++) {
+        let value = lodash.find(self.dirinfo, {'name': fileList[i].name})
+        if (value === undefined) {
+          let fileSize = 0
+          if (fileList[i].size > 1024 * 1024) { fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB' } else { fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB' }
+
+          if (fileList[i].type !== undefined && fileList[i].type !== '') {
+            self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'type': fileList[i].type, 'status': 'Uploading...'})
+          } else if (fileList[i].type === undefined || fileList.type === '') {
+            self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'status': 'Uploading'})
+          }
+
+          reader.readAsDataURL(fileList[i])
+          let uri = await self.retResult(reader)
+          self.image_batch.push({'file': {'url': uri, 'filename': fileList[i].name}, 'folder': 'product_images/' + id + '/'})
+             // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
+          if (i === fileList.length - 1) {
+            isDone = true
+          }
+
+          self.total_image = self.dirinfo.length
+        }
+      }
+
+      $('.f-layout-copy').css('position', 'absolute')
+    },
     handleView (item) {
       let self = this
       self.imgpath = item.file_path
@@ -1988,7 +2142,6 @@ export default {
             })
           }
         })
-
     },
     mapType (sysHeader, type) {
     },
@@ -2007,31 +2160,6 @@ export default {
 
         this.mObj[tab].schema = []
         this.SchemaValue(tab)
-          // if(tab === 'Product Information'){
-          //   this.mObj[tab].schema = lodash.cloneDeep(ProductInformationSchema)
-          //   console.log("this.mObj[tab].schema",this.mObj[tab].schema)
-          // }
-          // else if(tab === 'Product Price'){
-          //   this.mObj[tab].schema = lodash.cloneDeep(ProductPricingSchema)
-          // }
-          // else if(tab === 'Product Imprint Data'){
-          //   this.mObj[tab].schema = lodash.cloneDeep(ProductImprintDataSchema)
-          // }
-          // else if(tab === 'Product Image'){
-          //   this.mObj[tab].schema = lodash.cloneDeep(ProductImagesSchema)
-          // }
-          // else if(tab === 'Product Shipping'){
-          //   this.mObj[tab].schema = lodash.cloneDeep(ProductShippingSchema)
-          // }
-          // else if(tab === 'Product Additional Charges'){
-          //   this.mObj[tab].schema = lodash.cloneDeep(ProductAdditionalChargesSchema)
-          //
-          // }
-          // else if(tab === 'Product Variation Price'){
-          //   this.mObj[tab].schema = lodash.cloneDeep(ProductVariationSchema)
-          //
-          // }
-
         this.generateHeadersandMapping(tab)
       } else {
         let currentSelectedSchema = this.mObj[tab].selected_schema
@@ -2067,7 +2195,6 @@ export default {
             duration: 10
           })
         }
-
       }
     },
     SchemaValue (tab) {
@@ -2212,7 +2339,6 @@ export default {
       // schemaObj = await this.makeSchemaObj(tab)
 
       if (self.mObj[tab].uploadCSV.length !== 0) {
-
         self.loadingdot = true
 
         for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
@@ -2299,15 +2425,20 @@ export default {
       this.modal1 = false
       this.proceedBtn = true
       this.ProceedLoading = false
-
       continueFlag = false
+
+      if (tab === 'Product Image') {
+        this.showWebImage = false
+        this.mObj[tab].previewDisplay = true
+        this.mObj[tab].headerDisplay = true
+      }
     },
     async continuee (tab) {
       // this.loadProcessing = true
       continueFlag = true
       this.proceedBtn = true
       let self = this
-      if(tab == "Product Image"){
+      if (tab === 'Product Image') {
         await self.checkImg(tab)
         // await self.ValidateImages(tab)
       }
@@ -2347,6 +2478,8 @@ export default {
             for (let j = 0; j < self.mObj[tab].mapping.length; j++) {
               if (self.mObj[tab].mapping[j]['csvHeader'] === key) {
                 obj[self.mObj[tab].mapping[j]['sysHeader']] = self.mObj[tab].uploadCSV[i][key]
+              } else if (key.search('secure_url') !== undefined && key.search('secure_url') !== -1) {
+                obj[key] = self.mObj[tab].uploadCSV[i][key]
               } else if (!obj.hasOwnProperty(self.mObj[tab].mapping[j]['sysHeader'])) {
                 obj[self.mObj[tab].mapping[j]['sysHeader']] = ''
               }
@@ -2356,7 +2489,6 @@ export default {
           self.mObj[tab].newUploadCSV.push(obj)
 
           this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
-
 
          // for(let k=0;k<this.mObj[tab].mapping.length;k++){
          //   if(this.mObj[tab].mapping[k].transform !== ""){
@@ -2374,6 +2506,10 @@ export default {
       let self = this
 
       if (mapFlag === false) {
+        if (tab === 'Product Image') {
+          await self.checkImg(tab)
+        }
+
         let checkHeaders = _.filter(self.mObj[tab].mapping, function (o) {
           if (o.schemaObj.optional === false && o.csvHeader === '') {
             return o.csvHeader === ''
@@ -2405,6 +2541,9 @@ export default {
         }
       } else {
         self.ProceedLoading = true
+        if (tab === 'Product Image') {
+          await self.checkImg(tab)
+        }
         await self.saveSchemaandMapping(tab)
         await self.parseFile(tab)
       }
@@ -2424,9 +2563,15 @@ export default {
             streamer.pause()
             self.mObj[tab].uploadCSV = []
             self.mObj[tab].uploadCSV = results.data
+            if (tab === 'Product Image') {
+              await self.insertImageUrl(tab)
+            }
             await self.makeNewUploadCSVObj(tab)
             await self.transformFromMapping(tab)
             globalValidateResolve = null
+            if (tab === 'Product Image') {
+              await self.ValidateImages(tab)
+            }
             await self.ProceedToValidate(tab)
             await self.saveData(tab)
             await self.socketResponse()
@@ -2442,11 +2587,56 @@ export default {
 
         complete: async function (results, file) {
           completeFlag = false
-          // await self.changeStatus(tab)
-          // if(self.mObj[tab].complete_flag === false){
-          //   self.mObj[tab].complete_flag = true
-          //
-          // }
+        }
+      })
+    },
+    ValidateImages (tab) {
+      return new Promise(async(resolve, reject) => {
+        let self = this
+        self.image_err = []
+        for (let i = 0; i < self.mObj[tab].newUploadCSV.length; i++) {
+          for (let k in self.mObj[tab].newUploadCSV[i]) {
+            if (k.search('web_image') !== undefined && k.search('web_image') !== -1) {
+              if (self.mObj[tab].newUploadCSV[i][k] !== '' && self.mObj[tab].newUploadCSV[i][k] !== null) {
+                let obj = lodash.find(self.dirinfo, {name: self.mObj[tab].newUploadCSV[i][k]})
+                if (obj === undefined) {
+                  self.image_err.push(self.mObj[tab].newUploadCSV[i][k])
+                }
+              }
+            }
+          }
+        }
+        if (self.image_err.length < 10) {
+          isDone = true
+        }
+        if (self.image_err.length !== 0) {
+          if (self.mObj[tab].load === true) {
+            self.mObj[tab].load = false
+          }
+          self.modal1 = false
+          self.showWebImage = true
+          $('#dirinfo').css('padding-top', '3%')
+
+          self.ProceedLoading = false
+          $('.f-layout-copy').css('position', 'absolute')
+        } else {
+          $('#dirinfo').css('padding-top', '6%')
+          resolve('done')
+        }
+      })
+    },
+    checkImg (tab) {
+      return new Promise(async(resolve, reject) => {
+        if (this.dirinfo.length === 0) {
+          this.ProceedLoading = false
+          this.modal1 = false
+          this.$Notice.error({
+            title: 'Please upload Images',
+            desc: 'Cannot proceed without uploading images',
+            duration: 5
+          })
+        } else if (this.dirinfo.length !== 0) {
+          resolve('done')
         }
       })
     },
@@ -2533,7 +2723,6 @@ export default {
           import_tracker_id: id,
           tabname: tab
         }
-
 
         let name = tab.replace(/\s/g, '')
 
@@ -2650,7 +2839,6 @@ export default {
             duration: 10
           })
         }
-
       })
       })
     },
@@ -2685,7 +2873,6 @@ export default {
               duration: 10
             })
           }
-
         })
       })
     },
@@ -3112,6 +3299,9 @@ export default {
                   self.mObj[tab].uploadDisplay = false
                   self.mObj[tab].showHandson = true
                   self.mObj[tab].errDisplay = true
+                  if (tab === 'Product Image') {
+                    self.showWebImage = false
+                  }
                   if (self.mObj[tab].load === true) {
                     self.mObj[tab].load = false
                   }
@@ -3129,7 +3319,7 @@ export default {
     },
     Abort (tab) {
       let self = this
-      if(tab == "Product Image"){
+      if (tab === 'Product Image') {
         self.showWebImage = false
         self.dirinfo = []
         self.image_err = []
@@ -3152,9 +3342,36 @@ export default {
       totalRecords = 0
       $('.f-layout-copy').css('position', 'fixed')
     },
-    abortUploadedRecords (tab) {
+    deleteFromCloudinary (id) {
+      return new Promise((resolve, reject) => {
+        let resource = 'product_images/' + this.$route.params.id
+        api.request('delete', '/upload-image/?resource=' + resource).then(response => {
+          resolve(response)
+        })
+        .catch(error => {
+          if (error.response) {
+            this.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else {
+            this.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
+      })
+    },
+    async abortUploadedRecords (tab) {
       this.deleteRecModal = false
       let tabName = tab.replace(/ /g, '')
+      if (tab === 'Product Image') {
+        this.dirinfo = []
+        this.image_err = []
+        await this.deleteFromCloudinary(id)
+      }
       api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab).then(res => {
         api.request('get', '/uploader/' + this.$route.params.id).then(res => {
           if (Object.keys(res.data).indexOf(tabName) >= 0) {
@@ -3218,8 +3435,17 @@ export default {
       })
     },
 
-    AbortValidation (tab) {
+    async AbortValidation (tab) {
       let self = this
+      if (tab === 'Product Image') {
+        self.dirinfo = []
+        self.image_err = []
+        totalRecords = 0
+        isDone = false
+        self.total_image = 0
+        self.img_no = 0
+        await self.deleteFromCloudinary(id)
+      }
       self.proceedBtn = true
       self.ProceedLoading = false
       self.mObj[tab].errmsg = []
@@ -3228,7 +3454,6 @@ export default {
       self.mObj[tab].data1 = []
       self.mObj[tab].headers1 = []
       completeFlag = true
-      totalRecords = 0
       $('table.htCore').each(function () {
         this.remove()
       })
@@ -3514,7 +3739,7 @@ export default {
     },
     saveData (tab) {
       let self = this
-      if(tab == 'Product Image'){
+      if (tab === 'Product Image') {
         self.showWebImage = false
       }
       self.mObj[tab].load = true
@@ -3753,8 +3978,11 @@ export default {
               })
             }
 
-
             if (message[name] && message[name].uploadStatus === 'completed') {
+              if (self.activeTab === 'Product Image') {
+                self.showWebImage = false
+                self.nextBtn = false
+              }
               self.mObj[self.activeTab].headerDisplay = false
               self.mObj[self.activeTab].previewDisplay = false
               self.mObj[self.activeTab].newSchemaDisplay = false
@@ -3878,7 +4106,33 @@ export default {
       }
     }
   },
+  watch: {
+    'image_batch': function (batch) {
+      let self = this
 
+      if (batch.length >= 10) {
+        let batchChunk = lodash.chunk(batch, 10)
+
+        for (let i = 0; i < batchChunk.length; i++) {
+          socket.emit('pdmimages', batchChunk[i], (err, data) => {
+            if (err) {
+
+            }
+          })
+          self.image_batch.splice(0, 10)
+        }
+      }
+
+      if (isDone === true && batch.length < 10 && batch.length !== 0) {
+        socket.emit('pdmimages', batch, (err, data) => {
+          if (err) {
+
+          }
+        })
+        self.image_batch.splice(0, batch.length)
+      }
+    }
+  },
   mounted () {
     let self = this
     id = self.$route.params.id
@@ -4120,6 +4374,20 @@ export default {
       //     })
       //   }
       // }
+
+    socket.on('img_res', (response) => {
+      for (let i = 0; i < response.length; i++) {
+        if (response[i].hasOwnProperty('iserror')) {
+          let index = lodash.findIndex(self.dirinfo, {name: response[i].filename})
+          self.dirinfo[index].status = 'error'
+        } else {
+          self.secure_url_arr.push({'file_name': response[i].file_name, 'secure_url': response[i].secure_url})
+          let index = lodash.findIndex(self.dirinfo, {name: response[i].file_name})
+          self.dirinfo[index].status = 'success'
+          self.img_no ++
+        }
+      }
+    })
   }
 }
 let x = String
