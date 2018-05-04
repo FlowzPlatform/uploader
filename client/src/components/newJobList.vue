@@ -175,7 +175,6 @@ export default {
         if (this.$store.state.selectedUserName !== 'All' && this.$store.state.subscription_id !== 'All') {
           socket.emit('uploader::find', {'user_id': id1, 'subscriptionId': this.$store.state.subscription_id}, async (e, data) => {
             self.cpage = 1
-            console.log('data...', data)
             if (data) {
               if (data.data.length !== 0) {
                 await self.renderData(data.data)
@@ -187,7 +186,6 @@ export default {
         } else if (this.$store.state.selectedUserName !== 'All' && this.$store.state.subscription_id === 'All') {
           socket.emit('uploader::find', {'user_id': id1, 'role': 'other'}, async (e, data) => {
             self.cpage = 1
-            console.log('data...', data)
             if (data) {
               if (data.data.length !== 0) {
                 await self.renderData(data.data)
@@ -199,7 +197,6 @@ export default {
         } else {
           socket.emit('uploader::find', {'user_id': this.$store.state.userid, 'role': 'other'}, async (e, data) => {
             self.cpage = 1
-            console.log('data...', data)
             if (data) {
               if (data.data.length !== 0) {
                 await self.renderData(data.data)
