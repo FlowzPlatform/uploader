@@ -45,7 +45,7 @@
                            <div class="api" slot="content">
                              <Form inline>
                                <FormItem>
-                                   <Input type="text" v-model="mObj[activeTab].new_schema" @on-enter="validateSchema(activeTab,mObj[activeTab].new_schema)"></Input>
+                                   <Input type="text" v-model="mObj[activeTab].new_schema"></Input>
                                </FormItem>
                                   <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
                                   <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
@@ -368,7 +368,7 @@
                            <div slot="content" class="prptycontent">
                              <!-- <Form> -->
                              <Form-item label="MaxLength" :label-width="1" class="prpty-label">
-                               <Input  size="small" v-model="item.schemaObj.maxLength" ></Input>
+                               <Input size="small" v-model="item.schemaObj.maxLength" ></Input>
                              </Form-item>
                              <Form-item  label="Allowed Value" :label-width="1" class="prpty-label">
                                 <input-tag  :tags="item.schemaObj.allowedValues" class="allowedTags"></input-tag>
@@ -2288,12 +2288,14 @@ export default {
     },
     validateSchema (tab, schema) {
       if (schema === '' || schema === null) {
+        this.ProceedLoading = false
         this.proceedBtn = true
         this.$Notice.error({
           title: 'Empty values not allowed',
           duration: 5
         })
       } else if (schema === 'Untitled mapping' || schema === '--Add new--') {
+        this.ProceedLoading = false
         this.proceedBtn = true
         this.$Notice.error({
           title: 'Please write new mapping name',
@@ -2307,6 +2309,7 @@ export default {
               title: 'This mapping name already exists',
               duration: 5
             })
+            this.ProceedLoading = false
             this.proceedBtn = true
             flag = true
           }
@@ -2700,14 +2703,20 @@ export default {
         let self = this
         let name = tab.replace(/\s/g, '')
 
-        if (self.mObj[tab].new_flag === 1) {
-          await self.saveSchema(tab, name)
-          await self.saveCSVFiles(tab, name)
-          await self.saveMapping(tab, name)
-          resolve('done')
+        if (self.mObj[tab].selected_schema === '--Add new--') {
+          self.$Notice.error({title: 'Please enter a valid mapping name', duration: 5})
+          self.ProceedLoading = false
+          self.proceedBtn = true
         } else {
-          await self.saveOnlyCSVFiles(tab, name)
-          resolve('done')
+          if (self.mObj[tab].new_flag === 1) {
+            await self.saveSchema(tab, name)
+            await self.saveCSVFiles(tab, name)
+            await self.saveMapping(tab, name)
+            resolve('done')
+          } else {
+            await self.saveOnlyCSVFiles(tab, name)
+            resolve('done')
+          }
         }
       })
     },
@@ -2886,369 +2895,303 @@ export default {
         let self = this
         mapFlag = false
 
-        if (self.mObj[tab].selected_schema === '--Add new--') {
-          self.$Notice.error({title: 'Please enter a valid mapping name', duration: 5})
-          self.proceedBtn = true
-        } else {
-          continueFlag = false
-          self.showContinue = false
-          let errcols = []
-          let dateValidatorFunc = function (obj, value, fieldName) {
-            if (value !== '' || value !== undefined) {
-              let date = moment(value)
-              let isValid = date.isValid()
-              if (isValid !== true) return 'Invalid date. Please provide date in y-m-d format'
-              date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
-              return
-            }
+        continueFlag = false
+        self.showContinue = false
+        let errcols = []
+        let dateValidatorFunc = function (obj, value, fieldName) {
+          if (value !== '' || value !== undefined) {
+            let date = moment(value)
+            let isValid = date.isValid()
+            if (isValid !== true) return 'Invalid date. Please provide date in y-m-d format'
+            date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
+            return
           }
-          let urlValidatorFunc = function (obj, value, fieldName) {
-            if (value !== '' || value !== undefined) {
-              let re = /^((http[s]?|ftp):\/)?\/?([^:\s]+)((\/\w+)*\/)([\w]+[^#?\s]+)(.*)?(#[\w]+)?$/
-              if (re.test(value) !== true) { return 'Invalid url' } else { return }
-            }
+        }
+        let urlValidatorFunc = function (obj, value, fieldName) {
+          if (value !== '' || value !== undefined) {
+            let re = /^((http[s]?|ftp):\/)?\/?([^:\s]+)((\/\w+)*\/)([\w]+[^#?\s]+)(.*)?(#[\w]+)?$/
+            if (re.test(value) !== true) { return 'Invalid url' } else { return }
           }
+        }
 
-          let emailValidatorFunc = function (obj, value, fieldName) {
-            if (value !== undefined || value !== '') {
-              let re = /\S+@\S+\.\S+/
-              if (re.test(value) !== true) { return 'Invalid email address' } else { return }
-            }
+        let emailValidatorFunc = function (obj, value, fieldName) {
+          if (value !== undefined || value !== '') {
+            let re = /\S+@\S+\.\S+/
+            if (re.test(value) !== true) { return 'Invalid email address' } else { return }
           }
+        }
 
-          let optionalValidatorFunc = function (obj, value, fieldName) {
-            if (value === '') { return fieldName + ' cannot be left blank' } else { return }
-          }
+        let optionalValidatorFunc = function (obj, value, fieldName) {
+          if (value === '') { return fieldName + ' cannot be left blank' } else { return }
+        }
 
-          let phoneValidatorFunc = function (obj, value, fieldName) {
+        let phoneValidatorFunc = function (obj, value, fieldName) {
         let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
-            if (value !== undefined || value !== '') {
-              if (re.test(value) !== true) { return 'Invalid phone number' } else { return }
-            }
+          if (value !== undefined || value !== '') {
+            if (re.test(value) !== true) { return 'Invalid phone number' } else { return }
           }
+        }
 
-          let pincodeValidatorFunc = function (obj, value, fieldName) {
+        let pincodeValidatorFunc = function (obj, value, fieldName) {
         let re = /^[0-9]{1,6}$/ // eslint-disable-line
-            if (value !== undefined || value !== '') {
-              if (re.test(value) !== true) { return 'Invalid pin-code' } else { return }
-            }
+          if (value !== undefined || value !== '') {
+            if (re.test(value) !== true) { return 'Invalid pin-code' } else { return }
           }
+        }
 
-          let getFunctionDate = function (obj, value, fieldName) {
-            var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-            var func2 = regExValidatorFunc(obj, value, fieldName)
-            var func3 = dateValidatorFunc(obj, value, fieldName)
-            var func4 = defaultValidatorFunc(obj, value, fieldName)
-            var func5 = optionalValidatorFunc(obj, value, fieldName)
-            if (func1 !== undefined) {
-              return func1
-            } else if (func2 !== undefined) {
-              return func2
-            } else if (func3 !== undefined) {
-              return func3
-            } else if (func4 !== undefined) {
-              return func4
-            } else if (func5 !== undefined) {
-              return func5
-            } else {
-              return
-            }
+        let getFunctionDate = function (obj, value, fieldName) {
+          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          var func2 = regExValidatorFunc(obj, value, fieldName)
+          var func3 = dateValidatorFunc(obj, value, fieldName)
+          var func4 = defaultValidatorFunc(obj, value, fieldName)
+          var func5 = optionalValidatorFunc(obj, value, fieldName)
+          if (func1 !== undefined) {
+            return func1
+          } else if (func2 !== undefined) {
+            return func2
+          } else if (func3 !== undefined) {
+            return func3
+          } else if (func4 !== undefined) {
+            return func4
+          } else if (func5 !== undefined) {
+            return func5
+          } else {
+            return
           }
-          let getFunctionUrl = function (obj, value, fieldName) {
-            var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-            var func2 = regExValidatorFunc(obj, value, fieldName)
-            var func3 = urlValidatorFunc(obj, value, fieldName)
-            var func4 = defaultValidatorFunc(obj, value, fieldName)
-            var func5 = optionalValidatorFunc(obj, value, fieldName)
-            if (func1 !== undefined) {
-              return func1
-            } else if (func2 !== undefined) {
-              return func2
-            } else if (func3 !== undefined) {
-              return func3
-            } else if (func4 !== undefined) {
-              return func4
-            } else if (func5 !== undefined) {
-              return func5
-            } else {
-              return
-            }
+        }
+        let getFunctionUrl = function (obj, value, fieldName) {
+          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          var func2 = regExValidatorFunc(obj, value, fieldName)
+          var func3 = urlValidatorFunc(obj, value, fieldName)
+          var func4 = defaultValidatorFunc(obj, value, fieldName)
+          var func5 = optionalValidatorFunc(obj, value, fieldName)
+          if (func1 !== undefined) {
+            return func1
+          } else if (func2 !== undefined) {
+            return func2
+          } else if (func3 !== undefined) {
+            return func3
+          } else if (func4 !== undefined) {
+            return func4
+          } else if (func5 !== undefined) {
+            return func5
+          } else {
+            return
           }
-          let getFunctionEmail = function (obj, value, fieldName) {
-            var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-            var func2 = regExValidatorFunc(obj, value, fieldName)
-            var func3 = emailValidatorFunc(obj, value, fieldName)
-            var func4 = defaultValidatorFunc(obj, value, fieldName)
-            var func5 = optionalValidatorFunc(obj, value, fieldName)
-            if (func1 !== undefined) {
-              return func1
-            } else if (func2 !== undefined) {
-              return func2
-            } else if (func3 !== undefined) {
-              return func3
-            } else if (func4 !== undefined) {
-              return func4
-            } else if (func5 !== undefined) {
-              return func5
-            } else {
-              return
-            }
+        }
+        let getFunctionEmail = function (obj, value, fieldName) {
+          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          var func2 = regExValidatorFunc(obj, value, fieldName)
+          var func3 = emailValidatorFunc(obj, value, fieldName)
+          var func4 = defaultValidatorFunc(obj, value, fieldName)
+          var func5 = optionalValidatorFunc(obj, value, fieldName)
+          if (func1 !== undefined) {
+            return func1
+          } else if (func2 !== undefined) {
+            return func2
+          } else if (func3 !== undefined) {
+            return func3
+          } else if (func4 !== undefined) {
+            return func4
+          } else if (func5 !== undefined) {
+            return func5
+          } else {
+            return
           }
+        }
 
-          let getFunctionPhone = function (obj, value, fieldName) {
-            var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-            var func2 = regExValidatorFunc(obj, value, fieldName)
-            var func3 = phoneValidatorFunc(obj, value, fieldName)
-            var func4 = defaultValidatorFunc(obj, value, fieldName)
-            var func5 = optionalValidatorFunc(obj, value, fieldName)
-            if (func1 !== undefined) {
-              return func1
-            } else if (func2 !== undefined) {
-              return func2
-            } else if (func3 !== undefined) {
-              return func3
-            } else if (func4 !== undefined) {
-              return func4
-            } else if (func5 !== undefined) {
-              return func5
-            } else {
-              return
-            }
+        let getFunctionPhone = function (obj, value, fieldName) {
+          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          var func2 = regExValidatorFunc(obj, value, fieldName)
+          var func3 = phoneValidatorFunc(obj, value, fieldName)
+          var func4 = defaultValidatorFunc(obj, value, fieldName)
+          var func5 = optionalValidatorFunc(obj, value, fieldName)
+          if (func1 !== undefined) {
+            return func1
+          } else if (func2 !== undefined) {
+            return func2
+          } else if (func3 !== undefined) {
+            return func3
+          } else if (func4 !== undefined) {
+            return func4
+          } else if (func5 !== undefined) {
+            return func5
+          } else {
+            return
           }
+        }
 
-          let getFunctionPincode = function (obj, value, fieldName) {
-            var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-            var func2 = regExValidatorFunc(obj, value, fieldName)
-            var func3 = getFunctionPincode(obj, value, fieldName)
-            var func4 = defaultValidatorFunc(obj, value, fieldName)
-            var func5 = optionalValidatorFunc(obj, value, fieldName)
-            if (func1 !== undefined) {
-              return func1
-            } else if (func2 !== undefined) {
-              return func2
-            } else if (func3 !== undefined) {
-              return func3
-            } else if (func4 !== undefined) {
-              return func4
-            } else if (func5 !== undefined) {
-              return func5
-            } else {
-              return
-            }
+        let getFunctionPincode = function (obj, value, fieldName) {
+          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          var func2 = regExValidatorFunc(obj, value, fieldName)
+          var func3 = pincodeValidatorFunc(obj, value, fieldName)
+          var func4 = defaultValidatorFunc(obj, value, fieldName)
+          var func5 = optionalValidatorFunc(obj, value, fieldName)
+          if (func1 !== undefined) {
+            return func1
+          } else if (func2 !== undefined) {
+            return func2
+          } else if (func3 !== undefined) {
+            return func3
+          } else if (func4 !== undefined) {
+            return func4
+          } else if (func5 !== undefined) {
+            return func5
+          } else {
+            return
           }
+        }
 
-          let getFunctionText = function (obj, value, fieldName) {
-            var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-            var func2 = regExValidatorFunc(obj, value, fieldName)
-            var func3 = defaultValidatorFunc(obj, value, fieldName)
-            var func4 = maxLengthValidatorFunc(obj, value, fieldName)
-            var func5 = optionalValidatorFunc(obj, value, fieldName)
-            if (func1 !== undefined) {
-              return func1
-            } else if (func2 !== undefined) {
-              return func2
-            } else if (func3 !== undefined) {
-              return func3
-            } else if (func4 !== undefined) {
-              return func4
-            } else if (func5 !== undefined) {
-              return func5
-            } else {
-              return
-            }
+        let getFunctionText = function (obj, value, fieldName) {
+          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          var func2 = regExValidatorFunc(obj, value, fieldName)
+          var func3 = defaultValidatorFunc(obj, value, fieldName)
+          var func4 = maxLengthValidatorFunc(obj, value, fieldName)
+          var func5 = optionalValidatorFunc(obj, value, fieldName)
+          if (func1 !== undefined) {
+            return func1
+          } else if (func2 !== undefined) {
+            return func2
+          } else if (func3 !== undefined) {
+            return func3
+          } else if (func4 !== undefined) {
+            return func4
+          } else if (func5 !== undefined) {
+            return func5
+          } else {
+            return
           }
+        }
 
-          let allowedValueValidatorFunc = function (obj, value, fieldName) {
-            var i
-            _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-              if (fieldName === value) {
-                i = key
-              }
-            })
-            if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
-              if (fieldName === 'available_currencies') {
-                let value = obj['available_currencies'].split('|')
-                let arr = lodash.cloneDeep(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues)
-                for (let i = 0; i < value.length; i++) {
-                  let check = _.includes(arr, value[i])
-                  if (check !== true) {
-                    return 'System allowedvalues are ' + arr
-                  } else {
-                  }
-                }
-                return
-              } else {
-                if (value !== undefined) {
-                  let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
-                  if (check !== true) { return 'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues } else {
-                    return
-                  }
+        let allowedValueValidatorFunc = function (obj, value, fieldName) {
+          var i
+          _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+            if (fieldName === value) {
+              i = key
+            }
+          })
+          if (self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues.length > 0) {
+            if (fieldName === 'available_currencies') {
+              let value = obj['available_currencies'].split('|')
+              let arr = lodash.cloneDeep(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues)
+              for (let i = 0; i < value.length; i++) {
+                let check = _.includes(arr, value[i])
+                if (check !== true) {
+                  return 'System allowedvalues are ' + arr
+                } else {
                 }
               }
-            }
-          }
-
-          let defaultValidatorFunc = function (obj, value, fieldName) {
-            var i
-            _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-              if (fieldName === value) {
-                i = key
-              }
-            })
-            if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== '' && self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== undefined) {
-              if (value === '') { return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue } else { return }
-            }
-          }
-
-          let maxLengthValidatorFunc = function (obj, value, fieldName) {
-            var i
-            _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-              if (fieldName === value) {
-                i = key
-              }
-            })
-            if (self.mObj[self.activeTab].mapping[i].schemaObj.maxLength !== '') {
-              if (value !== undefined && typeof (value) === 'string') {
-                let check = value.length
-                if (check !== self.mObj[self.activeTab].mapping[i].schemaObj.maxLength) { return 'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength } else {
+              return
+            } else {
+              if (value !== undefined) {
+                let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
+                if (check !== true) { return 'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues } else {
                   return
                 }
               }
             }
           }
+        }
 
-          let regExValidatorFunc = function (obj, value, fieldName) {
-            var i
-            _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
-              if (fieldName === value) {
-                i = key
-              }
-            })
-            if (self.mObj[self.activeTab].mapping[i].schemaObj.regEx !== '') {
-              if (value !== undefined) {
-                let pttrn = new RegExp(self.mObj[self.activeTab].mapping[i].schemaObj.regEx)
-                if (pttrn.test(value) === false && fieldName === 'max_imprint_color_allowed') {
-                  return 'Decimal value not allowed'
-                } else if (pttrn.test(value) === false && fieldName !== 'max_imprint_color_allowed') {
-                  return 'Value does not match with the regex'
-                }
+        let defaultValidatorFunc = function (obj, value, fieldName) {
+          var i
+          _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+            if (fieldName === value) {
+              i = key
+            }
+          })
+          if (self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== null && self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue !== undefined) {
+            if (value === '') { return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue } else { return }
+          }
+        }
+
+        let maxLengthValidatorFunc = function (obj, value, fieldName) {
+          var i
+          _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+            if (fieldName === value) {
+              i = key
+            }
+          })
+          if (self.mObj[self.activeTab].mapping[i].schemaObj.maxLength !== '') {
+            if (value !== undefined && typeof (value) === 'string') {
+              let check = (value.length).toString()
+              if (check !== self.mObj[self.activeTab].mapping[i].schemaObj.maxLength) { return 'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength } else {
+                return
               }
             }
           }
+        }
 
-          let schemaObj = {}
-          _.forEach(self.mObj[tab].mapping, function (value, key) {
-            if (value.schemaObj.optional === true) {
-              if (value.schemaObj.type === 'date') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: dateValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'url') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: urlValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'email') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: emailValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'phone') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: phoneValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'pin-code') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: pincodeValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else {
-                schemaObj[value.sysHeader] = {type: value.schemaObj.type, validator: regExValidatorFunc, label: value.schemaObj.type, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              }
-            } else if (value.schemaObj.optional === false) {
-              if (value.schemaObj.type === 'date') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionDate, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'url') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionUrl, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'email') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionEmail, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'phone') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionPhone, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else if (value.schemaObj.type === 'pin-code') {
-                schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionPincode, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              } else {
-                schemaObj[value.sysHeader] = {type: value.schemaObj.type, label: value.schemaObj.type, validator: getFunctionText, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
-              }
+        let regExValidatorFunc = function (obj, value, fieldName) {
+          var i
+          _.forEach(Object.keys(self.mObj[self.activeTab].schema.structure), function (value, key) {
+            if (fieldName === value) {
+              i = key
             }
           })
-          self.mObj[tab].schema = new Schema(schemaObj)
-
-          errLength = 0
-          self.mObj[tab].data1 = []
-          self.mObj[tab].headers1 = []
-          self.mObj[tab].errmsg = []
-          self.generateError(self.mObj[tab].newUploadCSV, self.mObj[tab].schema, schemaObj, tab, errcols)
-        // _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
-        //     if(errLength > 0) {
-        //       return false
-        //     }
-        //   self.mObj[tab].schema.validate(value, function (err, newP, errors) {
-        //
-        //     if (err) {
-        //       throw err
-        //     } else {
-        //       if (errors.length) {
-        //         errLength = errors.length
-        //         let errType = ''
-        //         if (!_.isEqual(Object.values(value), [""])) {
-        //
-        //           self.mObj[tab].data1.push(Object.values(value))
-        //           self.mObj[tab].headers1.push(Object.keys(value))
-        //           let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
-        //           _.forEach(errors, (item) => {
-        //             errcols.push({
-        //               cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
-        //               rows: key
-        //             })
-        //
-        //             for(let key in schemaObj){
-        //               if(key === item.field){
-        //                 errType = schemaObj[key].type
-        //               }
-        //             }
-        //
-        //             if(item.message === "Error during casting"){
-        //               if(errType === 'number'){
-        //                 self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
-        //               }
-        //               else if(errType === 'string'){
-        //                 self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
-        //               }
-        //             }
-        //             else {
-        //               self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
-        //             }
-        //           })
-        //
-        //           self.mObj[tab].headerDisplay = false
-        //           self.mObj[tab].newSchemaDisplay = false
-        //           self.mObj[tab].previewDisplay = false
-        //           self.mObj[tab].uploadDisplay = false
-        //           self.mObj[tab].showHandson = true
-        //           self.mObj[tab].errDisplay = true
-        //           if(self.mObj[tab].load === true){
-        //             self.mObj[tab].load = false
-        //           }
-        //           console.log("errLength")
-        //           self.showerrmsg(errcols,tab)
-        //           // return
-        //         }
-        //       } else {
-        //           // return
-        //       }
-        //     }
-        //   })
-        // })
-
-          if (errLength === 0) {
-            self.mObj[tab].headerDisplay = false
-            self.mObj[tab].newSchemaDisplay = false
-            self.mObj[tab].previewDisplay = false
-            self.mObj[tab].uploadDisplay = false
-            self.mObj[tab].showHandson = false
-            $('.f-layout-copy').css('position', 'fixed')
-            globalValidateResolve('done')
-          } else {
-            if (globalValidateResolveFlag === true) {
-              resolve('done')
+          if (self.mObj[self.activeTab].mapping[i].schemaObj.regEx !== '') {
+            if (value !== undefined) {
+              let pttrn = new RegExp(self.mObj[self.activeTab].mapping[i].schemaObj.regEx)
+              if (pttrn.test(value) === false && fieldName === 'max_imprint_color_allowed') {
+                return 'Decimal value not allowed'
+              } else if (pttrn.test(value) === false && fieldName !== 'max_imprint_color_allowed') {
+                return 'Value does not match with the regex'
+              }
             }
+          }
+        }
+
+        let schemaObj = {}
+        _.forEach(self.mObj[tab].mapping, function (value, key) {
+          if (value.schemaObj.optional === true) {
+            if (value.schemaObj.type === 'date') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: dateValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'url') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: urlValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'email') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: emailValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'phone') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: phoneValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'pin-code') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: pincodeValidatorFunc, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else {
+              schemaObj[value.sysHeader] = {type: value.schemaObj.type, validator: regExValidatorFunc, label: value.schemaObj.type, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            }
+          } else if (value.schemaObj.optional === false) {
+            if (value.schemaObj.type === 'date') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionDate, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'url') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionUrl, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'email') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionEmail, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'phone') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionPhone, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else if (value.schemaObj.type === 'pin-code') {
+              schemaObj[value.sysHeader] = {type: 'string', label: value.schemaObj.type, validator: getFunctionPincode, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            } else {
+              schemaObj[value.sysHeader] = {type: value.schemaObj.type, label: value.schemaObj.type, validator: getFunctionText, optional: value.schemaObj.optional, allowedValues: value.schemaObj.allowedValues, defaultValue: value.schemaObj.defaultValues, maxLength: value.schemaObj.maxLength}
+            }
+          }
+        })
+        self.mObj[tab].schema = new Schema(schemaObj)
+
+        errLength = 0
+        self.mObj[tab].data1 = []
+        self.mObj[tab].headers1 = []
+        self.mObj[tab].errmsg = []
+        self.generateError(self.mObj[tab].newUploadCSV, self.mObj[tab].schema, schemaObj, tab, errcols)
+
+        if (errLength === 0) {
+          self.mObj[tab].headerDisplay = false
+          self.mObj[tab].newSchemaDisplay = false
+          self.mObj[tab].previewDisplay = false
+          self.mObj[tab].uploadDisplay = false
+          self.mObj[tab].showHandson = false
+          $('.f-layout-copy').css('position', 'fixed')
+          globalValidateResolve('done')
+        } else {
+          if (globalValidateResolveFlag === true) {
+            resolve('done')
           }
         }
       })
@@ -3446,8 +3389,8 @@ export default {
         self.img_no = 0
         await self.deleteFromCloudinary(id)
       }
-      self.proceedBtn = true
       self.ProceedLoading = false
+      self.proceedBtn = true
       self.mObj[tab].errmsg = []
       self.mObj[tab].uploadCSV = []
       self.mObj[tab].newUploadCSV = []
