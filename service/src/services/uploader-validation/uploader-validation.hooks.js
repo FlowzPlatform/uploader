@@ -8,8 +8,10 @@ const ProductVariationPriceRules = require('../../validation_rules/product_varia
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const config1 = require('../../../config/default.json');
+let errors = require('@feathersjs/errors') ;
 config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
 config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
+config1.mongodb_database = process.env.mongodb_database ? process.env.mongodb_database : 'pdmuploader'
 config1.username = process.env.username ? process.env.username : null
 config1.password = process.env.password ? process.env.password : null
 
@@ -50,12 +52,24 @@ module.exports = {
 };
 
 var beforeCreate = async function(hook){
-  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-  var cnn_with_mongo = await connectToMongo(hook,url)
+  // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
+  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
+  var cnn_with_mongo = await connectToMongo(hook,url).then(res => {
+    return res
+  })
+  .catch(err => {
+    throw err
+  })
 }
 
 var connectToMongo = async function(hook,url){
-  var db = await (MongoClient.connect(url))
+  var db = await (MongoClient.connect(url).then(res => {
+    return res
+  })
+  .catch(err => {
+    throw new errors.GeneralError('Mongodb Service unavailable');
+  }))
+
   let collection_name = hook.data.sheet_name.split(" ")
   let prod_name = collection_name[0]
   collection_name.splice(0,1)
@@ -101,7 +115,12 @@ var connectToMongo = async function(hook,url){
       for(let j=rule_value ;j<rules.length;j++){
           let query = rules[j].qryMongo
           query["import-tracker_id"] = hook.data.id
-          var query_result = await (db.collection(collection_name).find(query).toArray())
+          var query_result = await (db.collection(collection_name).find(query).toArray().then(res => {
+            return res
+          })
+          .catch(err => {
+            console.log("error in finding data from collection =======>",err)
+          }))
           // uploader_obj = await(hook.app.service('/uploader').get(hook.data.id))
           let obj = uploader_obj[hook.data.key]
           delete uploader_obj[hook.data.key]
@@ -110,12 +129,15 @@ var connectToMongo = async function(hook,url){
           // obj["validate_flag"] = 'running'
           uploader_obj[hook.data.key] = obj
           uploader_obj["validate_flag"] = 'running'
-          var update_ruleindx = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
-          if(query_result.length > 0){
+
+          if(query_result.length > 0) {
             err_obj["err_data"] = query_result
             err_obj["err_fields"].push({"columnName":rules[j].columnName, "errorString": rules[j].errorString,"errCode":rules[j].errorCode })
+            obj["currentRuleIndex"] = j
+            var update_ruleindx = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
             break;
           }
+          var update_ruleindx = await(hook.app.service('/uploader').update(hook.data.id,uploader_obj))
     }
     errors_arr.push(err_obj)
     if(errors_arr[0].err_data.length != 0){
@@ -141,13 +163,23 @@ var connectToMongo = async function(hook,url){
 }
 
 var beforePatch= async function(hook){
-  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-  var cnn_with_mongo = await UpdateInMongo(hook,url)
+  // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
+  var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
+  var cnn_with_mongo = await UpdateInMongo(hook,url).then(res => {
+    return res
+  })
+  .catch(err => {
+    throw err
+  })
 }
 
 var UpdateInMongo = async function(hook,url){
-  var db = await (MongoClient.connect(url))
-
+  var db = await (MongoClient.connect(url).then(res => {
+    return res
+  })
+  .catch(err => {
+    throw new errors.GeneralError('Mongodb Service unavailable');
+  }))
   let collection_name = hook.data.sheet_name.split(" ")
   let prod_name = collection_name[0]
   collection_name.splice(0,1)
@@ -162,7 +194,11 @@ var UpdateInMongo = async function(hook,url){
             [columnName]: newValue
         }
     };
-  var query_result = await (db.collection(collection_name).update({_id:hook.data._id},query))
+  var query_result = await (db.collection(collection_name).update({_id:hook.data._id},query).then(res => {
+    return res
+  }).catch(err => {
+    throw new errors.GeneralError('Unable to update data');
+  }))
 
    hook.result = query_result
 }

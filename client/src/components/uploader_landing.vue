@@ -170,9 +170,9 @@ import lodash from 'lodash'
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 } else {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 }
 const app = feathers().configure(socketio(socket))
 moment().format();
@@ -211,9 +211,20 @@ export default {
             self.$router.push('/uploader')
           })
           .catch(error => {
-            self.$Notice.error({
-              title: 'Something bad happened.Please try again later'
-            });
+            if(error.response){
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            }
+            else if(error.message == 'Network Error'){
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+            self.modal1 = false
           })
       },
       //converts into uppercase
@@ -234,27 +245,47 @@ export default {
         this.$router.push('/upload/' + this.$route.params.id)
       },
       findData(sub_id){
+        if(this.$store.state.disconnect == false){
+          socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
+            if(data.data.length != 0){
+              this.$store.state.jobData = data.data[0]
 
-        socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
-          if(data.data.length != 0){
-            this.$store.state.jobData = data.data[0]
-            this.job.push(data.data[0])
-            this.loading = false
-            this.show_table = true
-            this.keys = Object.keys(this.job[0])
-            for(let i=0 ;i<this.keys.length;i++){
-              if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
-              this.keys[i] == 'ProductVariationPrice'){
-                this.show = true
+              let tab_array = ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"]
+              for(let i=0;i<tab_array.length;i++){
+                for(let key in data.data[0]){
+                  if(tab_array[i] == key){
+                    let prod_data = data.data[0][key]
+                    delete data.data[0][key]
+                    data.data[0][tab_array[i]] = prod_data
+                  }
+                }
+              }
+
+              this.job.push(data.data[0])
+              this.loading = false
+              this.show_table = true
+              this.keys = Object.keys(this.job[0])
+              for(let i=0 ;i<this.keys.length;i++){
+                if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
+                this.keys[i] == 'ProductVariationPrice'){
+                  this.show = true
+                }
               }
             }
-          }
-          else{
-            this.$Notice.info({
-                     title: 'No Data Available',
-             });
-          }
-        })
+            else{
+              this.$Notice.info({
+                title: 'No Data Available',
+              });
+            }
+          })
+        }
+        else if(this.$store.state.disconnect == true){
+          this.loading = false
+          this.$Notice.error({
+            title: 'Service unavailable',
+            duration: 10
+          })
+        }
       }
     },
     mounted(){
@@ -333,7 +364,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 
 .upload-type > span{
   padding-right: 35px;

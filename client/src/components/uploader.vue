@@ -29,11 +29,13 @@
             <Button type="primary" size="large" class="custombtn" v-if="loadingBtn">Loading...</Button>
         </div>
         <Row>
+          <!-- <div   > -->
           <div id="dv" class="clearfix col-md-10 col-md-offset-1 col-sm-12 col-xs-12" style="display:none">
-              <Button type="ghost" class="ghtbtn">×</Button>
+              <!-- <Button type="ghost" class="ghtbtn">×</Button> -->
               <img class="bulb" src="../assets/images/idea.png" />
               <p id="get"></p>
           </div>
+        <!-- </div> -->
         </Row>
 
         <div id="display-error" style="display:none">Please choose a method of your choice.</div>
@@ -56,9 +58,9 @@ import lodash from 'lodash'
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 } else {
-  socket = io(config.socketURI)
+  socket = io(config.socketURI,{reconnect: true})
 }
 const app = feathers().configure(socketio(socket))
 let id
@@ -104,7 +106,7 @@ export default {
        },
        //to hide the method hints(showHintsDiv)
        hide(){
-         document.getElementById("dv").style.display="none";
+         // document.getElementById("dv").style.display="none";
        },
        //to display proper hint according to method
        showHintsDiv(data){
@@ -144,19 +146,6 @@ export default {
               subscriptionId: this.$store.state.subscription_id
             }
 
-            if(this.$store.state.user.firstname && !this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.firstname
-            }
-            else if(this.$store.state.user.firstname && this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.firstname + " " + this.$store.state.user.lastname
-            }
-            else if(!this.$store.state.user.firstname && this.$store.state.user.lastname){
-              obj["username"] = this.$store.state.user.lastname
-            }
-            else if(this.$store.state.user.email){
-                obj["username"] = this.$store.state.user.email
-            }
-
             api.request('post', '/uploader', obj).then(res => {
               id = res.data.id
               this.$store.state.disableuser = true
@@ -165,29 +154,49 @@ export default {
             })
             .catch(error =>{
               this.loadingBtn = false
-              if(error.response.data.className == 'forbidden' && error.response.data.code == 403){
+              if(error.response){
                 this.$Notice.error({
-                 title: error.response.data.message,
-                 duration: 3
-               });
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
               }
+              else if(error.message == 'Network Error'){
+                this.$Notice.error({
+                  title: 'API Service unavailable',
+                  duration: 10
+                })
+              }
+
             })
           }
        }
      },
      getData(id){
-       socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
-         if (data.data.length !== 0) {
-           this.showDiv = false
-           this.loading = false
-           this.$router.push('/landing/' + data.data[0].id)
-         }
-         else {
-           this.showDiv = true
-           this.loading = false
-           this.$store.state.jobData = {}
-         }
-       })
+      if(this.$store.state.disconnect == false){
+        socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
+
+          if(data){
+            if (data.data.length !== 0) {
+              this.showDiv = false
+              this.loading = false
+              this.$router.push('/landing/' + data.data[0].id)
+            }
+            else {
+              this.showDiv = true
+              this.loading = false
+              this.$store.state.jobData = {}
+            }
+          }
+        })
+      }
+      else if(this.$store.state.disconnect == true){
+        this.loading = false
+        this.$Notice.error({
+          title: 'Service unavailable',
+          duration: 10
+        })
+      }
      }
     },
     mounted(){
@@ -230,40 +239,6 @@ export default {
         // this.loading = false
         this.getData(this.$store.state.subscription_id)
       }
-
-      // if(this.$store.state.storedUsername != ""){
-      //   console.log("called uploader ++++++++++++++++",this.$store.state.storedUsername,this.$store.state.user_list)
-      //   let self = this
-      //   let userId = lodash.findIndex(self.$store.state.user_list, function(o) { return o.label == "All"; })
-      //   if(userId != -1){
-      //       self.$store.state.user_list.splice(userId,1)
-      //   }
-      //   if(self.$store.state.storedUsername != "All" && self.$store.state.storedUsername != ""){
-      //     self.selected_user = self.$store.state.storedUsername
-      //   }
-      //   else{
-      //     self.selected_user = self.$store.state.user_list[0].label
-      //     self.$store.state.storedUsername = self.selected_user
-      //   }
-      // }
-
-      // if(this.$store.state.subscription_id != ""){
-      //
-      // }
-
-      // if(this.$store.state.subscription_id == 'All'){
-      //   this.loading = false
-      //   this.$Notice.error({
-      //    title: 'Please select a proper subscription id...'
-      //  });
-      // }
-      // else if(this.$store.state.subscription_id != "All"){
-      //   // this.loading = false
-      //   this.getData(this.$store.state.subscription_id)
-      // }
-
-
-
     },
     watch:{
     '$store.state.subscription_id': function (id) {
@@ -327,8 +302,6 @@ ul.mySection label:hover {
   }
   #dv {
   height: 185px;
-  margin-bottom: 19px;
-  width: 90px;
   width: 74%;
   margin-top: 2px;
   margin-bottom:20px !important;
@@ -337,6 +310,8 @@ ul.mySection label:hover {
   color: black;
   text-align: center;
   padding-top: 4px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media(max-width: 480px){
@@ -350,7 +325,7 @@ ul.mySection label:hover {
     margin-top: 100px !important;
     margin-left: auto;
     margin-right: auto;
-    text-align: -webkit-center !important;
+    text-align: center !important;
     border: 2px #7c7e86 dashed;
     width: 60%;
     margin-top:10px;

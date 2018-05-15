@@ -59,6 +59,8 @@
     price_5:"number",
 
     code_5:"string",
+    
+    Net_Price_5:"number",
 
 
     qty_6_min:"number",

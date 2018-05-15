@@ -31,7 +31,17 @@
                          <Option v-for="item in $store.state.subscription_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
                      </Select>
                     </Menu-item>
-                    <Menu-item name="5">
+                    <Submenu name="5">
+           <template slot="title">
+                <Icon type="grid" :size="20"></Icon>
+           </template>
+           <MenuGroup title="Flowz-Products" style="font-size:14px">
+                      <MenuItem name="5-1"><span @click="gotoDashboard" style="font-size:12px;">Flowz Dashboard</span></MenuItem>
+                      <MenuItem name="5-2"><span @click="gotoWebsiteBuilder" style="font-size:12px;">Website Builder</span></MenuItem>
+                      <MenuItem name="5-3"><span @click="gotoCRM" style="font-size:12px;">CRM</span></MenuItem>
+                  </MenuGroup>
+                  </Submenu>
+                    <Menu-item name="6">
                       <Submenu name="1">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
@@ -59,6 +69,7 @@ import modelAuthentication from '@/api/authentication'
 import lodash from 'lodash'
 import axios from 'axios'
 import config from '@/config'
+// let domainkey = process.env.domainkey ? process.env.domainkey : 'flowzcluster.tk'
 
   export default {
     data () {
@@ -67,7 +78,10 @@ import config from '@/config'
           selected_subscription_id: '',
           subscription_list: [{"value":"All","label":"All"}],
           selected_user: '',
-          user_list: [{"value":"All","label":"All"}]
+          user_list: [{"value":"All","label":"All"}],
+          flowzDashboardUrl: '',
+          crmUrl: '',
+          websiteBuilderUrl: ''
         }
     },
     computed: {
@@ -76,6 +90,15 @@ import config from '@/config'
       }
     },
     methods:{
+      gotoDashboard(){
+         window.open(this.flowzDashboardUrl, '_blank');
+      },
+      gotoWebsiteBuilder(){
+         window.open(this.websiteBuilderUrl, '_blank');
+      },
+      gotoCRM(){
+         window.open(this.crmUrl, '_blank');
+      },
       handleLogout () {
         let location = psl.parse(window.location.hostname)
         location = location.domain === null ? location.input : location.domain
@@ -227,6 +250,9 @@ import config from '@/config'
     },
     mounted(){
       let self = this
+      self.flowzDashboardUrl = config.flowzDashboardUrl
+      self.crmUrl = config.crmUrl
+      self.websiteBuilderUrl = config.websiteBuilderUrl
         // for(let i=0 ;i<self.$store.state.subscription_detail_list.length;i++){
         //   self.subscription_list.push({"value":self.$store.state.subscription_detail_list[i].subscription_id,"label":self.$store.state.subscription_detail_list[i].name})
         // }

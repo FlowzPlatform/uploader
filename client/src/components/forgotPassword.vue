@@ -54,7 +54,7 @@ export default {
   data () {
     const emailValidator = (rule, value, callback) => {
                 if (value == '') {
-                    callback(new Error('Please fill email'));
+                    callback(new Error('Please enter email'));
                 } else if (value != '') {
                   let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
                   if(re.test(value) != true)
@@ -98,7 +98,12 @@ export default {
                })
                .catch(function(error) {
                   self.loading = false
-                  self.$message.error("Email is incorrect");
+                  if(error.response){
+                    self.$message.error(error.response.data);
+                  }
+                  else if(error.message){
+                    self.$message.error(error.message);
+                  }
                });
 
         } else {

@@ -82,6 +82,7 @@ const ProductImprintDataSchema = {
 
 
     qty_6_min:"number",
+    qty_6_max:"number",
 
     price_6:"number",
     code_6: "string",

@@ -65,7 +65,7 @@ export default {
   data () {
     const emailValidator = (rule, value, callback) => {
                 if (value == '') {
-                    callback(new Error('Please fill email'));
+                    callback(new Error('Please enter email'));
                 } else if (value != '') {
                   let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
                   if(re.test(value) != true)
@@ -87,16 +87,16 @@ export default {
       },
       ruleRegister: {
         firstname: [
-          { required: true, message: 'Please fill Firstname', trigger: 'blur'}
+          { required: true, message: 'Please enter Firstname', trigger: 'blur'}
         ],
         lastname: [
-          {required: true, message: 'Please fill Lastname', trigger: 'blur'}
+          {required: true, message: 'Please enter Lastname', trigger: 'blur'}
         ],
         email: [
           {validator:emailValidator,trigger: 'blur'}
         ],
         password: [
-          {required: true, message: 'Please fill password', trigger: 'blur'}
+          {required: true, message: 'Please enter password', trigger: 'blur'}
         ]
       },
   }
@@ -110,7 +110,7 @@ export default {
           modelAuthentication.register(this.formRegister).then(response => {
             if (response) {
               this.loading = false
-              this.$Message.success('User succesfuly register!')
+              this.$Message.success(response.message)
               this.formRegister.firstname = ""
               this.formRegister.lastname = ""
               this.formRegister.email = ""
@@ -123,7 +123,11 @@ export default {
             }
           })
           .catch(e => {
-            this.$Message.error(e.response.data)
+            this.$Notice.error({
+              title: e.response.data.name,
+              message: e.response.data.message,
+              duration:10
+            })
             this.loading = false
           })
         } else {

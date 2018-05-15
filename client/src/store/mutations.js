@@ -2,6 +2,8 @@
 import axios from 'axios'
 import config from '@/config'
 import _ from 'lodash'
+// import $ from 'jquery';
+
 export default {
   TOGGLE_LOADING (state) {
     state.callingAPI = !state.callingAPI
@@ -33,6 +35,14 @@ export default {
       .then(response => {
         return response
       })
+      .catch(err => {
+        if(err.message == "Network Error"){
+          toastr.error("API Service unavailable")
+        }
+        else if(err.response != undefined){
+          toastr.error(err.response.data.message)
+        }
+      })
       if(response.data.data.length != 0){
         list1.push({"value":state.subscription_list[key].value,"label":response.data.data[0].userId})
       }
@@ -40,7 +50,6 @@ export default {
 
 
       let uniq_user_id = _.uniqBy(list1, 'label');
-
       let uniq_user_array = []
     // setTimeout(function(){
       for(let i=0;i<uniq_user_id.length;i++){
@@ -53,6 +62,8 @@ export default {
          })
          .then(resp => {
            return resp
+         })
+         .catch(error => {
          })
          if(resp.data.data[0].fullname){
           uniq_user_array.push({"user_id":uniq_user_id[i].label,"name":resp.data.data[0].fullname})
@@ -79,10 +90,9 @@ export default {
   //  setTimeout(function(){
      state.user_detail_list = list1
   //  },4500)
-
-
-
-
+  },
+  SET_DISCONNECT (state,value) {
+    state.disconnect = value
   },
   SET_TOKEN (state, token) {
     state.token = token

@@ -55,7 +55,7 @@ export const ProductImprintDataSchema = new Schema({
         allowedValues: [],
         defaultValue: '',
         maxLength : '',
-        regEx:''
+        regEx:'^[0-9]+$'
     },
     price_included: {
         type: "number",
@@ -204,7 +204,6 @@ export const ProductImprintDataSchema = new Schema({
         maxLength : '',
         regEx:''
     },
-
     qty_2_min: {
         type: "number",
         label: "Qty_2_Min",

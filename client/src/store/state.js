@@ -30,6 +30,7 @@ export default {
   storedSubscriptionName: '',
   storedSubscriptionId: '',
   storedUsername: '',
+  disconnect: false,
   // viewTemplate: [],
   // upload: '',
   // filename: '',

@@ -45,17 +45,23 @@ module.exports = {
   }
 };
 
-
-
-
 async function beforeCreate(hook) {
   let base_url = app.get("jobqueueUrl")
   module.exports.authorization = this.authorization
   let import_tracker_id = hook.data.importTrackerId
-  let user_data = await(axios.get(user_detail_url,{'headers':{'Authorization':module.exports.authorization}}))
-  let tdata = await(hook.app.service('/uploader').get(import_tracker_id))
+  let user_data = await(axios.get(user_detail_url,{'headers':{'Authorization':module.exports.authorization}}).then(res => {
+    return res
+  })
+  .catch(err => {
+    throw err
+  }))
+  let tdata = await(hook.app.service('/uploader').get(import_tracker_id).then(res => {
+    return res
+  }).catch(err => {
+    throw err
+  }))
   let timeout = 10000000
-  let  fullname = ''
+  let fullname = ''
   let company = ''
   if(user_data.data.data.firstname){
     fullname = user_data.data.data.firstname
@@ -91,7 +97,7 @@ async function beforeCreate(hook) {
   }
 
     try {
-        axios.post(base_url,hook.data).then(res => {
+        await axios.post(base_url,hook.data).then(res => {
           if(res.status == 200){
             let import_obj = {
               stepStatus : "import_in_progress"
@@ -104,10 +110,15 @@ async function beforeCreate(hook) {
           }
         })
         .catch(error => {
-          throw new errors.GeneralError('Import not completed');
+          if(error.response.status == 502 && error.response.data.message == "An invalid response was received from the upstream server"){
+            throw new errors.BadGateway('JobQueue not running')
+          }
+          else{
+            throw error
+          }
         })
   } catch (err) {
-      throw new errors.GeneralError('Import not completed');
+    throw err;
   }
 
 }

@@ -19,6 +19,7 @@ const ProductAdditionalChargeSchema = require('../../schema/product_additional_c
 
 config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
 config1.mongodb_port = process.env.mongodb_port ? process.env.mongodb_port : '27017'
+config1.mongodb_database = process.env.mongodb_database ? process.env.mongodb_database : 'pdmuploader'
 config1.username = process.env.username ? process.env.username : null
 config1.password = process.env.password ? process.env.password : null
 
@@ -28,13 +29,34 @@ module.exports = function () {
   const paginate = app.get('paginate');
 
   app.configure(socketio(function(io) {
-  io.on('connection', function(socket) {
-    socket.on('pdmData',async function( data){
-          var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/pdmuploader';
-          var cnn_with_mongo = await connectToMongo(url,data)
-          socket.emit('response',{stdout:cnn_with_mongo.result})
+  io.on('connection',function(socket) {
+    socket.on('error', function (err) {
+        console.log("err...",err)
+    });
 
+    socket.on('pdmData',async function( data){
+          var url = 'mongodb://' + config1.username + ':' + config1.password + '@' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
+             // var url = 'mongodb://' + config1.mongodb_host + ':' + config1.mongodb_port + '/' + config1.mongodb_database;
+          var cnn_with_mongo = await connectToMongo(url,data,socket).then(res => {
+            if(res !== undefined){
+              if(res.result){
+                socket.emit('response',{stdout:res.result})
+              }
+              else{
+                if(res.message){
+                  socket.emit('err',{stdout: res.message})
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.log("error...",error)
+            socket.emit('err',{stdout: 'Error in saving data'})
+          })
   });
+
+
+
   });
   io.use(function (socket, next) {
    // Exposing a request property to services and hooks
@@ -61,8 +83,15 @@ module.exports = function () {
   }
 };
 
-var connectToMongo = async function(url,data){
-  var db = await (MongoClient.connect(url))
+var connectToMongo = async function(url,data,socket){
+    var db = await (MongoClient.connect(url).then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log("err....",err)
+       socket.emit('err',{stdout:'Mongodb Service unavailable'})
+    }))
+
     let collection_name = data.activetab.split(" ")
     collection_name = data.activetab.split(" ")
     let prod_name = collection_name[0]
@@ -98,12 +127,22 @@ var connectToMongo = async function(url,data){
     }
 
 
-    for(let i=0;i<data.newCSV.length;i++){
+   for(let i=0;i<data.newCSV.length;i++){
       for(key in data.newCSV[i]){
         for(let schema_key in schemarules){
           if(key == schema_key && schemarules[schema_key] == "string"){
             if(typeof(data.newCSV[i][key]) != "string"){
-              data.newCSV[i][key] =  data.newCSV[i][key].toString()
+              if(data.newCSV[i][key] != null){
+                data.newCSV[i][key] =  data.newCSV[i][key].toString()
+              }
+              else if(data.newCSV[i][key] == null){
+                data.newCSV[i][key] = ""
+              }
+            }
+          }
+          else if(key == schema_key && schemarules[schema_key] != "string"){
+            if(data.newCSV[i][key] == null){
+              data.newCSV[i][key] = ""
             }
           }
         }
@@ -111,17 +150,33 @@ var connectToMongo = async function(url,data){
     }
 
 
-
-
-    var response = await (db.listCollections().toArray())
+     if(db){
+       var response = await (db.listCollections().toArray())
        let index = _.findIndex(response, function(o) { return o.name == collection_name; });
-        if(index == -1){
-          var response = await db.createCollection(collection_name)
-          var result = await (db.collection(collection_name).insert(data.newCSV))
-          return result
-      }
-      else{
-        var result = await (db.collection(collection_name).insert(data.newCSV))
-        return result
-      }
+       if(index == -1){
+         var response = await db.createCollection(collection_name)
+         var result = await (db.collection(collection_name).insertMany(data.newCSV).then(res => {
+           return res
+         }).catch(err => {
+           console.log("error....",err)
+           if(err.code == '12501' || err.message == 'quota exceeded'){
+              var res1 = await(db.command({repairDatabase:1}))
+           }
+           return err
+         }))
+         return result
+       }
+       else{
+         var result = await (db.collection(collection_name).insertMany(data.newCSV).then(res => {
+           return res
+         }).catch(async function(err){
+           console.log("error....",err)
+           if(err.code == '12501' || err.message == 'quota exceeded'){
+              var res1 = await(db.command({repairDatabase:1}))
+           }
+           return err
+         }))
+         return result
+       }
+     }
 }

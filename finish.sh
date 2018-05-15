@@ -90,7 +90,7 @@ echo "waiting for service to upgrade "
               "$RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_FRONTEND/" | jq '.state'` in
               "\"upgraded\"" )
                   echo "completing service upgrade"
-                  curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
+                  curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
                     -X POST \
                     -H 'Accept: application/json' \
                     -H 'Content-Type: application/json' \

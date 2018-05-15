@@ -19,7 +19,7 @@ var temp = {
   facebookSuccessCallbackUrl: protocol + '://localhost:8000/',
   loginWithFacebookUrl: protocol + '://auth.' + domainkey + '/auth/facebook',
   googleSuccessCallbackUrl: protocol + '://localhost:8000/',
-  loginWithGoogleUrl: protocol + '://auth.' + domainkey + '/auth/Gplus',
+  loginWithGoogleUrl: protocol + '://auth.' + domainkey + '/auth/google',
   twitterSuccessCallbackUrl: protocol + '://localhost:8000/',
   loginWithTwitterUrl: protocol + '://auth.' + domainkey + '/auth/twitter',
   linkedinSuccessCallbackUrl: protocol + '://localhost:8000/',
@@ -28,11 +28,15 @@ var temp = {
   loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
   subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
+  // subscriptionUri: 'http://172.16.230.161:3030/user-subscription',
   getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
-  resetPasswordRedirectUrl: 'https://uploader.' + domainkey + '/reset-password',
+  resetPasswordRedirectUrl: 'https://www.uploader.' + domainkey + '/reset-password',
   // resetPasswordRedirectUrl: protocol + '://localhost:8000/reset-password',
   resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
-  forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword'
+  forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
+  flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
+  crmUrl: 'https://www.crm.' + domainkey,
+  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -44,7 +48,7 @@ if (process.env.MYENV !== 'development') {
     facebookSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
     loginWithFacebookUrl: protocol + '://auth.' + domainkey + '/auth/facebook',
     googleSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
-    loginWithGoogleUrl: protocol + '://auth.' + domainkey + '/auth/Gplus',
+    loginWithGoogleUrl: protocol + '://auth.' + domainkey + '/auth/google',
     twitterSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
     loginWithTwitterUrl: protocol + '://auth.' + domainkey + '/auth/twitter',
     linkedinSuccessCallbackUrl: protocol + '://uploader.' + domainkey + '/',
@@ -53,10 +57,14 @@ if (process.env.MYENV !== 'development') {
     loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
     jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
     subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
+    // subscriptionUri: 'http://172.16.230.161:3030/user-subscription',
     getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
-    resetPasswordRedirectUrl: 'https://uploader.' + domainkey + '/reset-password',
+    resetPasswordRedirectUrl: 'https://www.uploader.' + domainkey + '/reset-password',
     resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
-    forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword'
+    forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
+    flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
+    crmUrl: 'https://www.crm.' + domainkey,
+    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
   }
 }
 

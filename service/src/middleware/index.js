@@ -1,13 +1,13 @@
 const subscription = require('flowz-subscription');
 module.exports.subscription = subscription
 const authentication = require('../authentication')
+const flowzError = require('flowz-error-handler');
 
 let app = undefined;
 module.exports = function () {
   // Add your custom middleware here. Remember, that
   // in Express the order matters
   app = this; // eslint-disable-line no-unused-vars
-
 
   // check authentication
   app.use(authentication)
@@ -24,6 +24,7 @@ module.exports = function () {
  subscription.registerDynamicHooks(app, registerAppModule)
 
 
+
   // Check subscription
   // app.use(subscription.subscription);
   // subscription.secureService.validate = (route, params, secureRouteInfo) => {
@@ -32,7 +33,9 @@ module.exports = function () {
   //     resolve(data)
   //   });
   // };
+  app.use(flowzError());
 };
+
 
 
 

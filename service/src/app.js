@@ -16,16 +16,22 @@ const services = require('./services');
 const appHooks = require('./app.hooks');
 const rethinkdb = require('./rethinkdb');
 const subscription = require('flowz-subscription');
+const uws = require('uws');
 
 // const mongodb = require('./mongodb');
 const app = feathers();
+
+var corsOptions = {
+  origin: true,
+  exposedHeaders:['Content-Range', 'X-Content-Range']
+}
 
 
 
 // Load app configuration
 app.configure(configuration());
 // Enable CORS, security, compression, favicon and body parsing
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(compress());
 app.use(bodyParser.json());
