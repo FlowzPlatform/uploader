@@ -53,6 +53,7 @@ RUN cp /opt/app/.htaccess /var/www/html/
 RUN cp /opt/app/vhost_ssl_master.conf /etc/apache2/sites-enabled/
 RUN cp /opt/app/vhost_ssl_develop.conf /etc/apache2/sites-enabled/
 RUN cp /opt/app/vhost_ssl_qa.conf /etc/apache2/sites-enabled/
+RUN cp /opt/app/vhost_ssl_staging.conf /etc/apache2/sites-enabled/
 RUN rm -rf /opt/app/*
 RUN a2enmod http2
 RUN a2enmod rewrite
