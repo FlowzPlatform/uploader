@@ -588,8 +588,23 @@
           <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
           <Progress :percent="progressPercent"></Progress>
         </div>
-      <div v-if="import1"><h2>Import Completed</h2></div>
-      <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
+      <div v-if="import1"><h2>Import Completed</h2>
+      <p style="font-size:18px;margin-top:20px;margin-bottom: 15px;">Product data has been successfully imported into PDM. Ready to go live...!!!</p>
+      <Form>
+        <FormItem label="Sync With" class="syncWith">
+         <CheckboxGroup v-model="syncApi" size="large">
+          <Checkbox label="ASI" class="asi">
+              <Icon type="asi"></Icon>
+              <span>ASI</span>
+          </Checkbox>
+          <Checkbox label="Sage" class="sage">
+              <Icon type="sage"></Icon>
+              <span>Sage</span>
+          </Checkbox>
+         </CheckboxGroup>
+       </FormItem>
+     </Form>
+      </div>
       <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
       <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
       </Card>
@@ -729,6 +744,7 @@ export default {
       progressPercent: 0,
       showContinue: false,
       dirinfo: [],
+      syncApi: [],
       dircols: [
         {
           title: 'FileName',
@@ -1740,8 +1756,7 @@ export default {
       let sheetName = key.replace(/([A-Z])/g, ' $1').trim()
       validationObj = {
         id: id,
-        username: self.$store.state.user.fullname,
-        user_id: self.$store.state.userId,
+        username: self.$store.state.user.email,
         sheet_name: sheetName,
         key: key
       }
@@ -1916,7 +1931,6 @@ export default {
           columnname: columnname,
           sheet_name: sheetName
         }
-
         api.request('patch', '/uploader-validation/' + id, updateObj).then(res => {
 
         })
@@ -4844,5 +4858,20 @@ table.zaklad {
 }
 .prpty-label {
     width: 100%;
+}
+.asi {
+  font-size: 14px;
+}
+.asi > .ivu-checkbox {
+  margin-right: 0px;
+}
+.syncWith > .ivu-form-item-label {
+  font-size: 14px;
+}
+.sage {
+  font-size: 14px;
+}
+.sage > .ivu-checkbox {
+  margin-right: 0px;
 }
 </style>
