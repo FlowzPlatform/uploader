@@ -25,5 +25,6 @@
   "cloudname": "cloudname",
   "apikey": "apikey",
   "apisecret": "apisecret",
-  "jobqueueUrl": "jobqueueUrl"
+  "jobqueueUrl": "jobqueueUrl",
+  "ProductSyncWorker": "product_sync_worker"
 }

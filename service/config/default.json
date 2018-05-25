@@ -27,6 +27,7 @@
   "apisecret": "apisecret",
   "jobqueueUrl": "jobqueueUrl",
   "importToConfirmUrl": "",
+  "ProductSyncWorker": "product_sync_worker",
   "rethinkdb": {
     "db": "FlowzDBETL",
     "servers": [
