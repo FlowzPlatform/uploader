@@ -69,7 +69,11 @@ var beforeCreate = async function(hook){
       hook.data["user_id"] = user_data.data.userId
     }
     else if(schemaData.data.length > 0){
-      throw new errors.GeneralError('This mapping name already exists');
+      removedSchemaData = await(hook.app.service('/uploader-schema').remove(schemaData.data[0].id))  //remove the old record and insert the updated one
+      hook.data["createdAt"] = new Date()
+      hook.data["updatedAt"] = new Date()
+      hook.data["user_id"] = user_data.data.userId
+      // throw new errors.GeneralError('This mapping name already exists');
     }
   }
   else{

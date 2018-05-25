@@ -70,7 +70,11 @@ var beforeCreate = async function(hook){
       hook.data["user_id"] = user_data.data.userId
     }
     else if(mappingData.data.length > 0){
-      throw new errors.GeneralError('This csv file mapping already exists');
+      removedMappingData = await(hook.app.service('/uploader-csv-file-mapping').remove(mappingData.data[0].id))  //remove the old record and insert the updated one
+      hook.data["createdAt"] = new Date()
+      hook.data["updatedAt"] = new Date()
+      hook.data["user_id"] = user_data.data.userId
+      // throw new errors.GeneralError('This csv file mapping already exists');
     }
    }
    else{

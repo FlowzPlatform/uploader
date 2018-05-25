@@ -42,6 +42,7 @@ app.use('/', feathers.static(app.get('public')));
 
 
 app.use(function(req, res, next) {
+ // console.log('req....', req)
  this.subscriptionId = req.headers['subscriptionid'];
  module.exports.subscriptionId = this.subscriptionId;
  this.authorization = req.headers['authorization'];
@@ -74,4 +75,5 @@ app.configure(socketio({
   wsEngine: 'uws',
   origin: '*.' + (process.env.domainKey ? 'localhost' : process.env.domainKey) + ':*'
 }));
+
 module.exports = app;

@@ -24,13 +24,14 @@ export default {
     }
 
     for (let key in state.subscription_list) {
-      let response = await axios({
-        method: 'get',
-        url: config.subscriptionUri + '?id=' + state.subscription_list[key].value,
-        headers: {
-          'authorization': authToken
-        }
-      })
+      if (state.subscription_list[key].value !== undefined) {
+        let response = await axios({
+          method: 'get',
+          url: config.subscriptionUri + '?id=' + state.subscription_list[key].value,
+          headers: {
+            'authorization': authToken
+          }
+        })
       .then(response => {
         return response
       })
@@ -41,8 +42,9 @@ export default {
           toastr.error(err.response.data.message)
         }
       })
-      if (response.data.data.length !== 0) {
-        list1.push({'value': state.subscription_list[key].value, 'label': response.data.data[0].userId})
+        if (response.data.data.length !== 0) {
+          list1.push({'value': state.subscription_list[key].value, 'label': response.data.data[0].userId})
+        }
       }
     }
 
