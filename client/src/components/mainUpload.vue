@@ -590,7 +590,7 @@
         </div>
       <div v-if="import1"><h2>Import Completed</h2>
       <p style="font-size:18px;margin-top:20px;margin-bottom: 15px;">Product data has been successfully imported into PDM. Ready to go live...!!!</p>
-      <Form>
+      <!-- <Form>
         <FormItem label="Sync With" class="syncWith">
          <CheckboxGroup v-model="syncApi" size="large">
           <Checkbox label="ASI" class="asi">
@@ -603,7 +603,7 @@
           </Checkbox>
          </CheckboxGroup>
        </FormItem>
-     </Form>
+     </Form> -->
       </div>
       <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
       <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
@@ -744,7 +744,6 @@ export default {
       progressPercent: 0,
       showContinue: false,
       dirinfo: [],
-      syncApi: [],
       dircols: [
         {
           title: 'FileName',
