@@ -25,6 +25,7 @@ import mainUpload from '@/components/mainUpload'
 import newJoblist from '@/components/newJobList'
 import forgotPassword from '@/components/forgotPassword'
 import resetPassword from '@/components/resetPassword'
+import invite from '@/components/invite'
 // import example from '@/components/example'
 
 // import FlowzList from '@/components/FlowList'
@@ -67,6 +68,11 @@ const routes = [{
     path: '/uploader-joblist',
     name: 'newJoblist',
     component: newJoblist
+  },
+  {
+    path: '/invite',
+    name: 'invite',
+    component: invite
   }]
 }, {
   path: '/Login',

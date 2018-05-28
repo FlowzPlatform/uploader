@@ -21,17 +21,23 @@
                               &nbsp;Uploader
                       </Menu-item>
                    </router-link>
-                   <Menu-item name="3" >
+                    <router-link to="/invite">
+                        <Menu-item name="3">
+                            <Icon type="cash" :size="14"></Icon>
+                            &nbsp;Invite
+                        </Menu-item>
+                    </router-link>
+                   <Menu-item name="4" >
                      <Select v-model="selected_user" style="width:200px" @on-change="setSelectedUser()" :disabled=$store.state.disableuser>
                         <Option v-for="item in $store.state.user_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
                     </Select>
                    </Menu-item>
-                    <Menu-item name="4">
+                    <Menu-item name="5">
                       <Select v-model="selected_subscription_name" style="width:200px" @on-change="getSubscriptionId()" :disabled=$store.state.disablesubscription>
                          <Option v-for="item in $store.state.subscription_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
                      </Select>
                     </Menu-item>
-                    <Submenu name="5">
+                    <Submenu name="6">
            <template slot="title">
                 <Icon type="grid" :size="20"></Icon>
            </template>
@@ -41,7 +47,7 @@
                       <MenuItem name="5-3"><span @click="gotoCRM" style="font-size:12px;">CRM</span></MenuItem>
                   </MenuGroup>
                   </Submenu>
-                    <Menu-item name="6">
+                    <Menu-item name="7">
                       <Submenu name="1">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
@@ -175,32 +181,33 @@ export default {
         this.$store.commit('SET_STOREDUSERNAME', user)
         this.$store.state.selectedUserName = user
       }
-      if (user !== 'All') {
-        let self = this
-        let subArray = []
-        let groupedlist = lodash.groupBy(this.$store.state.user_detail_list, 'name')
-        lodash.forEach(groupedlist, (value, key) => {
-          if (key === user) {
-            for (let i = 0; i < value.length; i++) {
-              subArray.push({'value': value[i].value})
-            }
-          }
-        })
+      // if (user !== 'All') {
+      //   // let self = this
+      //   // let subArray = []
+      //   // let groupedlist = lodash.groupBy(this.$store.state.user_detail_list, 'name')
+      //   // lodash.forEach(groupedlist, (value, key) => {
+      //   //   if (key === user) {
+      //   //     for (let i = 0; i < value.length; i++) {
+      //   //       subArray.push({'value': value[i].value})
+      //   //     }
+      //   //   }
+      //   // })
 
-        for (let i = 0; i < self.$store.state.subscription_list.length; i++) {
-          if (subArray.length !== 0) {
-            let idx1 = lodash.findIndex(subArray, function (o) { return o.value === self.$store.state.subscription_list[i].value })
-
-            if (idx1 === -1 && self.$store.state.subscription_list[i].value !== 'All') {
-              self.$store.state.subscription_list.splice(i, 1)
-            }
-          }
-        }
-      } else {
-        if (this.selected_subscription_name === '') {
-          this.selected_subscription_name = this.$store.state.subscription_list[0].label
-        }
-      }
+      //   // for (let i = 0; i < self.$store.state.subscription_list.length; i++) {
+      //   //   if (subArray.length !== 0) {
+      //   //     let idx1 = lodash.findIndex(subArray, function (o) { return o.value === self.$store.state.subscription_list[i].value })
+      //   //     console.log('indx1....', idx1)
+      //   //     if (idx1 === -1 && self.$store.state.subscription_list[i].value !== 'All') {
+      //   //       console.log('caleed...... inside', self.$store.state.subscription_list[i])
+      //   //       self.$store.state.subscription_list.splice(i, 1)
+      //   //     }
+      //   //   }
+      //   // }
+      // } else {
+      //   if (this.selected_subscription_name === '') {
+      //     this.selected_subscription_name = this.$store.state.subscription_list[0].label
+      //   }
+      // }
     },
     '$store.state.subscription_list': function (list) {
       let self = this
