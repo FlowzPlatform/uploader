@@ -198,33 +198,36 @@ export default {
     }
 
     if (this.$store.state.storedSubscriptionName !== '') {
-      let self = this
-      let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
-      if (subId !== -1) {
-        self.$store.state.subscription_list.splice(subId, 1)
-      }
+      this.getData(this.$store.state.subscription_id)
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // console.log('self.$store.state.subscription_list.....', self.$store.state.subscription_list, subId)
+      // if (subId !== -1) {
+      //   console.log('called....')
+      //   self.$store.state.subscription_list.splice(subId, 1)
+      // }
 
-      let subscriptionObj1
-      subscriptionObj1 = lodash.filter(self.$store.state.subscription_list, function (o) {
-        if (o.label === self.$store.state.storedSubscriptionName) {
-          return o
-        }
-      })
-      if (subscriptionObj1.length !== 0) {
-        self.$store.state.subscription_id = subscriptionObj1[0].value
-      }
-      this.getData(this.$store.state.subscription_id)
-    } else {
-      let self = this
-      let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
-      if (subId !== -1) {
-        self.$store.state.subscription_list.splice(subId, 1)
-      }
-      this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
-      this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
-      this.$store.state.storedSubscriptionName = this.$store.state.subscription_name
-        // this.loading = false
-      this.getData(this.$store.state.subscription_id)
+      // let subscriptionObj1
+      // subscriptionObj1 = lodash.filter(self.$store.state.subscription_list, function (o) {
+      //   if (o.label === self.$store.state.storedSubscriptionName) {
+      //     return o
+      //   }
+      // })
+      // console.log('subscriptionObj1 &&&&&&', subscriptionObj1)
+      // if (subscriptionObj1.length !== 0) {
+      //   self.$store.state.subscription_id = subscriptionObj1[0].value
+      // }
+    //   this.getData(this.$store.state.subscription_id)
+    // } else {
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // if (subId !== -1) {
+      //   self.$store.state.subscription_list.splice(subId, 1)
+      // }
+      // this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
+      // this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
+      // this.$store.state.storedSubscriptionName = this.$store.state.subscription_name
+      // this.getData(this.$store.state.subscription_id)
     }
   },
   watch: {
@@ -248,6 +251,10 @@ export default {
           let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })
           if (userId !== -1) {
             list.splice(userId, 1)
+            let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
+            if (subId !== -1) {
+              this.$store.state.subscription_list.splice(subId, 1)
+            }
           }
         }
       }

@@ -263,9 +263,10 @@ export default {
               }
             }
           } else {
-            this.$Notice.info({
-              title: 'No Data Available'
-            })
+            // this.$Notice.info({
+            //   title: 'No Data Available'
+            // })
+            this.$router.push('/uploader')
           }
         })
       } else if (this.$store.state.disconnect === true) {
@@ -282,43 +283,34 @@ export default {
     this.$store.state.validationStatus = false
 
     if (this.$store.state.storedSubscriptionName !== '') {
-      let self = this
-      let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
-      if (subId !== -1) {
-        self.$store.state.subscription_list.splice(subId, 1)
-      }
+      this.findData(this.$store.state.subscription_id)
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // if (subId !== -1) {
+      //   self.$store.state.subscription_list.splice(subId, 1)
+      // }
 
-      let subscriptionObj1
-      subscriptionObj1 = lodash.filter(self.$store.state.subscription_list, function (o) {
-        if (o.label === self.$store.state.storedSubscriptionName) {
-          return o
-        }
-      })
-      if (subscriptionObj1.length !== 0) {
-        self.$store.state.subscription_id = subscriptionObj1[0].value
-      }
-      this.findData(this.$store.state.subscription_id)
-    } else {
-      let self = this
-      let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
-      if (subId !== -1) {
-        self.$store.state.subscription_list.splice(subId, 1)
-      }
-      this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
-      this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
-      this.$store.state.storedSubscriptionName = this.$store.state.subscription_name
-      this.findData(this.$store.state.subscription_id)
+      // let subscriptionObj1
+      // subscriptionObj1 = lodash.filter(self.$store.state.subscription_list, function (o) {
+      //   if (o.label === self.$store.state.storedSubscriptionName) {
+      //     return o
+      //   }
+      // })
+      // if (subscriptionObj1.length !== 0) {
+      //   self.$store.state.subscription_id = subscriptionObj1[0].value
+      // }
+
+    // } else {
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // if (subId !== -1) {
+      //   self.$store.state.subscription_list.splice(subId, 1)
+      // }
+      // this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
+      // this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
+      // this.$store.state.storedSubscriptionName = this.$store.state.subscription_name
+      // this.findData(this.$store.state.subscription_id)
     }
-
-      // if(this.$store.state.subscription_name != "All"){
-      //   this.findData(this.$store.state.subscription_id)
-      // }
-      // else if(this.$store.state.subscription_name == "All"){
-      //   this.loading = false
-      //   this.$Notice.error({
-      //    title: 'Please select a proper subscription id...'
-      //  });
-      // }
   },
   watch: {
     '$store.state.subscription_id': function (subId) {
@@ -342,6 +334,10 @@ export default {
           let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })
           if (userId !== -1) {
             list.splice(userId, 1)
+            let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
+            if (subId !== -1) {
+              this.$store.state.subscription_list.splice(subId, 1)
+            }
           }
         }
       }
