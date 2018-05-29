@@ -317,9 +317,9 @@ export default {
       let self = this
       if (subId === 'All') {
         self.loading = false
-        self.$Notice.error({
-          title: 'Please select a proper subscription id...'
-        })
+        // self.$Notice.error({
+        //   title: 'Please select a proper subscription id...'
+        // })
       } else {
         if (self.show_table === true) {
           self.show_table = false
@@ -337,11 +337,27 @@ export default {
             let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
             if (subId !== -1) {
               this.$store.state.subscription_list.splice(subId, 1)
+              // this.$store.state.fullSubscriptionList = lodash.cloneDeep(this.$store.state.subscription_list)
             }
           }
         }
       }
     }
+    // '$store.state.storedUsername': function (selectedUser) {
+    //   console.log('called.....')
+    //   let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+    //   let subsArr = []
+
+    //   for (let userSubs in filteredUser) {
+    //     for (let subs in this.$store.state.fullSubscriptionList) {
+    //       if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+    //         subsArr.push(this.$store.state.fullSubscriptionList[subs])
+    //       }
+    //     }
+    //   }
+    //   this.$store.state.subscription_list = subsArr
+    //   this.$store.state.storedSubscriptionName = subsArr[0].label
+    // }
   }
 }
 </script>

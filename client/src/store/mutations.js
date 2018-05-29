@@ -23,6 +23,8 @@ export default {
       state.subscription_list.push({'value': response.data.data.package[key].subscriptionId, 'label': response.data.data.package[key].name})
     }
 
+    state.fullSubscriptionList = _.cloneDeep(state.subscription_list)
+
     for (let key in state.subscription_list) {
       if (state.subscription_list[key].value !== undefined && state.subscription_list[key].value !== 'All') {
         let response = await axios({
