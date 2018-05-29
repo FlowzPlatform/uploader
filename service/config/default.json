@@ -29,7 +29,7 @@
   "importToConfirmUrl": "",
   "ProductSyncWorker": "product_sync_worker",
   "rethinkdb": {
-    "db": "FlowzDBETL",
+    "db": "FlowzDBETL", 
     "servers": [
       {
         "host": "localhost",
