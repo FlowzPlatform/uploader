@@ -49,6 +49,7 @@ module.exports = function () {
         }
 
         Promise.all(promiseAll).then(function(values) {
+          console.log('----------------------------------------- values', values)
           socket.emit('img_res',values)
         });
 
@@ -91,6 +92,7 @@ var uploadImage = async function(data){
         }
         else{
           result.file_name = data.file.filename
+          console.log('result.....', result)
           resolve(result)
         }
       });

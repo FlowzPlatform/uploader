@@ -1295,6 +1295,7 @@ export default {
     setImportProgress (totalProduct, uploadedProduct) {
       let self = this
       self.progressPercent = Math.round(uploadedProduct / totalProduct * 100)
+      console.log('self.progressPercent...', self.progressPercent)
     },
     retResult (reader) {
       let _promise = new Promise((resolve, reject) => {
