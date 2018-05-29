@@ -127,7 +127,7 @@ var connectToMongo = async function(url,data,socket){
     }
 
 
-    for(let i=0;i<data.newCSV.length;i++){
+   for(let i=0;i<data.newCSV.length;i++){
       for(key in data.newCSV[i]){
         for(let schema_key in schemarules){
           if(key == schema_key && schemarules[schema_key] == "string"){
@@ -148,7 +148,6 @@ var connectToMongo = async function(url,data,socket){
         }
       }
     }
-
 
 
      if(db){
