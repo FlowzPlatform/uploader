@@ -258,6 +258,7 @@ export default {
         this.$store.state.subscription_list = subsArr
         this.$store.state.storedSubscriptionName = subsArr[0].label
       } else {
+        console.log('else called')
         this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
         this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
       }

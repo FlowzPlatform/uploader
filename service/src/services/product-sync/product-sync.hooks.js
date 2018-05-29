@@ -46,6 +46,10 @@ function aftercreateInstance(hook) {
     const Queue = require('rethinkdb-job-queue')
       //--------------- Connection Options -----------------
     const cxnOptions = app.rethinkdb
+    console.log('.....................', cxnOptions)
+    // cxnOptions.servers[0].host = app.get("rdb_host")
+    // cxnOptions.servers[0].port = app.get("rdb_port")
+    // console.log("&&&&&&&&&&&&&&", cxnOptions)
       //--------------- Queue Options -----------------
     const qOptions = {
       name: app.get('ProductSyncWorker')
