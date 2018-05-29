@@ -590,6 +590,10 @@
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
+      <div v-if="import1"  style="font-size:18px;margin-top:20px"><div><b>Sync With</b></div><span>
+        <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
+        <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox></Checkbox>
+      </span></div>
       <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
       <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
       </Card>
@@ -665,6 +669,8 @@ export default {
   components: {VueTabs, VTab, 'input-tag': InputTag, vueDropzone: vue2Dropzone},
   data () {
     return {
+      asiSync: false,
+      sageSync: false,
       moment: moment,
       currentStep: 0,
       map: false,
@@ -2054,9 +2060,18 @@ export default {
       // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
     importToConfirm () {
       let self = this
+      let SyncData = ''
       this.abortImportBtn = false
+      if (this.asiSync & this.sageSync) {
+        SyncData = 'BOTH'
+      } else if (this.asiSync) {
+        SyncData = 'ASI'
+      } else if (this.sageSync) {
+        SyncData = 'SAGE'
+      }
       let jobQueueObj = {
-        'importTrackerId': id
+        'importTrackerId': id,
+        'syncOn': SyncData
       }
 
       api.request('post', '/import-to-confirm/', jobQueueObj).then(res => {

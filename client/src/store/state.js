@@ -18,6 +18,7 @@ export default {
   subscription_id: '',
   subscription_name: '',
   subscription_list: [],
+  fullSubscriptionList: [],
   user_detail_list: [],
   user_list: [],
   selectedUserName: '',

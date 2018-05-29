@@ -188,6 +188,7 @@ export default {
     }
   },
   mounted () {
+    console.log('uploader called....')
     this.loading = true
     this.$store.state.validationStatus = false
     if (this.$store.state.disableuser === true) {
@@ -232,11 +233,12 @@ export default {
   },
   watch: {
     '$store.state.subscription_id': function (id) {
+      console.log('$store')
       if (id === 'All') {
         this.loading = false
-        this.$Notice.error({
-          title: 'Please select a proper subscription id...'
-        })
+        // this.$Notice.error({
+        //   title: 'Please select a proper subscription id...'
+        // })
       } else {
         if (this.showDiv === true) {
           this.showDiv = false
@@ -254,11 +256,27 @@ export default {
             let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
             if (subId !== -1) {
               this.$store.state.subscription_list.splice(subId, 1)
+              // this.$store.state.fullSubscriptionList = lodash.cloneDeep(this.$store.state.subscription_list)
             }
           }
         }
       }
     }
+    // '$store.state.storedUsername': function (selectedUser) {
+    //   console.log('called.....')
+    //   let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+    //   let subsArr = []
+
+    //   for (let userSubs in filteredUser) {
+    //     for (let subs in this.$store.state.fullSubscriptionList) {
+    //       if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+    //         subsArr.push(this.$store.state.fullSubscriptionList[subs])
+    //       }
+    //     }
+    //   }
+    //   this.$store.state.subscription_list = subsArr
+    //   this.$store.state.storedSubscriptionName = subsArr[0].label
+    // }
   }
 }
 </script>
