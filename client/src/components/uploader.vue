@@ -248,6 +248,7 @@ export default {
       }
     },
     '$store.state.user_list': function (list) {
+      console.log('list.....', list)
       if (list.length !== 0) {
         if (this.$store.state.storedUsername !== '') {
           let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })

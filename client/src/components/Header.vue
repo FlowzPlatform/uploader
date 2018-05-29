@@ -178,6 +178,7 @@ export default {
       }
     },
     'selected_user': function (user) {
+      console.log('user....', user)
       if (user !== '' && user !== 'All') {
         this.$store.state.storedUsername = this.selected_user
         console.log('this.$store.state.storedUsername', this.$store.state.storedUsername)
@@ -193,9 +194,11 @@ export default {
             }
           }
         }
+        this.$store.state.subscription_list = []
         this.$store.state.subscription_list = subsArr
         this.$store.state.storedSubscriptionName = subsArr[0].label
       } else {
+        this.$store.state.subscription_list = []
         this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
         this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
       }
@@ -255,10 +258,12 @@ export default {
             }
           }
         }
+        this.$store.state.subscription_list = []
         this.$store.state.subscription_list = subsArr
         this.$store.state.storedSubscriptionName = subsArr[0].label
       } else {
         console.log('else called')
+        this.$store.state.subscription_list = []
         this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
         this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
       }

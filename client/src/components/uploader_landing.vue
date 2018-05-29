@@ -313,9 +313,10 @@ export default {
     }
   },
   watch: {
-    '$store.state.subscription_id': function (subId) {
+    '$store.state.subscription_id': function (id) {
       let self = this
-      if (subId === 'All') {
+      console.log('landing $store')
+      if (id === 'All') {
         self.loading = false
         // self.$Notice.error({
         //   title: 'Please select a proper subscription id...'
@@ -325,10 +326,11 @@ export default {
           self.show_table = false
         }
         self.loading = true
-        self.findData(subId)
+        self.findData(id)
       }
     },
     '$store.state.user_list': function (list) {
+      console.log('landing list....', list)
       if (list.length !== 0) {
         if (this.$store.state.storedUsername !== '') {
           let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })
