@@ -200,36 +200,22 @@ export default {
 
     if (this.$store.state.storedSubscriptionName !== '') {
       this.getData(this.$store.state.subscription_id)
-      // let self = this
-      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
-      // console.log('self.$store.state.subscription_list.....', self.$store.state.subscription_list, subId)
-      // if (subId !== -1) {
-      //   console.log('called....')
-      //   self.$store.state.subscription_list.splice(subId, 1)
-      // }
-
-      // let subscriptionObj1
-      // subscriptionObj1 = lodash.filter(self.$store.state.subscription_list, function (o) {
-      //   if (o.label === self.$store.state.storedSubscriptionName) {
-      //     return o
-      //   }
-      // })
-      // console.log('subscriptionObj1 &&&&&&', subscriptionObj1)
-      // if (subscriptionObj1.length !== 0) {
-      //   self.$store.state.subscription_id = subscriptionObj1[0].value
-      // }
-    //   this.getData(this.$store.state.subscription_id)
-    // } else {
-      // let self = this
-      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
-      // if (subId !== -1) {
-      //   self.$store.state.subscription_list.splice(subId, 1)
-      // }
-      // this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
-      // this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
-      // this.$store.state.storedSubscriptionName = this.$store.state.subscription_name
-      // this.getData(this.$store.state.subscription_id)
     }
+    console.log('this.$store.state.storedUsername uploader .....', this.$store.state.storedUsername, this.$store.state.user_detail_list)
+    // let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === this.$store.state.storedUsername })
+    // console.log('&&&&&', filteredUser)
+    // let subsArr = []
+
+    // for (let userSubs in filteredUser) {
+    //   for (let subs in this.$store.state.fullSubscriptionList) {
+    //     if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+    //       subsArr.push(this.$store.state.fullSubscriptionList[subs])
+    //     }
+    //   }
+    // }
+    // this.$store.state.subscription_list = []
+    // this.$store.state.subscription_list = subsArr
+    // this.$store.state.storedSubscriptionName = subsArr[0].label
   },
   watch: {
     '$store.state.subscription_id': function (id) {
@@ -257,50 +243,41 @@ export default {
             let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
             if (subId !== -1) {
               this.$store.state.subscription_list.splice(subId, 1)
-              // this.$store.state.fullSubscriptionList = lodash.cloneDeep(this.$store.state.subscription_list)
+              let self = this
+              let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === self.$store.state.storedUsername })
+              console.log('&&&&&', filteredUser)
+              let subsArr = []
+
+              for (let userSubs in filteredUser) {
+                for (let subs in self.$store.state.fullSubscriptionList) {
+                  if (filteredUser[userSubs].value === self.$store.state.fullSubscriptionList[subs].value) {
+                    subsArr.push(self.$store.state.fullSubscriptionList[subs])
+                  }
+                }
+              }
+              self.$store.state.subscription_list = []
+              self.$store.state.subscription_list = subsArr
+              self.$store.state.storedSubscriptionName = subsArr[0].label
             }
           }
         }
       }
     },
     '$store.state.storedUsername': function (selectedUser) {
-      console.log('called 8888888....')
-      if (selectedUser !== 'All') {
-        let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
-        let subsArr = []
+      console.log('called.....')
+      let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+      let subsArr = []
 
-        for (let userSubs in filteredUser) {
-          for (let subs in this.$store.state.fullSubscriptionList) {
-            if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
-              subsArr.push(this.$store.state.fullSubscriptionList[subs])
-            }
+      for (let userSubs in filteredUser) {
+        for (let subs in this.$store.state.fullSubscriptionList) {
+          if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+            subsArr.push(this.$store.state.fullSubscriptionList[subs])
           }
         }
-        this.$store.state.subscription_list = []
-        this.$store.state.subscription_list = subsArr
-        this.$store.state.storedSubscriptionName = subsArr[0].label
-      } else {
-        console.log('else called')
-        this.$store.state.subscription_list = []
-        this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
-        this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
       }
+      this.$store.state.subscription_list = subsArr
+      this.$store.state.storedSubscriptionName = subsArr[0].label
     }
-    // '$store.state.storedUsername': function (selectedUser) {
-    //   console.log('called.....')
-    //   let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
-    //   let subsArr = []
-
-    //   for (let userSubs in filteredUser) {
-    //     for (let subs in this.$store.state.fullSubscriptionList) {
-    //       if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
-    //         subsArr.push(this.$store.state.fullSubscriptionList[subs])
-    //       }
-    //     }
-    //   }
-    //   this.$store.state.subscription_list = subsArr
-    //   this.$store.state.storedSubscriptionName = subsArr[0].label
-    // }
   }
 }
 </script>
