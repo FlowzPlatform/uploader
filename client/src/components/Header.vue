@@ -125,16 +125,15 @@ export default {
     },
     setSelectedUser () {
       // let self = this
+      console.log('cxalled.....')
       if (this.selected_user === '') {
+        console.log('%%%%%%')
         if (this.$store.state.user_list.length !== 0) {
+          console.log('########')
           this.selected_user = this.$store.state.user_list[0].label
         }
       }
       this.$store.state.selectedUserName = this.selected_user
-      // if (this.$store.state.storedUsername !== '') {
-      //   console.log('^^^^^^^', this.$store.state.storedUsername)
-      //   self.$store.commit('SET_STOREDUSERNAME', this.$store.state.storedUsername)
-      // }
     }
   },
   watch: {
@@ -166,10 +165,12 @@ export default {
             this.$store.state.user_list.splice(0, 0, {'value': 'All', 'label': 'All'})
           }
           if (this.$store.state.storedUsername !== '') {
+            console.log('*********')
             this.selected_user = this.$store.state.storedUsername
             this.$store.state.storedUsername = this.selected_user
             this.$store.commit('SET_STOREDUSERNAME', this.selected_user)
           } else {
+            console.log('^^^^^^')
             this.selected_user = this.$store.state.user_list[0].label
             this.$store.state.storedUsername = this.selected_user
             this.$store.commit('SET_STOREDUSERNAME', this.selected_user)

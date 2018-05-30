@@ -339,10 +339,34 @@ export default {
             let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
             if (subId !== -1) {
               this.$store.state.subscription_list.splice(subId, 1)
+              console.log('atlast called....')
               // this.$store.state.fullSubscriptionList = lodash.cloneDeep(this.$store.state.subscription_list)
             }
           }
         }
+      }
+    },
+    '$store.state.storedUsername': function (selectedUser) {
+      console.log('called 777777777777.....')
+      if (selectedUser !== 'All') {
+        let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+        let subsArr = []
+
+        for (let userSubs in filteredUser) {
+          for (let subs in this.$store.state.fullSubscriptionList) {
+            if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+              subsArr.push(this.$store.state.fullSubscriptionList[subs])
+            }
+          }
+        }
+        this.$store.state.subscription_list = []
+        this.$store.state.subscription_list = subsArr
+        this.$store.state.storedSubscriptionName = subsArr[0].label
+      } else {
+        console.log('else called')
+        this.$store.state.subscription_list = []
+        this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
+        this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
       }
     }
     // '$store.state.storedUsername': function (selectedUser) {
