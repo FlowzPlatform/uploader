@@ -19,6 +19,7 @@ const ProductInformationSchema = {
     description: "string",
     linename: "string",
     categories: "string",
+    tags: "string",
     search_keyword:"string",
     default_image:  "string",
     default_image_color_code: "string",

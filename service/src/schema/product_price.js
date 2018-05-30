@@ -23,7 +23,6 @@
 
     code_1:"string",
 
-
     qty_2_min:"number",
 
     qty_2_max:"number",

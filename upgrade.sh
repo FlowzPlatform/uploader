@@ -31,6 +31,9 @@ then
     RANCHER_SECRETKEY="$RANCHER_SECRETKEY_MASTER";
     RANCHER_URL="$RANCHER_URL_MASTER";
     MONGODB_DATABASE="$MONGODB_DATABASE_MASTER";
+    cloudname="$cloudname_master";
+    apikey="$apikey_master";
+    apisecret="$apisecret_master";
   }
 elif [ "$TRAVIS_BRANCH" = "develop" ]
 then
@@ -47,6 +50,9 @@ then
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_DEVELOP";
       RANCHER_URL="$RANCHER_URL_DEVELOP";
       MONGODB_DATABASE="$MONGODB_DATABASE_DEVELOP";
+      cloudname="$cloudname_develop";
+      apikey="$apikey_develop";
+      apisecret="$apisecret_develop";
   }
 elif [ "$TRAVIS_BRANCH" = "staging" ]
 then
@@ -63,6 +69,9 @@ then
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_STAGING";
       RANCHER_URL="$RANCHER_URL_STAGING";
       MONGODB_DATABASE="$MONGODB_DATABASE_STAGING";
+      cloudname="$cloudname_staging";
+      apikey="$apikey_staging";
+      apisecret="$apisecret_staging";
   }  
 else
   {
@@ -78,6 +87,9 @@ else
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_QA";
       RANCHER_URL="$RANCHER_URL_QA";
       MONGODB_DATABASE="$MONGODB_DATABASE_QA";
+      cloudname="$cloudname_qa";
+      apikey="$apikey_qa";
+      apisecret="$apisecret_qa";
   }
 fi
 
@@ -92,7 +104,7 @@ curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
-       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$mongodb_host"'","mongodb_port":"'"$mongodb_port"'","username":"'"$username_env"'","password":"'"$password"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
+       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$mongodb_host"'","mongodb_port":"'"$mongodb_port"'","username":"'"$username_env"'","password":"'"$password"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'","cloudname":"'"$cloudname"'","apikey":"'"$apikey"'","apisecret":"'"$apisecret"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
 $RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_BACKEND?action=upgrade
 
 curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \

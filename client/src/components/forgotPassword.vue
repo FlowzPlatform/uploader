@@ -42,27 +42,20 @@
 </template>
 
 <script>
-/*eslint-disable*/
 import axios from 'axios'
-import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
 import config from '@/config'
-import psl from 'psl'
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
 export default {
   name: 'login',
   data () {
     const emailValidator = (rule, value, callback) => {
-                if (value == '') {
-                    callback(new Error('Please enter email'));
-                } else if (value != '') {
-                  let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
-                  if(re.test(value) != true)
-                    callback(new Error('Please enter correct email'));
-                  else
-                    callback()
-                }
-    };
+      if (value === '') {
+        callback(new Error('Please enter email'))
+      } else if (value !== '') {
+        let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
+        if (re.test(value) !== true) { callback(new Error('Please enter correct email')) } else { callback() }
+      }
+    }
     return {
       loading: false,
       formForgotPassword: {
@@ -71,7 +64,7 @@ export default {
       ruleForgotPassword: {
         email: [
           // { required: true, message: 'Please fill in the email id', trigger: 'blur' },
-          {validator:emailValidator,trigger: 'blur'}
+          {validator: emailValidator, trigger: 'blur'}
         ]
       }
     }
@@ -82,30 +75,28 @@ export default {
         if (valid) {
           let self = this
           self.loading = true
-           axios.post(config.forgotPasswordUrl, {
-                   email: self.formForgotPassword.email.trim(),
-                   url: config.resetPasswordRedirectUrl,
-                   headers: {
-                     "authorization": Cookies.get('auth_token')
-                   }
+          axios.post(config.forgotPasswordUrl, {
+            email: self.formForgotPassword.email.trim(),
+            url: config.resetPasswordRedirectUrl,
+            headers: {
+              'authorization': Cookies.get('auth_token')
+            }
+          })
+               .then(function (response) {
+                 if (response.data.code === 200) {
+                   self.loading = false
+                   self.$message.success(response.data.message)
+                   self.formForgotPassword.email = ''
+                 }
                })
-               .then(function(response) {
-                   if (response.data.code == 200) {
-                       self.loading = false
-                       self.$message.success(response.data.message);
-                       self.formForgotPassword.email = ""
-                   }
+               .catch(function (error) {
+                 self.loading = false
+                 if (error.response) {
+                   self.$message.error(error.response.data)
+                 } else if (error.message) {
+                   self.$message.error(error.message)
+                 }
                })
-               .catch(function(error) {
-                  self.loading = false
-                  if(error.response){
-                    self.$message.error(error.response.data);
-                  }
-                  else if(error.message){
-                    self.$message.error(error.message);
-                  }
-               });
-
         } else {
           // this.$Message.error('Please enter your email')
         }
@@ -116,7 +107,7 @@ export default {
     var mainDiv = document.getElementById('main-panel')
     let self = this
     mainDiv.onkeypress = function (e) {
-      if (e.key == 'Enter') self.handleSubmit('formForgotPassword')
+      if (e.key === 'Enter') self.handleSubmit('formForgotPassword')
     }
   }
 }
