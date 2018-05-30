@@ -52,6 +52,7 @@ async function beforeCreate(hook) {
   module.exports.authorization = this.authorization
   let user_data = await(axios.get(user_detail_url,{'headers':{'Authorization':module.exports.authorization}}))
   let import_tracker_id = hook.data.importTrackerId
+  let syncOn = hook.data.syncOn
   hook.data = {
     "queue": {
       "name":"uploaderJobQueConfirm"
@@ -59,6 +60,7 @@ async function beforeCreate(hook) {
     "jobs":[
       {
         "importTrackerId":import_tracker_id,
+        "syncOn": syncOn,
         "userdetails":{
           "id":user_data.data.data._id,
           "email":user_data.data.data.email,

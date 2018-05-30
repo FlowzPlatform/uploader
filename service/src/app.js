@@ -34,14 +34,15 @@ app.configure(configuration());
 app.use(cors(corsOptions));
 app.use(helmet());
 app.use(compress());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({limit: '100mb'}));
+app.use(bodyParser.urlencoded({ limit: '100mb',extended: true }));
 app.use(favicon(path.join(app.get('public'), 'favicon.ico')));
 // Host the public folder
 app.use('/', feathers.static(app.get('public')));
 
 
 app.use(function(req, res, next) {
+ // console.log('req....', req)
  this.subscriptionId = req.headers['subscriptionid'];
  module.exports.subscriptionId = this.subscriptionId;
  this.authorization = req.headers['authorization'];
@@ -74,4 +75,5 @@ app.configure(socketio({
   wsEngine: 'uws',
   origin: '*.' + (process.env.domainKey ? 'localhost' : process.env.domainKey) + ':*'
 }));
+
 module.exports = app;

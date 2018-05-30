@@ -40,11 +40,8 @@
 </template>
 
 <script>
-/*eslint-disable*/
 // import axios from 'axios'
 import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
-import config from '@/config'
 import psl from 'psl'
 export default {
   name: 'email-verification',
@@ -70,16 +67,17 @@ export default {
           this.loading = true
 
           var auth = await modelAuthentication.social(this.formLogin).catch(error => {
-						this.$Message.error(error.response.data)
+            this.$Message.error(error.response.data)
             return
           })
           if (auth) {
             this.$store.commit('SET_TOKEN', auth.logintoken)
-						// Token Store in cookie
-						let location = psl.parse(window.location.hostname)    // get parent domain
-						location = location.domain === null ? location.input : location.domain
-						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
-						this.$store.commit('SET_ROLE', null)
+
+            // Token Store in cookie
+            let location = psl.parse(window.location.hostname)    // get parent domain
+            location = location.domain === null ? location.input : location.domain
+            this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location}) // Store in cookie
+            this.$store.commit('SET_ROLE', null)
             this.$router.push({path: '/'}) // Redirect to dashbord
           }
           this.loading = false
@@ -92,9 +90,9 @@ export default {
   mounted () {
     // let params = new URLSearchParams(window.location.search)
     // this.formLogin.id = params.get('ob_id')
-    let url = new URL(window.location.href);
-    let ob_id = url.search.split('=')[1]
-    this.formLogin.id = ob_id
+    let url = new URL(window.location.href)
+    let obId = url.search.split('=')[1]
+    this.formLogin.id = obId
   }
 }
 </script>

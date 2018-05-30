@@ -39,24 +39,20 @@
 </template>
 
 <script>
-/*eslint-disable*/
 import axios from 'axios'
-import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
 import config from '@/config'
-import psl from 'psl'
 export default {
   name: 'login',
   data () {
     const validatePassCheck = (rule, value, callback) => {
-              if (value === '') {
-                  callback(new Error('Please enter your password again'));
-              } else if (value !== this.formResetPassword.password) {
-                  callback(new Error('The two input passwords do not match!'));
-              } else {
-                  callback();
-              }
-          };
+      if (value === '') {
+        callback(new Error('Please enter your password again'))
+      } else if (value !== this.formResetPassword.password) {
+        callback(new Error('The two input passwords do not match!'))
+      } else {
+        callback()
+      }
+    }
     return {
       loading: false,
       formResetPassword: {
@@ -68,7 +64,7 @@ export default {
           { required: true, message: 'Please enter password', trigger: 'blur' }
         ],
         confirmpassword: [
-          { trigger: 'blur',validator: validatePassCheck }
+          { trigger: 'blur', validator: validatePassCheck }
         ]
       }
     }
@@ -77,27 +73,26 @@ export default {
     handleSubmit (name) {
       this.$refs[name].validate(async (valid) => {
         if (valid) {
-               let self = this
-               self.loading = true
-               let url = new URL(window.location.href);
-               let forgetToken = self.$route.query.forget_token
-             axios.post(config.resetPasswordUrl, {
-                     new_password: self.formResetPassword.password.trim(),
-                     token: forgetToken
-               })
+          let self = this
+          self.loading = true
+          let forgetToken = self.$route.query.forget_token
+          axios.post(config.resetPasswordUrl, {
+            new_password: self.formResetPassword.password.trim(),
+            token: forgetToken
+          })
                .then(function (response) {
-                   self.loading = false
-                   self.$message.success(response.data.message);
-                   self.formResetPassword.password = ""
-                   self.formResetPassword.confirmpassword = ""
-                   setTimeout(function(){
-                     self.$router.push('/Login')
-                   },1700);
+                 self.loading = false
+                 self.$message.success(response.data.message)
+                 self.formResetPassword.password = ''
+                 self.formResetPassword.confirmpassword = ''
+                 setTimeout(function () {
+                   self.$router.push('/Login')
+                 }, 1700)
                })
                .catch(function (error) {
-                   self.loading = false
-                   self.$message.error(error.response.data);
-               });
+                 self.loading = false
+                 self.$message.error(error.response.data)
+               })
         } else {
           // this.$Message.error('Form validation failed!')
         }
@@ -108,7 +103,7 @@ export default {
     var mainDiv = document.getElementById('main-panel')
     let self = this
     mainDiv.onkeypress = function (e) {
-      if (e.key == 'Enter') self.handleSubmit('formResetPassword')
+      if (e.key === 'Enter') self.handleSubmit('formResetPassword')
     }
   }
 }

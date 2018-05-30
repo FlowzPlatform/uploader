@@ -22,8 +22,12 @@
   "mongodb_host": "mongodb_host",
   "mongodb_port": "mongodb_port",
   "mongodb_database": "mongodb_database",
+  "cloudname": "cloudname",
+  "apikey": "apikey",
+  "apisecret": "apisecret",
   "jobqueueUrl": "jobqueueUrl",
   "importToConfirmUrl": "",
+  "ProductSyncWorker": "product_sync_worker",
   "rethinkdb": {
     "db": "FlowzDBETL",
     "servers": [

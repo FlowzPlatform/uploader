@@ -13,7 +13,6 @@
 </template>
 
 <script>
-// eslint-disable
 import Header from './Header'
 import Footer from './Footer'
 export default {

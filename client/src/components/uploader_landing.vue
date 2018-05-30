@@ -156,69 +156,60 @@
   </div>
 </template>
 <script>
-/*eslint-disable*/
-let axios = require("axios")
 import api from '../api'
-import schema from '../api/schema'
 import config from '@/config'
 import io from 'socket.io-client'
-import feathers from 'feathers/client'
-import socketio from 'feathers-socketio/client'
-var moment = require('moment');
+var moment = require('moment')
 import lodash from 'lodash'
-
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI,{reconnect: true})
+  socket = io(config.socketURI, {reconnect: true})
 } else {
-  socket = io(config.socketURI,{reconnect: true})
+  socket = io(config.socketURI, {reconnect: true})
 }
-const app = feathers().configure(socketio(socket))
-moment().format();
-let id
+moment().format()
 export default {
-    name: 'uploaderLanding',
-    components: {},
-    data () {
-        return {
-            job: [],
-            modal1:false,
-            keys: [],
-            show: false,
-            show_table: false,
-            aborting: false,
-            moment : moment,
-            loading:true
-        }
-    },
-    methods:{
+  name: 'uploaderLanding',
+  components: {},
+  data () {
+    return {
+      job: [],
+      modal1: false,
+      keys: [],
+      show: false,
+      show_table: false,
+      aborting: false,
+      moment: moment,
+      loading: true
+    }
+  },
+  methods: {
 
-      //to abort the current running job
-      abort(){
-        let self = this
-        self.aborting = true
-        self.$store.state.data = []
+      // to abort the current running job
+    abort () {
+      let self = this
+      self.aborting = true
+      self.$store.state.data = []
 
-        let patch_obj = {
-           "masterJobStatus": "rejected",
-        }
+      let patchObj = {
+        'masterJobStatus': 'rejected'
+      }
 
-          api.request('patch', '/uploader/' + this.$route.params.id,patch_obj).then(res => {
-            self.$Notice.error({
-              title: 'Your files have been deleted'
-            });
-            self.$router.push('/uploader')
-          })
+      api.request('patch', '/uploader/' + this.$route.params.id, patchObj).then(res => {
+        self.$Notice.error({
+          title: 'Your files have been deleted'
+        })
+        self.$router.push('/uploader')
+      })
           .catch(error => {
-            if(error.response){
+            if (error.response) {
               self.$Notice.error({
                 title: error.response.data.name,
                 desc: error.response.data.message,
                 duration: 10
               })
-            }
-            else if(error.message == 'Network Error'){
+            } else if (error.message === 'Network Error') {
               self.$Notice.error({
                 title: 'API Service unavailable',
                 duration: 10
@@ -226,141 +217,173 @@ export default {
             }
             self.modal1 = false
           })
-      },
-      //converts into uppercase
-      convert(item){
-        item = item.replace(/([A-Z])/g, ' $1').trim()
-        return item
-      },
+    },
+      // converts into uppercase
+    convert (item) {
+      item = item.replace(/([A-Z])/g, ' $1').trim()
+      return item
+    },
 
-      //closes the alert
-      cancel(){
-        this.modal1 = false
-      },
-      //takes to the main upload page
-      continue1(){
-        this.$store.state.calledFromContinue = true
-        this.$store.state.disableuser = true
-        this.$store.state.disablesubscription = true
-        this.$router.push('/upload/' + this.$route.params.id)
-      },
-      findData(sub_id){
-        if(this.$store.state.disconnect == false){
-          socket.emit('uploader::find',{"subscriptionId":sub_id,"id": this.$route.params.id,"masterJobStatus":"running"}, (e, data) => {
-            if(data.data.length != 0){
-              this.$store.state.jobData = data.data[0]
+      // closes the alert
+    cancel () {
+      this.modal1 = false
+    },
+      // takes to the main upload page
+    continue1 () {
+      this.$store.state.calledFromContinue = true
+      this.$store.state.disableuser = true
+      this.$store.state.disablesubscription = true
+      this.$router.push('/upload/' + this.$route.params.id)
+    },
+    findData (subId) {
+      if (this.$store.state.disconnect === false) {
+        socket.emit('uploader::find', {'subscriptionId': subId, 'id': this.$route.params.id, 'masterJobStatus': 'running'}, (e, data) => {
+          if (data.data.length !== 0) {
+            this.$store.state.jobData = data.data[0]
 
-              let tab_array = ["ProductInformation","ProductPrice","ProductImprintData","ProductImage","ProductShipping","ProductAdditionalCharges","ProductVariationPrice"]
-              for(let i=0;i<tab_array.length;i++){
-                for(let key in data.data[0]){
-                  if(tab_array[i] == key){
-                    let prod_data = data.data[0][key]
-                    delete data.data[0][key]
-                    data.data[0][tab_array[i]] = prod_data
-                  }
-                }
-              }
-
-              this.job.push(data.data[0])
-              this.loading = false
-              this.show_table = true
-              this.keys = Object.keys(this.job[0])
-              for(let i=0 ;i<this.keys.length;i++){
-                if(this.keys[i] == 'ProductInformation' || this.keys[i] == 'ProductPrice' || this.keys[i] == 'ProductShipping' || this.keys[i] == 'ProductImage' || this.keys[i] == 'ProductImprintData' || this.keys[i] == 'ProductAdditionalCharges' ||
-                this.keys[i] == 'ProductVariationPrice'){
-                  this.show = true
+            let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
+            for (let i = 0; i < tabArray.length; i++) {
+              for (let key in data.data[0]) {
+                if (tabArray[i] === key) {
+                  let prodData = data.data[0][key]
+                  delete data.data[0][key]
+                  data.data[0][tabArray[i]] = prodData
                 }
               }
             }
-            else{
-              this.$Notice.info({
-                title: 'No Data Available',
-              });
+
+            this.job.push(data.data[0])
+            this.loading = false
+            this.show_table = true
+            this.keys = Object.keys(this.job[0])
+            for (let i = 0; i < this.keys.length; i++) {
+              if (this.keys[i] === 'ProductInformation' || this.keys[i] === 'ProductPrice' || this.keys[i] === 'ProductShipping' || this.keys[i] === 'ProductImage' || this.keys[i] === 'ProductImprintData' || this.keys[i] === 'ProductAdditionalCharges' ||
+                this.keys[i] === 'ProductVariationPrice') {
+                this.show = true
+              }
             }
-          })
-        }
-        else if(this.$store.state.disconnect == true){
-          this.loading = false
-          this.$Notice.error({
-            title: 'Service unavailable',
-            duration: 10
-          })
-        }
+          } else {
+            // this.$Notice.info({
+            //   title: 'No Data Available'
+            // })
+            this.$router.push('/uploader')
+          }
+        })
+      } else if (this.$store.state.disconnect === true) {
+        this.loading = false
+        this.$Notice.error({
+          title: 'Service unavailable',
+          duration: 10
+        })
       }
-    },
-    mounted(){
-      this.loading = true
-      this.$store.state.validationStatus = false
+    }
+  },
+  mounted () {
+    this.loading = true
+    this.$store.state.validationStatus = false
 
-      if(this.$store.state.storedSubscriptionName != ""){
-        let self = this
-        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
-        if(sub_id != -1){
-            self.$store.state.subscription_list.splice(sub_id,1)
-        }
-
-        let subscription_obj1
-        subscription_obj1 = lodash.filter(self.$store.state.subscription_list, function(o) {
-           if(o.label == self.$store.state.storedSubscriptionName){
-             return o
-           }
-         });
-         if(subscription_obj1.length != 0){
-           self.$store.state.subscription_id = subscription_obj1[0].value
-         }
-        this.findData(this.$store.state.subscription_id)
-      }
-      else{
-        let self = this
-        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
-        if(sub_id != -1){
-            self.$store.state.subscription_list.splice(sub_id,1)
-        }
-        this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
-        this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
-        this.$store.state.storedSubscriptionName =   this.$store.state.subscription_name
-        this.findData(this.$store.state.subscription_id)
-      }
-
-
-      // if(this.$store.state.subscription_name != "All"){
-      //   this.findData(this.$store.state.subscription_id)
+    if (this.$store.state.storedSubscriptionName !== '') {
+      this.findData(this.$store.state.subscription_id)
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // if (subId !== -1) {
+      //   self.$store.state.subscription_list.splice(subId, 1)
       // }
-      // else if(this.$store.state.subscription_name == "All"){
-      //   this.loading = false
-      //   this.$Notice.error({
-      //    title: 'Please select a proper subscription id...'
-      //  });
+
+      // let subscriptionObj1
+      // subscriptionObj1 = lodash.filter(self.$store.state.subscription_list, function (o) {
+      //   if (o.label === self.$store.state.storedSubscriptionName) {
+      //     return o
+      //   }
+      // })
+      // if (subscriptionObj1.length !== 0) {
+      //   self.$store.state.subscription_id = subscriptionObj1[0].value
       // }
-    },
-    watch:{
-    '$store.state.subscription_id': function (sub_id) {
+
+    // } else {
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // if (subId !== -1) {
+      //   self.$store.state.subscription_list.splice(subId, 1)
+      // }
+      // this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
+      // this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
+      // this.$store.state.storedSubscriptionName = this.$store.state.subscription_name
+      // this.findData(this.$store.state.subscription_id)
+    }
+  },
+  watch: {
+    '$store.state.subscription_id': function (id) {
       let self = this
-      if(sub_id == 'All'){
+      console.log('landing $store')
+      if (id === 'All') {
         self.loading = false
-        self.$Notice.error({
-         title: 'Please select a proper subscription id...'
-       });
-      }
-      else {
-        if(self.show_table == true){
+        // self.$Notice.error({
+        //   title: 'Please select a proper subscription id...'
+        // })
+      } else {
+        if (self.show_table === true) {
           self.show_table = false
         }
         self.loading = true
-        self.findData(sub_id)
+        self.findData(id)
       }
     },
-    '$store.state.user_list': function(list){
-      if(list.length != 0){
-        if(this.$store.state.storedUsername != ""){
-          let self = this
-          let userId = lodash.findIndex(list, function(o) { return o.label == "All"; })
-          if(userId != -1){
-              list.splice(userId,1)
+    '$store.state.user_list': function (list) {
+      console.log('landing list....', list)
+      if (list.length !== 0) {
+        if (this.$store.state.storedUsername !== '') {
+          let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })
+          if (userId !== -1) {
+            list.splice(userId, 1)
+            let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
+            if (subId !== -1) {
+              this.$store.state.subscription_list.splice(subId, 1)
+              console.log('atlast called....')
+              // this.$store.state.fullSubscriptionList = lodash.cloneDeep(this.$store.state.subscription_list)
+            }
           }
         }
       }
+    },
+    '$store.state.storedUsername': function (selectedUser) {
+      console.log('called 777777777777.....')
+      if (selectedUser !== 'All') {
+        let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+        let subsArr = []
+
+        for (let userSubs in filteredUser) {
+          for (let subs in this.$store.state.fullSubscriptionList) {
+            if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+              subsArr.push(this.$store.state.fullSubscriptionList[subs])
+            }
+          }
+        }
+        this.$store.state.subscription_list = []
+        this.$store.state.subscription_list = subsArr
+        this.$store.state.storedSubscriptionName = subsArr[0].label
+      } else {
+        console.log('else called')
+        this.$store.state.subscription_list = []
+        this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
+        this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
+      }
     }
+    // '$store.state.storedUsername': function (selectedUser) {
+    //   console.log('called.....')
+    //   let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+    //   let subsArr = []
+
+    //   for (let userSubs in filteredUser) {
+    //     for (let subs in this.$store.state.fullSubscriptionList) {
+    //       if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+    //         subsArr.push(this.$store.state.fullSubscriptionList[subs])
+    //       }
+    //     }
+    //   }
+    //   this.$store.state.subscription_list = subsArr
+    //   this.$store.state.storedSubscriptionName = subsArr[0].label
+    // }
   }
 }
 </script>

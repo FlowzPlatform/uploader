@@ -38,6 +38,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_1:{
+      type: "string",
+      label: "Secure Url 1",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_1: {
       type: "string",
       label: "Image Color Code 1",
@@ -64,6 +73,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_2:{
+      type: "string",
+      label: "Secure Url 2",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_2: {
       type: "string",
@@ -92,6 +110,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_3:{
+      type: "string",
+      label: "Secure Url 3",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_3: {
       type: "string",
       label: "Image Color Code 3",
@@ -118,6 +145,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_4:{
+      type: "string",
+      label: "Secure Url 4",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_4: {
       type: "string",
@@ -146,6 +182,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_5:{
+      type: "string",
+      label: "Secure Url 5",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_5: {
       type: "string",
       label: "Image Color Code 5",
@@ -172,6 +217,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_6:{
+      type: "string",
+      label: "Secure Url 6",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_6: {
       type: "string",
@@ -200,6 +254,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_7:{
+      type: "string",
+      label: "Secure Url 7",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_7: {
       type: "string",
       label: "Image Color Code 7",
@@ -226,6 +289,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_8:{
+      type: "string",
+      label: "Secure Url 8",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_8: {
       type: "string",
@@ -254,6 +326,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_9:{
+      type: "string",
+      label: "Secure Url 9",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_9: {
       type: "string",
       label: "Image Color Code 9",
@@ -280,6 +361,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_10:{
+      type: "string",
+      label: "Secure Url 10",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_10: {
       type: "string",
@@ -308,6 +398,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_11:{
+      type: "string",
+      label: "Secure Url 11",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_11: {
       type: "string",
       label: "Image Color Code 11",
@@ -334,6 +433,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_12:{
+      type: "string",
+      label: "Secure Url 12",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_12: {
       type: "string",
@@ -362,6 +470,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_13:{
+      type: "string",
+      label: "Secure Url 13",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_13: {
       type: "string",
       label: "Image Color Code 13",
@@ -388,6 +505,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_14:{
+      type: "string",
+      label: "Secure Url 14",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_14: {
       type: "string",
@@ -416,6 +542,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_15:{
+      type: "string",
+      label: "Secure Url 15",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_15: {
       type: "string",
       label: "Image Color Code 15",
@@ -442,6 +577,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_16:{
+      type: "string",
+      label: "Secure Url 16",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_16: {
       type: "string",
@@ -470,6 +614,15 @@ export const ProductImagesSchema = new Schema({
         maxLength : '',
         regEx:''
     },
+    secure_url_17:{
+      type: "string",
+      label: "Secure Url 17",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
+    },
     image_color_code_17: {
       type: "string",
       label: "Image Color Code 17",
@@ -496,6 +649,15 @@ export const ProductImagesSchema = new Schema({
         defaultValue: '',
         maxLength : '',
         regEx:''
+    },
+    secure_url_18:{
+      type: "string",
+      label: "Secure Url 18",
+      optional: true,
+      allowedValues: [],
+      defaultValue: '',
+      maxLength : '',
+      regEx:''
     },
     image_color_code_18: {
       type: "string",

@@ -46,227 +46,261 @@
 </template>
 
 <script>
-/*eslint-disable*/
-let axios = require("axios")
 import api from '../api'
-import schema from '../api/schema'
 import config from '@/config'
 import io from 'socket.io-client'
-import feathers from 'feathers/client'
-import socketio from 'feathers-socketio/client'
+// import feathers from 'feathers/client'
+// import socketio from 'feathers-socketio/client'
 import lodash from 'lodash'
+import $ from 'jquery'
 
 let socket
 if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.socketURI,{reconnect: true})
+  socket = io(config.socketURI, {reconnect: true})
 } else {
-  socket = io(config.socketURI,{reconnect: true})
+  socket = io(config.socketURI, {reconnect: true})
 }
-const app = feathers().configure(socketio(socket))
+// const app = feathers().configure(socketio(socket))
 let id
 export default {
-    name: 'uploader',
-    components: {},
-    data () {
-        return {
-          methods1: [
-           { name: 'REPLACE',selected:false},
-           { name: 'APPEND',selected:false},
-           { name: 'UPSERT',selected:false},
-           { name: 'UPDATE',selected:false}
-         ],
-         selectedMethod:'',
-         disabled: true,
-         showDiv: false,
-         loadingBtn: false,
-         loading: true
+  name: 'uploader',
+  components: {},
+  data () {
+    return {
+      methods1: [
+           {name: 'REPLACE', selected: false},
+           {name: 'APPEND', selected: false},
+           {name: 'UPSERT', selected: false},
+           {name: 'UPDATE', selected: false}
+      ],
+      selectedMethod: '',
+      disabled: true,
+      showDiv: false,
+      loadingBtn: false,
+      loading: true
+    }
+  },
+  methods: {
+      // to display the tick on the click of any method
+    methodChanged (index) {
+      this.methods1[index].selected = true
+      this.selectedMethod = this.methods1[index].name
+      this.disabled = false
+      let me = $('ul.mySection').find('#' + index)
+      me.css('background-color', '#1fb58f', 'color', 'fff')
+
+      for (let i = 0; i < this.methods1.length; i++) {
+        if (i !== index) {
+          this.methods1[i].selected = false
+          let me1 = $('ul.mySection').find('#' + i)
+          me1.css('background-color', '#494e6b', 'color', 'fff')
         }
+      }
     },
-    methods:{
-      //to display the tick on the click of any method
-       methodChanged(index){
-         this.methods1[index].selected = true
-         this.selectedMethod = this.methods1[index].name
-         this.disabled = false
-         let me = $("ul.mySection").find("#"+index)
-         me.css("background-color", "#1fb58f","color","fff");
-
-         for(let i=0;i<this.methods1.length;i++){
-           if(i != index){
-             this.methods1[i].selected = false
-             let me1 = $("ul.mySection").find("#"+i)
-             me1.css("background-color", "#494e6b","color","fff");
-           }
-         }
-       },
-       //to display the method hints(showHintsDiv)
-       display(name){
-         document.getElementById("dv").style.display="block";
-         this.showHintsDiv(name)
-       },
-       //to hide the method hints(showHintsDiv)
-       hide(){
+       // to display the method hints(showHintsDiv)
+    display (name) {
+      document.getElementById('dv').style.display = 'block'
+      this.showHintsDiv(name)
+    },
+       // to hide the method hints(showHintsDiv)
+    hide () {
          // document.getElementById("dv").style.display="none";
-       },
-       //to display proper hint according to method
-       showHintsDiv(data){
-        if(data == "REPLACE") {
-            $( "#get" ).html( "<p> By choosing <b>Replace</b> method you can remove all your old data and add the new one.Replace all the old products with new one.</p><table border=1 style='position:absolute;left:34%;width:37%;'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr></table>");
-        }
-        else if(data == "APPEND") {
-            $( "#get" ).html( "<p> By choosing <b>Append</b> method you can Keep all the old products and add the new one . No old records will be updated .</p><p><table border=1 style='position:absolute;left:34%;width:37%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'> A, B, C, D, E</td></tr></table>" );
-        }
-        else if(data == "UPSERT") {
-            $( "#get" ).html( " <p> By choosing <b>Upsert</b> method you can Keep all the old products , update old records and add the new one .</p><p><table border=1 style='position:absolute;left:37%;width:34%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'>A, B, <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr></table>" );
-        }
-        else if(data == "UPDATE") {
-            $( "#get" ).html( "<p> By choosing <b>Update</b> method you can Keep all the old products and update old records . No new products can be added in this method</p><p>  <table border=1 style='position:absolute;left:34%;width:37%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'>A, B, <span style='color:blue;font-weight:bold'>C'</span> </td></tr></table>" );
-        }
-     },
+    },
+       // to display proper hint according to method
+    showHintsDiv (data) {
+      if (data === 'REPLACE') {
+        $('#get').html("<p> By choosing <b>Replace</b> method you can remove all your old data and add the new one.Replace all the old products with new one.</p><table border=1 style='position:absolute;left:34%;width:37%;'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr></table>")
+      } else if (data === 'APPEND') {
+        $('#get').html("<p> By choosing <b>Append</b> method you can Keep all the old products and add the new one . No old records will be updated .</p><p><table border=1 style='position:absolute;left:34%;width:37%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'> A, B, C, D, E</td></tr></table>")
+      } else if (data === 'UPSERT') {
+        $('#get').html(" <p> By choosing <b>Upsert</b> method you can Keep all the old products , update old records and add the new one .</p><p><table border=1 style='position:absolute;left:37%;width:34%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'>A, B, <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr></table>")
+      } else if (data === 'UPDATE') {
+        $('#get').html("<p> By choosing <b>Update</b> method you can Keep all the old products and update old records . No new products can be added in this method</p><p>  <table border=1 style='position:absolute;left:34%;width:37%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'>A, B, <span style='color:blue;font-weight:bold'>C'</span> </td></tr></table>")
+      }
+    },
      // creates a job in uploader service
-     Proceed(){
-       if(this.$store.state.subscription_name == '' || this.$store.state.subscription_name == 'All'){
-         this.loadingBtn = false
-         this.$Notice.error({
-            title: "Please select a subscription to proceed"
-         });
-       }
-       else{
-          this.loadingBtn = true
-          if(this.selectedMethod == ''){
-            $('#display-error').fadeIn().delay(4000).fadeOut();
+    Proceed () {
+      if (this.$store.state.subscription_name === '' || this.$store.state.subscription_name === 'All') {
+        this.loadingBtn = false
+        this.$Notice.error({
+          title: 'Please select a subscription to proceed'
+        })
+      } else {
+        this.loadingBtn = true
+        if (this.selectedMethod === '') {
+          $('#display-error').fadeIn().delay(4000).fadeOut()
+        } else {
+          var obj = {
+            createdAt: new Date(),
+            stepStatus: 'upload_pending',
+            uploadType: this.selectedMethod.toLowerCase(),
+            key: 'pdm_uploader',
+            masterJobStatus: 'running',
+            subscriptionId: this.$store.state.subscription_id
           }
-          else{
-            var obj = {
-              createdAt: new Date(),
-              stepStatus: 'upload_pending',
-              uploadType:this.selectedMethod.toLowerCase(),
-              key:'pdm_uploader',
-              masterJobStatus: "running",
-              subscriptionId: this.$store.state.subscription_id
-            }
 
-            api.request('post', '/uploader', obj).then(res => {
-              id = res.data.id
-              this.$store.state.disableuser = true
-              this.$store.state.disablesubscription = true
-              this.$router.push('/upload/' + id)
-            })
-            .catch(error =>{
+          api.request('post', '/uploader', obj).then(res => {
+            id = res.data.id
+            this.$store.state.disableuser = true
+            this.$store.state.disablesubscription = true
+            this.$router.push('/upload/' + id)
+          })
+            .catch(error => {
               this.loadingBtn = false
-              if(error.response){
+              if (error.response) {
                 this.$Notice.error({
                   title: error.response.data.name,
                   desc: error.response.data.message,
                   duration: 10
                 })
-              }
-              else if(error.message == 'Network Error'){
+              } else if (error.message === 'Network Error') {
                 this.$Notice.error({
                   title: 'API Service unavailable',
                   duration: 10
                 })
               }
-
             })
-          }
-       }
-     },
-     getData(id){
-      if(this.$store.state.disconnect == false){
-        socket.emit('uploader::find', {"subscriptionId":id,"masterJobStatus":"running","key":"pdm_uploader"}, (e, data) => {
-
-          if(data){
+        }
+      }
+    },
+    getData (id) {
+      if (this.$store.state.disconnect === false) {
+        socket.emit('uploader::find', {'subscriptionId': id, 'masterJobStatus': 'running', 'key': 'pdm_uploader'}, (e, data) => {
+          if (data) {
             if (data.data.length !== 0) {
               this.showDiv = false
               this.loading = false
               this.$router.push('/landing/' + data.data[0].id)
-            }
-            else {
+            } else {
               this.showDiv = true
               this.loading = false
               this.$store.state.jobData = {}
             }
           }
         })
-      }
-      else if(this.$store.state.disconnect == true){
+      } else if (this.$store.state.disconnect === true) {
         this.loading = false
         this.$Notice.error({
           title: 'Service unavailable',
           duration: 10
         })
       }
-     }
-    },
-    mounted(){
-      this.loading = true
-      this.$store.state.validationStatus = false
-      if(this.$store.state.disableuser == true){
-        this.$store.state.disableuser = false
-      }
-      if(this.$store.state.disablesubscription == true){
-        this.$store.state.disablesubscription = false
-      }
+    }
+  },
+  mounted () {
+    console.log('uploader called....')
+    this.loading = true
+    this.$store.state.validationStatus = false
+    if (this.$store.state.disableuser === true) {
+      this.$store.state.disableuser = false
+    }
+    if (this.$store.state.disablesubscription === true) {
+      this.$store.state.disablesubscription = false
+    }
 
-      if(this.$store.state.storedSubscriptionName != ""){
-        let self = this
-        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
-        if(sub_id != -1){
-            self.$store.state.subscription_list.splice(sub_id,1)
-        }
+    if (this.$store.state.storedSubscriptionName !== '') {
+      this.getData(this.$store.state.subscription_id)
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // console.log('self.$store.state.subscription_list.....', self.$store.state.subscription_list, subId)
+      // if (subId !== -1) {
+      //   console.log('called....')
+      //   self.$store.state.subscription_list.splice(subId, 1)
+      // }
 
-        let subscription_obj1
-        subscription_obj1 = lodash.filter(self.$store.state.subscription_list, function(o) {
-           if(o.label == self.$store.state.storedSubscriptionName){
-             return o
-           }
-         });
-         if(subscription_obj1.length != 0){
-           self.$store.state.subscription_id = subscription_obj1[0].value
-         }
-        this.getData(this.$store.state.subscription_id)
-      }
-      else{
-        let self = this
-        let sub_id = lodash.findIndex(self.$store.state.subscription_list, function(o) { return o.label == "All"; })
-        if(sub_id != -1){
-            self.$store.state.subscription_list.splice(sub_id,1)
-        }
-        this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
-        this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
-        this.$store.state.storedSubscriptionName =  this.$store.state.subscription_name
-        // this.loading = false
-        this.getData(this.$store.state.subscription_id)
-      }
-    },
-    watch:{
+      // let subscriptionObj1
+      // subscriptionObj1 = lodash.filter(self.$store.state.subscription_list, function (o) {
+      //   if (o.label === self.$store.state.storedSubscriptionName) {
+      //     return o
+      //   }
+      // })
+      // console.log('subscriptionObj1 &&&&&&', subscriptionObj1)
+      // if (subscriptionObj1.length !== 0) {
+      //   self.$store.state.subscription_id = subscriptionObj1[0].value
+      // }
+    //   this.getData(this.$store.state.subscription_id)
+    // } else {
+      // let self = this
+      // let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === 'All' })
+      // if (subId !== -1) {
+      //   self.$store.state.subscription_list.splice(subId, 1)
+      // }
+      // this.$store.state.subscription_id = this.$store.state.subscription_list[0].value
+      // this.$store.state.subscription_name = this.$store.state.subscription_list[0].label
+      // this.$store.state.storedSubscriptionName = this.$store.state.subscription_name
+      // this.getData(this.$store.state.subscription_id)
+    }
+  },
+  watch: {
     '$store.state.subscription_id': function (id) {
-      if(id == 'All'){
+      console.log('$store')
+      if (id === 'All') {
         this.loading = false
-        this.$Notice.error({
-         title: 'Please select a proper subscription id...'
-       });
-      }
-      else {
-        if(this.showDiv == true){
+        // this.$Notice.error({
+        //   title: 'Please select a proper subscription id...'
+        // })
+      } else {
+        if (this.showDiv === true) {
           this.showDiv = false
         }
         this.loading = true
         this.getData(id)
       }
     },
-    '$store.state.user_list': function(list){
-      if(list.length != 0){
-        if(this.$store.state.storedUsername != ""){
-          let self = this
-          let userId = lodash.findIndex(list, function(o) { return o.label == "All"; })
-          if(userId != -1){
-              list.splice(userId,1)
+    '$store.state.user_list': function (list) {
+      console.log('list.....', list)
+      if (list.length !== 0) {
+        if (this.$store.state.storedUsername !== '') {
+          let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })
+          if (userId !== -1) {
+            list.splice(userId, 1)
+            let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
+            if (subId !== -1) {
+              this.$store.state.subscription_list.splice(subId, 1)
+              // this.$store.state.fullSubscriptionList = lodash.cloneDeep(this.$store.state.subscription_list)
+            }
           }
         }
       }
+    },
+    '$store.state.storedUsername': function (selectedUser) {
+      console.log('called 8888888....')
+      if (selectedUser !== 'All') {
+        let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+        let subsArr = []
+
+        for (let userSubs in filteredUser) {
+          for (let subs in this.$store.state.fullSubscriptionList) {
+            if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+              subsArr.push(this.$store.state.fullSubscriptionList[subs])
+            }
+          }
+        }
+        this.$store.state.subscription_list = []
+        this.$store.state.subscription_list = subsArr
+        this.$store.state.storedSubscriptionName = subsArr[0].label
+      } else {
+        console.log('else called')
+        this.$store.state.subscription_list = []
+        this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
+        this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
+      }
     }
+    // '$store.state.storedUsername': function (selectedUser) {
+    //   console.log('called.....')
+    //   let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+    //   let subsArr = []
+
+    //   for (let userSubs in filteredUser) {
+    //     for (let subs in this.$store.state.fullSubscriptionList) {
+    //       if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+    //         subsArr.push(this.$store.state.fullSubscriptionList[subs])
+    //       }
+    //     }
+    //   }
+    //   this.$store.state.subscription_list = subsArr
+    //   this.$store.state.storedSubscriptionName = subsArr[0].label
+    // }
   }
 }
 </script>
