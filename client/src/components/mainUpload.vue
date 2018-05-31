@@ -3970,7 +3970,7 @@ export default {
         let batchChunk = lodash.chunk(batch, 10)
         console.log('batch Chunk....', batchChunk)
         for (let i = 0; i < batchChunk.length; i++) {
-          socket.emit('pdmimages', batchChunk[i], (err, data) => {
+          socket.emit('images', batchChunk[i], (err, data) => {
             console.log('data....', data)
             if (err) {
 
@@ -3981,7 +3981,7 @@ export default {
       }
 
       if (isDone === true && batch.length < 10 && batch.length !== 0) {
-        socket.emit('pdmimages', batch, (err, data) => {
+        socket.emit('images', batch, (err, data) => {
           console.log('emitted.....')
           if (err) {
 
