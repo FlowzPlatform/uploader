@@ -3976,8 +3976,8 @@ export default {
 
             }
           })
-          self.image_batch.splice(0, 2)
         }
+        self.image_batch.splice(0, 2)
       }
 
       if (isDone === true && batch.length < 2 && batch.length !== 0) {
