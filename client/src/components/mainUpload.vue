@@ -3966,8 +3966,8 @@ export default {
     'image_batch': function (batch) {
       let self = this
       console.log('batch called....', batch)
-      if (batch.length >= 10) {
-        let batchChunk = lodash.chunk(batch, 10)
+      if (batch.length >= 2) {
+        let batchChunk = lodash.chunk(batch, 2)
         console.log('batch Chunk....', batchChunk)
         for (let i = 0; i < batchChunk.length; i++) {
           socket.emit('images', batchChunk[i], (err, data) => {
@@ -3976,11 +3976,11 @@ export default {
 
             }
           })
-          self.image_batch.splice(0, 10)
+          self.image_batch.splice(0, 2)
         }
       }
 
-      if (isDone === true && batch.length < 10 && batch.length !== 0) {
+      if (isDone === true && batch.length < 2 && batch.length !== 0) {
         socket.emit('images', batch, (err, data) => {
           console.log('emitted.....')
           if (err) {
