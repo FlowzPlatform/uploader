@@ -182,24 +182,7 @@ export default {
         this.$store.state.storedUsername = this.selected_user
         console.log('this.$store.state.storedUsername', this.$store.state.storedUsername)
         this.$store.state.selectedUserName = user
-
-        // let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === user })
-        // let subsArr = []
-
-        // for (let userSubs in filteredUser) {
-        //   for (let subs in this.$store.state.fullSubscriptionList) {
-        //     if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
-        //       subsArr.push(this.$store.state.fullSubscriptionList[subs])
-        //     }
-        //   }
-        // }
-        // this.$store.state.subscription_list = []
-        // this.$store.state.subscription_list = subsArr
-        // this.$store.state.storedSubscriptionName = subsArr[0].label
       } else {
-        // this.$store.state.subscription_list = []
-        // this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
-        // this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
       }
     },
     '$store.state.subscription_list': function (list) {

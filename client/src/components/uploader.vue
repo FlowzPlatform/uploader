@@ -222,9 +222,6 @@ export default {
       console.log('$store')
       if (id === 'All') {
         this.loading = false
-        // this.$Notice.error({
-        //   title: 'Please select a proper subscription id...'
-        // })
       } else {
         if (this.showDiv === true) {
           this.showDiv = false
@@ -248,16 +245,20 @@ export default {
               console.log('&&&&&', filteredUser)
               let subsArr = []
 
-              for (let userSubs in filteredUser) {
-                for (let subs in self.$store.state.fullSubscriptionList) {
-                  if (filteredUser[userSubs].value === self.$store.state.fullSubscriptionList[subs].value) {
-                    subsArr.push(self.$store.state.fullSubscriptionList[subs])
+              if (filteredUser.length !== 0) {
+                for (let userSubs in filteredUser) {
+                  for (let subs in self.$store.state.fullSubscriptionList) {
+                    if (filteredUser[userSubs].value === self.$store.state.fullSubscriptionList[subs].value) {
+                      subsArr.push(self.$store.state.fullSubscriptionList[subs])
+                    }
                   }
                 }
+                self.$store.state.subscription_list = []
+                self.$store.state.subscription_list = subsArr
+                self.$store.state.storedSubscriptionName = subsArr[0].label
+                console.log('subsArr....', subsArr)
+                self.$store.state.subscription_id = subsArr[0].value
               }
-              self.$store.state.subscription_list = []
-              self.$store.state.subscription_list = subsArr
-              self.$store.state.storedSubscriptionName = subsArr[0].label
             }
           }
         }
