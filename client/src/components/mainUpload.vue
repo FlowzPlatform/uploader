@@ -3965,22 +3965,24 @@ export default {
   watch: {
     'image_batch': function (batch) {
       let self = this
-
-      if (batch.length >= 10) {
-        let batchChunk = lodash.chunk(batch, 10)
-
+      console.log('batch called....', batch)
+      if (batch.length >= 2) {
+        let batchChunk = lodash.chunk(batch, 2)
+        console.log('batch Chunk....', batchChunk)
         for (let i = 0; i < batchChunk.length; i++) {
-          socket.emit('pdmimages', batchChunk[i], (err, data) => {
+          socket.emit('images', batchChunk[i], (err, data) => {
+            console.log('data....', data)
             if (err) {
 
             }
           })
-          self.image_batch.splice(0, 10)
         }
+        self.image_batch.splice(0, 2)
       }
 
-      if (isDone === true && batch.length < 10 && batch.length !== 0) {
-        socket.emit('pdmimages', batch, (err, data) => {
+      if (isDone === true && batch.length < 2 && batch.length !== 0) {
+        socket.emit('images', batch, (err, data) => {
+          console.log('emitted.....')
           if (err) {
 
           }
@@ -4105,6 +4107,7 @@ export default {
         if (this.$store.state.disconnect === false) {
           socket.emit('uploader-schema::find', {'subscriptionId': this.$store.state.subscription_id, 'import_tracker_id': id}, (e, res) => {
             if (res) {
+              console.log('res......', res)
               self.existingSchemaData = res.data[0]
               let schemaNames = lodash.groupBy(res.data, 'tabname')
               let schemavalue = lodash.isEmpty(schemaNames)
@@ -4233,12 +4236,15 @@ export default {
 
     socket.on('img_res', (response) => {
       for (let i = 0; i < response.length; i++) {
+        console.log('response....', response)
         if (response[i].hasOwnProperty('iserror')) {
           let index = lodash.findIndex(self.dirinfo, {name: response[i].filename})
+          console.log('err index.....', index)
           self.dirinfo[index].status = 'error'
         } else {
           self.secure_url_arr.push({'file_name': response[i].file_name, 'secure_url': response[i].secure_url})
           let index = lodash.findIndex(self.dirinfo, {name: response[i].file_name})
+          console.log('success index.....', index)
           self.dirinfo[index].status = 'success'
           self.img_no ++
         }

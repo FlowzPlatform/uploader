@@ -339,51 +339,44 @@ export default {
             let subId = lodash.findIndex(this.$store.state.subscription_list, function (o) { return o.label === 'All' })
             if (subId !== -1) {
               this.$store.state.subscription_list.splice(subId, 1)
-              console.log('atlast called....')
-              // this.$store.state.fullSubscriptionList = lodash.cloneDeep(this.$store.state.subscription_list)
+              let self = this
+              let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === self.$store.state.storedUsername })
+              console.log('&&&&&', filteredUser)
+              let subsArr = []
+
+              if (filteredUser.length !== 0) {
+                for (let userSubs in filteredUser) {
+                  for (let subs in self.$store.state.fullSubscriptionList) {
+                    if (filteredUser[userSubs].value === self.$store.state.fullSubscriptionList[subs].value) {
+                      subsArr.push(self.$store.state.fullSubscriptionList[subs])
+                    }
+                  }
+                }
+                self.$store.state.subscription_list = []
+                self.$store.state.subscription_list = subsArr
+                self.$store.state.storedSubscriptionName = subsArr[0].label
+                self.$store.state.subscription_id = subsArr[0].value
+              }
             }
           }
         }
       }
     },
     '$store.state.storedUsername': function (selectedUser) {
-      console.log('called 777777777777.....')
-      if (selectedUser !== 'All') {
-        let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
-        let subsArr = []
+      console.log('called.....')
+      let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
+      let subsArr = []
 
-        for (let userSubs in filteredUser) {
-          for (let subs in this.$store.state.fullSubscriptionList) {
-            if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
-              subsArr.push(this.$store.state.fullSubscriptionList[subs])
-            }
+      for (let userSubs in filteredUser) {
+        for (let subs in this.$store.state.fullSubscriptionList) {
+          if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
+            subsArr.push(this.$store.state.fullSubscriptionList[subs])
           }
         }
-        this.$store.state.subscription_list = []
-        this.$store.state.subscription_list = subsArr
-        this.$store.state.storedSubscriptionName = subsArr[0].label
-      } else {
-        console.log('else called')
-        this.$store.state.subscription_list = []
-        this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
-        this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label
       }
+      this.$store.state.subscription_list = subsArr
+      this.$store.state.storedSubscriptionName = subsArr[0].label
     }
-    // '$store.state.storedUsername': function (selectedUser) {
-    //   console.log('called.....')
-    //   let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
-    //   let subsArr = []
-
-    //   for (let userSubs in filteredUser) {
-    //     for (let subs in this.$store.state.fullSubscriptionList) {
-    //       if (filteredUser[userSubs].value === this.$store.state.fullSubscriptionList[subs].value) {
-    //         subsArr.push(this.$store.state.fullSubscriptionList[subs])
-    //       }
-    //     }
-    //   }
-    //   this.$store.state.subscription_list = subsArr
-    //   this.$store.state.storedSubscriptionName = subsArr[0].label
-    // }
   }
 }
 </script>

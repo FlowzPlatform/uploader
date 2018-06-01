@@ -42,7 +42,8 @@ module.exports = function () {
         console.log("err...",err)
     });
 
-    socket.on('pdmimages',async function(data) {
+    socket.on('images',async function(data) {
+      console.log('data.....', data)
       let promiseAll = []
         for(let item of data){
           promiseAll.push(uploadImage(item))
@@ -83,6 +84,7 @@ module.exports = function () {
 };
 
 var uploadImage = async function(data){
+  console.log('data.....', data)
   let _promise = new Promise((resolve,reject) => {
     cloudinary.v2.uploader.upload(data.file.url,
       { public_id: data.file.filename, resource_type: "raw",folder: data.folder},
