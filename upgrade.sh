@@ -26,7 +26,11 @@ then
     jobqueueUrl="$JOBQUEUEURL_MASTER";
     DOMAINKEY="$DOMAINKEY_MASTER";
     TAG="latest";
+    SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_MASTER";
+    SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_MASTER";
     FRONT_HOST="$FRONT_HOST_MASTER";
+    BACKEND_HOST="$BACKEND_HOST_MASTER";
+    STACK_SERVICE_NAME_FOR_FRONT="$STACK_SERVICE_NAME_FOR_FRONT_MASTER";
     RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_MASTER";
     RANCHER_SECRETKEY="$RANCHER_SECRETKEY_MASTER";
     RANCHER_URL="$RANCHER_URL_MASTER";
@@ -45,7 +49,11 @@ then
       jobqueueUrl="$JOBQUEUEURL_DEVELOP";
       DOMAINKEY="$DOMAINKEY_DEVELOP";
       TAG="dev";
+      SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_DEVELOP";
+      SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_DEVELOP";
       FRONT_HOST="$FRONT_HOST_DEVELOP";
+      BACKEND_HOST="$BACKEND_HOST_DEVELOP";
+      STACK_SERVICE_NAME_FOR_FRONT="$STACK_SERVICE_NAME_FOR_FRONT_DEVELOP";
       RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_DEVELOP";
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_DEVELOP";
       RANCHER_URL="$RANCHER_URL_DEVELOP";
@@ -64,7 +72,11 @@ then
       jobqueueUrl="$JOBQUEUEURL_STAGING";
       DOMAINKEY="$DOMAINKEY_STAGING";
       TAG="staging";
+      SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_STAGING";
+      SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_STAGING";
       FRONT_HOST="$FRONT_HOST_STAGING";
+      BACKEND_HOST="$BACKEND_HOST_STAGING";
+      STACK_SERVICE_NAME_FOR_FRONT="$STACK_SERVICE_NAME_FOR_FRONT_STAGING";
       RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_STAGING";
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_STAGING";
       RANCHER_URL="$RANCHER_URL_STAGING";
@@ -82,7 +94,11 @@ else
       jobqueueUrl="$JOBQUEUEURL_QA";
       DOMAINKEY="$DOMAINKEY_QA";
       TAG="qa";
+      SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_QA";
+      SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_QA";
       FRONT_HOST="$FRONT_HOST_QA";
+      BACKEND_HOST="$BACKEND_HOST_QA";
+      STACK_SERVICE_NAME_FOR_FRONT="$STACK_SERVICE_NAME_FOR_FRONT_QA";
       RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_QA";
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_QA";
       RANCHER_URL="$RANCHER_URL_QA";
@@ -93,10 +109,10 @@ else
   }
 fi
 
-SERVICE_ID_BACKEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=uploader-backend-flowz" | jq '.data[].id' | tr -d '"'`
+SERVICE_ID_BACKEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_BACKEND" | jq '.data[].id' | tr -d '"'`
 echo $SERVICE_ID_BACKEND
 
-SERVICE_ID_FRONTEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=uploader-frontend-flowz" | jq '.data[].id' | tr -d '"'`
+SERVICE_ID_FRONTEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_FRONTEND" | jq '.data[].id' | tr -d '"'`
 echo $SERVICE_ID_FRONTEND
 
 curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
@@ -104,7 +120,7 @@ curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
-       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$mongodb_host"'","mongodb_port":"'"$mongodb_port"'","username":"'"$username_env"'","password":"'"$password"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'","cloudname":"'"$cloudname"'","apikey":"'"$apikey"'","apisecret":"'"$apisecret"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
+       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$BACKEND_HOST"'"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$mongodb_host"'","mongodb_port":"'"$mongodb_port"'","username":"'"$username_env"'","password":"'"$password"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'","cloudname":"'"$cloudname"'","apikey":"'"$apikey"'","apisecret":"'"$apisecret"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
 $RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_BACKEND?action=upgrade
 
 curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
@@ -112,5 +128,5 @@ curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
-     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_frontend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$FRONT_HOST"'","io.rancher.scheduler.affinity:container_label_soft_ne": "io.rancher.stack_service.name=front-flowz/uploader-frontend-flowz"},"environment": {"server_port": "'"$server_port"'","socket_port": "'"$socket_port"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 80,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"requestLine": "GET \"http://localhost\" \"HTTP/1.0\"","responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
+     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_frontend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$FRONT_HOST"'","io.rancher.scheduler.affinity:container_label_soft_ne": "'"$STACK_SERVICE_NAME_FOR_FRONT"'"},"environment": {"server_port": "'"$server_port"'","socket_port": "'"$socket_port"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 80,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"requestLine": "GET \"http://localhost\" \"HTTP/1.0\"","responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
 $RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_FRONTEND?action=upgrade
