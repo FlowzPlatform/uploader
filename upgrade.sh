@@ -38,6 +38,8 @@ then
     cloudname="$cloudname_master";
     apikey="$apikey_master";
     apisecret="$apisecret_master";
+    RDB_HOST="$RDB_HOST_MASTER";
+    RDB_PORT="$RDB_PORT_MASTER";
   }
 elif [ "$TRAVIS_BRANCH" = "develop" ]
 then
@@ -61,6 +63,8 @@ then
       cloudname="$cloudname_develop";
       apikey="$apikey_develop";
       apisecret="$apisecret_develop";
+      RDB_HOST="RDB_HOST_DEVELOP";
+      RDB_PORT="$RDB_PORT_PORT";
   }
 elif [ "$TRAVIS_BRANCH" = "staging" ]
 then
@@ -84,6 +88,8 @@ then
       cloudname="$cloudname_staging";
       apikey="$apikey_staging";
       apisecret="$apisecret_staging";
+      RDB_HOST="$RDB_HOST_STAGING";
+      RDB_PORT="$RDB_PORT_STAGING";
   }  
 else
   {
@@ -106,6 +112,8 @@ else
       cloudname="$cloudname_qa";
       apikey="$apikey_qa";
       apisecret="$apisecret_qa";
+      RDB_HOST="$RDB_HOST_QA";
+      RDB_PORT="$RDB_PORT_QA";
   }
 fi
 
