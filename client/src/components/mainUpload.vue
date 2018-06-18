@@ -96,7 +96,9 @@
                  <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
                  <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
                    <Row>
-                     <Col span="5" v-for="(item,index) in image_err">{{item}}</Col>
+                    <div v-for="(item,index) in image_err">
+                      <Col span="5" >{{item}}</Col>
+                    </div>
                    </Row>
                  </div>
               </div>
@@ -593,6 +595,12 @@
       <div v-if="import1"  style="font-size:18px;margin-top:20px"><div><b>Sync With</b></div><span>
         <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
         <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox></Checkbox>
+        <div>
+          <span v-if="asiSync">
+            
+          </span>
+          <span v-if="sageSync">SAGE </span>
+        </div>
       </span></div>
       <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
       <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>

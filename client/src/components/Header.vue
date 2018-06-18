@@ -9,20 +9,26 @@
         <Col span="20">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
-                    <router-link to="/uploader-joblist">
+                    <router-link to="/syncstatus">
                         <Menu-item name="1">
+                            <Icon type="navicon-round" :size="14"></Icon>
+                            &nbsp;Sync Status
+                        </Menu-item>
+                    </router-link>
+                    <router-link to="/uploader-joblist">
+                        <Menu-item name="2">
                             <Icon type="navicon-round" :size="14"></Icon>
                             &nbsp;Upload Status
                         </Menu-item>
                     </router-link>
                     <router-link to="/uploader">
-                      <Menu-item name="2">
+                      <Menu-item name="3">
                               <Icon type="cloud" :size="14"></Icon>
                               &nbsp;Uploader
                       </Menu-item>
                    </router-link>
                     <router-link to="/invite">
-                        <Menu-item name="3">
+                        <Menu-item name="4">
                             <Icon type="cash" :size="14"></Icon>
                             &nbsp;Invite
                         </Menu-item>
@@ -54,9 +60,15 @@
                           {{$store.state.user === null ? 'Guest' : $store.state.user.email}}
                         </template>
                         <Menu-item name="1-1">
+                            <a @click="viewConfig">
+                                <Icon type="gear-b" :size="16"></Icon>
+                                  ASI/SAGE Configuration
+                            </a>
+                        </Menu-item>
+                        <Menu-item name="1-2">
                             <a @click="handleLogout()">
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
-                                Logout
+                                  Logout
                             </a>
                         </Menu-item>
                     </Submenu>
@@ -93,6 +105,9 @@ export default {
     }
   },
   methods: {
+    viewConfig () {
+      this.$router.push('/settings')
+    },
     gotoDashboard () {
       window.open(this.flowzDashboardUrl, '_blank')
     },

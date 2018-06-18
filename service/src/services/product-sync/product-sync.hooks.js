@@ -42,7 +42,7 @@ function beforeCreate (hook) {
 
 function aftercreateInstance(hook) {
   if (hook.data.id != undefined) {
-  let id = hook.data.id;
+    let id = hook.data.id;
     const Queue = require('rethinkdb-job-queue')
       //--------------- Connection Options -----------------
     const cxnOptions = app.rethinkdb
