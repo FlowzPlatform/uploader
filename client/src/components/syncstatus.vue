@@ -21,7 +21,7 @@
     </div>
     <hr v-if="isresync">
     <div style="padding-top:10px;">
-      <Table :loading="loading" stripe :columns="statusCols" :data="statusData"></Table>
+      <Table :loading="loading" stripe :columns="statusCols" :data="statusData" class="tableclass"></Table>
     </div>
   </div>
 </template>
@@ -265,8 +265,23 @@ export default {
 }
 </script>
 
+<style>
+  .tableclass .ivu-table-body table {width: 100% !important;}
+  .tableclass .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
+  .tableclass .ivu-table .ivu-table-tip {overflow-x: hidden;}
+</style>
 <style scoped>
-	.syncstatus {
-		padding: 40px;
-	}
+.syncstatus {
+    padding: 40px;
+  }
+.tableclass{
+  text-align: center !important;
+  /*overflow: inherit !important;*/
+}
+.tableclass th{
+  text-align: center !important;
+}
+.ivu-table-body {
+  overflow: inherit !important;
+}
 </style>
