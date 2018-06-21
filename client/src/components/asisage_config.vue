@@ -10,7 +10,7 @@
         </h1>
         <hr>
         <div style="padding-top:20px;">
-          <Table :loading="loading" stripe :columns="asiCols" :data="asiData"></Table>
+          <Table :loading="loading" stripe :columns="asiCols" :data="asiData" class="tableclass"></Table>
         </div>
       </div>
       <div style="border: 1px solid #C0C0C0;padding: 20px;margin-top:40px;">
@@ -21,7 +21,7 @@
         </h1>
         <hr>
         <div style="padding-top:20px;">
-          <Table :loading="loading" stripe :columns="sageCols" :data="sageData"></Table>
+          <Table :loading="loading" stripe :columns="sageCols" :data="sageData"  class="tableclass"></Table>
         </div>
       </div>
     </Row>
@@ -339,9 +339,23 @@ export default {
   .deleteb:hover {
     color: red;
   }
+
+  .tableclass .ivu-table-body table {width: 100% !important;}
+  .tableclass .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
+  .tableclass .ivu-table .ivu-table-tip {overflow-x: hidden;}
 </style>
 <style scoped>
 .asisageconfig {
   padding: 40px;
+}
+.tableclass{
+  text-align: center !important;
+  /*overflow: inherit !important;*/
+}
+.tableclass th{
+  text-align: center !important;
+}
+.ivu-table-body {
+  overflow: inherit !important;
 }
 </style>
