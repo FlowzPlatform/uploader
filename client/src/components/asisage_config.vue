@@ -41,31 +41,31 @@ export default {
       asiCols: [
         {
           title: 'Name',
-          key: 'name',
-          align: 'center'
+          key: 'name'
+          // align: 'center'
         },
         {
           title: 'ASI Number',
-          key: 'number',
-          align: 'center'
+          key: 'number'
+          // align: 'center'
         },
         {
           title: 'Date',
           key: 'createdAt',
-          align: 'center',
+          // align: 'center',
           render: (h, params) => {
             return h('div', moment(params.row.createdAt).format('ll'))
           }
         },
         {
           title: 'User',
-          key: 'user',
-          align: 'center'
+          key: 'user'
+          // align: 'center'
         },
         {
           title: 'Password',
           key: 'password',
-          align: 'center',
+          // align: 'center',
           render: (h, params) => {
             return h('div', [
               h('span', params.row.isShow ? params.row.password : ''),
@@ -83,8 +83,8 @@ export default {
         {
           title: 'Action',
           key: 'action',
-          width: 200,
-          align: 'center',
+          // width: 200,
+          // align: 'center',
           render: (h, params) => {
             // let self = this
             return h('div', [
@@ -167,31 +167,31 @@ export default {
       sageCols: [
         {
           title: 'Name',
-          key: 'name',
-          align: 'center'
+          key: 'name'
+          // align: 'center'
         },
         {
           title: 'SAGE Number',
-          key: 'number',
-          align: 'center'
+          key: 'number'
+          // align: 'center'
         },
         {
           title: 'Date',
           key: 'createdAt',
-          align: 'center',
+          // align: 'center',
           render: (h, params) => {
             return h('div', moment(params.row.createdAt).format('ll'))
           }
         },
         {
           title: 'User',
-          key: 'user',
-          align: 'center'
+          key: 'user'
+          // align: 'center'
         },
         {
           title: 'Password',
-          key: 'password',
-          align: 'center',
+          key: 'password'
+          // align: 'center',
           render: (h, params) => {
             return h('div', [
               h('span', params.row.isShow ? params.row.password : ''),
@@ -209,8 +209,8 @@ export default {
         {
           title: 'Action',
           key: 'action',
-          width: 200,
-          align: 'center',
+          // width: 200,
+          // align: 'center',
           render: (h, params) => {
             // let self = this
             return h('div', [
