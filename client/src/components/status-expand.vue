@@ -38,7 +38,7 @@
                                       </div>
                                   </td>
                               </tr>
-                              <tr >
+                              <tr v-else>
                                 <td style="text-align:center;" colspan="2">No Data</td>
                               </tr>
                           </tbody>

@@ -592,16 +592,33 @@
         </div>
       <div v-if="import1"><h2>Import Completed</h2></div>
       <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
-      <div v-if="import1"  style="font-size:18px;margin-top:20px"><div><b>Sync With</b></div><span>
-        <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
-        <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox></Checkbox>
-        <div>
-          <span v-if="asiSync">
-            
-          </span>
-          <span v-if="sageSync">SAGE </span>
-        </div>
-      </span></div>
+      <div v-if="import1"  style="font-size:18px;margin-top:20px">
+        <h3>Sync With</h3>
+        <Row style="">
+          <Col :span="6" style="padding:10px;">
+            <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
+            <div v-if="asiSync">
+              <div style="padding-top:10px;"><div style="font-size:12px;">Select ASI configuration</div>
+                <Select v-model="asiValue" multiple style="width:260px" filterable  @on-change="handleasiChange">
+                    <Option v-for="item in asiconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                </Select>
+                <div v-if="isasiValid" style="font-size:12px;color:red;">! credintial must required.</div>
+              </div>
+            </div>
+          </Col>
+          <Col :span="6" style="padding:10px;">
+            <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox></Checkbox>
+            <div v-if="sageSync">
+              <div style="padding-top:10px;"><div style="font-size:12px;">Select SAGE configuration</div>
+                <Select v-model="sageValue" multiple style="width:260px" filterable  @on-change="handlesageChange">
+                    <Option v-for="item in sageconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                </Select>
+                <div v-if="issageValid" style="font-size:12px;color:red;">! credintial must required.</div>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </div>
       <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
       <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
       </Card>
@@ -637,6 +654,8 @@ import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
+
+import asconfigModal from '@/api/asconfiguration'
 
 Vue.use(VueCodeMirror)
 moment().format()
@@ -677,8 +696,14 @@ export default {
   components: {VueTabs, VTab, 'input-tag': InputTag, vueDropzone: vue2Dropzone},
   data () {
     return {
+      asiValue: [],
+      sageValue: [],
+      asiconfig: [],
+      sageconfig: [],
       asiSync: false,
       sageSync: false,
+      isasiValid: false,
+      issageValid: false,
       moment: moment,
       currentStep: 0,
       map: false,
@@ -1159,6 +1184,21 @@ export default {
     }
   },
   methods: {
+    handleasiChange (value) {
+      console.log('.................', value)
+      if (value.length === 0) {
+        this.isasiValid = true
+      } else {
+        this.isasiValid = false
+      }
+    },
+    handlesageChange (value) {
+      if (value.length === 0) {
+        this.issageValid = true
+      } else {
+        this.issageValid = false
+      }
+    },
     getValue () {
       let tab = this.activeTab
       return Object.keys(this.mObj[tab].schema.structure)
@@ -2068,40 +2108,76 @@ export default {
 
       // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
     importToConfirm () {
-      let self = this
+      // let self = this
       let SyncData = ''
+      let isValid = false
       this.abortImportBtn = false
       if (this.asiSync & this.sageSync) {
         SyncData = 'BOTH'
+        if (this.asiValue.length > 0 && this.sageValue.length > 0) {
+          isValid = true
+        } else if (this.asiValue.length > 0) {
+          this.issageValid = true
+        } else if (this.sageValue.length > 0) {
+          this.isasiValid = true
+        } else {
+          this.issageValid = true
+          this.isasiValid = true
+        }
       } else if (this.asiSync) {
         SyncData = 'ASI'
+        if (this.asiValue.length > 0) {
+          isValid = true
+        } else {
+          this.isasiValid = true
+        }
       } else if (this.sageSync) {
         SyncData = 'SAGE'
+        if (this.sageValue.length > 0) {
+          isValid = true
+        } else {
+          this.issageValid = true
+        }
+      } else {
+        isValid = true
       }
       let jobQueueObj = {
         'importTrackerId': id,
         'syncOn': SyncData
       }
-
-      api.request('post', '/import-to-confirm/', jobQueueObj).then(res => {
-        if (res.data) {
-          self.importBtn = false
+      // console.log(SyncData, jobQueueObj, isValid)
+      if (isValid) {
+        if (SyncData === 'ASI') {
+          jobQueueObj.asiConfig = this.asiValue
+        } else if (SyncData === 'SAGE') {
+          jobQueueObj.sageConfig = this.sageValue
+        } else if (SyncData === 'BOTH') {
+          jobQueueObj.asiConfig = this.asiValue
+          jobQueueObj.sageConfig = this.sageValue
         }
-      })
-        .catch(error => {
-          if (error.response) {
-            self.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
-          } else {
-            self.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
+        console.log('jobQueueObj', jobQueueObj)
+        api.request('post', '/import-to-confirm/', jobQueueObj).then(res => {
+          if (res.data) {
+            self.importBtn = false
           }
         })
+          .catch(error => {
+            if (error.response) {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else {
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
+      } else {
+        // alert('validation error')
+      }
     },
     mapType (sysHeader, type) {
     },
@@ -4026,7 +4102,19 @@ export default {
             }
           }
         }
-
+        // Get configuration of asi and sage
+        this.$Spin.show()
+        asconfigModal.get({
+          userID: this.$store.state.user._id
+        }).then(resp => {
+          // console.log('............', resp)
+          this.asiconfig = _.filter(resp.data.data, {type: 'asi'})
+          this.sageconfig = _.filter(resp.data.data, {type: 'sage'})
+          this.$Spin.hide()
+        }).catch(err => {
+          this.$Spin.hide()
+          console.log('Error asconfig', err)
+        })
         if (response.data.stepStatus === 'upload_pending') {
           self.uploadStep = true
           self.setPage(keys, filteredKeys, response.data)

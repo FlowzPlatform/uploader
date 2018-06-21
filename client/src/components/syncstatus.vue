@@ -1,7 +1,25 @@
 <template>
   <div class="syncstatus">
-    <h1>Sync Status</h1>
+    <Row>
+      <Col :span="20">
+        <h1>Sync Status</h1>
+      </Col>
+      <Col :span="4">
+        <div v-if="vid !== ''" style="float:right;">
+          <Button type="primary" icon="android-sync" shape="circle" @click="handleResync">re-sync</Button>
+        </div>
+      </Col>
+    </Row>
     <hr>
+    <div v-if="isresync" style="padding:10px;text-align:right">
+      <!-- <div style="font-size:12px;">Select ASI configuration</div> -->
+      <Select v-model="asiValue" multiple style="width:260px" filterable  placeholder="Select Credential" @on-change="asiHandleChange">
+          <Option v-for="item in asiconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
+      </Select>
+      <span v-if="isnotValid" style="font-size:12px;color:red;">! credintial must required.</span>
+      <Button type="success" shape="circle" @click="handleresyncProceed">Proceed</Button>
+    </div>
+    <hr v-if="isresync">
     <div style="padding-top:10px;">
       <Table :loading="loading" stripe :columns="statusCols" :data="statusData"></Table>
     </div>
@@ -13,6 +31,7 @@ import axios from 'axios'
 import config from '@/config'
 import Cookies from 'js-cookie'
 import productSyncModel from '@/api/product-sync'
+import asconfigModel from '@/api/asconfiguration'
 import _ from 'lodash'
 import moment from 'moment'
 import expandRow from './status-expand.vue'
@@ -23,6 +42,10 @@ export default {
   data () {
     return {
       loading: false,
+      isresync: false,
+      asiconfig: [],
+      asiValue: [],
+      isnotValid: false,
       statusCols: [
         {
           type: 'expand',
@@ -46,9 +69,24 @@ export default {
           align: 'center'
         },
         {
+          title: 'Credential',
+          key: 'asiConfig',
+          align: 'center',
+          render: (h, params) => {
+            let finx = _.findIndex(this.asiconfig, {id: params.row.asiConfig})
+            if (finx !== -1) {
+              console.log(finx, this.asiconfig[finx].name)
+              return h('div', this.asiconfig[finx].name)
+            } else {
+              return h('div', '-')
+            }
+          }
+        },
+        {
           title: 'Date',
           key: 'createdOn',
           align: 'center',
+          width: 110,
           render: (h, params) => {
             return h('div', moment(params.row.createdAt).format('ll'))
           }
@@ -61,7 +99,8 @@ export default {
         {
           title: 'Total Records',
           key: 'total',
-          align: 'center'
+          align: 'center',
+          width: 120
         },
         {
           title: 'Progress',
@@ -70,12 +109,13 @@ export default {
           render: (h, params) => {
             let total = params.row.total
             if (params.row.total === undefined) {
-              total = 0
+              total = 1
             }
             let perc = (params.row['no-product-process'] * 100) / total
+            perc = perc.toString().split('.')
             return h('i-circle', {
               props: {
-                percent: perc
+                percent: parseInt(perc[0])
               },
               style: {
                 width: '50px',
@@ -89,7 +129,7 @@ export default {
                 // style: {
                 //   fontSize: 6
                 // }
-              }, perc + '%')
+              }, perc[0] + '%')
             ])
           }
         }
@@ -98,12 +138,83 @@ export default {
       vid: ''
     }
   },
-  mounted () {
+  methods: {
+    asiHandleChange (value) {
+      if (value.length > 0) {
+        this.isnotValid = false
+      } else {
+        this.isnotValid = true
+      }
+      // console.log('value', value)
+    },
+    handleResync () {
+      // alert()
+      this.isresync = !this.isresync
+      // productSyncModel.post({
+      //   asiStatus: 'initiated',
+      //   asiError: [],
+      //   syncOn: 'ASI',
+      //   vid: this.vid,
+      //   'no-product-process': 0
+      // }).then(resp => {
+      //   self.$Notice.success({title: 're-sync Started', duration: 3})
+      // }).catch(err => {
+      //   console.log('Error: ', err)
+      //   self.$Notice.error({title: 'Network Error', duration: 3})
+      // })
+    },
+    handleresyncProceed () {
+      // let self = this
+      if (this.asiValue.length > 0) {
+        this.isnotValid = false
+      } else {
+        this.isnotValid = true
+      }
+      if (!this.isnotValid) {
+        this.$Modal.confirm({
+          title: 'Confirm',
+          content: '<b>Are you sure you want resync the data?</b>',
+          loading: true,
+          onOk: async() => {
+            for (let item of this.asiValue) {
+              await productSyncModel.post({
+                asiConfig: item,
+                asiStatus: 'initiated',
+                asiError: [],
+                syncOn: 'ASI',
+                vid: this.vid,
+                'no-product-process': 0
+              }).then(resp => {
+                this.$Notice.success({title: 're-sync Started'})
+              }).catch(err => {
+                console.log('Error: ', err)
+                this.$Notice.error({title: 'Network Error'})
+              })
+            }
+            this.$Modal.remove()
+          },
+          onCancel: () => {
+            this.isresync = false
+            this.isnotValid = false
+          }
+        })
+      }
+    }
+  },
+  async mounted () {
     let token = Cookies.get('auth_token')
     if (token !== undefined && token !== '') {
       // console.log('this.$store.state.token', token)
       this.loading = true
-      axios.get(config.vshopUrl).then(res => {
+      await asconfigModel.get({
+        userID: this.$store.state.user._id,
+        type: 'asi'
+      }).then(result => {
+        console.log('result', result)
+        this.asiconfig = result.data.data
+      }).catch(e => {
+      })
+      await axios.get(config.vshopUrl).then(async res => {
         // console.log('Resp', res.data)
         if (res.data.length > 0) {
           this.vid = res.data[0].id
@@ -123,6 +234,32 @@ export default {
         this.loading = false
         console.log('Error ::', err)
       })
+    }
+  },
+  feathers: {
+    'product-sync': {
+      created (data) {
+        console.log('Created ............', data)
+        if (data.vid === this.vid && data.syncOn === 'ASI') {
+          let finx = _.findIndex(this.statusData, {id: data.id})
+          if (finx === -1) {
+            this.statusData.splice(0, 0, data)
+          }
+        }
+      },
+      updated (data) {
+        console.log('Updated..............', data)
+        if (data.vid === this.vid && data.syncOn === 'ASI') {
+          console.log('Match')
+          let finx = _.findIndex(this.statusData, {id: data.id})
+          if (finx !== -1) {
+            this.statusData.splice(finx, 1, data)
+          }
+        }
+      },
+      removed (data) {
+        console.log('Removed..............', data)
+      }
     }
   }
 }
