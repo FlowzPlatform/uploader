@@ -190,7 +190,7 @@ export default {
         },
         {
           title: 'Password',
-          key: 'password'
+          key: 'password',
           // align: 'center',
           render: (h, params) => {
             return h('div', [
