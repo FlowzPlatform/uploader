@@ -60,18 +60,18 @@ export default {
         },
         {
           title: 'Id',
-          key: 'id',
-          align: 'center'
+          key: 'id'
+          // align: 'center'
         },
         {
           title: 'Sync On',
-          key: 'syncOn',
-          align: 'center'
+          key: 'syncOn'
+          // align: 'center'
         },
         {
           title: 'Credential',
           key: 'asiConfig',
-          align: 'center',
+          // align: 'center',
           render: (h, params) => {
             let finx = _.findIndex(this.asiconfig, {id: params.row.asiConfig})
             if (finx !== -1) {
@@ -85,27 +85,27 @@ export default {
         {
           title: 'Date',
           key: 'createdOn',
-          align: 'center',
-          width: 110,
+          // align: 'center',
+          // width: 110,
           render: (h, params) => {
             return h('div', moment(params.row.createdAt).format('ll'))
           }
         },
         {
           title: 'Status',
-          key: 'asiStatus',
-          align: 'center'
+          key: 'asiStatus'
+          // align: 'center'
         },
         {
           title: 'Total Records',
-          key: 'total',
-          align: 'center',
-          width: 120
+          key: 'total'
+          // align: 'center',
+          // width: 120
         },
         {
           title: 'Progress',
           key: 'no-product-process',
-          align: 'center',
+          // align: 'center',
           render: (h, params) => {
             let total = params.row.total
             if (params.row.total === undefined) {
