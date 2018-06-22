@@ -11,7 +11,7 @@ export default {
   name: 'pdmlist',
   data () {
     return {
-      vid: 'b00ef491-d25e-4f50-9327-299bc78e5789',
+      vid: 'b45d766c-4529-4ba3-8068-5c03e749596a',
       columns: [
         {
           title: '_id',

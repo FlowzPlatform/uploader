@@ -7,7 +7,7 @@
              <Button type="ghost" @click="hanleRestore">Restore</Button>
            </Row>
            <div class='row'>
-             <div id='editor_simple' class='medium-12 columns'></div>
+             <div id='editor_simple'></div>
            </div>
          </div>
        </TabPane>
@@ -18,7 +18,7 @@
               <Button type="ghost" @click="hanleRestore">Restore</Button>
             </Row>
             <div class='row'>
-              <div id='editor_holder' class='medium-12 columns'></div>
+              <div id='editor_holder'></div>
             </div>
           </div>
         </TabPane>
@@ -69,11 +69,12 @@ export default {
     return {
       tab0: true,
       tab1: true,
-      vid: 'b00ef491-d25e-4f50-9327-299bc78e5789',
+      vid: 'b45d766c-4529-4ba3-8068-5c03e749596a',
       pdata: {},
       simpledata:{},
       realdata: {},
-      activetab: 0
+      activetab: 0,
+      pdmUrl: 'http://localhost:3038/pdm'
     }
   },
   created() {
@@ -98,7 +99,7 @@ export default {
   methods: {
     async init (id) {
       console.log('calling')
-      let url = 'https://api.flowzcluster.tk/pdmnew/pdm?_id=' + id
+      let url = this.pdmUrl + '?_id=' + id
       this.pdata = await axios.get(url, {
         headers: {
           vid: this.vid
@@ -127,13 +128,22 @@ export default {
     },
     hanleSubmit () {
       console.log("self.activeTab",this.activetab)
+      let data = editor.getValue()
+      let url = this.pdmUrl + '/' + data._id
       if(this.activetab === 0){
-        let data = editor.getValue()
         console.log('Value:::::', data)
         this.mapData(data)
       }
       else if(this.activetab === 1){
-        let data = editor.getValue()
+        axios.patch(url, data, {
+          headers: {
+            vid: this.vid
+          }
+        }).then(res => {
+          console.log('Updated Data::', res)
+        }).catch(err => {
+          console.log('Error while updating data::', err)
+        })
         console.log('Value:::::', data)
       }
     },
@@ -151,7 +161,7 @@ export default {
       for(let item in data){
         console.log("key",item)
         if(item == 'sku' || item == 'price_1' || item == 'min_price' || item == 'max_price' || item == 'currency' ||
-        item == 'product_name' || item == 'language'){
+        item == 'product_name' || item == 'language') {
           this.simpledata[item] = data[item]
         }
       }

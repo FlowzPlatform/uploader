@@ -7,6 +7,9 @@ export default {
     } else {
       return api.request('get', '/' + model + '/' + id)
     }
+  },
+  patch: (id, data) => {
+    return api.request('patch', '/' + model + '/' + id, data)
   }
   // post: (data) => {
   //   return api.request('post', '/' + model, data).then(response => {
