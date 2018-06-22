@@ -3,7 +3,7 @@ import config from '../config'
 import store from '../store'
 
 export default {
-  request (method, uri, data = null, headers = {'subscriptionId': store.state.subscription_id}) {
+  request (method, uri, data = null, params = null, headers = {'subscriptionId': store.state.subscription_id}) {
     if (!method) {
       console.error('API function call requires method argument')
       return
@@ -20,6 +20,6 @@ export default {
     }
 
     var url = config.serverURI + uri
-    return axios({method, url, data, headers})
+    return axios({method, url, data, params, headers})
   }
 }
