@@ -31,6 +31,8 @@
 <script>
 import asconfigurationModel from '@/api/asconfiguration'
 import _ from 'lodash'
+import config from '@/config'
+import axios from 'axios'
 
 export default {
   name: 'addconfig',
@@ -161,17 +163,38 @@ export default {
           this.loading = true
           let isExist = await (this.checkExist(this.formItem))
           if (isExist) {
-            await asconfigurationModel.post(this.formItem).then(res => {
-              this.$Notice.success({title: 'Success', desc: 'Successfully saved.', duration: 3})
-              this.$router.push('/settings')
-            }).catch(err => {
-              console.log('Error', err)
+            let asiauth = await this.asiAuth(this.formItem)
+            if (asiauth.valid) {
+              await asconfigurationModel.post(this.formItem).then(res => {
+                this.$Notice.success({title: 'Success', desc: 'Successfully saved.', duration: 3})
+                this.$router.push('/settings')
+              }).catch(err => {
+                console.log('Error', err)
+                this.loading = false
+                this.$Notice.error({title: 'Error', desc: 'Not Saved.', duration: 3})
+              })
+            } else {
               this.loading = false
-              this.$Notice.error({title: 'Error', desc: 'Not Saved.', duration: 3})
-            })
+              this.$Notice.error({title: 'ASI Error', desc: 'Please Add Authorized Credential.', duration: 5})
+            }
           }
         }
       })
+    },
+    async asiAuth (formItem) {
+      let mdata = {
+        asi: formItem.number,
+        username: formItem.user,
+        password: formItem.password
+      }
+      let res = await axios.post(config.asiUrl + 'Login', mdata).then(res => {
+        console.log('res=>', res)
+        return { valid: true }
+      }).catch(err => {
+        console.log('ASI Auth Error', err)
+        return {valid: false, msg: err.message}
+      })
+      return res
     },
     async checkExist (formItem, value) {
       let res = await (asconfigurationModel.get({
