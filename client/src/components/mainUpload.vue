@@ -80,7 +80,7 @@
 
              <div v-if="showWebImage" id="upload-image-zone">
                 <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
-                  <span class="dz-message">Mass image upload<br/>
+                  <span class="dz-message">Select Folder for Mass image upload<br/>
                       <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
                   </span>
                   <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
@@ -225,7 +225,7 @@
                   </table>
                 </div>
                 <div class="pagination">
-                  <Page :total="mObj[activeTab].newUploadCSV.length" :current="mObj[activeTab].cpage" @on-change="changePage" :page-size=5></Page>
+                  <Page :total="mObj[activeTab].newUploadCSV.length" :current="mObj[activeTab].cpage" @on-change="changePage" :page-size=5> </Page>
                 </div>
               </div>
           </div>
@@ -707,7 +707,8 @@ export default {
       moment: moment,
       currentStep: 0,
       map: false,
-      fileTypes: ['Product Variation Price', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping', 'Product Additional Charges'],
+      // fileTypes: ['Product Variation Price', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping', 'Product Additional Charges'],
+      fileTypes: ['Product Shipping', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image'],
       activeTab: 'Product Information',
       fileNames: ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice'],
       validate: true,
