@@ -52,12 +52,12 @@ export default {
       })
       if (res.status) {
         if (!res.valid) {
-          callback(new Error('! Name Already Exist, Please Enter another Name.'))
+          callback(new Error('Name Already Exist, Please Enter another Name.'))
         } else {
           callback()
         }
       } else {
-        callback(new Error('! Network Error'))
+        callback(new Error('Network Error'))
       }
     }
     const editvalidateName = async(rule, value, callback) => {
@@ -80,12 +80,12 @@ export default {
         })
         if (res.status) {
           if (!res.valid) {
-            callback(new Error('! Name Already Exist, Please Enter another Name.'))
+            callback(new Error('Name Already Exist, Please Enter another Name.'))
           } else {
             callback()
           }
         } else {
-          callback(new Error('! Network Error'))
+          callback(new Error('Network Error'))
         }
       }
     }
@@ -104,32 +104,32 @@ export default {
       },
       rulesformItem: {
         name: [
-          { required: true, message: '! Please Enter the Name', trigger: 'blur' },
+          { required: true, message: 'Please Enter the Name', trigger: 'blur' },
           { validator: validateName, trigger: 'blur' }
         ],
         number: [
-          { required: true, message: '! Please Enter the Number', trigger: 'blur' }
+          { required: true, message: 'Please Enter the Number', trigger: 'blur' }
         ],
         user: [
-          { required: true, message: '! Please Enter the User', trigger: 'blur' }
+          { required: true, message: 'Please Enter the User', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '! Please Enter the Password', trigger: 'blur' }
+          { required: true, message: 'Please Enter the Password', trigger: 'blur' }
         ]
       },
       updateRulesformItem: {
         name: [
-          { required: true, message: '! Please Enter the Name', trigger: 'blur' },
+          { required: true, message: 'Please Enter the Name', trigger: 'blur' },
           { validator: editvalidateName, trigger: 'blur' }
         ],
         number: [
-          { required: true, message: '! Please Enter the Number', trigger: 'blur' }
+          { required: true, message: 'Please Enter the Number', trigger: 'blur' }
         ],
         user: [
-          { required: true, message: '! Please Enter the User', trigger: 'blur' }
+          { required: true, message: 'Please Enter the User', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '! Please Enter the Password', trigger: 'blur' }
+          { required: true, message: 'Please Enter the Password', trigger: 'blur' }
         ]
       },
       validName: ''

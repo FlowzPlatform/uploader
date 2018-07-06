@@ -119,11 +119,15 @@ export default {
             }
           })
           .catch(e => {
-            this.$Notice.error({
-              title: e.response.data.name,
-              message: e.response.data.message,
-              duration: 10
-            })
+            if (typeof (e.response.data) === 'string') {
+              this.$Message.error(e.response.data)
+            } else {
+              this.$Notice.error({
+                title: e.response.data.name,
+                message: e.response.data.message,
+                duration: 10
+              })
+            }
             this.loading = false
           })
         } else {
@@ -210,136 +214,136 @@ export default {
 	}
   .animate0 {
    	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 0s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 0s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 0s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 0s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+    -webkit-animation-delay: 0s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: 0s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: 0s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: 0s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate1{
+  .animate1{
    	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .2s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .2s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .2s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .2s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+    -webkit-animation-delay: .2s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .2s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .2s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .2s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate2{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .4s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .4s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .4s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .4s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+  .animate2{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: .4s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .4s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .4s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .4s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate3{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .6s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .6s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .6s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .6s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+  .animate3{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: .6s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .6s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .6s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .6s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate4{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .8s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .8s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .8s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .8s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+  .animate4{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: .8s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .8s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .8s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .8s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate5{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 1s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 1s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 1s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 1s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
-#particles-js {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.registerpanel .ivu-form-item-error-tip {
-   display: block
-}
- .ivu-form-item-error-tip {
-    position: relative !important;
-    top: 100%;
+  .animate5{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: 1s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: 1s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: 1s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: 1s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
+  #particles-js {
+    position: fixed;
+    top: 0;
     left: 0;
-    line-height: 1;
-    padding-top: 0px;
-    margin-top:7px !important;
-    font-size:15px !important;
-    color: #ed3f14;
-}
+    width: 100%;
+    height: 100%;
+  }
+
+  .registerpanel .ivu-form-item-error-tip {
+    display: block
+  }
+  .ivu-form-item-error-tip {
+      position: relative !important;
+      top: 100%;
+      left: 0;
+      line-height: 1;
+      padding-top: 0px;
+      margin-top:7px !important;
+      font-size:15px !important;
+      color: #ed3f14;
+  }
 </style>
