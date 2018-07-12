@@ -60,7 +60,8 @@ export default {
         },
         {
           title: 'Id',
-          key: 'id'
+          key: 'id',
+          width: 300
           // align: 'center'
         },
         {
@@ -75,7 +76,7 @@ export default {
           render: (h, params) => {
             let finx = _.findIndex(this.asiconfig, {id: params.row.asiConfig})
             if (finx !== -1) {
-              console.log(finx, this.asiconfig[finx].name)
+              // console.log(finx, this.asiconfig[finx].name)
               return h('div', this.asiconfig[finx].name)
             } else {
               return h('div', '-')
@@ -98,7 +99,14 @@ export default {
         },
         {
           title: 'Total Records',
-          key: 'total'
+          key: 'total',
+          render: (h, params) => {
+            if (params.row.total === undefined) {
+              return h('div', '-')
+            } else {
+              return h('div', params.row.total)
+            }
+          }
           // align: 'center',
           // width: 120
         },
@@ -185,6 +193,7 @@ export default {
                 vid: this.vid,
                 'no-product-process': 0
               }).then(resp => {
+                this.isresync = false
                 this.$Notice.success({title: 're-sync Started'})
               }).catch(err => {
                 console.log('Error: ', err)
@@ -224,11 +233,20 @@ export default {
           }).then(resp => {
             // console.log(resp)
             this.statusData = _.filter(resp.data.data, {syncOn: 'ASI'})
+            _.map(this.statusData, (m) => {
+              if (m.asiStatus !== 'completed') {
+                m._disableExpand = true
+              } else {
+                m._disableExpand = false
+              }
+            })
             this.loading = false
           }).catch(errr => {
             this.loading = false
             console.log('Error', errr)
           })
+        } else {
+          this.loading = false
         }
       }).catch(err => {
         this.loading = false
@@ -241,6 +259,7 @@ export default {
       created (data) {
         console.log('Created ............', data)
         if (data.vid === this.vid && data.syncOn === 'ASI') {
+          data._disableExpand = true
           let finx = _.findIndex(this.statusData, {id: data.id})
           if (finx === -1) {
             this.statusData.splice(0, 0, data)
@@ -250,7 +269,12 @@ export default {
       updated (data) {
         console.log('Updated..............', data)
         if (data.vid === this.vid && data.syncOn === 'ASI') {
-          console.log('Match')
+          // console.log('Match')
+          if (data.asiStatus !== 'completed') {
+            data._disableExpand = true
+          } else {
+            data._disableExpand = false
+          }
           let finx = _.findIndex(this.statusData, {id: data.id})
           if (finx !== -1) {
             this.statusData.splice(finx, 1, data)
