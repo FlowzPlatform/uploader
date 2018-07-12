@@ -1,81 +1,80 @@
 <template>
     <div>
-        <Row class="expand-row">
-            <div class="schema-form ivu-table-wrapper">
-              <div class="ivu-table ivu-table-border">
-                  <div class="ivu-table-body">
-                      <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
-                          <colgroup>
-                              <col width="25">
-                                  <col width="75">
-                          </colgroup>
-                          <thead>
-                              <tr>
-                                  <th class="">
-                                      <div class="ivu-table-cell">
-                                          <span>SKU</span>
-                                      </div>
-                                  </th>
-                                  <th class="">
-                                      <div class="ivu-table-cell">
-                                          <span>Error</span>
-                                      </div>
-                                  </th>
-                              </tr>
-                          </thead>
-                          <tbody class="ivu-table-tbody">
-                              <tr v-if="row.asiError.length > 0" class="ivu-table-row" v-for="(item, index) in row.asiError">
-                                  <td class="">
-                                      <div class="ivu-table-cell">
-                                        <span class="list-color">{{item.sku}}</span>
-                                      </div>
-                                  </td>
-                                  <td class="">
-                                      <div class="ivu-table-cell">
-                                        <ul class="" v-for="err in item.error">
-                                          <li class="list-color">{{err.Reason}}</li>
-                                        </ul>
-                                      </div>
-                                  </td>
-                              </tr>
-                              <tr v-else>
-                                <td style="text-align:center;" colspan="2">No Data</td>
-                              </tr>
-                          </tbody>
-                      </table>
-                  </div>
-              </div>
-            </div>
-        </Row>
+        <div>
+          <Table :columns="tcols" :data="calculateData" stripe border class="tableclass"></Table>
+        </div>
+        <div style="float:right; padding-top:10px;">
+          <Page :page-size="5" :total="tdata.length" @on-change="handleChange"></Page>
+        </div>
     </div>
 </template>
 
 <script>
-    export default {
-      props: {
-        row: Object
-      },
-      data () {
-        return {
-        }
-      },
-      mounted () {
-        console.log('this.row', this.row)
-      },
-      feathers: {
-        'product-sync': {
-          created (data) {
+import _ from 'lodash'
+export default {
+  props: {
+    row: Object
+  },
+  data () {
+    return {
+      tcols: [{
+        title: 'SKU',
+        key: 'sku',
+        className: 'list-color'
+      }, {
+        title: 'Error',
+        key: '',
+        className: 'list-color',
+        render: (h, params) => {
+          // console.log(params.row)
+          let abc = []
+          for (let item of params.row.error) {
+            abc.push(h('li', item.Reason))
           }
+          return h('ul', abc)
         }
+      }],
+      tdata: [],
+      mdata: [],
+      page: 1
+    }
+  },
+  computed: {
+    calculateData () {
+      return this.mdata[this.page - 1]
+    }
+  },
+  methods: {
+    handleChange (page) {
+      this.page = page
+    }
+  },
+  mounted () {
+    console.log('this.row', this.row)
+    if (this.row.asiError !== undefined) {
+      this.tdata = this.row.asiError
+      this.mdata = _.chunk(this.tdata, 5)
+    }
+  },
+  feathers: {
+    'product-sync': {
+      created (data) {
       }
     }
+  }
+}
 </script>
 
 <style scoped>
     .expand-row{
         margin-bottom: 16px;
     }
-    .list-color {
+    
+</style>
+<style>
+  .list-color {
       color: #a94442;
+      padding: 10px;
+      background-color: #fff !important;
     }
 </style>
