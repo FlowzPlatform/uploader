@@ -52,6 +52,15 @@ async function beforeCreate(hook) {
   module.exports.authorization = this.authorization
   let user_data = await(axios.get(user_detail_url,{'headers':{'Authorization':module.exports.authorization}}))
   let import_tracker_id = hook.data.importTrackerId
+  let syncOn = hook.data.syncOn
+  let asiConfig = []
+  let sageConfig = []
+  if (hook.data.asiConfig != undefined) {
+    asiConfig = hook.data.asiConfig
+  }
+  if (hook.data.sageConfig != undefined) {
+    sageConfig = hook.data.sageConfig
+  }
   hook.data = {
     "queue": {
       "name":"uploaderJobQueConfirm"
@@ -59,6 +68,7 @@ async function beforeCreate(hook) {
     "jobs":[
       {
         "importTrackerId":import_tracker_id,
+        "syncOn": syncOn,
         "userdetails":{
           "id":user_data.data.data._id,
           "email":user_data.data.data.email,
@@ -71,7 +81,13 @@ async function beforeCreate(hook) {
       "port": app.get("rdb_port"),
       "db": app.get("rdb_db")
     }
+  }
 
+  if (asiConfig.length > 0) {
+    hook.data.jobs[0].asiConfig = asiConfig
+  }
+  if (sageConfig.length > 0) {
+    hook.data.jobs[0].sageConfig = sageConfig
   }
 
   try {

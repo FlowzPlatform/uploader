@@ -57,23 +57,19 @@
 </template>
 
 <script>
-/*eslint-disable*/
 import modelAuthentication from '@/api/authentication'
 // import lodash from 'lodash'
 export default {
   name: 'Register',
   data () {
     const emailValidator = (rule, value, callback) => {
-                if (value == '') {
-                    callback(new Error('Please enter email'));
-                } else if (value != '') {
-                  let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
-                  if(re.test(value) != true)
-                    callback(new Error('Please enter correct email'));
-                  else
-                    callback()
-                }
-            };
+      if (value === '') {
+        callback(new Error('Please enter email'))
+      } else if (value !== '') {
+        let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}$/
+        if (re.test(value) !== true) { callback(new Error('Please enter correct email')) } else { callback() }
+      }
+    }
 
     return {
       loading: false,
@@ -87,20 +83,20 @@ export default {
       },
       ruleRegister: {
         firstname: [
-          { required: true, message: 'Please enter Firstname', trigger: 'blur'}
+          {required: true, message: 'Please enter Firstname', trigger: 'blur'}
         ],
         lastname: [
           {required: true, message: 'Please enter Lastname', trigger: 'blur'}
         ],
         email: [
-          {validator:emailValidator,trigger: 'blur'}
+          {validator: emailValidator, trigger: 'blur'}
         ],
         password: [
           {required: true, message: 'Please enter password', trigger: 'blur'}
         ]
-      },
-  }
-},
+      }
+    }
+  },
   methods: {
     handleSubmit (name) {
       let self = this
@@ -111,33 +107,37 @@ export default {
             if (response) {
               this.loading = false
               this.$Message.success(response.message)
-              this.formRegister.firstname = ""
-              this.formRegister.lastname = ""
-              this.formRegister.email = ""
-              this.formRegister.password = ""
-              setTimeout(function(){
+              this.formRegister.firstname = ''
+              this.formRegister.lastname = ''
+              this.formRegister.email = ''
+              this.formRegister.password = ''
+              setTimeout(function () {
                 self.$router.push('/Login')
-              },1700)
+              }, 1700)
             } else {
               this.loading = false
             }
           })
           .catch(e => {
-            this.$Notice.error({
-              title: e.response.data.name,
-              message: e.response.data.message,
-              duration:10
-            })
+            if (typeof (e.response.data) === 'string') {
+              this.$Message.error(e.response.data)
+            } else {
+              this.$Notice.error({
+                title: e.response.data.name,
+                message: e.response.data.message,
+                duration: 10
+              })
+            }
             this.loading = false
           })
         } else {
-          // if(lodash.isEmpty(this.$refs[name].model["firstname"]) == true && lodash.isEmpty(this.$refs[name].model["lastname"]) == true && lodash.isEmpty(this.$refs[name].model["email"]) == true && lodash.isEmpty(this.$refs[name].model["password"]) == true){
+          // if(lodash.isEmpty(this.$refs[name].model["firstname"]) === true && lodash.isEmpty(this.$refs[name].model["lastname"]) === true && lodash.isEmpty(this.$refs[name].model["email"]) === true && lodash.isEmpty(this.$refs[name].model["password"]) === true){
           //   this.$Message.error('Please fill your details to register!')
           // }
         }
       })
     }
-}
+  }
 }
 </script>
 <style>
@@ -214,136 +214,136 @@ export default {
 	}
   .animate0 {
    	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 0s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 0s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 0s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 0s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+    -webkit-animation-delay: 0s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: 0s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: 0s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: 0s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate1{
+  .animate1{
    	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .2s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .2s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .2s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .2s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+    -webkit-animation-delay: .2s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .2s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .2s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .2s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate2{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .4s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .4s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .4s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .4s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+  .animate2{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: .4s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .4s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .4s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .4s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate3{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .6s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .6s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .6s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .6s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+  .animate3{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: .6s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .6s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .6s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .6s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate4{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: .8s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: .8s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: .8s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: .8s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
+  .animate4{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: .8s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: .8s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: .8s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: .8s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
 
-.animate5{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 1s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 1s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 1s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 1s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;
-}
-#particles-js {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.registerpanel .ivu-form-item-error-tip {
-   display: block
-}
- .ivu-form-item-error-tip {
-    position: relative !important;
-    top: 100%;
+  .animate5{
+      -webkit-animation-duration: .8s;
+    -webkit-animation-delay: 1s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: both;
+    -moz-animation-duration: .8s;
+    -moz-animation-delay: 1s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: both;
+    -ms-animation-duration: .8s;
+    -ms-animation-delay: 1s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-fill-mode: both;
+    animation-duration: .8s;
+    animation-delay: 1s;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+  }
+  #particles-js {
+    position: fixed;
+    top: 0;
     left: 0;
-    line-height: 1;
-    padding-top: 0px;
-    margin-top:7px !important;
-    font-size:15px !important;
-    color: #ed3f14;
-}
+    width: 100%;
+    height: 100%;
+  }
+
+  .registerpanel .ivu-form-item-error-tip {
+    display: block
+  }
+  .ivu-form-item-error-tip {
+      position: relative !important;
+      top: 100%;
+      left: 0;
+      line-height: 1;
+      padding-top: 0px;
+      margin-top:7px !important;
+      font-size:15px !important;
+      color: #ed3f14;
+  }
 </style>

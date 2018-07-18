@@ -28,15 +28,19 @@ var temp = {
   loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
   subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
-  // subscriptionUri: 'http://172.16.230.161:3030/user-subscription',
+  subscriptionUrl: 'https://api.' + domainkey + '/subscription/',
+  userDetail: 'https://api.' + domainkey + '/auth/api/userdetails',
+  baseUrl: 'https://api.' + domainkey,
   getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
   resetPasswordRedirectUrl: 'https://www.uploader.' + domainkey + '/reset-password',
-  // resetPasswordRedirectUrl: protocol + '://localhost:8000/reset-password',
   resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
   forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
   flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
   crmUrl: 'https://www.crm.' + domainkey,
-  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
+  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
+  cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload',
+  vshopUrl: 'https://api.flowzcluster.tk/pdmnew/vshop-list?supplier=true&all=1',
+  asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -57,14 +61,19 @@ if (process.env.MYENV !== 'development') {
     loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
     jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
     subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
-    // subscriptionUri: 'http://172.16.230.161:3030/user-subscription',
+    subscriptionUrl: 'https://api.' + domainkey + '/subscription/',
+    userDetail: 'https://api.' + domainkey + '/auth/api/userdetails',
+    baseUrl: 'https://api.' + domainkey,
     getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
     resetPasswordRedirectUrl: 'https://www.uploader.' + domainkey + '/reset-password',
     resetPasswordUrl: 'https://api.' + domainkey + '/auth/api/resetpassword',
     forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
     flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
     crmUrl: 'https://www.crm.' + domainkey,
-    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
+    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
+    cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload',
+    vshopUrl: 'https://api.' + domainkey + '/pdmnew/vshop-list?supplier=true&all=1',
+    asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/'
   }
 }
 

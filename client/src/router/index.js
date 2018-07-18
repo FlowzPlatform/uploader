@@ -25,6 +25,11 @@ import mainUpload from '@/components/mainUpload'
 import newJoblist from '@/components/newJobList'
 import forgotPassword from '@/components/forgotPassword'
 import resetPassword from '@/components/resetPassword'
+import invite from '@/components/invite'
+import asisageConfig from '@/components/asisage_config'
+import addconfig from '@/components/addconfig'
+import syncstatus from '@/components/syncstatus'
+
 // import example from '@/components/example'
 
 // import FlowzList from '@/components/FlowList'
@@ -40,6 +45,35 @@ const routes = [{
     alias: '',
     component: Dashboard,
     name: 'Dashboard',
+    meta: { description: 'Overview of environment', requiresAuth: true }
+  },
+  {
+    path: 'settings',
+    alias: '',
+    component: asisageConfig,
+    name: 'asisageconfig',
+    meta: { description: 'Overview of environment', requiresAuth: true }
+  },
+  {
+    path: 'settings/:type',
+    alias: '',
+    component: addconfig,
+    name: 'addconfig',
+    props: {
+      type: Text,
+      required: false
+    },
+    meta: { description: 'Overview of environment', requiresAuth: true }
+  },
+  {
+    path: 'settings/:type/:id',
+    alias: '',
+    component: addconfig,
+    name: 'editconfig',
+    props: {
+      type: Text,
+      required: false
+    },
     meta: { description: 'Overview of environment', requiresAuth: true }
   },
   {
@@ -67,6 +101,16 @@ const routes = [{
     path: '/uploader-joblist',
     name: 'newJoblist',
     component: newJoblist
+  },
+  {
+    path: '/syncstatus',
+    name: 'syncstatus',
+    component: syncstatus
+  },
+  {
+    path: '/invite',
+    name: 'invite',
+    component: invite
   }]
 }, {
   path: '/Login',

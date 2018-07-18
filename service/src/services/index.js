@@ -40,6 +40,14 @@ const uploadImage = require('./upload-image/upload-image.service.js');
 
 
 
+const productSync = require('./product-sync/product-sync.service.js');
+
+
+
+const asconfiguration = require('./asconfiguration/asconfiguration.service.js');
+
+
+
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -67,4 +75,6 @@ module.exports = function() {
   app.configure(importToConfirm);
   app.configure(uploaderValidation);
   app.configure(uploadImage);
+  app.configure(productSync);
+  app.configure(asconfiguration);
 };
