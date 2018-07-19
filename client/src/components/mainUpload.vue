@@ -1,629 +1,630 @@
 <template>
-  <div>
-    <Steps :current="currentStep" class="uploadSteps">
-       <Step content="Upload"></Step>
-       <Step content="Validate"></Step>
-       <Step content="Import"></Step>
-   </Steps>
-   <template v-if="currentStep === 0 && uploadStep">
-     <Row>
-          <Col span="6" class="tabList">
-                <vue-tabs active-tab-color="#494e6b"
-                          active-text-color="#fff"
-                          type="pills"
-                          direction="vertical"
-                          v-model="activeTab"
-                          :tab-change="hideHandson()">
-
-                     <div v-for="(files,fIndex) in fileTypes">
-                           <v-tab :title=files :id="changeIndex(files)">
-                              <!-- <img src="../assets/images/green_tick.jpg" alt="" style="width:20px;height:20px;"></img> -->
-                           </v-tab>
-                    </div>
-                </vue-tabs>
-                <div style="margin-top: 20px;position: absolute;top: 300px;">
-                      <Button type="success" class="sucessbtn" size="large" style="font-size:15px" :disabled="validate" @click="startValidation()">Start validation<i class="ivu-icon ivu-icon-android-arrow-dropright-circle" style="margin-left:7%"></i></Button>
+   <div>
+      <Steps :current="currentStep" class="uploadSteps">
+         <Step content="Upload"></Step>
+         <Step content="Validate"></Step>
+         <Step content="Import"></Step>
+      </Steps>
+      <template v-if="currentStep === 0 && uploadStep">
+         <Row>
+            <Col span="6" class="tabList">
+              <vue-tabs active-tab-color="#494e6b"
+                active-text-color="#fff"
+                type="pills"
+                direction="vertical"
+                v-model="activeTab"
+                :tab-change="hideHandson()">
+                <div v-for="(files,fIndex) in fileTypes">
+                    <v-tab :title=files :id="changeIndex(files)">
+                      <!-- <img src="../assets/images/green_tick.jpg" alt="" style="width:20px;height:20px;"></img> -->
+                    </v-tab>
                 </div>
-          </Col>
-          <Col span="18" class="tabView">
+              </vue-tabs>
+              <div style="margin-top: 20px;position: absolute;top: 300px;">
+                <Button type="success" class="sucessbtn" size="large" style="font-size:15px" :disabled="validate" @click="startValidation()">Start validation<i class="ivu-icon ivu-icon-android-arrow-dropright-circle" style="margin-left:7%"></i></Button>
+              </div>
+            </Col>
+            <Col span="18" class="tabView">
             <div id="uploadCsv" style="margin-top:5%;" v-model="mObj[activeTab]">
-                <div>
-                    <Form>
-                      <FormItem label="Field Mapping">
+               <div>
+                  <Form>
+                     <FormItem label="Field Mapping">
                         <Row>
-                        <Col span="5">
-                        <Select v-model="mObj[activeTab].selected_schema" style="width:200px" @on-change="changeSchema(activeTab,mObj[activeTab].selected_schema)">
-                            <Option v-for="schema in mObj[activeTab].schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
-                        </Select>
-                       </Col>
-
-
-
-                       <Col span="3">
-                        <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
-                          <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled mapping</a>
-                           <div class="api" slot="content">
-                             <Form inline>
-                               <FormItem>
-                                   <Input type="text" v-model="mObj[activeTab].new_schema"></Input>
-                               </FormItem>
-                                  <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
-                                  <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
-                           </Form>
-                           </div>
-                       </Poptip>
-                     </Col>
-
-
-
-                     <!-- <Col span="3">
+                           <Col span="5">
+                           <Select v-model="mObj[activeTab].selected_schema" style="width:200px" @on-change="changeSchema(activeTab,mObj[activeTab].selected_schema)">
+                              <Option v-for="schema in mObj[activeTab].schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
+                           </Select>
+                           </Col>
+                           <Col span="3">
+                           <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
+                              <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled mapping</a>
+                              <div class="api" slot="content">
+                  <Form inline>
+                  <FormItem>
+                  <Input type="text" v-model="mObj[activeTab].new_schema"></Input>
+                  </FormItem>
+                  <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
+                  <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
+                  </Form>
+                  </div>
+                  </Poptip>
+                  </Col>
+                  <!-- <Col span="3">
                      <a @click="showUpload()" v-if="activeTab === 'Product Image'">Upload Image</a>
                      </Col> -->
-
-                     <Col span="1" v-if="loadingdot">
-                       <Spin></Spin>
-                     </Col>
-
-                     </Row>
-                     </FormItem>
-                   </Form>
-                </div>
-
-                <div id="upload-csv-zone" v-if="mObj[activeTab].uploadDisplay">
-                  <div class="file-zone">
-                      <span class="dz-message">Drop <span style="color: #494e6b">"{{activeTab}}"</span> files here<br/>
-                          <small>(only csv files are valid.)</small>
-                      </span>
-                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
-                  </div>
-              </div>
-
-             <div v-if="showWebImage" id="upload-image-zone">
-                <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
-                  <span class="dz-message">Select Folder for Mass image upload<br/>
-                      <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
-                  </span>
-                  <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
-               </form>
-               <Button type="primary" style="margin-top:0px;color: #fff;margin-top:14px;float:right;padding: 6px 30px;margin-left:1%" @click="Back(activeTab)">Back</Button>
-               <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)">Abort</Button>
-               <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)"  :disabled="!proceedBtn" :loading="ProceedLoading">
-                <span v-if="ProceedLoading">Processing</span>
-                <span v-else>Proceed</span>
-               </Button>
-               <div v-if="image_err.length !== 0" style="margin-top:7%;">
-                 <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
-                 <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
-                 <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
-                   <Row>
-                    <div v-for="(item,index) in image_err">
-                      <Col span="5" >{{item}}</Col>
-                    </div>
-                   </Row>
-                 </div>
-              </div>
-               <div id="dirinfo">
-                 <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
-                 <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
-               </div>
-             </div>
-
-              <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
-                        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                        <div>Loading</div>
-                    </Spin></div>
-
-              <div v-if="mObj[activeTab].load" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
-                        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                        <div>Loading</div>
-                    </Spin></div>
-
-
-              <div v-if="mObj[activeTab].previewDisplay && mObj[activeTab].newUploadCSV.length !== 0 ">
-              <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
-               <div class="schema-form ivu-table-wrapper">
-                 <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
-                   <div class="ivu-table-body" style="overflow:auto !important;">
-                     <table style="min-width:1077px;overflow-x: auto;">
-                       <thead>
-                         <tr>
-                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure)" v-if="!map && header !== '_id'">
-                             <div>
-                               <span>{{header}}</span>
-                             </div>
-                           </th>
-                         </tr>
-                         <tr>
-                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0])" v-if="map && header !== '_id'">
-                             <div>
-                               <span>{{header}}</span>
-                             </div>
-                           </th>
-                         </tr>
-                       </thead>
-                       <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
-                         <tr class="ivu-table-row" v-if="(index<5)">
-                           <td class="" v-for="data in getwithoutid(item,4)" style="overflow:hidden;">
-                             {{data}}
-                           </td>
-                         </tr>
-
-                       </tbody>
-                     </table>
-                   </div>
-                 </div>
-             </div>
-             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)" v-if="(mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay) && !nextBtn" :disabled="!proceedBtn" :loading="ProceedLoading">
-              <span v-if="ProceedLoading">Processing</span>
-              <span v-else>Proceed</span>
-             </Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
-           </div>
-
-           <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
-             <div class="recordsDisplay">
-             <h2 class="hclass">Uploaded Records of {{activeTab}}</h2>
-             <Button type="ghost" class="close" @click="deleteRecModal = true"><Icon type="close-circled" class="redIcon"></Icon></Button>
-            </div>
-            <Row>
-              <Col :span="12">
-                <Button type="error" class="delete" @click="deleteSelModal = true" :disabled="delete1"><Icon type="trash-b"></Icon> Delete</Button>
-              </Col>
-              <Col :span="12" style="margin-top:5px">
-                  <Row>
-                    <Col :span="19">
-                      <Input type="text"  class="" style="" placeholder="Filter" v-model="filterValue">
-                        <Icon type="funnel" slot="prepend" class="funnel"></Icon>
-                      </Input>
-                    </Col>
-                    <Col :span="5" class="buttons">
-                      <!-- <Button type="ghost" class="apply" @click = "filter(filterValue,activeTab)" icon="ios-checkmark"></Button>
-                      <Button type="ghost" class="reset" @click="reset()" icon="refresh"></Button> -->
-                      <button type="submit" class="apply" @click = "filter(filterValue,activeTab)"><Icon type="ios-checkmark"></Icon></button>
-                      <button type="submit" class="reset" @click="reset()" :disabled="disableReset"><Icon type="refresh"></Icon></button>
-                    </Col>
+                  <Col span="1" v-if="loadingdot">
+                  <Spin></Spin>
+                  </Col>
                   </Row>
-              </Col>
-            </Row>
-
-
-            <div class="schema-form ivu-table-wrapper previewtable">
-              <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
-                <div class="ivu-table-body">
-                  <table style="min-width:1077px;overflow-x: auto;" v-if="mObj[activeTab].main_arr.length !== 0">
-                    <thead>
-                      <tr>
-                        <!-- <th>
-                           <Checkbox ></Checkbox>
-                        </th> -->
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map && header !== '_id'">
-                          <div>
-                            <span>{{header}}</span>
-                          </div>
-                        </th>
-                      </tr>
-                      <tr>
-                        <th>
-                         <Checkbox v-model="mObj[activeTab].mPage[mObj[activeTab].cpage - 1].mCheck" @on-change="selectAllChunk()" class="check"></Checkbox>
-                        </th>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[mObj[activeTab].cpage - 1][0]) " v-if="map && header !== '_id' && header !== 'is_checked'">
-                          <div>
-                            <span>{{header}}</span>
-                          </div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].main_arr[mObj[activeTab].cpage - 1]">
-                      <tr class="ivu-table-row">
-                        <td>
-                           <Checkbox v-model="item['is_checked']" @on-change="PushToArray(item)"></Checkbox>
-                        </td>
-                        <td class=""  v-for="data in getwithoutid(item)" style="overflow:hidden;padding-left:15px;padding-right:15px">{{data}}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="pagination">
-                  <Page :total="mObj[activeTab].newUploadCSV.length" :current="mObj[activeTab].cpage" @on-change="changePage" :page-size=5> </Page>
-                </div>
-              </div>
-          </div>
-        </div>
-
-          <Modal v-model="deleteRecModal" width="500">
-           <p slot="header" style="color:#f60;text-align:center;font-size:20px">
-               <Icon type="information-circled"></Icon>
-               <span>Delete confirmation</span>
-           </p>
-           <div style="text-align:center">
-               <p style="font-size:15px">Are you sure you want to delete?</p>
-               <p style="font-size:15px">All your records will be deleted...</p>
-           </div>
-           <div slot="footer">
-               <Button type="error" @click="abortUploadedRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
-               <Button type="primary"  @click="deleteRecModal = false">No</Button>
-           </div>
-        </Modal>
-
-        <Modal v-model="deleteSelModal" width="500">
-         <p slot="header" style="color:#f60;text-align:center;font-size:20px">
-             <Icon type="information-circled"></Icon>
-             <span>Delete confirmation</span>
-         </p>
-         <div style="text-align:center">
-             <p style="font-size:15px">Are you sure you want to delete?</p>
-             <p style="font-size:15px">Your selected {{deletedValues.length}} records will be deleted...</p>
-         </div>
-         <div slot="footer">
-             <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
-             <Button type="primary"  @click="deleteSelModal = false">No</Button>
-         </div>
-      </Modal>
-
-            <div v-if="mObj[activeTab].headerDisplay && mObj[activeTab].mapping.length !== 0">
-            <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
-            <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
-             <div class="schema-form ivu-table-wrapper" >
-               <div class="ivu-table ivu-table-border customtable" >
-                 <div class="ivu-table-body">
-                   <table class="mapping-table" style="width:100%;overflow-y:auto;">
-                     <colgroup>
-                       <col width="35">
-                       <col width="35">
-                       <col width="30">
-                     </colgroup>
-                     <thead>
-                       <tr>
-                         <th class="">System headers</th>
-                         <th class="">CSV headers</th>
-                         <th class="">Transform</th>
-                       </tr>
-                     </thead>
-                     <tbody class="ivu-table-tbody">
-                       <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
-                         <td>
-                           <div class="ivu-table-cell" >
-                             <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span>{{item.sysHeader}}</span>
-                              <span v-else>{{item.sysHeader}}</span>
-                           </div>
-                         </td>
-                         <td>
-                           <div class="ivu-table-cell">
-                             <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
-                                 <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header" >{{ header}}</Option>
-                             </Select>
-                           </div>
-                         </td>
-                         <td class="transform-block">
-                           <div class="ivu-table-cell">
-                               <a  @click="modelshow(item,index)"><Icon type="compose"></Icon></a>
-                           </div>
-                           <div v-if="item.transformMethod" class="transform-function" title="">
-                               <span>{{item.transform}}</span>
-                               <span  @click="removeTransform(item,index)"><Icon type="close-circled" /></span>
-                           </div>
-                         </td>
-                       </tr>
-                     </tbody>
-                   </table>
-                 </div>
+                  </FormItem>
+                  </Form>
                </div>
-           </div>
-         </div>
-
-         <div v-if="mObj[activeTab].newSchemaDisplay">
-         <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
-         <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
-         <div class="schema-form ivu-table-wrapper">
-           <div class="ivu-table ivu-table-border customtable" >
-             <div class="ivu-table-body">
-               <table class="mapping-table" style="width:100%;overflow-y:auto;">
-                 <colgroup>
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                 </colgroup>
-                 <thead>
-                   <tr>
-                     <th class="">System headers</th>
-                     <th class="">CSV headers</th>
-                     <th class="">Type</th>
-                     <th class="">Property</th>
-                     <th class="">Transform</th>
-                   </tr>
-                 </thead>
-                 <tbody class="ivu-table-tbody">
-                   <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
-                     <th>
-                       <div class="ivu-table-cell headercolor">
-                         <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span> {{item.sysHeader}}</span>
-                          <span v-else>{{item.sysHeader}}</span>
-                       </div>
-                     </th>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
-                             <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header">{{ header}}</Option>
-                         </Select>
-                       </div>
-                     </td>
-
-                     <td class="">
-                       <div class="ivu-table-cell">
-                         <Select v-model="item.schemaObj.type">
-                             <Option v-for="type in types" :value="type" :key="type">{{ type}}</Option>
-                         </Select>
-                       </div>
-                     </td>
-
-                     <td class="">
-                       <div class="property ivu-table-cell">
-                         <Poptip placement="left" width="300">
-                           <a>
-                             <Icon type="edit"></Icon>
-                           </a>
-                           <div slot="title">
-                             <h3>Property</h3></div>
-                           <div slot="content" class="prptycontent">
-                             <Form label-position="left" >
-                             <FormItem label="MaxLength" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.maxLength" ></Input>
-                             </FormItem>
-                             <FormItem  label="Allowed Value" :label-width="100">
-                                <input-tag  :tags="item.schemaObj.allowedValues" class="prpty-label"></input-tag>
-                             </FormItem>
-                             <FormItem  label="Default Value" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.defaultValue"></Input>
-                             </FormItem>
-                             <FormItem  label="regEx" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.regEx"></Input>
-                             </FormItem>
-                             <FormItem  label="label" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.label"></Input>
-                             </FormItem>
-                             <FormItem  label="" :label-width="100">
-                               <Checkbox  id="prptychckbox" class="propertychbx" v-model="item.schemaObj.optional">Optional</Checkbox>
-                             </FormItem>
-                           </Form>
-                           </div>
-                         </Poptip>
-                       </div>
-                     </td>
-
-                     <td class="transform-block">
-                       <div class="ivu-table-cell">
-                           <a  @click="modelshow(item,index)"><Icon type="compose"></Icon></a>
-                       </div>
-                       <div v-if="item.transformMethod" class="transform-function" title="">
-                           <span>{{item.transform}}</span>
-                           <span  @click="removeTransform(item,index)"><Icon type="close-circled" /></span>
-                       </div>
-                     </td>
-                   </tr>
-                 </tbody>
-               </table>
-             </div>
-           </div>
-       </div>
-     </div>
-
-         <div id="example1" class="hot handsontable htColumnHeaders" style="overflow-x: auto"></div>
-         <table>
-           <tr>
-           <td class="ivu-table-row" style="color:red;font-size:14px;word-break:break-word;">{{mObj[activeTab].errmsg[0]}}</td>
-         </tr>
-         </table>
-         <div id="hot-preview" v-if="mObj[activeTab].showHandson">
-           <Button type="error" @click="AbortValidation(activeTab)" style="float:right;margin-right:10px;">Abort Data</Button>
-         </div>
-         <div id="hot-preview" v-if="mObj[activeTab].showHandson">
-           <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
-         </div>
-
-         <Modal  v-model="model" title="Transform" @on-ok="handleModalOk" width="900px" :mask-closable="false ">
-           <Row style="padding: 10px;">
-             <Col span="18">
-                 <codemirror v-model="transformData" :options="editorOptions"></codemirror>
-             </Col>
-             <Col span="6">
-               <div class="transform-method" style="padding: 0px 30px !important;">
-                 <ul style="list-style-type:disc;">
-                   <li>
-                     <a href="javascript:void(0)" data-method="toUpperCase()" @click="transform">UpperCase</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="toLowerCase()" @click="transform">LowerCase</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="trimRight()" @click="transform">Right Trim</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="trimLeft()" @click="transform">Left Trim</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="concate()" @click="transform">Concat</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="capitalize()" @click="transform">Capitalize</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="stripHTMLTags()" @click="transform">Stripe HTML Tags</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="stripSpecialCharacter()" @click="transform">Stripe Special Character</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="formatDate('yyyy-mm-dd')" @click="transform">Date Format</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="toDecimal(2)" @click="transform">Decimal</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="toInteger()" @click="transform">Integer</a>
-                   </li>
-                 </ul>
+               <div id="upload-csv-zone" v-if="mObj[activeTab].uploadDisplay">
+                  <div class="file-zone">
+                     <span class="dz-message">Drop <span style="color: #494e6b">"{{activeTab}}"</span> files here<br/>
+                     <small>(only csv files are valid.)</small>
+                     </span>
+                     <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
+                  </div>
                </div>
-             </Col>
-           </Row>
-         </Modal>
-
-         <Modal v-model="modal1" width="500" @on-cancel="cancel" >
-          <p slot="header" style="color:#f60;text-align:center;font-size:20px">
-              <Icon type="information-circled"></Icon>
-              <span>Some of your headers are not mapped ...</span>
-          </p>
-          <div style="text-align:center">
-              <p style="font-size:15px">Want to map headers or Continue as it is ?</p>
-              <p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p>
-          </div>
-          <div slot="footer">
-              <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
-              <Button type="primary"  @click="continuee(activeTab)"  style="background-color:#1fb58f;border-color:#1fb58f;" v-if="showContinue" :disabled="!showContinue">
-                <!-- <span v-if="showContinue">Continue</span>
-                <span v-else>Processing...</span> -->
-                Continue
-              </Button>
-          </div>
-       </Modal>
-
-        </div>
-      </Col>
-    </Row>
-    </template>
-    <template v-if="currentStep === 1 && validateStep">
-      <Card :bordered=false style="margin-top:30px">
-      <div v-if="validating" class="demo-spin-col">  <Spin fix>
-                <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                <div>Loading</div>
-            </Spin></div>
-
-        <div>
-        <h2 style="margin-bottom:1%;text-transform: capitalize;" v-if="showValidationTable">Validation Status</h2>
-         <div class="schema-form ivu-table-wrapper" >
-           <div class="ivu-table ivu-table-border customtable border" >
-             <div class="ivu-table-body">
-               <table class="mapping-table" style="width:100%;overflow-y:auto;" id="valid_err">
-                 <colgroup>
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                 </colgroup>
-                 <thead v-if="showValidationTable">
-                   <tr>
-                     <th class="">Validation File Type</th>
-                     <th class="">File Uploaded On</th>
-                     <th class="">Validation Status</th>
-                     <th class="">Total No of Records</th>
-                     <th class="">Validation Progress</th>
-                   </tr>
-                 </thead>
-                 <tbody class="ivu-table-tbody" v-if="!validation_data">
-                   <tr class="ivu-table-row" v-for="(item,index) in val_data" :id="item.name">
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>{{convert(item.name)}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                        <span>{{moment(item.data.uploadedAt).fromNow()}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>{{item.data.validateStatus}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>{{item.data.totalNoOfRecords}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>
-                           <div class="ivu-table-cell">
-                             <i-circle :percent="item.progress" style="width:45px;height:45px;">
-                               <span style="font-size:12px">{{item.progress}}%</span>
-                             </i-circle>
+               <div v-if="showWebImage" id="upload-image-zone">
+                  <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
+                     <span class="dz-message">Select Folder for Mass image upload<br/>
+                     <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
+                     </span>
+                     <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
+                  </form>
+                  <Button type="primary" style="margin-top:0px;color: #fff;margin-top:14px;float:right;padding: 6px 30px;margin-left:1%" @click="Back(activeTab)">Back</Button>
+                  <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)">Abort</Button>
+                  <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)"  :disabled="!proceedBtn" :loading="ProceedLoading">
+                  <span v-if="ProceedLoading">Processing</span>
+                  <span v-else>Proceed</span>
+                  </Button>
+                  <div v-if="image_err.length !== 0" style="margin-top:7%;">
+                     <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
+                     <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
+                     <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
+                        <Row>
+                           <div v-for="(item,index) in image_err">
+                              <Col span="5" >
+                              {{item}}</Col>
                            </div>
-                         </span>
-                       </div>
-                     </td>
-                   </tr>
-                   <!-- <tr>
-                    <td colspan="5">
-                       <div id="validation_err" class="hot handsontable htColumnHeaders"></div>
-                    </td> -->
-                     <!-- <table> -->
-                       <!-- <tr>
-                       <td class="ivu-table-row"  style="color:red;font-size:14px;" v-if="validation_err_fields !== ''">{{validation_err_fields}}</td>
-                     </tr> -->
-                     <!-- </table> -->
-                     <!-- <div id="hot-preview" v-if="proceedNext">
-                       <Button type="primary" @click="proceedToNext()" style="float: right;margin-right: 20px;">Proceed To Next</Button>
-                     </div> -->
-                   <!-- </tr> -->
-                 </tbody>
+                        </Row>
+                     </div>
+                  </div>
+                  <div id="dirinfo">
+                     <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
+                     <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
+                  </div>
+               </div>
+               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">
+                  <Spin fix>
+                     <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                     <div>Loading</div>
+                  </Spin>
+               </div>
+               <div v-if="mObj[activeTab].load" class="demo-spin-col" style="margin-top:14px">
+                  <Spin fix>
+                     <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                     <div>Loading</div>
+                  </Spin>
+               </div>
+               <div v-if="mObj[activeTab].previewDisplay && mObj[activeTab].newUploadCSV.length !== 0 ">
+                  <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
+                  <div class="schema-form ivu-table-wrapper">
+                     <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
+                        <div class="ivu-table-body" style="overflow:auto !important;">
+                           <table style="min-width:1077px;overflow-x: auto;">
+                              <thead>
+                                 <tr>
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure)" v-if="!map && header !== '_id'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                                 <tr>
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0])" v-if="map && header !== '_id'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
+                                 <tr class="ivu-table-row" v-if="(index<5)">
+                                    <td class="" v-for="data in getwithoutid(item,4)" style="overflow:hidden;">
+                                       {{data}}
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+                  <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
+                  <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)" v-if="(mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay) && !nextBtn" :disabled="!proceedBtn" :loading="ProceedLoading">
+                  <span v-if="ProceedLoading">Processing</span>
+                  <span v-else>Proceed</span>
+                  </Button>
+                  <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
+               </div>
+               <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
+                  <div class="recordsDisplay">
+                     <h2 class="hclass">Uploaded Records of {{activeTab}}</h2>
+                     <Button type="ghost" class="close" @click="deleteRecModal = true">
+                        <Icon type="close-circled" class="redIcon"></Icon>
+                     </Button>
+                  </div>
+                  <Row>
+                     <Col :span="12">
+                     <Button type="error" class="delete" @click="deleteSelModal = true" :disabled="delete1">
+                        <Icon type="trash-b"></Icon>
+                        Delete
+                     </Button>
+                     </Col>
+                     <Col :span="12" style="margin-top:5px">
+                     <Row>
+                        <Col :span="19">
+                        <Input type="text"  class="" style="" placeholder="Filter" v-model="filterValue">
+                        <Icon type="funnel" slot="prepend" class="funnel"></Icon>
+                        </Input>
+                        </Col>
+                        <Col :span="5" class="buttons">
+                        <!-- <Button type="ghost" class="apply" @click = "filter(filterValue,activeTab)" icon="ios-checkmark"></Button>
+                           <Button type="ghost" class="reset" @click="reset()" icon="refresh"></Button> -->
+                        <button type="submit" class="apply" @click = "filter(filterValue,activeTab)">
+                           <Icon type="ios-checkmark"></Icon>
+                        </button>
+                        <button type="submit" class="reset" @click="reset()" :disabled="disableReset">
+                           <Icon type="refresh"></Icon>
+                        </button>
+                        </Col>
+                     </Row>
+                     </Col>
+                  </Row>
+                  <div class="schema-form ivu-table-wrapper previewtable">
+                     <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
+                        <div class="ivu-table-body">
+                           <table style="min-width:1077px;overflow-x: auto;" v-if="mObj[activeTab].main_arr.length !== 0">
+                              <thead>
+                                 <tr>
+                                    <!-- <th>
+                                       <Checkbox ></Checkbox>
+                                       </th> -->
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map && header !== '_id'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                                 <tr>
+                                    <th>
+                                       <Checkbox v-model="mObj[activeTab].mPage[mObj[activeTab].cpage - 1].mCheck" @on-change="selectAllChunk()" class="check"></Checkbox>
+                                    </th>
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[mObj[activeTab].cpage - 1][0]) " v-if="map && header !== '_id' && header !== 'is_checked'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].main_arr[mObj[activeTab].cpage - 1]">
+                                 <tr class="ivu-table-row">
+                                    <td>
+                                       <Checkbox v-model="item['is_checked']" @on-change="PushToArray(item)"></Checkbox>
+                                    </td>
+                                    <td class=""  v-for="data in getwithoutid(item)" style="overflow:hidden;padding-left:15px;padding-right:15px">{{data}}</td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                        <div class="pagination">
+                           <Page :total="mObj[activeTab].newUploadCSV.length" :current="mObj[activeTab].cpage" @on-change="changePage" :page-size=5> </Page>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <Modal v-model="deleteRecModal" width="500">
+                  <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+                     <Icon type="information-circled"></Icon>
+                     <span>Delete confirmation</span>
+                  </p>
+                  <div style="text-align:center">
+                     <p style="font-size:15px">Are you sure you want to delete?</p>
+                     <p style="font-size:15px">All your records will be deleted...</p>
+                  </div>
+                  <div slot="footer">
+                     <Button type="error" @click="abortUploadedRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
+                     <Button type="primary"  @click="deleteRecModal = false">No</Button>
+                  </div>
+               </Modal>
+               <Modal v-model="deleteSelModal" width="500">
+                  <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+                     <Icon type="information-circled"></Icon>
+                     <span>Delete confirmation</span>
+                  </p>
+                  <div style="text-align:center">
+                     <p style="font-size:15px">Are you sure you want to delete?</p>
+                     <p style="font-size:15px">Your selected {{deletedValues.length}} records will be deleted...</p>
+                  </div>
+                  <div slot="footer">
+                     <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
+                     <Button type="primary"  @click="deleteSelModal = false">No</Button>
+                  </div>
+               </Modal>
+               <div v-if="mObj[activeTab].headerDisplay && mObj[activeTab].mapping.length !== 0">
+                  <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
+                  <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
+                  <div class="schema-form ivu-table-wrapper" >
+                     <div class="ivu-table ivu-table-border customtable" >
+                        <div class="ivu-table-body">
+                           <table class="mapping-table" style="width:100%;overflow-y:auto;">
+                              <colgroup>
+                                 <col width="35">
+                                 <col width="35">
+                                 <col width="30">
+                              </colgroup>
+                              <thead>
+                                 <tr>
+                                    <th class="">System headers</th>
+                                    <th class="">CSV headers</th>
+                                    <th class="">Transform</th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody">
+                                 <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
+                                    <td>
+                                       <div class="ivu-table-cell" >
+                                          <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span>{{item.sysHeader}}</span>
+                                          <span v-else>{{item.sysHeader}}</span>
+                                       </div>
+                                    </td>
+                                    <td>
+                                       <div class="ivu-table-cell">
+                                          <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
+                                             <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header" >{{ header}}</Option>
+                                          </Select>
+                                       </div>
+                                    </td>
+                                    <td class="transform-block">
+                                       <div class="ivu-table-cell">
+                                          <a  @click="modelshow(item,index)">
+                                             <Icon type="compose"></Icon>
+                                          </a>
+                                       </div>
+                                       <div v-if="item.transformMethod" class="transform-function" title="">
+                                          <span>{{item.transform}}</span>
+                                          <span  @click="removeTransform(item,index)">
+                                             <Icon type="close-circled" />
+                                          </span>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div v-if="mObj[activeTab].newSchemaDisplay">
+                  <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
+                  <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
+                  <div class="schema-form ivu-table-wrapper">
+                     <div class="ivu-table ivu-table-border customtable" >
+                        <div class="ivu-table-body">
+                           <table class="mapping-table" style="width:100%;overflow-y:auto;">
+                              <colgroup>
+                                 <col width="20">
+                                 <col width="20">
+                                 <col width="20">
+                                 <col width="20">
+                                 <col width="20">
+                              </colgroup>
+                              <thead>
+                                 <tr>
+                                    <th class="">System headers</th>
+                                    <th class="">CSV headers</th>
+                                    <th class="">Type</th>
+                                    <th class="">Property</th>
+                                    <th class="">Transform</th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody">
+                                 <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
+                                    <th>
+                                       <div class="ivu-table-cell headercolor">
+                                          <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span> {{item.sysHeader}}</span>
+                                          <span v-else>{{item.sysHeader}}</span>
+                                       </div>
+                                    </th>
+                                    <td>
+                                       <div class="ivu-table-cell">
+                                          <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
+                                             <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header">{{ header}}</Option>
+                                          </Select>
+                                       </div>
+                                    </td>
+                                    <td class="">
+                                       <div class="ivu-table-cell">
+                                          <Select v-model="item.schemaObj.type">
+                                             <Option v-for="type in types" :value="type" :key="type">{{ type}}</Option>
+                                          </Select>
+                                       </div>
+                                    </td>
+                                    <td class="">
+                                       <div class="property ivu-table-cell">
+                                          <Poptip placement="left" width="300">
+                                             <a>
+                                                <Icon type="edit"></Icon>
+                                             </a>
+                                             <div slot="title">
+                                                <h3>Property</h3>
+                                             </div>
+                                             <div slot="content" class="prptycontent">
+                                                <Form label-position="left" >
+                                                   <FormItem label="MaxLength" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.maxLength" ></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="Allowed Value" :label-width="100">
+                                                      <input-tag  :tags="item.schemaObj.allowedValues" class="prpty-label"></input-tag>
+                                                   </FormItem>
+                                                   <FormItem  label="Default Value" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.defaultValue"></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="regEx" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.regEx"></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="label" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.label"></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="" :label-width="100">
+                                                      <Checkbox  id="prptychckbox" class="propertychbx" v-model="item.schemaObj.optional">Optional</Checkbox>
+                                                   </FormItem>
+                                                </Form>
+                                             </div>
+                                          </Poptip>
+                                       </div>
+                                    </td>
+                                    <td class="transform-block">
+                                       <div class="ivu-table-cell">
+                                          <a  @click="modelshow(item,index)">
+                                             <Icon type="compose"></Icon>
+                                          </a>
+                                       </div>
+                                       <div v-if="item.transformMethod" class="transform-function" title="">
+                                          <span>{{item.transform}}</span>
+                                          <span  @click="removeTransform(item,index)">
+                                             <Icon type="close-circled" />
+                                          </span>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div id="example1" class="hot handsontable htColumnHeaders" style="overflow-x: auto"></div>
+               <table>
+                  <tr>
+                     <td class="ivu-table-row" style="color:red;font-size:14px;word-break:break-word;">{{mObj[activeTab].errmsg[0]}}</td>
+                  </tr>
                </table>
-               <!-- <div id="validation_err" class="hot handsontable htColumnHeaders"></div> -->
-             </div>
-           </div>
-       </div>
-      </div>
-
-
-      <div v-if="validation_completed"><p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p></div>
-      <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
-      <Button type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Import</Button>
-      </Card>
-    </template>
-    <template v-if="currentStep === 2 && importStep">
-      <Card :bordered=false style="margin-top:30px">
-        <div v-if="!import1">
-          <h2>Import in progress</h2>
-          <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
-          <Progress :percent="progressPercent"></Progress>
-        </div>
-      <div v-if="import1"><h2>Import Completed</h2></div>
-      <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
-      <div v-if="import1"  style="font-size:18px;margin-top:20px">
-        <h3>Sync With</h3>
-        <Row style="">
-          <Col :span="6" style="padding:10px;">
-            <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
-            <div v-if="asiSync">
-              <div style="padding-top:10px;"><div style="font-size:12px;">Select ASI configuration</div>
-                <Select v-model="asiValue" multiple style="width:260px" filterable  @on-change="handleasiChange">
-                    <Option v-for="item in asiconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                </Select>
-                <div v-if="isasiValid" style="font-size:12px;color:red;">! credintial must required.</div>
-              </div>
+               <div id="hot-preview" v-if="mObj[activeTab].showHandson">
+                  <Button type="error" @click="AbortValidation(activeTab)" style="float:right;margin-right:10px;">Abort Data</Button>
+               </div>
+               <div id="hot-preview" v-if="mObj[activeTab].showHandson">
+                  <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
+               </div>
+               <Modal  v-model="model" title="Transform" @on-ok="handleModalOk" width="900px" :mask-closable="false ">
+                  <Row style="padding: 10px;">
+                     <Col span="18">
+                     <codemirror v-model="transformData" :options="editorOptions"></codemirror>
+                     </Col>
+                     <Col span="6">
+                     <div class="transform-method" style="padding: 0px 30px !important;">
+                        <ul style="list-style-type:disc;">
+                           <li>
+                              <a href="javascript:void(0)" data-method="toUpperCase()" @click="transform">UpperCase</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="toLowerCase()" @click="transform">LowerCase</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="trimRight()" @click="transform">Right Trim</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="trimLeft()" @click="transform">Left Trim</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="concate()" @click="transform">Concat</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="capitalize()" @click="transform">Capitalize</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="stripHTMLTags()" @click="transform">Stripe HTML Tags</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="stripSpecialCharacter()" @click="transform">Stripe Special Character</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="formatDate('yyyy-mm-dd')" @click="transform">Date Format</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="toDecimal(2)" @click="transform">Decimal</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="toInteger()" @click="transform">Integer</a>
+                           </li>
+                        </ul>
+                     </div>
+                     </Col>
+                  </Row>
+               </Modal>
+               <Modal v-model="modal1" width="500" @on-cancel="cancel" >
+                  <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+                     <Icon type="information-circled"></Icon>
+                     <span>Some of your headers are not mapped ...</span>
+                  </p>
+                  <div style="text-align:center">
+                     <p style="font-size:15px">Want to map headers or Continue as it is ?</p>
+                     <p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p>
+                  </div>
+                  <div slot="footer">
+                     <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
+                     <Button type="primary"  @click="continuee(activeTab)"  style="background-color:#1fb58f;border-color:#1fb58f;" v-if="showContinue" :disabled="!showContinue">
+                        <!-- <span v-if="showContinue">Continue</span>
+                           <span v-else>Processing...</span> -->
+                        Continue
+                     </Button>
+                  </div>
+               </Modal>
             </div>
-          </Col>
-          <Col :span="6" style="padding:10px;">
-            <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox></Checkbox>
-            <div v-if="sageSync">
-              <div style="padding-top:10px;"><div style="font-size:12px;">Select SAGE configuration</div>
-                <Select v-model="sageValue" multiple style="width:260px" filterable  @on-change="handlesageChange">
-                    <Option v-for="item in sageconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                </Select>
-                <div v-if="issageValid" style="font-size:12px;color:red;">! credintial must required.</div>
-              </div>
+            </Col>
+         </Row>
+      </template>
+      <template v-if="currentStep === 1 && validateStep">
+         <Card :bordered=false style="margin-top:30px">
+            <div v-if="validating" class="demo-spin-col">
+               <Spin fix>
+                  <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                  <div>Loading</div>
+               </Spin>
             </div>
-          </Col>
-        </Row>
-      </div>
-      <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
-      <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
-      </Card>
-    </template>
-    <!-- {{getValue()}} -->
+            <div>
+               <h2 style="margin-bottom:1%;text-transform: capitalize;" v-if="showValidationTable">Validation Status</h2>
+               <div class="schema-form ivu-table-wrapper" >
+                  <div class="ivu-table ivu-table-border customtable border" >
+                     <div class="ivu-table-body">
+                        <table class="mapping-table" style="width:100%;overflow-y:auto;" id="valid_err">
+                           <colgroup>
+                              <col width="20">
+                              <col width="20">
+                              <col width="20">
+                              <col width="20">
+                              <col width="20">
+                           </colgroup>
+                           <thead v-if="showValidationTable">
+                              <tr>
+                                 <th class="">Validation File Type</th>
+                                 <th class="">File Uploaded On</th>
+                                 <th class="">Validation Status</th>
+                                 <th class="">Total No of Records</th>
+                                 <th class="">Validation Progress</th>
+                              </tr>
+                           </thead>
+                           <tbody class="ivu-table-tbody" v-if="!validation_data">
+                              <tr class="ivu-table-row" v-for="(item,index) in val_data" :id="item.name">
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{convert(item.name)}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{moment(item.data.uploadedAt).fromNow()}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{item.data.validateStatus}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{item.data.totalNoOfRecords}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>
+                                          <div class="ivu-table-cell">
+                                             <i-circle :percent="item.progress" style="width:45px;height:45px;">
+                                                <span style="font-size:12px">{{item.progress}}%</span>
+                                             </i-circle>
+                                          </div>
+                                       </span>
+                                    </div>
+                                 </td>
+                              </tr>
+                              <!-- <tr>
+                                 <td colspan="5">
+                                    <div id="validation_err" class="hot handsontable htColumnHeaders"></div>
+                                 </td> -->
+                              <!-- <table> -->
+                              <!-- <tr>
+                                 <td class="ivu-table-row"  style="color:red;font-size:14px;" v-if="validation_err_fields !== ''">{{validation_err_fields}}</td>
+                                 </tr> -->
+                              <!-- </table> -->
+                              <!-- <div id="hot-preview" v-if="proceedNext">
+                                 <Button type="primary" @click="proceedToNext()" style="float: right;margin-right: 20px;">Proceed To Next</Button>
+                                 </div> -->
+                              <!-- </tr> -->
+                           </tbody>
+                        </table>
+                        <!-- <div id="validation_err" class="hot handsontable htColumnHeaders"></div> -->
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div v-if="validation_completed">
+               <p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p>
+            </div>
+            <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
+            <Button :loading="importLoading" type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Import</Button>
+         </Card>
+      </template>
+      <template v-if="currentStep === 2 && importStep">
+         <Card :bordered=false style="margin-top:30px">
+            <div v-if="!import1">
+               <h2>Import in progress</h2>
+               <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
+               <Progress :percent="progressPercent"></Progress>
+            </div>
+            <div v-if="import1">
+               <h2>Import Completed</h2>
+            </div>
+            <div v-if="import1">
+               <p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p>
+            </div>
+            <div v-if="import1"  style="font-size:18px;margin-top:20px">
+               <h3>Sync With</h3>
+               <Row style="">
+                  <Col :span="6" style="padding:10px;">
+                  <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
+                  <div v-if="asiSync">
+                     <div style="padding-top:10px;">
+                        <div style="font-size:12px;">Select ASI configuration</div>
+                        <Select v-model="asiValue" multiple style="width:260px" filterable  @on-change="handleasiChange">
+                           <Option v-for="item in asiconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                        </Select>
+                        <div v-if="isasiValid" style="font-size:12px;color:red;">! credintial must required.</div>
+                     </div>
+                  </div>
+                  </Col>
+                  <Col :span="6" style="padding:10px;">
+                  <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox>
+                  </Checkbox>
+                  <div v-if="sageSync">
+                     <div style="padding-top:10px;">
+                        <div style="font-size:12px;">Select SAGE configuration</div>
+                        <Select v-model="sageValue" multiple style="width:260px" filterable  @on-change="handlesageChange">
+                           <Option v-for="item in sageconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                        </Select>
+                        <div v-if="issageValid" style="font-size:12px;color:red;">! credintial must required.</div>
+                     </div>
+                  </div>
+                  </Col>
+               </Row>
+            </div>
+            <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
+            <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
+         </Card>
+      </template>
+      <!-- {{getValue()}} -->
    </div>
 </template>
 
@@ -718,6 +719,7 @@ export default {
       validation_data: false,
       import1: false,
       loading: false,
+      importLoading: false,
       transformData: '',
       transformMethod: '',
       modelIndex: '',
@@ -2073,7 +2075,7 @@ export default {
       let jobQueueObj = {
         'importTrackerId': id
       }
-
+      self.importLoading = true
       api.request('post', '/import-to-jobqueue/', jobQueueObj).then(res => {
         if (res.data) {
           this.showValidationTable = false
@@ -2086,8 +2088,10 @@ export default {
             this.abortImportBtn = false
           }
         }
+        self.importLoading = false
       })
               .catch(error => {
+                self.importLoading = false
                 if (error.response) {
                   self.$Notice.error({
                     title: error.response.data.name,
@@ -3959,6 +3963,9 @@ export default {
               let oldTabIndex = ''
               _.forEach(self.fileTypes, function (value, key) {
                 if (value === self.activeTab) {
+                  if (self.fileTypes.length - 1 === key) {
+                    key = -1
+                  }
                   newTab = self.fileTypes[key + 1]
                   oldTabIndex = value.replace(/ /g, '_')
                 }
@@ -4052,10 +4059,8 @@ export default {
   watch: {
     'image_batch': function (batch) {
       let self = this
-      console.log('batch called....', batch)
       if (batch.length >= 2) {
         let batchChunk = lodash.chunk(batch, 2)
-        console.log('batch Chunk....', batchChunk)
         for (let i = 0; i < batchChunk.length; i++) {
           socket.emit('images', batchChunk[i], (err, data) => {
             console.log('data....', data)
@@ -4106,7 +4111,7 @@ export default {
           }
         }
         // Get configuration of asi and sage
-        this.$Spin.show()
+        // this.$Spin.show()
         asconfigModal.get({
           userID: this.$store.state.user._id
         }).then(resp => {
@@ -4206,7 +4211,6 @@ export default {
         if (this.$store.state.disconnect === false) {
           socket.emit('uploader-schema::find', {'subscriptionId': this.$store.state.subscription_id, 'import_tracker_id': id}, (e, res) => {
             if (res) {
-              console.log('res......', res)
               self.existingSchemaData = res.data[0]
               let schemaNames = lodash.groupBy(res.data, 'tabname')
               let schemavalue = lodash.isEmpty(schemaNames)
