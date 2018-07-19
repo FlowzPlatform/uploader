@@ -2779,6 +2779,7 @@ export default {
           resolve('done')
         })
         .catch(error => {
+          console.log('error at saveCSVFiles:',error)
           if (error.response) {
             if (error.response.data.message === 'This csv file entry already exists') {
               CSVFileId = error.response.data.data.CSVFileId
@@ -2825,6 +2826,7 @@ export default {
           resolve('done')
         })
       .catch(error => {
+         console.log('error at saveonlyCSVFiles:',error)
         if (error.response) {
           if (error.response.data.message === 'This csv file entry already exists') {
             CSVFileId = error.response.data.data.CSVFileId
@@ -4257,6 +4259,7 @@ export default {
       }
     })
       .catch(error => {
+        console.log("error at mounted:",error)
         if (error.response) {
           this.$Notice.error({
             title: error.response.data.name,
