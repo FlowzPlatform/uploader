@@ -18,8 +18,10 @@ import io from 'socket.io-client'
 import Emitter from '@/mixins/emitter'
 import config from '@/config'
 import Cookies from 'js-cookie'
+import Papa from 'papaparse'
 var lodash = require('lodash')
 var moment = require('moment')
+var flatten = require('flat')
 moment().format()
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -104,8 +106,30 @@ export default {
           render: (h, params) => {
             return h('div', params.row.username)
           }
+        },
+        {
+          title: 'Export',
+          width: 200,
+          render: (h, params) => {
+            return h(
+              'Button',
+              {
+                props: {
+                  type: 'primary'
+                },
+                style: {},
+                on: {
+                  click: () => {
+                    this.exportdata({ filename: 'stock-data.csv' })
+                  }
+                }
+              },
+              'export'
+            )
+          }
         }
       ],
+      csv: '',
       data2: [],
       chunkData: [],
       loading: true,
@@ -213,6 +237,43 @@ export default {
           duration: 10
         })
       }
+    },
+    exportdata: async function () {
+      console.log('hello export')
+      await axios
+        .get(config.vshoplist, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;',
+            authorization: Cookies.get('auth_token')
+          }
+        })
+        .then(async response => {
+          console.log('response', response.data)
+          await axios
+            .get(config.pdmnew, {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;',
+                vid: response.data[0].id
+              }
+            })
+            .then(async response => {
+              // console.log('response ------- ', response.data.hits.hits)
+              let productdata = response.data.hits.hits
+              const csv = Papa.unparse(productdata.map(flatten))
+              // console.log('csv', csv)
+              var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+              var link = document.createElement('a')
+              link.href = window.URL.createObjectURL(blob)
+              link.download = 'product-data.csv'
+              link.click()
+            })
+            .catch(err => {
+              console.log(err)
+            })
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
   },
   feathers: {
@@ -325,17 +386,17 @@ export default {
   overflow: inherit !important;
 }
 .demo-spin-icon-load{
-       animation: ani-demo-spin 1s linear infinite;
-   }
+  animation: ani-demo-spin 1s linear infinite;
+}
 @keyframes ani-demo-spin {
-   from { transform: rotate(0deg);}
-   50%  { transform: rotate(180deg);}
-   to   { transform: rotate(360deg);}
+  from { transform: rotate(0deg);}
+  50%  { transform: rotate(180deg);}
+  to   { transform: rotate(360deg);}
 }
 .demo-spin-col{
-   height: 100px;
-   position: relative;
-   border: 1px solid #eee;
+  height: 100px;
+  position: relative;
+  border: 1px solid #eee;
 }
 .pagination{
   margin-top: 10px;
@@ -348,12 +409,12 @@ export default {
 .jobtable .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
 .jobtable .ivu-table .ivu-table-tip {overflow-x: hidden;}
 .pagination .ivu-page-total {
-    display: inline-block;
-    height: 32px;
-    line-height: 32px;
-    margin-right: 10px;
-    font-size: 13px !important;
-    font-weight: 500 !important;
+  display: inline-block;
+  height: 32px;
+  line-height: 32px;
+  margin-right: 10px;
+  font-size: 13px !important;
+  font-weight: 500 !important;
 }
 
 </style>
