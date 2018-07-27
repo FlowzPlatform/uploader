@@ -1,6 +1,7 @@
 <template>
     <div class="pdmlist">
-        <Table :columns="columns" :data="tdata"></Table>
+        <Table :loading="productListLoading" :columns="columns" :data="productList" no-data-text="Products Not Found"></Table>
+        <Page class="pull-right" style="margin-top:10px;" :total="tdata.length" show-total :page-size="pageSize" :current="currentPage" @on-change="changePage"></Page>
     </div>
 </template>
 
@@ -11,7 +12,7 @@ export default {
   name: 'pdmlist',
   data () {
     return {
-      vid: 'b45d766c-4529-4ba3-8068-5c03e749596a',
+      vid: 'dca74bcc-e590-42ad-bd16-16f77d7dfc69',
       columns: [
         {
           title: '_id',
@@ -47,28 +48,59 @@ export default {
           }
         }
       ],
-      tdata: []
+      tdata: [],
+      productList: [],
+      productListLoading: true,
+      currentPage: 1,
+      pageSize: 10
     }
   },
   methods: {
+    async changePage (pageNo) {
+      this.productList = await this.makeChunk(pageNo, this.pageSize)
+    },
+    async makeChunk (pageNo, size) {
+      let chunk = []
+      for (let i = (pageNo - 1) * size; i < size + (pageNo - 1) * size; i++) {
+        if (this.tdata[i] !== undefined) {
+          await chunk.push(this.tdata[i])
+        }
+      }
+      return chunk.slice()
+    },
     async init () {
-      let url = 'https://api.flowzcluster.tk/pdmnew/pdm'
+      let url = 'http://localhost:3038/pdm'
       this.tdata = await axios.get(url, {
+        params: {
+          source: 'sku'
+        },
         headers: {
           vid: this.vid
         }
-      }).then(res => {
-        return _.map(res.data.hits.hits, (item) => {
-          let iitem = item._source
-          iitem._id = item._id
-          return iitem
+      }).then(async (res) => {
+        return axios.get(url, {
+          params: {
+            $limit: res.data.hits.total
+          },
+          headers: {
+            vid: this.vid
+          }
+        }).then(res => {
+          return _.map(res.data.hits.hits, (item) => {
+            let iitem = item._source
+            iitem._id = item._id
+            return iitem
+          })
         })
         // console.log('resp: ', res)
       }).catch(err => {
-        console.log('err', err)
+        console.log('Error while getting products::', err)
+        this.productListLoading = false
         return []
       })
-      console.log(this.tdata)
+      this.productList = await this.makeChunk(this.currentPage, this.pageSize)
+      this.productListLoading = false
+      // console.log(this.tdata)
     }
   },
   mounted () {
