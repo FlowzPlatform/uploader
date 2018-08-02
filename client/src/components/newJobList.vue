@@ -1,7 +1,11 @@
 <template>
   <div>
-    <h2 class="listUpld">List of Uploads</h2><br>
-    <Table :columns="columns1" :data="chunkData[cpage-1]" :loading="bloading" class="jobtable"></Table>
+    <Row>
+        <Col span="12"><h2 class="listUpld" style="font-size:24px;float:left">List of Uploads</h2><br></Col>
+        <Col span="12"><Button type="primary"  :loading="bloading" @click="exportdata" style="float:right">Export Live</Button></Col>
+    </Row>
+    <br>
+    <Table :columns="columns1" :data="chunkData[cpage-1]" class="jobtable"></Table>
     <div class="pagination">
       <Page :total="data2.length" :current="cpage" @on-change="changePage" :page-size=10 show-total></Page>
     </div>
@@ -111,28 +115,6 @@ export default {
           width: 200,
           render: (h, params) => {
             return h('div', params.row.username)
-          }
-        },
-        {
-          title: 'Export',
-          width: 200,
-          render: (h, params) => {
-            return h(
-              'Button',
-              {
-                props: {
-                  type: 'primary'
-                },
-                style: {},
-                on: {
-                  click: () => {
-                    this.bloading = true
-                    this.exportdata()
-                  }
-                }
-              },
-              'export'
-            )
           }
         }
       ],
@@ -276,6 +258,7 @@ export default {
     },
     exportdata: async function () {
       console.log('hello export')
+      this.bloading = true
       await axios
         .get(config.vshoplist, {
           headers: {
