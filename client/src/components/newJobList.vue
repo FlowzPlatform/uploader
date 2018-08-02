@@ -284,7 +284,7 @@ export default {
           }
         })
         .then(async response => {
-          console.log('response', response.data)
+          // console.log('response', response.data)
           await axios
             .get(config.pdmnew, {
               headers: {
@@ -293,7 +293,7 @@ export default {
               }
             })
             .then(async response => {
-              console.log('response ------- ', response.data.hits.hits)
+              // console.log('response ------- ', response.data.hits.hits)
               let productdata = response.data.hits.hits
 
               let shippingData = []
@@ -301,32 +301,26 @@ export default {
               let pricingData = []
               let imageData = []
               let productInfo = []
-              //  var shippingdata = []
               let csvdata = []
-              //  let csvdownload = []
               _.forEach(productdata, async function (item) {
                 // console.log("item", item._source.shipping);
 
                 let shipping = _.forEach(item._source.shipping, async function (pship) {
-                  console.log('pship', pship['_id'])
+                  // console.log('pship', pship['_id'])
                   delete pship._id
-                  // console.log("item._source.pricing >>>>>>>>>",item._source.pricing )
                 })
                 let impData = _.forEach(item._source.imprint_data, async function (pimp) {
-                  console.log('pimp', pimp['_id'])
+                  // console.log('pimp', pimp['_id'])
                   delete pimp._id
-                  // console.log("item._source.pricing >>>>>>>>>",item._source.pricing )
                 })
                 let pricing = _.forEach(item._source.pricing, async function (pprice) {
-                  console.log('pprice', pprice)
+                  // console.log('pprice', pprice)
                   delete pprice._id
                   // pricingData.push(pprice)
-                  // console.log("item._source.pricing >>>>>>>>>",item._source.pricing )
                 })
                 let images = _.forEach(item._source.images, async function (pimages) {
-                  console.log('pimages', pimages['_id'])
+                  // console.log('pimages', pimages['_id'])
                   delete pimages._id
-                  // console.log("item._source.pricing >>>>>>>>>",item._source.pricing )
                 })
                 // console.log('pricing.length', pricing.length)
                 // console.log('pricing', pricing)
@@ -364,7 +358,7 @@ export default {
                 imageData,
                 productInfo
               )
-              console.log('csvdata', csvdata)
+              // console.log('csvdata', csvdata)
               var mergedShipping = [].concat.apply([], csvdata[0])
               var mergedImprint = [].concat.apply([], csvdata[1])
               var mergedPricing = [].concat.apply([], csvdata[2])
@@ -400,10 +394,24 @@ export default {
                 // see FileSaver.js
                 FileSaver.saveAs(content, 'product-data.zip')
               })
-            }).catch(err => console.log(err))
+            }).catch(err => {
+              console.log(err)
+              this.$Notice.error({
+                title: err.message,
+                // desc: err.message,
+                duration: 5
+              })
+              this.bloading = false
+            })
         })
         .catch(err => {
           console.log(err)
+          this.$Notice.error({
+            title: err.message,
+            // desc: err.message,
+            duration: 5
+          })
+          this.bloading = false
         })
       this.bloading = false
     }
