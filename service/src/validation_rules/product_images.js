@@ -6,7 +6,8 @@ const ProductImageRules = [
     errorString: "SKU field found blank",
     errorCode: 'SKUblankCheck400',
     qryMongo : {$or:[{"sku":null},{"sku":""}]},
-    qryES : {}
+    qryES : {},
+    qryObject: (sku)=>{ return (sku == null || sku == "")}
   }
 ];
 

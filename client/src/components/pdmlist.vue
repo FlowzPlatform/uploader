@@ -12,7 +12,7 @@ export default {
   name: 'pdmlist',
   data () {
     return {
-      vid: 'dca74bcc-e590-42ad-bd16-16f77d7dfc69',
+      vid: '1dee7d8d-d06a-475c-a4f5-e548a3709610',
       columns: [
         {
           title: '_id',
@@ -69,7 +69,7 @@ export default {
       return chunk.slice()
     },
     async init () {
-      let url = 'http://localhost:3038/pdm'
+      let url = 'http://172.16.230.161:3038/pdm'
       this.tdata = await axios.get(url, {
         params: {
           source: 'sku'
@@ -98,6 +98,7 @@ export default {
         this.productListLoading = false
         return []
       })
+      this.tdata = _.sortBy(this.tdata, [function (o) { return o.sku }])
       this.productList = await this.makeChunk(this.currentPage, this.pageSize)
       this.productListLoading = false
       // console.log(this.tdata)

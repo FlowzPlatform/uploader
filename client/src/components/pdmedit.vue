@@ -57,7 +57,7 @@
                     <Span>{{value}}</Span>
                   </div> -->
                   <div v-for="(value, key) in mObj" :key="key">
-                    <Span v-if="value.errmsg.length > 0">{{key}}</Span>
+                    <Span v-if="value.errmsg.length > 0"><Strong>{{key}}</Strong></Span>
                     <div v-if="value.errmsg.length > 0" v-for="(val, ky) in value.errmsg" :key="ky">
                       <Span>{{val}}</Span>
                     </div>
@@ -98,6 +98,7 @@
 /* eslint-disable */
 import axios from 'axios'
 import lodash from 'lodash'
+import api from '../api'
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
@@ -135,15 +136,16 @@ JSONEditor.defaults.iconlib = 'fontawesome4'
 
 // import VueFormGenerator from "vue-form-generator"
 // Vue.use(VueFormGenerator)
+// 'dca74bcc-e590-42ad-bd16-16f77d7dfc69'
 let err_length = 0
 export default {
   name: 'pdmedit',
   data () {
     return {
-      pdmUrl: 'http://localhost:3038/pdm',
+      pdmUrl: 'http://172.16.230.161:3038/pdm',
       tab0: true,
       tab1: true,
-      vid: 'dca74bcc-e590-42ad-bd16-16f77d7dfc69',
+      vid: '1dee7d8d-d06a-475c-a4f5-e548a3709610',
       pdata: {},
       simpledata:{},
       realdata: {},
@@ -180,14 +182,6 @@ export default {
           mapping: [],
           errmsg: []
         }
-        // 'errmsg': [],
-        // 'advErrmsg': {
-        //   'Product Information': [],
-        //   'Product Price': [],
-        //   'Product Imprint Data': [],
-        //   'Product Image': [],
-        //   'Product Shipping': []
-        // }
       }
     }
   },
@@ -236,19 +230,52 @@ export default {
       let productInfo = []
       productInfo.push(productData)
       console.log('after delete', productInfo)
-
+      let srvVld = {
+        data: productData,
+        sheet_name: 'Product Information'
+      }
+      let serverValidation = await api.request('post', '/product-validation', srvVld)
+      console.log('serverValidation:::', serverValidation)
       let pInfo_error = await this.proceedToValidate('Product Information', productInfo)
       if (data.pricing != undefined) {
-        let pPrice_error = await this.proceedToValidate('Product Price', data.pricing)
+        let pricingData = data.pricing
+        keyToDelete = ['import-tracker_id', 'price_range']
+        pricingData.map(item => {
+          keyToDelete.forEach(e => {
+            delete item[e]
+          })
+        })
+        let pPrice_error = await this.proceedToValidate('Product Price', pricingData)
       }
       if (data.imprint_data != undefined) {
-        let pImprint_error = await this.proceedToValidate('Product Imprint Data', data.imprint_data)
+        let imprintData = data.imprint_data
+        keyToDelete = ['import-tracker_id', 'imprint_data_range']
+        imprintData.map(item => {
+          keyToDelete.forEach(e => {
+            delete item[e]
+          })
+        })
+        let pImprint_error = await this.proceedToValidate('Product Imprint Data', imprintData)
       }
       if (data.images != undefined) {
-        let pImage_error = await this.proceedToValidate('Product Image', data.images)
+        let imagesData = data.images
+        keyToDelete = ['import-tracker_id', 'images']
+        imagesData.map(item => {
+          keyToDelete.forEach(e => {
+            delete item[e]
+          })
+        })
+        let pImage_error = await this.proceedToValidate('Product Image', imagesData)
       }
       if (data.shipping != undefined) {
-        let pShipping = await this.proceedToValidate('Product Shipping', data.shipping)
+        let shippingData = data.shipping
+        keyToDelete = ['import-tracker_id', 'shipping_range']
+        shippingData.map(item => {
+          keyToDelete.forEach(e => {
+            delete item[e]
+          })
+        })
+        let pShipping = await this.proceedToValidate('Product Shipping', shippingData)
       }
       // if (self.activetab === 0) {
       //     _.forIn(self.mObj, (value, key) => {
@@ -272,9 +299,9 @@ export default {
         let result = this.mapData(data)
         // console.log("RES::::", data)
         _.forIn(this.mObj, (value, key) => {
-          console.log(':: :: ', key)
+          // console.log(':: :: ', key)
           if (value.errmsg.length > 0) {
-            console.log('Error found', value.errmsg)
+            // console.log('Error found', value.errmsg)
             this.simpleValidate = false
             return false
           } else {
@@ -299,9 +326,9 @@ export default {
       } else if (this.activetab === 1) {
         console.log('Advanced Value:::', data)
         _.forIn(this.mObj, (value, key) => {
-          console.log(':: :: ', key)
+          // console.log(':: :: ', key)
           if (value.errmsg.length > 0) {
-            console.log('Error found', value.errmsg)
+            // console.log('Error found', value.errmsg)
             this.advancedValidate = false
             return false
           } else {
@@ -311,33 +338,26 @@ export default {
         if (this.advancedValidate) {
         // if (this.mObj.advErrmsg.length == 0) {
           console.log('No error, advanced data is going to live')
-          // axios.patch(url, data, {
-          //   headers: {
-          //     vid: this.vid
-          //   }
-          // }).then(res => {
-          //   this.$Notice.success({
-          //     title: 'Update Successfull',
-          //     desc: 'Product details updated successfully.'
-          //   })
-          //   console.log('Updated Data::', res)
-          // }).catch(err => {
-          //   this.$Notice.error({
-          //     title: 'Update Error',
-          //     desc: 'Error while updating product details'
-          //   })
-          //   console.log('Error while updating data::', err)
-          // })
+          axios.patch(url, data, {
+            headers: {
+              vid: this.vid
+            }
+          }).then(res => {
+            this.$Notice.success({
+              title: 'Update Successfull',
+              desc: 'Product details updated successfully.'
+            })
+            console.log('Updated Data::', res)
+          }).catch(err => {
+            this.$Notice.error({
+              title: 'Update Error',
+              desc: 'Error while updating product details'
+            })
+            console.log('Error while updating data::', err)
+          })
           // }
         }
       }
-      // if(errors.length) { // Not valid        
-        // indicator.className = 'label alert';
-        // indicator.textContent = 'not valid';
-      // } else { // Valid
-        // indicator.className = 'label success';
-        // indicator.textContent = 'valid';
-      // }
     },
     hanleRestore () {
        if(this.activetab === 0){
@@ -353,7 +373,7 @@ export default {
       for(let item in data){
         // console.log("key",item) || item == 'min_price' || item == 'max_price'
         if(item == 'sku' || item == 'price_1' || item == 'currency' ||
-        item == 'product_name' || item == 'language' || item == '_id') {
+        item == 'product_name' || item == 'language' || item == '_id' || item == 'min_price' || item == 'max_price' || item == 'country' || item == 'description') {
           this.simpledata[item] = data[item]
         }
       }
@@ -362,8 +382,12 @@ export default {
     },
     async generateForm (name){
       let tabname = 'tab' + name
-      if(tabname == 'tab1'){
+      _.forIn(this.mObj, (value, key) => {
+        value.errmsg = []
+      })
+      if (tabname == 'tab1') {
         console.log("tab1")
+        this.simpleValidate = true
         this.advanceLoader = true
         document.getElementById('editor_holder').innerHTML = ""
         await this.init(this.$route.params.id)
@@ -384,6 +408,11 @@ export default {
                 optional: false,
                 type: "string",
                 propertyOrder: 2
+              },
+              feature_1: {
+                title: "feature_1",
+                type: "string",
+                default: ""
               },
               _id: {
                 type: "string",
@@ -597,7 +626,8 @@ export default {
                 format: "table",
                 propertyOrder: 42
               },
-              tags: { 
+              tags: {
+                type: "array",
                 title: "Tags",
                 propertyOrder: 43
               },
@@ -642,6 +672,143 @@ export default {
                 title: "Feature",
                 type: "array",
                 propertyOrder: 1001
+              },
+              feature_1: {
+                type: "string",
+                title: "feature_1",
+                default: null
+              },
+              feature_2: {
+                type: "string",
+                title: "feature_2"
+              },
+              feature_3: {
+                type: "string",
+                title: "feature_3"
+              },
+              feature_4: {
+                type: "string",
+                title: "feature_4"
+              },
+              feature_5: {
+                type: "string",
+                title: "feature_5"
+              },
+              feature_6: {
+                type: "string",
+                title: "feature_6"
+              },
+              feature_7: {
+                type: "string",
+                title: "feature_7"
+              },
+              feature_8: {
+                type: "string",
+                title: "feature_8"
+              },
+              feature_9: {
+                type: "string",
+                title: "feature_9"
+              },
+              feature_10: {
+                type: "string",
+                title: "feature_10"
+              },
+              feature_11: {
+                type: "string",
+                title: "feature_11"
+              },
+              feature_12: {
+                type: "string",
+                title: "feature_12"
+              },
+              feature_13: {
+                type: "string",
+                title: "feature_13"
+              },
+              feature_14: {
+                type: "string",
+                title: "feature_14"
+              },
+              feature_15: {
+                type: "string",
+                title: "feature_15"
+              },
+              feature_16: {
+                type: "string",
+                title: "feature_16"
+              },
+              feature_17: {
+                type: "string",
+                title: "feature_17"
+              },
+              feature_18: {
+                type: "string",
+                title: "feature_18"
+              },
+              feature_19: {
+                type: "string",
+                title: "feature_19"
+              },
+              feature_20: {
+                type: "string",
+                title: "feature_20"
+              },
+              feature_21: {
+                type: "string",
+                title: "feature_21"
+              },
+              feature_22: {
+                type: "string",
+                title: "feature_22"
+              },
+              feature_23: {
+                type: "string",
+                title: "feature_23"
+              },
+              feature_24: {
+                type: "string",
+                title: "feature_24"
+              },
+              feature_25: {
+                type: "string",
+                title: "feature_25"
+              },
+              feature_26: {
+                type: "string",
+                title: "feature_26"
+              },
+              feature_27: {
+                type: "string",
+                title: "feature_27"
+              },
+              feature_28: {
+                type: "string",
+                title: "feature_28"
+              },
+              feature_29: {
+                type: "string",
+                title: "feature_29"
+              },
+              feature_30: {
+                type: "string",
+                title: "feature_30"
+              },
+              feature_31: {
+                type: "string",
+                title: "feature_31"
+              },
+              feature_32: {
+                type: "string",
+                title: "feature_32"
+              },
+              feature_33: {
+                type: "string",
+                title: "feature_33"
+              },
+              feature_34: {
+                type: "string",
+                title: "feature_34"
               }
             },
             format: "grid"
@@ -2724,6 +2891,7 @@ export default {
         this.advanceLoader = false
       } else if (tabname == 'tab0') {
         console.log("tab0")
+        this.advancedValidate = true
         this.simpleLoader = true
         document.getElementById('editor_simple').innerHTML = ""
         await this.init(this.$route.params.id)
@@ -2773,6 +2941,14 @@ export default {
                 title: "Currency",
                 type: "string",
                 propertyOrder: 7
+              },
+              country: {
+                type: "string",
+                title: "Country"
+              },
+              description: {
+                type: "string",
+                title: "Description"
               },
               language: {
                 title: "Language",
@@ -3345,14 +3521,14 @@ export default {
                   }
                   if (item.message == "Error during casting") {
                     if (err_type == 'number') {
-                      self.mObj[tab].errmsg.push('* Enter numeric value' + ' at field ' + item.field)
+                      self.mObj[tab].errmsg.push('Enter numeric value' + ' at field ' + item.field)
                       // self.mObj[err_obj].push('* Enter numeric value' + ' at field ' + item.field)
                     } else if (err_type == 'string') {
-                      self.mObj[tab].errmsg.push('* Invalid value' + ' at field ' + item.field)
+                      self.mObj[tab].errmsg.push('Invalid value' + ' at field ' + item.field)
                       // self.mObj[err_obj].push('* Invalid value' + ' at field ' + item.field)
                     }
                   } else {
-                    self.mObj[tab].errmsg.push('* ' + item.message + ' at field ' + item.field)
+                    self.mObj[tab].errmsg.push(item.message + ' at field ' + item.field)
                     // self.mObj[err_obj][tab].push('* ' + item.message + ' at field ' + item.field)
                   }
                 })

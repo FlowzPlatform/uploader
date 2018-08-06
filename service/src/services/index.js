@@ -40,6 +40,10 @@ const uploadImage = require('./upload-image/upload-image.service.js');
 
 
 
+const productValidation = require('./product-validation/product-validation.service.js');
+
+
+
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -67,4 +71,5 @@ module.exports = function() {
   app.configure(importToConfirm);
   app.configure(uploaderValidation);
   app.configure(uploadImage);
+  app.configure(productValidation);
 };

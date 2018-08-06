@@ -11,8 +11,8 @@ if (isSSl === 'true') {
 }
 
 var temp = {
-  serverURI: protocol + '://localhost:' + serverPort,
-  socketURI: protocol + '://localhost:' + socketPort,
+  serverURI: protocol + '://172.16.230.161:' + serverPort,
+  socketURI: protocol + '://172.16.230.161:' + socketPort,
   fixedLayout: false,
   hideLogoOnMobile: false,
   microURI: 'https://api.' + domainkey + '/auth/api',
