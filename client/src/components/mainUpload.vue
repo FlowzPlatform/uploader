@@ -67,7 +67,7 @@
                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
                   </div>
                </div>
-               <div v-if="showWebImage" id="upload-image-zone">
+               <!-- <div v-if="showWebImage" id="upload-image-zone">
                   <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
                      <span class="dz-message">Select Folder for Mass image upload<br/>
                      <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
@@ -108,7 +108,7 @@
                      <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
                      <div>Loading</div>
                   </Spin>
-               </div>
+               </div> -->
                <div v-if="mObj[activeTab].previewDisplay && mObj[activeTab].newUploadCSV.length !== 0 ">
                   <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
                   <div class="schema-form ivu-table-wrapper">
@@ -158,10 +158,10 @@
                   </div>
                   <Row>
                      <Col :span="12">
-                     <Button type="error" class="delete" @click="deleteSelModal = true" :disabled="delete1">
+                     <!-- <Button type="error" class="delete" @click="deleteSelModal = true" :disabled="delete1">
                         <Icon type="trash-b"></Icon>
                         Delete
-                     </Button>
+                     </Button> -->
                      </Col>
                      <Col :span="12" style="margin-top:5px">
                      <Row>
@@ -647,7 +647,6 @@ import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.css'
 import VueCodeMirror from 'vue-codemirror'
 import $ from 'jquery'
-var moment = require('moment')
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
@@ -657,6 +656,7 @@ import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
 
 import asconfigModal from '@/api/asconfiguration'
+var moment = require('moment')
 
 Vue.use(VueCodeMirror)
 moment().format()
@@ -729,7 +729,7 @@ export default {
         theme: 'base16-light',
         lineNumbers: true,
         line: true,
-            // keyMap: 'sublime',
+        // keyMap: 'sublime',
         extraKeys: { 'Ctrl': 'autocomplete' },
         foldGutter: true,
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
@@ -841,7 +841,7 @@ export default {
                     },
                     on: {
                       click: () => {
-                        this.deleteImage(params.row)      // delete image from cloudinary
+                        this.deleteImage(params.row) // delete image from cloudinary
                       }
                     }
                   })
@@ -891,7 +891,7 @@ export default {
                     },
                     on: {
                       click: () => {
-                        this.deleteImageFromList(params.row)      // delete image from cloudinary
+                        this.deleteImageFromList(params.row) // delete image from cloudinary
                       }
                     }
                   })
@@ -1228,7 +1228,7 @@ export default {
       if (fileExt !== 'csv') {
         self.$Notice.error({title: 'Only CSV files are allowed', duration: 1})
       } else {
-          // self.loadProcessing = false
+        // self.loadProcessing = false
         self.mObj[tab].uploadDisplay = false
         self.mObj[tab].load = true
         // let my_flag = true
@@ -1239,19 +1239,19 @@ export default {
           skipEmptyLines: true,
           preview: 5,
           chunk: await function (results, streamer) {
-              // map the user selected headers -> results
-              // do the validation`
-              // send results to server
-              // if abort pressed, discard the stored data on server
-              // else commit the stored data on server for import / live
+            // map the user selected headers -> results
+            // do the validation`
+            // send results to server
+            // if abort pressed, discard the stored data on server
+            // else commit the stored data on server for import / live
 
             self.mObj[tab].uploadCSV = results.data
             self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
             self.mObj[tab].headers.push('_id')
             self.mObj[tab].load = true
-            if (tab === 'Product Image') {
-              self.nextBtn = true
-            }
+            // if (tab === 'Product Image') {
+            //   // self.nextBtn = true
+            // }
             if (self.mObj[tab].new_flag === 1) {
               self.mObj[tab].load = true
               setTimeout(function () {
@@ -1270,79 +1270,79 @@ export default {
         })
       }
     },
-    insertImageUrl (tab) {
-      return new Promise(async (resolve, reject) => {
-        let self = this
-        for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
-          for (let k in self.mObj[tab].uploadCSV[i]) {
-            let n = k.search('Web_Image')
-            if (n !== undefined && n !== -1 && n !== null) {
-              let check = lodash.find(self.secure_url_arr, {file_name: self.mObj[tab].uploadCSV[i][k]})
-              if (check !== undefined) {
-                let abc = k.split('_')
-                self.mObj[tab].uploadCSV[i]['secure_url_' + abc[2]] = check['secure_url']
-              }
-            }
-          }
-        }
-        resolve('done')
-      })
-    },
-    deleteImage (imgdata) {
-      let self = this
-      let resource = 'product_images/' + this.$route.params.id + '/' + imgdata.name
-      api.request('delete', '/upload-image/?resource=' + resource).then(response => {
-        let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
-        self.secure_url_arr.splice(indx, 1)
-        self.dirinfo[imgdata._index]['status'] = 'deleted'
-        self.img_no--
-      })
-    },
-    deleteImageFromList (imgdata) {
-      let self = this
-      if (imgdata.status === 'error') {
-        let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
-        self.secure_url_arr.splice(indx, 1)
-        self.dirinfo.splice(imgdata._index, 1)
-      } else if (imgdata.status === 'deleted') {
-        self.dirinfo.splice(imgdata._index, 1)
-      }
-    },
-    async handleImageChange (e, tab) {
-      let self = this
-      const reader = new FileReader()
-      let fileList = e.target.files
+    // insertImageUrl (tab) {
+    //   return new Promise(async (resolve, reject) => {
+    //     let self = this
+    //     for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
+    //       for (let k in self.mObj[tab].uploadCSV[i]) {
+    //         let n = k.search('Web_Image')
+    //         if (n !== undefined && n !== -1 && n !== null) {
+    //           let check = lodash.find(self.secure_url_arr, {file_name: self.mObj[tab].uploadCSV[i][k]})
+    //           if (check !== undefined) {
+    //             let abc = k.split('_')
+    //             self.mObj[tab].uploadCSV[i]['secure_url_' + abc[2]] = check['secure_url']
+    //           }
+    //         }
+    //       }
+    //     }
+    //     resolve('done')
+    //   })
+    // },
+    // deleteImage (imgdata) {
+    //   let self = this
+    //   let resource = 'product_images/' + this.$route.params.id + '/' + imgdata.name
+    //   api.request('delete', '/upload-image/?resource=' + resource).then(response => {
+    //     let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
+    //     self.secure_url_arr.splice(indx, 1)
+    //     self.dirinfo[imgdata._index]['status'] = 'deleted'
+    //     self.img_no--
+    //   })
+    // },
+    // deleteImageFromList (imgdata) {
+    //   let self = this
+    //   if (imgdata.status === 'error') {
+    //     let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
+    //     self.secure_url_arr.splice(indx, 1)
+    //     self.dirinfo.splice(imgdata._index, 1)
+    //   } else if (imgdata.status === 'deleted') {
+    //     self.dirinfo.splice(imgdata._index, 1)
+    //   }
+    // },
+    // async handleImageChange (e, tab) {
+    //   let self = this
+    //   const reader = new FileReader()
+    //   let fileList = e.target.files
 
-      if (fileList.length < 10) {
-        isDone = true
-      }
+    //   if (fileList.length < 10) {
+    //     isDone = true
+    //   }
 
-      for (let i = 0; i < fileList.length; i++) {
-        let value = lodash.find(self.dirinfo, {'name': fileList[i].name})
-        if (value === undefined) {
-          let fileSize = 0
-          if (fileList[i].size > 1024 * 1024) { fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB' } else { fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB' }
+    //   for (let i = 0; i < fileList.length; i++) {
+    //     let value = lodash.find(self.dirinfo, {'name': fileList[i].name})
+    //     if (value === undefined) {
+    //       let fileSize = 0
+    //       if (fileList[i].size > 1024 * 1024) { fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB' } else { fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB' }
 
-          if (fileList[i].type !== undefined && fileList[i].type !== '') {
-            self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'type': fileList[i].type, 'status': 'Uploading...'})
-          } else if (fileList[i].type === undefined || fileList.type === '') {
-            self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'status': 'Uploading'})
-          }
+    //       if (fileList[i].type !== undefined && fileList[i].type !== '') {
+    //         self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'type': fileList[i].type, 'status': 'Uploading...'})
+    //       } else if (fileList[i].type === undefined || fileList.type === '') {
+    //         self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'status': 'Uploading'})
+    //       }
 
-          reader.readAsDataURL(fileList[i])
-          let uri = await self.retResult(reader)
-          self.image_batch.push({'file': {'url': uri, 'filename': fileList[i].name}, 'folder': 'product_images/' + id + '/'})
-             // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
-          if (i === fileList.length - 1) {
-            isDone = true
-          }
+    //       reader.readAsDataURL(fileList[i])
+    //       let uri = await self.retResult(reader)
+    //       self.image_batch.push({'file': {'url': uri, 'filename': fileList[i].name}, 'folder': 'product_images/' + id + '/'})
+    //       // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
+    //       if (i === fileList.length - 1) {
+    //         isDone = true
+    //       }
 
-          self.total_image = self.dirinfo.length
-        }
-      }
+    //       self.total_image = self.dirinfo.length
+    //     }
+    //   }
 
-      $('.f-layout-copy').css('position', 'absolute')
-    },
+    //   $('.f-layout-copy').css('position', 'absolute')
+    // },
     setImportProgress (totalProduct, uploadedProduct) {
       let self = this
       self.progressPercent = Math.round(uploadedProduct / totalProduct * 100)
@@ -1353,7 +1353,7 @@ export default {
         reader.addEventListener('load', function () {
           let result = reader.result
           resolve(result)
-              // return result
+          // return result
         }, false)
       })
       return Promise.resolve(_promise)
@@ -1376,7 +1376,7 @@ export default {
       self.showWebImage = true
     },
 
-      // to reset the filter
+    // to reset the filter
     reset () {
       if (this.mObj[this.activeTab].filter_flag === true) {
         this.filterValue = ''
@@ -1387,7 +1387,7 @@ export default {
       }
     },
 
-      // filter data according to the selected value
+    // filter data according to the selected value
     filter (filterValue, tab) {
       this.mObj[tab].filter_flag = true
       let mainArray = []
@@ -1415,7 +1415,7 @@ export default {
       }
     },
 
-      // pagination
+    // pagination
     changePage (page) {
       this.mObj[this.activeTab].cpage = page
     },
@@ -1459,7 +1459,7 @@ export default {
       }
     },
 
-      // Pushes the selected values required to be deleted in an array
+    // Pushes the selected values required to be deleted in an array
     PushToArray (item) {
       this.delete1 = false
       this.mObj[this.activeTab].newUploadCSV = []
@@ -1479,7 +1479,7 @@ export default {
       }
     },
 
-      // Deletes the selected records
+    // Deletes the selected records
     RemoveRecords (tab) {
       let self = this
       self.deleteSelModal = false
@@ -1586,31 +1586,41 @@ export default {
         })
     },
 
-      // Removes id from the data to be displayed
+    // Removes id from the data to be displayed
     getwithoutid (obj, value) {
+      // console.log('<<<<< getwithoutid called >>>>>>')
+      // console.log('obj', obj)
+      // console.log('value', value)
       if (obj.hasOwnProperty('is_checked')) {
         let pObj = lodash.cloneDeep(obj)
+        // console.log('pObj', pObj)
         return lodash.omit(pObj, '_id', 'is_checked')
       } else {
         let pObj = lodash.cloneDeep(obj)
+        // console.log('pObj', pObj)
         return lodash.omit(pObj, '_id')
       }
     },
     changeIndex (files) {
+      // console.log('<<<<<<< changeIndex called >>>>>>>>')
+      // console.log('files', files)
       let newIndex = files.replace(/ /g, '_')
+      // console.log('>>>>>>>> newIndex <<<<<<<', newIndex)
       return newIndex
     },
-      // Manages the client side validation handson table in different tabs
+    // Manages the client side validation handson table in different tabs
     hideHandson () {
+      // console.log('<<<<< hideHandson called >>>>>>')
       let self = this
       if (errLength !== 0) {
+        // console.log('self.mObj[self.activeTab]', self.mObj[self.activeTab])
         if (self.mObj[self.activeTab].errDisplay === false) {
           if (document.getElementById('example1') !== null || document.getElementById('example1') !== undefined) {
             if (document.getElementById('example1').innerHTML === '') {
             } else {
               document.getElementById('example1').style.display = 'none'
             }
-                 // document.getElementById('example1').innerHTML = ""
+            // document.getElementById('example1').innerHTML = ""
           } else {
 
           }
@@ -1629,7 +1639,7 @@ export default {
       }
     },
 
-      // Transform functions..........
+    // Transform functions..........
     setTransForm: function () {
       this.transformData = this.modelData
       if (this.mObj[this.activeTab].mapping[this.modelIndex].tranformMethod) {
@@ -1659,9 +1669,9 @@ export default {
         return _.reduce(row, function (result, value, key) {
           let inx = _.find(self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
           if (inx.transform !== '') {
-                // var s = new Function('row', inx.transform).call(this, row)
+            // var s = new Function('row', inx.transform).call(this, row)
                 result[key] = new Function('row', inx.transform).call(this, row) // eslint-disable-line
-                // result[key] = s
+            // result[key] = s
           } else {
             result[key] = value
           }
@@ -1686,7 +1696,7 @@ export default {
       return this.transformData
     },
 
-      // ......Transform functions
+    // ......Transform functions
     getSelectedHeaders (header, data) {
       return data.filter((el) => {
         if (header === el) { return el }
@@ -1704,7 +1714,7 @@ export default {
       }
     },
 
-      // Starts server side validation
+    // Starts server side validation
     startValidation () {
       let self = this
       if (prodInfoUpld === false) {
@@ -1712,13 +1722,13 @@ export default {
           title: 'Please upload Product Information file...'
         })
       } else {
-          // self.uploadStep = false
-          // self.validateStep = true
-          // self.currentStep = 1
-          // $(".f-layout-copy").css("position","fixed");
-          // let obj2 = {
-          //   "stepStatus": "validation_running"
-          // }
+        // self.uploadStep = false
+        // self.validateStep = true
+        // self.currentStep = 1
+        // $(".f-layout-copy").css("position","fixed");
+        // let obj2 = {
+        //   "stepStatus": "validation_running"
+        // }
 
         api.request('get', '/uploader/' + id).then(response => {
           uploaderObj = response.data
@@ -1790,7 +1800,7 @@ export default {
       }
     },
 
-      // Validates all the sheets one by one
+    // Validates all the sheets one by one
     sheetwiseValidation (key, data) {
       let self = this
       this.$store.state.validationStatus = false
@@ -1820,53 +1830,53 @@ export default {
               stepStatus: 'validation_completed'
             }
             api.request('patch', '/uploader/' + id, updatedObj).then(res => {
-                    // this.showValidationTable = false
+              // this.showValidationTable = false
               this.validation_completed = true
             })
-                .catch(error => {
-                  if (error.response) {
-                    self.$Notice.error({
-                      title: error.response.data.name,
-                      desc: error.response.data.message,
-                      duration: 10
-                    })
-                  } else if (error.message === 'Network Error') {
-                    this.$Notice.error({
-                      title: 'API Service unavailable',
-                      duration: 10
-                    })
-                  }
-                })
+              .catch(error => {
+                if (error.response) {
+                  self.$Notice.error({
+                    title: error.response.data.name,
+                    desc: error.response.data.message,
+                    duration: 10
+                  })
+                } else if (error.message === 'Network Error') {
+                  this.$Notice.error({
+                    title: 'API Service unavailable',
+                    duration: 10
+                  })
+                }
+              })
           }
         }
       })
-          .catch(error => {
-            if (error.response) {
-              if (error.response.data.code === 500) {
-                self.$Notice.error({
-                  title: error.response.data.name,
-                  desc: error.response.data.message,
-                  duration: 10
-                })
-              } else if (error.response.data.code === 504) {
-                self.sheetwiseValidation(key, data)
-              } else {
-                self.$Notice.error({
-                  title: error.response.data.name,
-                  desc: error.response.data.message,
-                  duration: 10
-                })
-              }
-            } else if (error.message === 'Network Error') {
+        .catch(error => {
+          if (error.response) {
+            if (error.response.data.code === 500) {
               self.$Notice.error({
-                title: 'API Service unavailable',
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.response.data.code === 504) {
+              self.sheetwiseValidation(key, data)
+            } else {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
                 duration: 10
               })
             }
-          })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
 
-      // To show the server side validation handson
+    // To show the server side validation handson
     showValidationHandson (data, sheetName) {
       let self = this
       let errcols = []
@@ -1910,7 +1920,6 @@ export default {
       document.getElementById('abortServerSide').onclick = function () {
         self.AbortServerSideValidation()
       }
-
       _.forEach(data[0].err_data, (item, key) => {
         errcols.push({
           cols: _.indexOf(Object.keys(self.error_data[0]), data[0].err_fields[0].columnName),
@@ -1921,43 +1930,43 @@ export default {
       let errRow = ''
       let errCol = ''
       // let errArr = []
-          var ht1 =  new Handsontable(cell1, { // eslint-disable-line
-            data: self.error_data,
-            colHeaders: Object.keys(self.error_data[0]),
-            height: 200,
-            hiddenColumns: {
-              columns: [0],
-              indicators: false
-            },
-            cells: (row, col) => {
-              var cellProp = {}
-              _.forEach(errcols, (value, key) => {
-                if (col === value.cols && row === key) {
-                  errRow = key
-                  // errRow.push(key)
-                  // errRow = lodash.uniqBy(errRow)
-                  errCol = col
+      var ht1 =  new Handsontable(cell1, { // eslint-disable-line
+        data: self.error_data,
+        colHeaders: Object.keys(self.error_data[0]),
+        height: 200,
+        hiddenColumns: {
+          columns: [0],
+          indicators: false
+        },
+        cells: (row, col) => {
+          var cellProp = {}
+          _.forEach(errcols, (value, key) => {
+            if (col === value.cols && row === key) {
+              errRow = key
+          // errRow.push(key)
+          // errRow = lodash.uniqBy(errRow)
+              errCol = col
 
-                  cellProp.className = 'error'
-                }
-              })
-
-              return cellProp
-            },
-            afterChange: function (changes, source) {
-              if (changes !== null) {
-                self.updateProductData(changes, source, sheetName)
-              }
+              cellProp.className = 'error'
             }
           })
 
-          // ht1.selectCell(errRow[0],errCol,errRow[errRow.length-1],errCol,true)
+          return cellProp
+        },
+        afterChange: function (changes, source) {
+          if (changes !== null) {
+            self.updateProductData(changes, source, sheetName)
+          }
+        }
+      })
+
+      // ht1.selectCell(errRow[0],errCol,errRow[errRow.length-1],errCol,true)
       ht1.selectCell(errRow, errCol, errRow, errCol, true)
       $('.f-layout-copy').css('position', 'absolute')
       self.proceedNext = true
     },
 
-      // Updates the errors of server side validation on change
+    // Updates the errors of server side validation on change
     updateProductData (changes, source, sheetName) {
       let rowindex = changes[0][0]
       let columnname = changes[0][1]
@@ -1965,7 +1974,7 @@ export default {
       let newvalue = changes[0][3]
 
       if (oldvalue !== newvalue) {
-        let _id = this.error_data[rowindex]._id     // objHandsontable.getDataAtCell(cellChange.rowIndex, 0);
+        let _id = this.error_data[rowindex]._id // objHandsontable.getDataAtCell(cellChange.rowIndex, 0);
 
         let updateObj = {
           _id: _id,
@@ -1978,20 +1987,20 @@ export default {
         api.request('patch', '/uploader-validation/' + id, updateObj).then(res => {
 
         })
-        .catch(error => {
-          if (error.response) {
-            this.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
-          } else if (error.message === 'Network Error') {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          .catch(error => {
+            if (error.response) {
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       }
     },
 
@@ -2031,8 +2040,8 @@ export default {
             }
 
             api.request('patch', '/uploader/' + id, updatedObj).then(res => {
-                // this.showValidationTable = false
-                // this.$store.state.data = []
+              // this.showValidationTable = false
+              // this.$store.state.data = []
               this.validation_completed = true
             })
 
@@ -2069,7 +2078,7 @@ export default {
         })
     },
 
-      // Puts a entry in the jobqueue
+    // Puts a entry in the jobqueue
     importToPDM () {
       let self = this
       let jobQueueObj = {
@@ -2090,28 +2099,28 @@ export default {
         }
         self.importLoading = false
       })
-              .catch(error => {
-                self.importLoading = false
-                if (error.response) {
-                  self.$Notice.error({
-                    title: error.response.data.name,
-                    desc: error.response.data.message,
-                    duration: 10
-                  })
-                } else {
-                  self.$Notice.error({
-                    title: 'API Service unavailable',
-                    duration: 10
-                  })
-                }
-              })
+        .catch(error => {
+          self.importLoading = false
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
     convert (item) {
       item = item.replace(/([A-Z])/g, ' $1').trim()
       return item
     },
 
-      // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
+    // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
     importToConfirm () {
       // let self = this
       let SyncData = ''
@@ -2289,7 +2298,7 @@ export default {
                     }
                   }
                   obj['_id'] = uuidV1()
-                    //  await self.validateObj(schemaObj,obj,tab,errcols,i)
+                  //  await self.validateObj(schemaObj,obj,tab,errcols,i)
                   this.mObj[tab].newUploadCSV.push(obj)
 
                   this.mObj[tab].load = false
@@ -2302,7 +2311,7 @@ export default {
                 }
 
                 // let index = this.mObj[tab].newUploadCSV.length - 1
-                  //  this.mObj[tab].newUploadCSV.splice(index, 1)
+                //  this.mObj[tab].newUploadCSV.splice(index, 1)
                 this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
                 for (let k = 0; k < this.mObj[tab].mapping.length; k++) {
@@ -2431,21 +2440,21 @@ export default {
       this.ProceedLoading = false
       continueFlag = false
 
-      if (tab === 'Product Image') {
-        this.showWebImage = false
-        this.mObj[tab].previewDisplay = true
-        this.mObj[tab].headerDisplay = true
-      }
+      // if (tab === 'Product Image') {
+      //   this.showWebImage = false
+      //   this.mObj[tab].previewDisplay = true
+      //   this.mObj[tab].headerDisplay = true
+      // }
     },
     async continuee (tab) {
       // this.loadProcessing = true
       continueFlag = true
       this.proceedBtn = true
       let self = this
-      if (tab === 'Product Image') {
-        await self.checkImg(tab)
-        // await self.ValidateImages(tab)
-      }
+      // if (tab === 'Product Image') {
+      //   await self.checkImg(tab)
+      //   // await self.ValidateImages(tab)
+      // }
       this.showContinue = false
       self.modal1 = false
       self.ProceedLoading = true
@@ -2493,25 +2502,25 @@ export default {
           self.mObj[tab].newUploadCSV.push(obj)
           this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
-         // for(let k=0;k<this.mObj[tab].mapping.length;k++){
-         //   if(this.mObj[tab].mapping[k].transform !== ""){
-         //     this.transformData = this.mObj[tab].mapping[k].transform
-         //     this.modelIndex = k
-         //     this.handleModalOk()
-         //   }
-         // }
+          // for(let k=0;k<this.mObj[tab].mapping.length;k++){
+          //   if(this.mObj[tab].mapping[k].transform !== ""){
+          //     this.transformData = this.mObj[tab].mapping[k].transform
+          //     this.modelIndex = k
+          //     this.handleModalOk()
+          //   }
+          // }
         }
-      // return;
+        // return;
         resolve('done')
       })
     },
     async Proceed (tab) {
       let self = this
-
+      self.ProceedLoading = true
       if (mapFlag === false) {
-        if (tab === 'Product Image') {
-          await self.checkImg(tab)
-        }
+        // if (tab === 'Product Image') {
+        //   await self.checkImg(tab)
+        // }
 
         let checkHeaders = _.filter(self.mObj[tab].mapping, function (o) {
           if (o.schemaObj.optional === false && o.csvHeader === '') {
@@ -2543,10 +2552,10 @@ export default {
           }
         }
       } else {
-        self.ProceedLoading = true
-        if (tab === 'Product Image') {
-          await self.checkImg(tab)
-        }
+        self.ProceedLoading = false
+        // if (tab === 'Product Image') {
+        //   await self.checkImg(tab)
+        // }
         await self.saveSchemaandMapping(tab)
         await self.parseFile(tab)
       }
@@ -2566,15 +2575,15 @@ export default {
             streamer.pause()
             self.mObj[tab].uploadCSV = []
             self.mObj[tab].uploadCSV = results.data
-            if (tab === 'Product Image') {
-              await self.insertImageUrl(tab)
-            }
+            // if (tab === 'Product Image') {
+            //   await self.insertImageUrl(tab)
+            // }
             await self.makeNewUploadCSVObj(tab)
             await self.transformFromMapping(tab)
             globalValidateResolve = null
-            if (tab === 'Product Image') {
-              await self.ValidateImages(tab)
-            }
+            // if (tab === 'Product Image') {
+            //   await self.ValidateImages(tab)
+            // }
             await self.ProceedToValidate(tab)
             await self.saveData(tab)
             await self.socketResponse()
@@ -2593,56 +2602,57 @@ export default {
         }
       })
     },
-    ValidateImages (tab) {
-      return new Promise(async(resolve, reject) => {
-        let self = this
-        self.image_err = []
-        for (let i = 0; i < self.mObj[tab].newUploadCSV.length; i++) {
-          for (let k in self.mObj[tab].newUploadCSV[i]) {
-            if (k.search('web_image') !== undefined && k.search('web_image') !== -1) {
-              if (self.mObj[tab].newUploadCSV[i][k] !== '' && self.mObj[tab].newUploadCSV[i][k] !== null) {
-                let obj = lodash.find(self.dirinfo, {name: self.mObj[tab].newUploadCSV[i][k]})
-                if (obj === undefined) {
-                  self.image_err.push(self.mObj[tab].newUploadCSV[i][k])
-                }
-              }
-            }
-          }
-        }
-        if (self.image_err.length < 10) {
-          isDone = true
-        }
-        if (self.image_err.length !== 0) {
-          if (self.mObj[tab].load === true) {
-            self.mObj[tab].load = false
-          }
-          self.modal1 = false
-          self.showWebImage = true
-          $('#dirinfo').css('padding-top', '3%')
+    // ValidateImages (tab) {
+    //   console.log(">>>> validate image called <<<<")
+    //   return new Promise(async (resolve, reject) => {
+    //     let self = this
+    //     self.image_err = []
+    //     for (let i = 0; i < self.mObj[tab].newUploadCSV.length; i++) {
+    //       for (let k in self.mObj[tab].newUploadCSV[i]) {
+    //         if (k.search('web_image') !== undefined && k.search('web_image') !== -1) {
+    //           if (self.mObj[tab].newUploadCSV[i][k] !== '' && self.mObj[tab].newUploadCSV[i][k] !== null) {
+    //             let obj = lodash.find(self.dirinfo, {name: self.mObj[tab].newUploadCSV[i][k]})
+    //             if (obj === undefined) {
+    //               self.image_err.push(self.mObj[tab].newUploadCSV[i][k])
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //     if (self.image_err.length < 10) {
+    //       isDone = true
+    //     }
+    //     if (self.image_err.length !== 0) {
+    //       if (self.mObj[tab].load === true) {
+    //         self.mObj[tab].load = false
+    //       }
+    //       self.modal1 = false
+    //       self.showWebImage = true
+    //       $('#dirinfo').css('padding-top', '3%')
 
-          self.ProceedLoading = false
-          $('.f-layout-copy').css('position', 'absolute')
-        } else {
-          $('#dirinfo').css('padding-top', '6%')
-          resolve('done')
-        }
-      })
-    },
-    checkImg (tab) {
-      return new Promise(async(resolve, reject) => {
-        if (this.dirinfo.length === 0) {
-          this.ProceedLoading = false
-          this.modal1 = false
-          this.$Notice.error({
-            title: 'Please upload Images',
-            desc: 'Cannot proceed without uploading images',
-            duration: 5
-          })
-        } else if (this.dirinfo.length !== 0) {
-          resolve('done')
-        }
-      })
-    },
+    //       self.ProceedLoading = false
+    //       $('.f-layout-copy').css('position', 'absolute')
+    //     } else {
+    //       $('#dirinfo').css('padding-top', '6%')
+    //       resolve('done')
+    //     }
+    //   })
+    // },
+    // checkImg (tab) {
+    //   return new Promise(async(resolve, reject) => {
+    //     if (this.dirinfo.length === 0) {
+    //       this.ProceedLoading = false
+    //       this.modal1 = false
+    //       this.$Notice.error({
+    //         title: 'Please upload Images',
+    //         desc: 'Cannot proceed without uploading images',
+    //         duration: 5
+    //       })
+    //     } else if (this.dirinfo.length !== 0) {
+    //       resolve('done')
+    //     }
+    //   })
+    // },
     socketResponse () {
       if (this.$store.state.disconnect === false) {
         return new Promise(async (resolve, reject) => {
@@ -2682,20 +2692,20 @@ export default {
           this.proceedBtn = true
           totalRecords = 0
         })
-         .catch(error => {
-           if (error.response) {
-             self.$Notice.error({
-               title: error.response.data.name,
-               desc: error.response.data.message,
-               duration: 10
-             })
-           } else if (error.message === 'Network Error') {
-             self.$Notice.error({
-               title: 'API Service unavailable',
-               duration: 10
-             })
-           }
-         })
+          .catch(error => {
+            if (error.response) {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       }
     },
     saveSchemaandMapping (tab) {
@@ -2723,7 +2733,7 @@ export default {
 
     saveSchema (tab, name) {
       let self = this
-      return new Promise(async(resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         let schemaobj = {
           name: self.mObj[tab].selected_schema,
           schema: self.mObj[tab].schema.structure,
@@ -2746,29 +2756,30 @@ export default {
           obj1[name]['schemaId'] = schemaId
           resolve('done')
         })
-    .catch(error => {
-      if (error.response) {
-        if (error.response.data.message === 'This mapping name already exists') {
-          resolve('done')
-        } else {
-          self.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
+          .catch(error => {
+            if (error.response) {
+              if (error.response.data.message === 'This mapping name already exists') {
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
           })
-        }
-      } else if (error.message === 'Network Error') {
-        this.$Notice.error({
-          title: 'API Service unavailable',
-          duration: 10
-        })
-      }
-    })
       })
     },
     saveCSVFiles (tab, name) {
+      console.log('<<<< saveCSVFiles called >>>>')
       let self = this
-      return new Promise(async(resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         let CSVFileObj = {
           name: file.name,
           size: file.size,
@@ -2782,28 +2793,28 @@ export default {
           obj1[name]['id'] = CSVFileId
           resolve('done')
         })
-        .catch(error => {
-          console.log('error at saveCSVFiles:',error)
-          if (error.response) {
-            if (error.response.data.message === 'This csv file entry already exists') {
-              CSVFileId = error.response.data.data.CSVFileId
-              obj1[name]['id'] = error.response.data.data.CSVFileId
-              obj1[name]['schemaId'] = schemaId
-              resolve('done')
-            } else {
-              self.$Notice.error({
-                title: error.response.data.name,
-                desc: error.response.data.message,
+          .catch(error => {
+            console.log('error at saveCSVFiles:', error)
+            if (error.response) {
+              if (error.response.data.message === 'This csv file entry already exists') {
+                CSVFileId = error.response.data.data.CSVFileId
+                obj1[name]['id'] = error.response.data.data.CSVFileId
+                obj1[name]['schemaId'] = schemaId
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
                 duration: 10
               })
             }
-          } else if (error.message === 'Network Error') {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          })
       })
     },
     saveOnlyCSVFiles (tab, name) {
@@ -2822,40 +2833,39 @@ export default {
           validateStatus: 'pending',
           uploadedAt: new Date()
         }
-
         api.request('post', '/uploader-csv-files/', CSVFileObj).then(result => {
           CSVFileId = result.data.id
           obj1[name]['id'] = CSVFileId
           obj1[name]['schemaId'] = schemaId
           resolve('done')
         })
-      .catch(error => {
-         console.log('error at saveonlyCSVFiles:',error)
-        if (error.response) {
-          if (error.response.data.message === 'This csv file entry already exists') {
-            CSVFileId = error.response.data.data.CSVFileId
-            obj1[name]['id'] = error.response.data.data.CSVFileId
-            obj1[name]['schemaId'] = schemaId
-            resolve('done')
-          } else {
-            self.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
-          }
-        } else if (error.message === 'Network Error') {
-          this.$Notice.error({
-            title: 'API Service unavailable',
-            duration: 10
+          .catch(error => {
+            console.log('error at saveonlyCSVFiles:', error)
+            if (error.response) {
+              if (error.response.data.message === 'This csv file entry already exists') {
+                CSVFileId = error.response.data.data.CSVFileId
+                obj1[name]['id'] = error.response.data.data.CSVFileId
+                obj1[name]['schemaId'] = schemaId
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
           })
-        }
-      })
       })
     },
     saveMapping (tab, name) {
       let self = this
-      return new Promise(async(resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         let mappingObj = {
           mapping: self.mObj[tab].mapping,
           fileTypeId: self.mObj[tab].selected_schema,
@@ -2867,24 +2877,24 @@ export default {
         api.request('post', '/uploader-csv-file-mapping/', mappingObj).then(response => {
           resolve('done')
         })
-        .catch(error => {
-          if (error.response) {
-            if (error.response.data.message === 'This csv file mapping already exists') {
-              resolve('done')
-            } else {
-              self.$Notice.error({
-                title: error.response.data.name,
-                desc: error.response.data.message,
+          .catch(error => {
+            if (error.response) {
+              if (error.response.data.message === 'This csv file mapping already exists') {
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
                 duration: 10
               })
             }
-          } else if (error.message === 'Network Error') {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          })
       })
     },
     ProceedToValidate (tab) {
@@ -2906,38 +2916,37 @@ export default {
             let isValid = date.isValid()
             if (isValid !== true) return 'Invalid date. Please provide date in y-m-d format'
             date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
-            return
           }
         }
         let urlValidatorFunc = function (obj, value, fieldName) {
           if (value !== '' || value !== undefined) {
             let re = /^((http[s]?|ftp):\/)?\/?([^:\s]+)((\/\w+)*\/)([\w]+[^#?\s]+)(.*)?(#[\w]+)?$/
-            if (re.test(value) !== true) { return 'Invalid url' } else { return }
+            if (re.test(value) !== true) { return 'Invalid url' } else { }
           }
         }
 
         let emailValidatorFunc = function (obj, value, fieldName) {
           if (value !== undefined || value !== '') {
             let re = /\S+@\S+\.\S+/
-            if (re.test(value) !== true) { return 'Invalid email address' } else { return }
+            if (re.test(value) !== true) { return 'Invalid email address' } else { }
           }
         }
 
         let optionalValidatorFunc = function (obj, value, fieldName) {
-          if (value === '') { return fieldName + ' cannot be left blank' } else { return }
+          if (value === '') { return fieldName + ' cannot be left blank' } else { }
         }
 
         let phoneValidatorFunc = function (obj, value, fieldName) {
         let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
           if (value !== undefined || value !== '') {
-            if (re.test(value) !== true) { return 'Invalid phone number' } else { return }
+            if (re.test(value) !== true) { return 'Invalid phone number' } else { }
           }
         }
 
         let pincodeValidatorFunc = function (obj, value, fieldName) {
         let re = /^[0-9]{1,6}$/ // eslint-disable-line
           if (value !== undefined || value !== '') {
-            if (re.test(value) !== true) { return 'Invalid pin-code' } else { return }
+            if (re.test(value) !== true) { return 'Invalid pin-code' } else { }
           }
         }
 
@@ -2958,7 +2967,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
         let getFunctionUrl = function (obj, value, fieldName) {
@@ -2978,7 +2987,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
         let getFunctionEmail = function (obj, value, fieldName) {
@@ -2998,7 +3007,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -3019,7 +3028,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -3040,7 +3049,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -3061,7 +3070,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -3083,12 +3092,11 @@ export default {
                 } else {
                 }
               }
-              return
             } else {
               if (value !== undefined) {
                 let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
                 if (check !== true) { return 'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues } else {
-                  return
+
                 }
               }
             }
@@ -3107,13 +3115,13 @@ export default {
               if (value === '') {
                 return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
               } else {
-                return
+
               }
             } else if (self.mObj[self.activeTab].mapping[i].schemaObj.type === 'number') {
               if (value === 0) {
                 return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
               } else {
-                return
+
               }
             }
           }
@@ -3130,7 +3138,7 @@ export default {
             if (value !== undefined && typeof (value) === 'string') {
               let check = (value.length).toString()
               if (check !== self.mObj[self.activeTab].mapping[i].schemaObj.maxLength) { return 'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength } else {
-                return
+
               }
             }
           }
@@ -3255,9 +3263,9 @@ export default {
                   self.mObj[tab].uploadDisplay = false
                   self.mObj[tab].showHandson = true
                   self.mObj[tab].errDisplay = true
-                  if (tab === 'Product Image') {
-                    self.showWebImage = false
-                  }
+                  // if (tab === 'Product Image') {
+                  //   self.showWebImage = false
+                  // }
                   if (self.mObj[tab].load === true) {
                     self.mObj[tab].load = false
                   }
@@ -3304,20 +3312,20 @@ export default {
         api.request('delete', '/upload-image/?resource=' + resource).then(response => {
           resolve(response)
         })
-        .catch(error => {
-          if (error.response) {
-            this.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
-          } else {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          .catch(error => {
+            if (error.response) {
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       })
     },
     async abortUploadedRecords (tab) {
@@ -3361,6 +3369,21 @@ export default {
             })
           }
         })
+          .catch(error => {
+            if (error.response) {
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
+      })
         .catch(error => {
           if (error.response) {
             this.$Notice.error({
@@ -3368,28 +3391,13 @@ export default {
               desc: error.response.data.message,
               duration: 10
             })
-          } else if (error.message === 'Network Error') {
+          } else {
             this.$Notice.error({
               title: 'API Service unavailable',
               duration: 10
             })
           }
         })
-      })
-      .catch(error => {
-        if (error.response) {
-          this.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
-          })
-        } else {
-          this.$Notice.error({
-            title: 'API Service unavailable',
-            duration: 10
-          })
-        }
-      })
     },
 
     async AbortValidation (tab) {
@@ -3419,7 +3427,7 @@ export default {
         document.getElementsByClassName('ht_master handsontable')[0].remove()
       }
       if (document.getElementById('example1')) {
-          // document.getElementById('example1').style.display = 'none'
+        // document.getElementById('example1').style.display = 'none'
         document.getElementById('example1').innerHTML = ''
       }
       self.mObj[tab].showHandson = false
@@ -3428,11 +3436,11 @@ export default {
     },
     abortImport () {
       let self = this
-       // self.showValidationTable = false
-       // self.validation_data = true
-       // self.validation_completed = false
-       // self.val_data = []
-       // self.$store.state.data = []
+      // self.showValidationTable = false
+      // self.validation_data = true
+      // self.validation_completed = false
+      // self.val_data = []
+      // self.$store.state.data = []
       //  self.mObj["Product Information"].newUploadCSV = []
       //  self.mObj["Product Price"].newUploadCSV = []
       api.request('get', '/uploader/' + id).then(response => {
@@ -3445,35 +3453,35 @@ export default {
         api.request('put', '/uploader/' + id, obj[0]).then(result => {
           self.setPage(obj[1], obj[2], result.data)
         })
-         .catch(error => {
-           if (error.response) {
-             self.$Notice.error({
-               title: error.response.data.name,
-               desc: error.response.data.message,
-               duration: 10
-             })
-           } else if (error.message === 'Network Error') {
-             self.$Notice.error({
-               title: 'API Service unavailable',
-               duration: 10
-             })
-           }
-         })
+          .catch(error => {
+            if (error.response) {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       })
-       .catch(error => {
-         if (error.response) {
-           self.$Notice.error({
-             title: error.response.data.name,
-             desc: error.response.data.message,
-             duration: 10
-           })
-         } else if (error.message === 'Network Error') {
-           self.$Notice.error({
-             title: 'API Service unavailable',
-             duration: 10
-           })
-         }
-       })
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
     abortImportConfirm () {
       let self = this
@@ -3490,25 +3498,25 @@ export default {
         self.validating = false
         self.validation_completed = true
         self.uploadStep = false
-         // self.importStep = false
-         // self.validateStep = true
+        // self.importStep = false
+        // self.validateStep = true
         self.currentStep = 1
         self.progressPercent = 0
       })
-       .catch(error => {
-         if (error.response) {
-           self.$Notice.error({
-             title: error.response.data.name,
-             desc: error.response.data.message,
-             duration: 10
-           })
-         } else if (error.message === 'Network Error') {
-           self.$Notice.error({
-             title: 'API Service unavailable',
-             duration: 10
-           })
-         }
-       })
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
     abortImportInProgress () {
       let self = this
@@ -3524,12 +3532,12 @@ export default {
         self.validateStep = true
         self.currentStep = 1
       })
-      .catch(error => {
-        self.$Notice.error({
-          title: error.response.message,
-          duration: 10
+        .catch(error => {
+          self.$Notice.error({
+            title: error.response.message,
+            duration: 10
+          })
         })
-      })
     },
     ModifyObj (data) {
       let keys = Object.keys(data)
@@ -3564,45 +3572,45 @@ export default {
         self.val_data = []
         self.setPage(obj1[1], obj1[2], result.data)
       })
-      .catch(error => {
-        if (error.response) {
-          self.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
-          })
-        } else if (error.message === 'Network Error') {
-          self.$Notice.error({
-            title: 'API Service unavailable',
-            duration: 10
-          })
-        }
-      })
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
     async showerrmsg (errcols, tab, schema) {
       var example1 = document.getElementById('example1')
       let row1
       let col1
       // let prop = {}
-     var ht = await(new Handsontable(example1, { // eslint-disable-line
-       data: [this.mObj[tab].data1[0]],
-       colHeaders: this.mObj[tab].headers1[0],
-       rowHeaders: true,
-       height: '100%',
-       stretchH: 'all',
-       cells: (row, col) => {
-         var cellProp = {}
-         _.forEach([errcols[0]], (value, key) => {
-           if (col === value.cols && row === key) {
-             row1 = key
-             col1 = value.cols
-             // cellProp.className = 'error'
-             // prop = cellProp
-           }
-         })
-         return cellProp
-       }
-     }))
+      var ht = await(new Handsontable(example1, { // eslint-disable-line
+        data: [this.mObj[tab].data1[0]],
+        colHeaders: this.mObj[tab].headers1[0],
+        rowHeaders: true,
+        height: '100%',
+        stretchH: 'all',
+        cells: (row, col) => {
+          var cellProp = {}
+          _.forEach([errcols[0]], (value, key) => {
+            if (col === value.cols && row === key) {
+              row1 = key
+              col1 = value.cols
+              // cellProp.className = 'error'
+              // prop = cellProp
+            }
+          })
+          return cellProp
+        }
+      }))
 
       setTimeout(function () {
         ht.selectCell(row1, col1, row1, col1, true)
@@ -3612,7 +3620,7 @@ export default {
       }
       $('.f-layout-copy').css('position', 'fixed')
 
-     // document.getElementById('hot-display-license-info').style.display = 'none'
+      // document.getElementById('hot-display-license-info').style.display = 'none'
     },
     async modifyData (tab) {
       let schema = this.mObj[tab].schema
@@ -3629,21 +3637,21 @@ export default {
         let valueToBeValidated = _.object(colHeaders, value)
         schema.validate(valueToBeValidated, (err, newP, errors) => {
           if (err) {} else {
-             // if (errors.length) {
-             //     // errorsLength = errors.length
-             //   newHotSettingsData.push(Object.values(value))
-             //   console.log("new...........",newHotSettingsData)
-             //   self.mObj[tab].data1 = newHotSettingsData
-             //   _.forEach(errors, (item) => {
-             //     errcols.push({
-             //       cols: _.indexOf(colHeaders, item.field),
-             //       rows: key
-             //     })
-             //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
-             //   })
-             //   self.mObj[tab].errmsg = errMsgArray
-             // }
-             // else {
+            // if (errors.length) {
+            //     // errorsLength = errors.length
+            //   newHotSettingsData.push(Object.values(value))
+            //   console.log("new...........",newHotSettingsData)
+            //   self.mObj[tab].data1 = newHotSettingsData
+            //   _.forEach(errors, (item) => {
+            //     errcols.push({
+            //       cols: _.indexOf(colHeaders, item.field),
+            //       rows: key
+            //     })
+            //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
+            //   })
+            //   self.mObj[tab].errmsg = errMsgArray
+            // }
+            // else {
 
             let modifiedField = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(':') + 1)
             modifiedField = modifiedField.trim()
@@ -3662,7 +3670,7 @@ export default {
             userUploadedDataArr = []
             userUploadedDataArr = newArr
 
-             // }
+            // }
           }
         })
       })
@@ -3698,10 +3706,11 @@ export default {
       }
     },
     saveData (tab) {
+      // console.log('<<<<< saveData >>>>>>')
       let self = this
-      if (tab === 'Product Image') {
-        self.showWebImage = false
-      }
+      // if (tab === 'Product Image') {
+      //   self.showWebImage = false
+      // }
       self.mObj[tab].load = true
 
       if (this.$store.state.disconnect === false) {
@@ -3815,20 +3824,20 @@ export default {
       let res = await (api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + tableName).then(res => {
         return res
       })
-    .catch(error => {
-      if (error.response) {
-        self.$Notice.error({
-          title: error.response.data.name,
-          desc: error.response.data.message,
-          duration: 10
-        })
-      } else if (error.message === 'Network Error') {
-        self.$Notice.error({
-          title: 'API Service unavailable',
-          duration: 10
-        })
-      }
-    }))
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        }))
 
       self.mObj[tab].newUploadCSV = res.data
       self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function (element) {
@@ -3850,7 +3859,6 @@ export default {
         self.mObj[tab].load = false
         self.mObj[tab].savePreviewDisplay = true
       }
-      return
     },
     setValData (data, filteredKeys) {
       uploaderObj = data
@@ -3890,7 +3898,6 @@ export default {
       } else {
         self.validation_completed = true
       }
-      return
     }
   },
   feathers: {
@@ -3939,10 +3946,10 @@ export default {
             }
 
             if (message[name] && message[name].uploadStatus === 'completed') {
-              if (self.activeTab === 'Product Image') {
-                self.showWebImage = false
-                self.nextBtn = false
-              }
+              // if (self.activeTab === 'Product Image') {
+              //   self.showWebImage = false
+              //   self.nextBtn = false
+              // }
               self.mObj[self.activeTab].headerDisplay = false
               self.mObj[self.activeTab].previewDisplay = false
               self.mObj[self.activeTab].newSchemaDisplay = false
@@ -4023,9 +4030,9 @@ export default {
             if (self.validation_completed === true) {
               self.validation_completed = false
             }
-              // if(self.validation_data === false){
-              //   self.validation_data = true
-              // }
+            // if(self.validation_data === false){
+            //   self.validation_data = true
+            // }
             if (self.validateStep === true) {
               self.validateStep = false
             }
@@ -4090,17 +4097,17 @@ export default {
     self.$store.state.disableuser = true
     self.$store.state.disablesubscription = true
     noticeFlag = true
-      // self.loadProceed = false
+    // self.loadProceed = false
 
     api.request('get', '/uploader/' + id).then(response => {
       if (response.data !== null) {
         let keys = Object.keys(response.data)
         let filteredKeys = []
-                // let filteredKeys = _.filter(keys, function(o) {
-                //   if(o === 'ProductInformation' || o === 'ProductPrice' || o === 'ProductImprintData' || o === 'ProductShipping' || o === 'ProductImage' || o === 'ProductVariationPrice' || o === "ProductAdditionalCharges"){
-                //     return o;
-                //   }
-                // });
+        // let filteredKeys = _.filter(keys, function(o) {
+        //   if(o === 'ProductInformation' || o === 'ProductPrice' || o === 'ProductImprintData' || o === 'ProductShipping' || o === 'ProductImage' || o === 'ProductVariationPrice' || o === "ProductAdditionalCharges"){
+        //     return o;
+        //   }
+        // });
 
         let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
         for (let i = 0; i < tabArray.length; i++) {
@@ -4151,7 +4158,7 @@ export default {
                   } else if (response.data[filteredKeys[i]].validateStatus === 'completed') {
                     self.val_data.push({'name': filteredKeys[i], 'data': uploaderObj[filteredKeys[i]], 'progress': 100})
                     remArr.push(filteredKeys[i])
-                          // propKeys.splice(i,1)
+                    // propKeys.splice(i,1)
                   }
                 }
               }
@@ -4173,7 +4180,7 @@ export default {
               self.setValData(response.data, filteredKeys)
             } else if (self.val_data.length > 0) {
               self.$store.state.validationStatus = true
-                        // self.setValData(response.data,filteredKeys)
+              // self.setValData(response.data,filteredKeys)
             }
           } else if (!response.data.validate_flag) {
             self.setValData(response.data, filteredKeys)
@@ -4183,7 +4190,7 @@ export default {
           this.uploadStep = false
           this.validateStep = true
           this.currentStep = 1
-                    // this.showValidationTable = false
+          // this.showValidationTable = false
           this.validation_completed = true
         } else if (response.data.stepStatus === 'import_in_progress') {
           this.uploadStep = false
@@ -4263,7 +4270,7 @@ export default {
       }
     })
       .catch(error => {
-        console.log("error at mounted:",error)
+        console.log('error at mounted:', error)
         if (error.response) {
           this.$Notice.error({
             title: error.response.data.name,
@@ -4350,7 +4357,7 @@ export default {
           let index = lodash.findIndex(self.dirinfo, {name: response[i].file_name})
           console.log('success index.....', index)
           self.dirinfo[index].status = 'success'
-          self.img_no ++
+          self.img_no++
         }
       }
     })
@@ -4432,7 +4439,6 @@ x.prototype.formatDate = function (format) {
 y.prototype.toDecimal = function (precision) {
   return parseFloat(this).toFixed(precision)
 }
-
 </script>
 <style>
 table.zaklad {
@@ -4831,8 +4837,8 @@ table.zaklad {
 
 #importBtn[disabled] {
   color: #fff;
-  background-color: ##1fb58f;
-  border-color: ##1fb58f;
+  background-color: #1fb58f;
+  border-color: #1fb58f;
 }
 
 .apply {
