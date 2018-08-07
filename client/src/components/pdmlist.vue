@@ -8,11 +8,12 @@
 <script>
 import axios from 'axios'
 import _ from 'lodash'
+import config from '../config'
 export default {
   name: 'pdmlist',
   data () {
     return {
-      vid: '1dee7d8d-d06a-475c-a4f5-e548a3709610',
+      vid: null,
       columns: [
         {
           title: '_id',
@@ -69,7 +70,8 @@ export default {
       return chunk.slice()
     },
     async init () {
-      let url = 'http://172.16.230.161:3038/pdm'
+      let url = config.pdmUrl + '/pdm'
+      // 'http://172.16.230.161:3038/pdm'
       this.tdata = await axios.get(url, {
         params: {
           source: 'sku'
@@ -78,6 +80,7 @@ export default {
           vid: this.vid
         }
       }).then(async (res) => {
+        console.log('>>>>', res)
         return axios.get(url, {
           params: {
             $limit: res.data.hits.total
@@ -95,6 +98,10 @@ export default {
         // console.log('resp: ', res)
       }).catch(err => {
         console.log('Error while getting products::', err)
+        this.$Notice.error({
+          title: 'Getting product list',
+          desc: 'Please refresh page and try again.'
+        })
         this.productListLoading = false
         return []
       })
@@ -104,7 +111,18 @@ export default {
       // console.log(this.tdata)
     }
   },
-  mounted () {
+  async mounted () {
+    let url = config.pdmUrl + '/vshop-list?all=1&supplier=true'
+    this.pdata = await axios.get(url).then(res => {
+      this.vid = res.data[0].id
+      this.$cookie.set('vid', res.data[0].id)
+    }).catch(err => {
+      this.$Notice.error({
+        title: 'Can\'t find vshop id',
+        desc: 'Please refresh page and try again.'
+      })
+      console.log('Error while getting vid', err)
+    })
     this.init()
   }
 }

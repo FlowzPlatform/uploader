@@ -6,12 +6,9 @@
         <Row type="flex" justify="end" align="middle">
           <Col span="1">
             <Tag v-if="simpleValidate" color="green">Valid</Tag>
-            <Poptip v-else trigger="hover" title="Error" placement="bottom">
+            <Poptip v-else trigger="hover" title="Error" placement="left">
               <div slot="content">
                 <Col>
-                  <!-- <div v-for="(value, key) in mObj.errmsg" :key="key">
-                    <Span>{{value}}</Span>
-                  </div> -->
                   <div v-for="(value, key) in mObj" :key="key">
                     <div v-if="value.errmsg.length > 0" v-for="(val, ky) in value.errmsg" :key="ky">
                       <Span>{{val}}</Span>
@@ -30,9 +27,7 @@
           <Col span="1">
             <Button type="ghost" @click="hanleRestore">Restore</Button>
           </Col>
-             <!-- <span id='valid_indicator' class='label'>valid</span> -->
         </Row>
-        <!-- <div class='row'> -->
           <Row type="flex" justify="center">
             <Col>
               <Spin v-if="simpleLoader" fix>
@@ -42,40 +37,36 @@
               <div id='editor_simple'></div>
             </Col>
           </Row>
-        <!-- </div> -->
       </div>
     </TabPane>
     <TabPane label="Advanced" v-if="tab1">
       <div class="pdmedit">
-        <Row type="flex" justify="end" align="middle">
-          <Col span="1">
-            <Tag v-if="advancedValidate" color="green">Valid</Tag>
-            <Poptip v-else trigger="hover" title="Error" placement="bottom">
-              <div slot="content">
-                <Col>
-                  <!-- <div v-for="(value, key) in mObj.advErrmsg" :key="key">
-                    <Span>{{value}}</Span>
-                  </div> -->
-                  <div v-for="(value, key) in mObj" :key="key">
-                    <Span v-if="value.errmsg.length > 0"><Strong>{{key}}</Strong></Span>
-                    <div v-if="value.errmsg.length > 0" v-for="(val, ky) in value.errmsg" :key="ky">
-                      <Span>{{val}}</Span>
+          <Row type="flex" justify="end" align="middle">
+            <Col span="1">
+              <Tag v-if="advancedValidate" color="green">Valid</Tag>
+              <Poptip v-else trigger="hover" title="Error" placement="left">
+                <div slot="content">
+                  <Col>
+                    <div v-for="(value, key) in mObj" :key="key">
+                      <Span v-if="value.errmsg.length > 0"><Strong>{{key}}</Strong></Span>
+                      <div v-if="value.errmsg.length > 0" v-for="(val, ky) in value.errmsg" :key="ky">
+                        <Span>{{val}}</Span>
+                      </div>
                     </div>
-                  </div>
-                </Col>
-              </div>
-              <Tag color="red">
-                Not Valid
-              </Tag>
-            </Poptip>
-          </Col>
-          <Col span="1">
-            <Button type="primary" @click="hanleSubmit">Submit</Button>
-          </Col>
-          <Col span="1">
-            <Button type="ghost" @click="hanleRestore">Restore</Button>
-          </Col>
-        </Row>
+                  </Col>
+                </div>
+                <Tag color="red">
+                  Not Valid
+                </Tag>
+              </Poptip>
+            </Col>
+            <Col span="1">
+              <Button type="primary" @click="hanleSubmit">Submit</Button>
+            </Col>
+            <Col span="1">
+              <Button type="ghost" @click="hanleRestore">Restore</Button>
+            </Col>
+          </Row>
         <Row type="flex" justify="center">
           <Col v-if="advanceLoader">
             <Spin fix>
@@ -85,9 +76,6 @@
           </Col>
           <div id='editor_holder'></div>
         </Row>
-        <!-- <div class='row'>
-          <div id='editor_holder'></div>
-        </div> -->
       </div>
     </TabPane>
   </Tabs>
@@ -99,53 +87,27 @@
 import axios from 'axios'
 import lodash from 'lodash'
 import api from '../api'
+import config from '../config'
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
 import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
-// import VueFormGenerator from "vue-form-generator";
-// import "vue-form-generator/dist/vfg.css";
+
 const Schema = require('simpleschema')
 let editor
 JSONEditor.defaults.theme = 'foundation3'
 JSONEditor.defaults.iconlib = 'fontawesome4'
-// JSONEditor.defaults.format = 'grid'
-// JSONEditor.defaults.editors.object.options.collapsed = true;
-// var editor = new JSONEditor(document.getElementById('editor_holder'),{
-//   // Enable fetching schemas via ajax
-//   ajax: true,
 
-//   // The schema for the editor
-//   schema: {
-//     $ref: "person.json",
-//     format: "grid"
-//   },
-
-//   // Seed the form with a starting value
-//   startval: starting_value
-// });
-
-//component javascript
-// export default{
-//   components:{
-//     "vue-form-generator": VueFormGenerator.component
-//   }
-// }
-// import _ from 'lodash'
-
-// import VueFormGenerator from "vue-form-generator"
-// Vue.use(VueFormGenerator)
-// 'dca74bcc-e590-42ad-bd16-16f77d7dfc69'
 let err_length = 0
 export default {
   name: 'pdmedit',
   data () {
     return {
-      pdmUrl: 'http://172.16.230.161:3038/pdm',
+      // pdmUrl: 'http://172.16.230.161:3038/pdm',
       tab0: true,
       tab1: true,
-      vid: '1dee7d8d-d06a-475c-a4f5-e548a3709610',
+      vid: this.$cookie.get('vid'),
       pdata: {},
       simpledata:{},
       realdata: {},
@@ -189,7 +151,7 @@ export default {
   methods: {
     async init (id) {
       console.log('calling')
-      let url = this.pdmUrl + '?_id=' + id
+      let url = config.pdmUrl + '/pdm?_id=' + id
       this.pdata = await axios.get(url, {
         headers: {
           vid: this.vid
@@ -223,22 +185,22 @@ export default {
       _.forIn(this.mObj, (value, key) => {
         value.errmsg = []
       })
-      let url = this.pdmUrl + '/' + data._id
+      let url = config.pdmUrl + '/pdm/' + data._id
       let productData = Object.assign({}, data)
+      let pricingData = null
+      let imprintData = null
+      let imagesData = null
+      let shippingData = null
       let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'non-available_regions', 'attributes', 'images', 'pricing', 'imprint_data', 'shipping', 'features']
       keyToDelete.forEach(e => { delete productData[e] });
       let productInfo = []
       productInfo.push(productData)
-      console.log('after delete', productInfo)
-      let srvVld = {
-        data: productData,
-        sheet_name: 'Product Information'
-      }
-      let serverValidation = await api.request('post', '/product-validation', srvVld)
-      console.log('serverValidation:::', serverValidation)
+      // console.log('after delete', productInfo)
+      
+      // console.log('serverValidation:::', serverValidation)
       let pInfo_error = await this.proceedToValidate('Product Information', productInfo)
       if (data.pricing != undefined) {
-        let pricingData = data.pricing
+        pricingData = data.pricing
         keyToDelete = ['import-tracker_id', 'price_range']
         pricingData.map(item => {
           keyToDelete.forEach(e => {
@@ -248,7 +210,7 @@ export default {
         let pPrice_error = await this.proceedToValidate('Product Price', pricingData)
       }
       if (data.imprint_data != undefined) {
-        let imprintData = data.imprint_data
+        imprintData = data.imprint_data
         keyToDelete = ['import-tracker_id', 'imprint_data_range']
         imprintData.map(item => {
           keyToDelete.forEach(e => {
@@ -258,7 +220,7 @@ export default {
         let pImprint_error = await this.proceedToValidate('Product Imprint Data', imprintData)
       }
       if (data.images != undefined) {
-        let imagesData = data.images
+        imagesData = data.images
         keyToDelete = ['import-tracker_id', 'images']
         imagesData.map(item => {
           keyToDelete.forEach(e => {
@@ -268,7 +230,7 @@ export default {
         let pImage_error = await this.proceedToValidate('Product Image', imagesData)
       }
       if (data.shipping != undefined) {
-        let shippingData = data.shipping
+        shippingData = data.shipping
         keyToDelete = ['import-tracker_id', 'shipping_range']
         shippingData.map(item => {
           keyToDelete.forEach(e => {
@@ -277,27 +239,19 @@ export default {
         })
         let pShipping = await this.proceedToValidate('Product Shipping', shippingData)
       }
-      // if (self.activetab === 0) {
-      //     _.forIn(self.mObj, (value, key) => {
-      //       console.log(':: :: ', key, value.errmsg)
-      //     })
-          // if (self.mObj.errmsg.length > 0) {
-          //   self.simpleValidate = false
-          // } else {
-          //   self.simpleValidate = true
-          // }
-        // } else {
-          
-          // if (self.mObj.advErrmsg.length > 0) {
-          //   self.advancedValidate = false
-          // } else {
-          //   self.advancedValidate = true
-          // }
-        // }
       if(this.activetab === 0) {
         console.log('Simple Value:::', data)
-        let result = this.mapData(data)
+        // let result = this.mapData(data)
         // console.log("RES::::", data)
+        let srvVld = {
+          data: productData,
+          sheet_name: 'Product Information'
+        }
+        api.request('post', '/product-validation', srvVld).then(async res => {
+          this.mObj['Product Information'].errmsg = this.mObj['Product Information'].errmsg.concat(res.data)
+        }).catch(err => {
+          console.log('Error while doing server side validation', err)
+        })
         _.forIn(this.mObj, (value, key) => {
           // console.log(':: :: ', key)
           if (value.errmsg.length > 0) {
@@ -309,7 +263,6 @@ export default {
           }
         })
         if (this.simpleValidate) {
-        // if (this.mObj.errmsg.length == 0) {
           console.log('No error, simple data is going to live')
           /* axios.patch(url, result, { headers: { vid: this.vid } }).then(res => {
             this.$Notice.success({
@@ -325,20 +278,10 @@ export default {
         }
       } else if (this.activetab === 1) {
         console.log('Advanced Value:::', data)
-        _.forIn(this.mObj, (value, key) => {
-          // console.log(':: :: ', key)
-          if (value.errmsg.length > 0) {
-            // console.log('Error found', value.errmsg)
-            this.advancedValidate = false
-            return false
-          } else {
-            this.advancedValidate = true
-          }
-        })
+        let validateServerside  = await this.validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData)
         if (this.advancedValidate) {
-        // if (this.mObj.advErrmsg.length == 0) {
           console.log('No error, advanced data is going to live')
-          axios.patch(url, data, {
+          /* axios.patch(url, data, {
             headers: {
               vid: this.vid
             }
@@ -354,10 +297,49 @@ export default {
               desc: 'Error while updating product details'
             })
             console.log('Error while updating data::', err)
-          })
-          // }
+          }) */
         }
       }
+    },
+    validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData) {
+      return new Promise((resolve, reject) => { 
+        _.forIn(this.mObj, (value, key) => {
+          // console.log(':: :: ', key)
+          let srvVld = {
+            data: data,
+            sheet_name: key
+          }
+          if (key == 'Product Information') {
+            srvVld.data = productData
+          } else if (key == 'Product Price') {
+            srvVld.data = pricingData
+          } else if (key == 'Product Image') {
+            srvVld.data = imagesData
+          } else if (key == 'Product Imprint Data') {
+            srvVld.data = imprintData
+          } else if (key == 'Product Shipping') {
+            srvVld.data = shippingData
+          }
+          // console.log('Before Req.', key, srvVld)
+          if (value.errmsg.length > 0) {
+            // console.log('Error found', value.errmsg)
+            this.advancedValidate = false
+            return false
+          } else {
+            api.request('post', '/product-validation', srvVld).then(res => {
+              console.log('Validation Res.', key, res.data)
+              this.mObj[key].errmsg = this.mObj[key].errmsg.concat(res.data)
+              if(this.mObj[key].errmsg.length > 0) {
+                this.advancedValidate = false
+              }
+            }).catch(err => {
+              console.log('Error while doing server side validation', err)
+            })
+            this.advancedValidate = true
+          }
+        })
+        resolve()
+      });
     },
     hanleRestore () {
        if(this.activetab === 0){
@@ -368,7 +350,6 @@ export default {
        }
     },
     getSimpleData(data) {
-      console.log("data....",data)
       this.simpledata = {}
       for(let item in data){
         // console.log("key",item) || item == 'min_price' || item == 'max_price'
@@ -3081,16 +3062,6 @@ export default {
         self.mObj[tab].mapping.push({'sysHeader':key,"schemaObj": self.mObj[tab].schema.structure[key],"csvHeader":"","transform":"","transformMethod":""})
       }
       return new Promise(async (resolve,reject)=> {
-        /* let globalValidateResolveFlag = true
-        if (globalValidateResolve === null) {
-          globalValidateResolveFlag = false
-          globalValidateResolve = resolve;
-        } 
-        map_flag = false 
-
-        continue_flag = false
-        self.showContinue = false
-        let errcols = []*/
         let dateValidatorFunc = function (obj, value, fieldName) {
                 if(value != "" || value != undefined){
                 let date = moment(value)
@@ -3390,115 +3361,11 @@ export default {
             }
           }
         })
-        console.log('schema_obj::', schema_Obj, tab)
+        // console.log('schema_obj::', schema_Obj, tab)
         self.mObj[tab].schema = new Schema(schema_Obj)
         let check_err = await self.generateError(dataToValidate,self.mObj[tab].schema,schema_Obj,tab)
-        console.log('Ckeck::: ', check_err, self.mObj[tab].errmsg)
-        // if (self.activetab === 0) {
-        //   _.forIn(self.mObj, (value, key) => {
-        //     console.log(':: :: ', key, value.errmsg)
-        //   })
-        //   // if (self.mObj.errmsg.length > 0) {
-        //   //   self.simpleValidate = false
-        //   // } else {
-        //   //   self.simpleValidate = true
-        //   // }
-        // } else {
-        //   _.forIn(self.mObj, (value, key) => {
-        //     console.log(':: :: ', key)
-        //     if (value.errmsg.length > 0) {
-        //       console.log('Error found', value.errmsg)
-        //       self.advancedValidate = false
-        //     } else {
-        //       self.advancedValidate = true
-        //     }
-        //   })
-        //   // if (self.mObj.advErrmsg.length > 0) {
-        //   //   self.advancedValidate = false
-        //   // } else {
-        //   //   self.advancedValidate = true
-        //   // }
-        // }
+        // console.log('Ckeck::: ', check_err, self.mObj[tab].errmsg)
         resolve(check_err)
-        /* if(self.mObj[tab].selected_schema == '--Add new--'){
-          self.proceedBtn = true
-          self.$Notice.error({title: 'Please enter a valid mapping name',duration: 5})
-        } else {
-          _.forEach(self.mObj[tab].newUploadCSV, function (value, key) {
-              if(err_length > 0) {
-                return false
-              }
-            self.mObj[tab].schema.validate(value, function (err, newP, errors) {
-          
-              if (err) {
-                throw err
-              } else {
-                if (errors.length) {
-                  err_length = errors.length
-                  let err_type = ''
-                  if (!_.isEqual(Object.values(value), [""])) {
-          
-                    self.mObj[tab].data1.push(Object.values(value))
-                    self.mObj[tab].headers1.push(Object.keys(value))
-                    let oldHeaders = _.keys(self.mObj[tab].newUploadCSV)
-                    _.forEach(errors, (item) => {
-                      errcols.push({
-                        cols: _.indexOf(self.mObj[tab].headers1[0], item.field),
-                        rows: key
-                      })
-          
-                      for(let key in schema_Obj){
-                        if(key == item.field){
-                          err_type = schema_Obj[key].type
-                        }
-                      }
-          
-                      if(item.message == "Error during casting"){
-                        if(err_type == 'number'){
-                          self.mObj[tab].errmsg.push('* Enter numeric value' + ' at column : ' + item.field)
-                        }
-                        else if(err_type == 'string'){
-                          self.mObj[tab].errmsg.push('* Invalid value' + ' at column : ' + item.field)
-                        }
-                      }
-                      else {
-                        self.mObj[tab].errmsg.push('* ' + item.message + ' at column : ' + item.field)
-                      }
-                    })
-          
-                    self.mObj[tab].headerDisplay = false
-                    self.mObj[tab].newSchemaDisplay = false
-                    self.mObj[tab].previewDisplay = false
-                    self.mObj[tab].uploadDisplay = false
-                    self.mObj[tab].showHandson = true
-                    self.mObj[tab].errDisplay = true
-                    if(self.mObj[tab].load == true){
-                      self.mObj[tab].load = false
-                    }
-                    console.log("err_length")
-                    self.showerrmsg(errcols,tab)
-                    // return
-                  }
-                } else {
-                    // return
-                }
-              }
-            })
-          }) 
-          if(err_length == 0){
-            self.mObj[tab].headerDisplay = false
-            self.mObj[tab].newSchemaDisplay = false
-            self.mObj[tab].previewDisplay = false
-            self.mObj[tab].uploadDisplay = false
-            self.mObj[tab].showHandson = false
-            $(".f-layout-copy").css("position","fixed");
-            globalValidateResolve("done")
-          } else {
-            if(globalValidateResolveFlag === true) {
-              resolve('done')
-            }
-          }
-        } */
       })
     },
     generateError(data,schema,schema_Obj,tab) {

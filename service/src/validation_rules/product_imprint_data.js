@@ -329,7 +329,7 @@ const ProductImprintDataRules = [
       errorCode: 'price_1RegEx400',
       qryMongo : {$and: [{ "price_1": { $exists: true, $ne: null,$type:2}},
        { "price_1" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-      qryObject: (qty_1_min, price_1)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_1 == undefined || price_1 == '' || typeof(price_1) != 'string') { return true; } else if (regExp.test(price_1)) { return true; } else { return false; }}
+      qryObject: (qty_1_min, price_1)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_1 == undefined || price_1 == '' || isNaN(price_1)) { return true; } else if (regExp.test(price_1)) { return true; } else { return false; }}
  },
   {
      columnName : 'price_2',
@@ -337,7 +337,7 @@ const ProductImprintDataRules = [
      errorCode: 'price_2RegEx400',
      qryMongo : {$and: [{ "price_2": { $exists: true, $ne: null,$type:2}},
       { "price_2" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-     qryObject: (price_2)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_2 == undefined || price_2 == '' || typeof(price_2) != 'string') { return true; } else if (regExp.test(price_2)) { return true; } else { return false; }}
+     qryObject: (price_2)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_2 == undefined || price_2 == '' || isNaN(price_2)) { return true; } else if (regExp.test(price_2)) { return true; } else { return false; }}
 
   },
   {
@@ -346,7 +346,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_3RegEx400',
     qryMongo : {$and: [{ "price_3": { $exists: true, $ne: null,$type:2}},
      { "price_3" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_3)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_3 == undefined || price_3 == '' || typeof(price_3) != 'string') { return true; } else if (regExp.test(price_3)) { return true; } else { return false; }}
+    qryObject: (price_3)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_3 == undefined || price_3 == '' || isNaN(price_3)) { return true; } else if (regExp.test(price_3)) { return true; } else { return false; }}
   },
   {
     columnName : 'price_4',
@@ -354,7 +354,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_4RegEx400',
     qryMongo : {$and: [{ "price_4": { $exists: true,$ne: null, $type:2}},
      { "price_4" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_4)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_4 == undefined || price_4 == '' || typeof(price_4) != 'string') { return true; } else if (regExp.test(price_4)) { return true; } else { return false; }}  
+    qryObject: (price_4)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_4 == undefined || price_4 == '' || isNaN(price_4)) { return true; } else if (regExp.test(price_4)) { return true; } else { return false; }}  
   },
   {
     columnName : 'price_5',
@@ -362,7 +362,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_5RegEx400',
     qryMongo : {$and: [{ "price_5": { $exists: true, $ne: null,$type:2}},
      { "price_5" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_5)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_5 == undefined || price_5 == '' || typeof(price_5) != 'string') { return true; } else if (regExp.test(price_5)) { return true; } else { return false; }}   
+    qryObject: (price_5)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_5 == undefined || price_5 == '' || isNaN(price_5)) { return true; } else if (regExp.test(price_5)) { return true; } else { return false; }}   
   },
   {
     columnName : 'price_6',
@@ -370,7 +370,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_6RegEx400',
     qryMongo : {$and: [{ "price_6": { $exists: true, $ne: null,$type:2}},
      { "price_6" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_6)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_6 == undefined || price_6 == '' || typeof(price_6) != 'string') { return true; } else if (regExp.test(price_6)) { return true; } else { return false; }}   
+    qryObject: (price_6)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_6 == undefined || price_6 == '' || isNaN(price_6)) { return true; } else if (regExp.test(price_6)) { return true; } else { return false; }}   
   },
   {
     columnName : 'price_7',
@@ -378,7 +378,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_7RegEx400',
     qryMongo : {$and: [{ "price_7": { $exists: true, $ne: null,$type:2}},
      { "price_7" :  /[^\d{0,8}(\.\d{0,4})?$]/}]},
-     qryObject: (price_7)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_7 == undefined || price_7 == '' || typeof(price_7) != 'string') { return true; } else if (regExp.test(price_7)) { return true; } else { return false; }} 
+     qryObject: (price_7)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_7 == undefined || price_7 == '' || isNaN(price_7)) { return true; } else if (regExp.test(price_7)) { return true; } else { return false; }} 
   },
   {
     columnName : 'price_8',
@@ -386,7 +386,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_8RegEx400',
     qryMongo : {$and: [{ "price_8": { $exists: true, $ne: null,$type:2}},
      { "price_8" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_8)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_8 == undefined || price_8 == '' || typeof(price_8) != 'string') { return true; } else if (regExp.test(price_8)) { return true; } else { return false; }} 
+    qryObject: (price_8)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_8 == undefined || price_8 == '' || isNaN(price_8)) { return true; } else if (regExp.test(price_8)) { return true; } else { return false; }} 
   },
   {
     columnName : 'price_9',
@@ -394,7 +394,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_9RegEx400',
     qryMongo : {$and: [{ "price_9": { $exists: true, $ne: null,$type:2}},
      { "price_9" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_9)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_9 == undefined || price_9 == '' || typeof(price_9) != 'string') { return true; } else if (regExp.test(price_9)) { return true; } else { return false; }} 
+    qryObject: (price_9)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_9 == undefined || price_9 == '' || isNaN(price_9)) { return true; } else if (regExp.test(price_9)) { return true; } else { return false; }} 
   },
   {
     columnName : 'price_10',
@@ -402,7 +402,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_10RegEx400',
     qryMongo : {$and: [{ "price_10": { $exists: true, $ne: null ,$type:2}},
      { "price_10" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_10)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_10 == undefined || price_10 == '' || typeof(price_10) != 'string') { return true; } else if (regExp.test(price_10)) { return true; } else { return false; }} 
+    qryObject: (price_10)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_10 == undefined || price_10 == '' || isNaN(price_10)) { return true; } else if (regExp.test(price_10)) { return true; } else { return false; }} 
   },
   {
     columnName : 'price_11',
@@ -410,7 +410,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_11RegEx400',
     qryMongo : {$and: [{ "price_11": { $exists: true,$ne: null,$type:2}},
      { "price_11" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_11)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_11 == undefined || price_11 == '' || typeof(price_11) != 'string') { return true; } else if (regExp.test(price_11)) { return true; } else { return false; }} 
+    qryObject: (price_11)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_11 == undefined || price_11 == '' || isNaN(price_11)) { return true; } else if (regExp.test(price_11)) { return true; } else { return false; }} 
   },
   {
     columnName : 'price_12',
@@ -418,7 +418,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_12RegEx400',
     qryMongo : {$and: [{ "price_12": { $exists: true, $ne: null,$type:2}},
      { "price_12" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_12)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_12 == undefined || price_12 == '' || typeof(price_12) != 'string') { return true; } else if (regExp.test(price_12)) { return true; } else { return false; }} 
+    qryObject: (price_12)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_12 == undefined || price_12 == '' || isNaN(price_12)) { return true; } else if (regExp.test(price_12)) { return true; } else { return false; }} 
   },
   {
     columnName : 'price_13',
@@ -426,7 +426,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_13RegEx400',
     qryMongo : {$and: [{ "price_13": { $exists: true, $ne: null,$type:2}},
      { "price_13" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_13)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_13 == undefined || price_13 == '' || typeof(price_13) != 'string') { return true; } else if (regExp.test(price_13)) { return true; } else { return false; }}
+    qryObject: (price_13)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_13 == undefined || price_13 == '' || isNaN(price_13)) { return true; } else if (regExp.test(price_13)) { return true; } else { return false; }}
   },
   {
     columnName : 'price_14',
@@ -434,7 +434,7 @@ const ProductImprintDataRules = [
     errorCode: 'price_14RegEx400',
     qryMongo : {$and: [{ "price_14": { $exists: true, $ne: null,$type:2}},
      { "price_14" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_14)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_14 == undefined || price_14 == '' || typeof(price_14) != 'string') { return true; } else if (regExp.test(price_14)) { return true; } else { return false; }}
+    qryObject: (price_14)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_14 == undefined || price_14 == '' || isNaN(price_14)) { return true; } else if (regExp.test(price_14)) { return true; } else { return false; }}
   },
   {
     columnName : 'price_15',
@@ -443,7 +443,7 @@ const ProductImprintDataRules = [
     qryMongo : {$and:
     [{ "price_15": { $exists: true, $ne: null,$type:2}},
      { "price_15" :  /[^\d{0,8}(\.\d{0,4})?$]/}]},
-    qryObject: (price_15)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_15 == undefined || price_15 == '' || typeof(price_15) != 'string') { return true; } else if (regExp.test(price_15)) { return true; } else { return false; }}
+    qryObject: (price_15)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (price_15 == undefined || price_15 == '' || isNaN(price_15)) { return true; } else if (regExp.test(price_15)) { return true; } else { return false; }}
   }
 ];
 

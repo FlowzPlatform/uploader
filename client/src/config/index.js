@@ -28,7 +28,7 @@ var temp = {
   loginWithGithubUrl: protocol + '://auth.' + domainkey + '/auth/github',
   jobQueueUrl: protocol + '://api.' + domainkey + '/rjobqueue1/job/create',
   subscriptionUri: 'https://api.' + domainkey + '/subscription/user-subscription',
-  // subscriptionUri: 'http://172.16.230.161:3030/user-subscription',
+  // subscriptionUri: 'http://localhost:3030/user-subscription',
   getUserdetailUri: 'https://api.' + domainkey + '/user/getuserdetails/',
   resetPasswordRedirectUrl: 'https://www.uploader.' + domainkey + '/reset-password',
   // resetPasswordRedirectUrl: protocol + '://localhost:8000/reset-password',
@@ -36,7 +36,9 @@ var temp = {
   forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
   flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
   crmUrl: 'https://www.crm.' + domainkey,
-  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
+  websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
+  pdmUrl: 'https://api.' + domainkey + '/pdmnew'
+  // pdmUrl: 'http://localhost:3038'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -64,7 +66,8 @@ if (process.env.MYENV !== 'development') {
     forgotPasswordUrl: 'https://api.' + domainkey + '/auth/api/forgetpassword',
     flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
     crmUrl: 'https://www.crm.' + domainkey,
-    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey
+    websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
+    pdmUrl: 'https://api.' + domainkey + '/pdmnew'
   }
 }
 

@@ -63,7 +63,7 @@
       errorCode: 'shipping_qty_per_cartonRegEx400',
       qryMongo : {$and: [{ "shipping_qty_per_carton": { $exists: true, $ne: null,$type:2 } },
        { "shipping_qty_per_carton" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-      qryObject: (shipping_qty_per_carton)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (shipping_qty_per_carton == undefined || shipping_qty_per_carton == "" || typeof(shipping_qty_per_carton) != 'string') { return true } else if(regExp.test(shipping_qty_per_carton)) { return true } else { return false } }
+      qryObject: (shipping_qty_per_carton)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (shipping_qty_per_carton == undefined || shipping_qty_per_carton == "" || isNaN(shipping_qty_per_carton)) { return true } else if(regExp.test(shipping_qty_per_carton)) { return true } else { return false } }
  },
   {
       columnName : 'carton_length',
@@ -72,7 +72,7 @@
       qryMongo : {$and:
       [{ "carton_length": { $exists: true, $ne: null,$type:2 } },
        { "carton_length" : /[^\d{0,8}(\.\d{0,4})?$]/}]},
-      qryObject: (carton_length)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (carton_length == undefined || carton_length == "" || typeof(carton_length) != 'string') { return true } else if(regExp.test(carton_length)) { return true } else { return false } }
+      qryObject: (carton_length)=>{ let regExp = new RegExp(/[^\d{0,8}(\.\d{0,4})?$]/); if (carton_length == undefined || carton_length == "" || isNaN(carton_length)) { return true } else if(regExp.test(carton_length)) { return true } else { return false } }
  },
  {
    columnName : 'carton_weight_unit',
