@@ -1943,8 +1943,8 @@ export default {
           _.forEach(errcols, (value, key) => {
             if (col === value.cols && row === key) {
               errRow = key
-          // errRow.push(key)
-          // errRow = lodash.uniqBy(errRow)
+              // errRow.push(key)
+              // errRow = lodash.uniqBy(errRow)
               errCol = col
 
               cellProp.className = 'error'
@@ -2516,7 +2516,6 @@ export default {
     },
     async Proceed (tab) {
       let self = this
-      self.ProceedLoading = true
       if (mapFlag === false) {
         // if (tab === 'Product Image') {
         //   await self.checkImg(tab)
@@ -2603,7 +2602,6 @@ export default {
       })
     },
     // ValidateImages (tab) {
-    //   console.log(">>>> validate image called <<<<")
     //   return new Promise(async (resolve, reject) => {
     //     let self = this
     //     self.image_err = []
@@ -3331,11 +3329,11 @@ export default {
     async abortUploadedRecords (tab) {
       this.deleteRecModal = false
       let tabName = tab.replace(/ /g, '')
-      if (tab === 'Product Image') {
-        this.dirinfo = []
-        this.image_err = []
-        await this.deleteFromCloudinary(id)
-      }
+      // if (tab === 'Product Image') {
+      //   this.dirinfo = []
+      //   this.image_err = []
+      //   // await this.deleteFromCloudinary(id)
+      // }
       api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab).then(res => {
         api.request('get', '/uploader/' + this.$route.params.id).then(res => {
           if (Object.keys(res.data).indexOf(tabName) >= 0) {
