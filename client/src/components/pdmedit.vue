@@ -1,6 +1,6 @@
 <template>
 <div>
-  <Tabs type="card" closable @on-tab-remove="handleTabRemove" @on-click="generateForm" v-model="activetab">
+  <Tabs @on-click="generateForm" v-model="activetab">
     <TabPane label="Simple" v-if="tab0">
       <div class="pdmsimple">
         <Row type="flex" justify="end" align="middle">
@@ -21,16 +21,20 @@
               </Tag>
             </Poptip>
           </Col>
-          <Col span="1">
-            <Button :disabled="simpleSubmit" type="primary" @click="hanleSubmit">Submit</Button>
+          <Col>
+            <ButtonGroup shape="circle">
+                <Button :loading="simpleSubmitLoading" :disabled="simpleSubmit" type="primary" @click="hanleSubmit">Submit</Button>
+                <Button type="ghost" @click="hanleRestore">Restore</Button>
+            </ButtonGroup>
           </Col>
-          <Col span="1">
+            <!-- <Button :loading="simpleSubmitLoading" :disabled="simpleSubmit" type="primary" @click="hanleSubmit">Submit</Button> -->
+          <!-- <Col span="1">
             <Button type="ghost" @click="hanleRestore">Restore</Button>
-          </Col>
+          </Col> -->
         </Row>
           <Row type="flex" justify="center">
             <Col>
-              <Spin v-if="simpleLoader" fix>
+              <Spin v-if="simpleDataLoader" fix>
                 <Icon type="load-c" size=22 class="demo-spin-icon-load"></Icon>
                 <div>Loading</div>
               </Spin>
@@ -60,15 +64,21 @@
                 </Tag>
               </Poptip>
             </Col>
-            <Col span="1">
-              <Button type="primary" @click="hanleSubmit">Submit</Button>
+            <Col>
+              <ButtonGroup shape="circle">
+                <Button :loading="advancedSubmitLoading" :disabled="advancedSubmit" type="primary" @click="hanleSubmit">Submit</Button>
+                <Button type="ghost" @click="hanleRestore">Restore</Button>
+              </ButtonGroup>
+            </Col>
+            <!-- <Col span="1">
+              <Button :loading="advancedSubmitLoading" :disabled="advancedSubmit" type="primary" @click="hanleSubmit">Submit</Button>
             </Col>
             <Col span="1">
               <Button type="ghost" @click="hanleRestore">Restore</Button>
-            </Col>
+            </Col> -->
           </Row>
         <Row type="flex" justify="center">
-          <Col v-if="advanceLoader">
+          <Col v-if="advanceDataLoader">
             <Spin fix>
               <Icon type="load-c" size=22 class="demo-spin-icon-load"></Icon>
               <div>Loading</div>
@@ -114,8 +124,10 @@ export default {
       activetab: 0,
       simpleValidate: true,
       advancedValidate: true,
-      simpleLoader: false,
-      advanceLoader: false,
+      simpleDataLoader: false,
+      advanceDataLoader: false,
+      simpleSubmitLoading: false,
+      advancedSubmitLoading: false,
       advancedSubmit: true,
       simpleSubmit: true,
       mObj: {
@@ -150,28 +162,26 @@ export default {
   created() {},
   methods: {
     async init (id) {
-      console.log('calling')
       let url = config.pdmUrl + '/pdm?_id=' + id
       this.pdata = await axios.get(url, {
         headers: {
           vid: this.vid
         }
       }).then(res => {
-        console.log(res.data.hits.hits[0]._source)
         let pdm = res.data.hits.hits[0]._source
         pdm._id = res.data.hits.hits[0]._id
         return pdm
       }).catch(err => {
-        console.log(err)
+        this.$Notice.error({
+          title: 'Getting product data',
+          desc: 'Please refresh page and try again.'
+        })
+        // console.log(err)
         return {}
       })
       this.realdata = lodash.cloneDeep(this.pdata)
     },
-    handleTabRemove (name) {
-      this['tab' + name] = false;
-    },
     mapData(data){
-      console.log("mapdata")
       for(let item in data){
         this.realdata[item] = data[item]
       }
@@ -180,8 +190,6 @@ export default {
     },
     async hanleSubmit () {
       let data = editor.getValue()
-      // console.log("self.activeTab",this.activetab)
-      // this.mObj.errmsg = []
       _.forIn(this.mObj, (value, key) => {
         value.errmsg = []
       })
@@ -240,9 +248,9 @@ export default {
         let pShipping = await this.proceedToValidate('Product Shipping', shippingData)
       }
       if(this.activetab === 0) {
+        this.simpleSubmitLoading = true
         console.log('Simple Value:::', data)
-        // let result = this.mapData(data)
-        // console.log("RES::::", data)
+        let result = null
         let srvVld = {
           data: productData,
           sheet_name: 'Product Information'
@@ -262,53 +270,80 @@ export default {
             this.simpleValidate = true
           }
         })
+        result = this.mapData(data)
         if (this.simpleValidate) {
           console.log('No error, simple data is going to live')
-          /* axios.patch(url, result, { headers: { vid: this.vid } }).then(res => {
+          axios.patch(url, result, { headers: { vid: this.vid } }).then(res => {
             this.$Notice.success({
               title: 'Update Successfull',
               desc: 'Product details updated successfully.'
             })
+            this.simpleSubmitLoading = false
           }).catch(err => {
             this.$Notice.error({
               title: 'Update Error',
               desc: 'Error while updating product details'
             })
-          }) */
+            this.simpleSubmitLoading = false
+          })
+        } else {
+          this.simpleSubmitLoading = false
         }
       } else if (this.activetab === 1) {
+        this.advancedSubmitLoading = true
         console.log('Advanced Value:::', data)
         let validateServerside  = await this.validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData)
+        for(let key in this.mObj) {
+          if (this.mObj[key].errmsg.length > 0) {
+            this.advancedValidate = false
+            this.advancedSubmitLoading = false
+            return false
+          } else {
+            this.advancedValidate = true
+          }
+        }
         if (this.advancedValidate) {
           console.log('No error, advanced data is going to live')
-          /* axios.patch(url, data, {
+          axios.patch(url, data, {
             headers: {
               vid: this.vid
             }
           }).then(res => {
-            this.$Notice.success({
-              title: 'Update Successfull',
-              desc: 'Product details updated successfully.'
-            })
+            if (res.data.code && res.data.code == 406) {
+              this.$Notice.error({
+                title: 'Update Error',
+                desc: res.data.message
+              })
+            } else {
+              this.$Notice.success({
+                title: 'Update Successfull',
+                desc: 'Product details updated successfully.'
+              })
+            }
+            this.advancedSubmitLoading = false
             console.log('Updated Data::', res)
           }).catch(err => {
             this.$Notice.error({
               title: 'Update Error',
               desc: 'Error while updating product details'
             })
+            this.advancedSubmitLoading = false
             console.log('Error while updating data::', err)
-          }) */
+          })
+        } else {
+          this.advancedSubmitLoading = false
         }
       }
     },
     validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData) {
-      return new Promise((resolve, reject) => { 
-        _.forIn(this.mObj, (value, key) => {
-          // console.log(':: :: ', key)
-          let srvVld = {
-            data: data,
-            sheet_name: key
-          }
+      let srvVld = {
+        data: data,
+        sheet_name: null
+      }
+      return new Promise(async (resolve, reject) => {
+        for(let key in this.mObj) {
+          srvVld.sheet_name = key
+          // console.log('>>>', value)
           if (key == 'Product Information') {
             srvVld.data = productData
           } else if (key == 'Product Price') {
@@ -320,24 +355,16 @@ export default {
           } else if (key == 'Product Shipping') {
             srvVld.data = shippingData
           }
-          // console.log('Before Req.', key, srvVld)
-          if (value.errmsg.length > 0) {
-            // console.log('Error found', value.errmsg)
-            this.advancedValidate = false
-            return false
-          } else {
-            api.request('post', '/product-validation', srvVld).then(res => {
-              console.log('Validation Res.', key, res.data)
-              this.mObj[key].errmsg = this.mObj[key].errmsg.concat(res.data)
-              if(this.mObj[key].errmsg.length > 0) {
-                this.advancedValidate = false
-              }
-            }).catch(err => {
-              console.log('Error while doing server side validation', err)
-            })
-            this.advancedValidate = true
-          }
-        })
+          await api.request('post', '/product-validation', srvVld).then(res => {
+            // console.log('Validation Res.', key, res.data)
+            this.mObj[key].errmsg = this.mObj[key].errmsg.concat(res.data)
+            // if(this.mObj[key].errmsg.length > 0) {
+            //   this.advancedValidate = false
+            // }
+          }).catch(err => {
+            console.log('Error while doing server side validation', err)
+          })
+        }
         resolve()
       });
     },
@@ -358,18 +385,18 @@ export default {
           this.simpledata[item] = data[item]
         }
       }
-      console.log("%%%%% obj",this.simpledata)
       return this.simpledata
     },
     async generateForm (name){
       let tabname = 'tab' + name
+      this.advancedSubmit = true
+      this.simpleSubmit = true
       _.forIn(this.mObj, (value, key) => {
         value.errmsg = []
       })
       if (tabname == 'tab1') {
-        console.log("tab1")
         this.simpleValidate = true
-        this.advanceLoader = true
+        this.advanceDataLoader = true
         document.getElementById('editor_holder').innerHTML = ""
         await this.init(this.$route.params.id)
         editor = new JSONEditor(document.getElementById('editor_holder'),{
@@ -2869,17 +2896,14 @@ export default {
         editor.getEditor('root.product_id').disable()
         editor.getEditor('root.supplier_info').disable()
         editor.getEditor('root.import-tracker_id').disable()
-        this.advanceLoader = false
+        this.advanceDataLoader = false
+        this.advancedSubmit = false
       } else if (tabname == 'tab0') {
-        console.log("tab0")
         this.advancedValidate = true
-        this.simpleLoader = true
+        this.simpleDataLoader = true
         document.getElementById('editor_simple').innerHTML = ""
         await this.init(this.$route.params.id)
         let data = await this.getSimpleData(this.pdata)
-        // data.min_price = null
-        // data.max_price = null
-        console.log('data::', data)
         
         editor = new JSONEditor(document.getElementById('editor_simple'), {
           // Enable fetching schemas via ajax
@@ -3051,7 +3075,7 @@ export default {
         });
         editor.getEditor('root.sku').disable();
         editor.getEditor('root._id').disable();
-        this.simpleLoader = false
+        this.simpleDataLoader = false
         this.simpleSubmit = false
       }
     },

@@ -37,8 +37,8 @@ var temp = {
   flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
   crmUrl: 'https://www.crm.' + domainkey,
   websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
-  pdmUrl: 'https://api.' + domainkey + '/pdmnew'
-  // pdmUrl: 'http://localhost:3038'
+  // pdmUrl: 'https://api.' + domainkey + '/pdmnew'
+  pdmUrl: 'http://localhost:3038'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
