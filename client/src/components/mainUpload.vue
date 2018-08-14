@@ -2918,25 +2918,25 @@ export default {
         let emailValidatorFunc = function (obj, value, fieldName) {
           if (value !== undefined || value !== '') {
             let re = /\S+@\S+\.\S+/
-            if (re.test(value) !== true) { return 'Invalid email address' } else { }
+            if (re.test(value) !== true) { return 'Invalid email address' } else { return }
           }
         }
 
         let optionalValidatorFunc = function (obj, value, fieldName) {
-          if (value === '') { return fieldName + ' cannot be left blank' } else { }
+          if (value === '') { return fieldName + ' cannot be left blank' } else { return }
         }
 
         let phoneValidatorFunc = function (obj, value, fieldName) {
         let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
           if (value !== undefined || value !== '') {
-            if (re.test(value) !== true) { return 'Invalid phone number' } else { }
+            if (re.test(value) !== true) { return 'Invalid phone number' } else { return }
           }
         }
 
         let pincodeValidatorFunc = function (obj, value, fieldName) {
         let re = /^[0-9]{1,6}$/ // eslint-disable-line
           if (value !== undefined || value !== '') {
-            if (re.test(value) !== true) { return 'Invalid pin-code' } else { }
+            if (re.test(value) !== true) { return 'Invalid pin-code' } else { return }
           }
         }
 
@@ -2957,7 +2957,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-
+            return
           }
         }
         let getFunctionUrl = function (obj, value, fieldName) {
@@ -2977,7 +2977,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-
+            return
           }
         }
         let getFunctionEmail = function (obj, value, fieldName) {
@@ -2997,7 +2997,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-
+            return
           }
         }
 
@@ -3018,7 +3018,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-
+            return
           }
         }
 
@@ -3039,7 +3039,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-
+            return
           }
         }
 
@@ -3060,7 +3060,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-
+            return
           }
         }
 
@@ -3082,11 +3082,12 @@ export default {
                 } else {
                 }
               }
+              return
             } else {
               if (value !== undefined) {
                 let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
                 if (check !== true) { return 'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues } else {
-
+                  return
                 }
               }
             }
@@ -3105,13 +3106,13 @@ export default {
               if (value === '') {
                 return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
               } else {
-
+                return
               }
             } else if (self.mObj[self.activeTab].mapping[i].schemaObj.type === 'number') {
               if (value === 0) {
                 return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
               } else {
-
+                return
               }
             }
           }
@@ -3128,7 +3129,7 @@ export default {
             if (value !== undefined && typeof (value) === 'string') {
               let check = (value.length).toString()
               if (check !== self.mObj[self.activeTab].mapping[i].schemaObj.maxLength) { return 'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength } else {
-
+                return
               }
             }
           }
@@ -3848,6 +3849,7 @@ export default {
         self.mObj[tab].load = false
         self.mObj[tab].savePreviewDisplay = true
       }
+      return
     },
     setValData (data, filteredKeys) {
       uploaderObj = data
@@ -3887,6 +3889,7 @@ export default {
       } else {
         self.validation_completed = true
       }
+      return
     }
   },
   feathers: {
