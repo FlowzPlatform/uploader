@@ -41,7 +41,7 @@ export const ProductImagesSchema = new Schema({
     secure_url_1:{
       type: "string",
       label: "Secure Url 1",
-      optional: false,
+      optional: true,
       allowedValues: [],
       defaultValue: '',
       maxLength : '',
