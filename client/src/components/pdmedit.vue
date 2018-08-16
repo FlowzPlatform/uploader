@@ -6,7 +6,10 @@
         <Row type="flex" justify="end" align="middle">
           <Col span="1">
             <Tag v-if="simpleValidate" color="green">Valid</Tag>
-            <Poptip v-else trigger="hover" title="Error" placement="left">
+            <Tag v-else color="red">
+              Not Valid
+            </Tag>
+            <!-- <Poptip v-else trigger="hover" title="Error" placement="left">
               <div slot="content">
                 <Col>
                   <div v-for="(value, key) in mObj" :key="key">
@@ -16,10 +19,7 @@
                   </div>
                 </Col>
               </div>
-              <Tag color="red">
-                Not Valid
-              </Tag>
-            </Poptip>
+            </Poptip> -->
           </Col>
           <Col>
             <ButtonGroup shape="circle">
@@ -27,18 +27,21 @@
                 <Button type="ghost" @click="hanleRestore">Restore</Button>
             </ButtonGroup>
           </Col>
-            <!-- <Button :loading="simpleSubmitLoading" :disabled="simpleSubmit" type="primary" @click="hanleSubmit">Submit</Button> -->
-          <!-- <Col span="1">
-            <Button type="ghost" @click="hanleRestore">Restore</Button>
-          </Col> -->
         </Row>
-          <Row type="flex" justify="center">
+          <Row type="flex" justify="space-around">
             <Col>
               <Spin v-if="simpleDataLoader" fix>
                 <Icon type="load-c" size=22 class="demo-spin-icon-load"></Icon>
                 <div>Loading</div>
               </Spin>
               <div id='editor_simple'></div>
+            </Col>
+            <Col style="padding-top:60px" v-if="!simpleValidate">
+              <div v-for="(value, key) in mObj" :key="key">
+                <div v-if="value.errmsg.length > 0" v-for="(val, ky) in value.errmsg" :key="ky">
+                  <Tag type="border" color="red"> {{val}}</Tag>
+                </div>
+              </div>
             </Col>
           </Row>
       </div>
@@ -48,7 +51,10 @@
           <Row type="flex" justify="end" align="middle">
             <Col span="1">
               <Tag v-if="advancedValidate" color="green">Valid</Tag>
-              <Poptip v-else trigger="hover" title="Error" placement="left">
+              <Tag v-else color="red">
+                Not Valid
+              </Tag>
+              <!-- <Poptip trigger="hover" title="Error" placement="left">
                 <div slot="content">
                   <Col>
                     <div v-for="(value, key) in mObj" :key="key">
@@ -59,10 +65,7 @@
                     </div>
                   </Col>
                 </div>
-                <Tag color="red">
-                  Not Valid
-                </Tag>
-              </Poptip>
+              </Poptip> -->
             </Col>
             <Col>
               <ButtonGroup shape="circle">
@@ -70,21 +73,23 @@
                 <Button type="ghost" @click="hanleRestore">Restore</Button>
               </ButtonGroup>
             </Col>
-            <!-- <Col span="1">
-              <Button :loading="advancedSubmitLoading" :disabled="advancedSubmit" type="primary" @click="hanleSubmit">Submit</Button>
-            </Col>
-            <Col span="1">
-              <Button type="ghost" @click="hanleRestore">Restore</Button>
-            </Col> -->
           </Row>
-        <Row type="flex" justify="center">
-          <Col v-if="advanceDataLoader">
-            <Spin fix>
+        <Row type="flex" justify="space-around">
+          <Col>
+            <Spin v-if="advanceDataLoader" fix>
               <Icon type="load-c" size=22 class="demo-spin-icon-load"></Icon>
               <div>Loading</div>
             </Spin>
+            <div id='editor_holder'></div>
           </Col>
-          <div id='editor_holder'></div>
+          <Col style="padding-top:60px" v-if="!advancedValidate">
+            <div v-for="(value, key) in mObj" :key="key">
+              <Span v-if="value.errmsg.length > 0"><br><Tag color="red"><Strong>{{key}}</Strong></Tag></Span>
+              <div v-if="value.errmsg.length > 0" v-for="(val, ky) in value.errmsg" :key="ky">
+                <Tag type="border" color="red">{{val}}</Tag>
+              </div>
+            </div>
+          </Col>
         </Row>
       </div>
     </TabPane>
@@ -114,12 +119,12 @@ export default {
   name: 'pdmedit',
   data () {
     return {
-      // pdmUrl: 'http://172.16.230.161:3038/pdm',
       tab0: true,
       tab1: true,
       vid: this.$cookie.get('vid'),
       pdata: {},
       simpledata:{},
+      advanceddata: {},
       realdata: {},
       activetab: 0,
       simpleValidate: true,
@@ -179,6 +184,7 @@ export default {
         // console.log(err)
         return {}
       })
+      console.log('OLD Data::', this.pdata)
       this.realdata = lodash.cloneDeep(this.pdata)
     },
     mapData(data){
@@ -188,27 +194,43 @@ export default {
       return this.realdata
       // console.log("new data",this.realdata)
     },
+    // mapAdvData(data) {
+    //   for(let item in data) {
+    //     this.realdata[item] = data[item]
+    //   }
+    //   return this.realdata
+    // },
     async hanleSubmit () {
       let data = editor.getValue()
       _.forIn(this.mObj, (value, key) => {
         value.errmsg = []
       })
-      let url = config.pdmUrl + '/pdm/' + data._id
+      let url = config.pdmUrl + '/pdm/' + this.realdata._id
+      let result = null
       let productData = Object.assign({}, data)
       let pricingData = null
       let imprintData = null
       let imagesData = null
       let shippingData = null
+      
       let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'non-available_regions', 'attributes', 'images', 'pricing', 'imprint_data', 'shipping', 'features']
       keyToDelete.forEach(e => { delete productData[e] });
+
+      if (this.activetab === 1) {
+        productData.categories = data.categories.join('|')
+        productData.search_keyword = data.search_keyword.join('|')
+        productData.available_regions = data.available_regions.join(',')
+        productData['non-available_regions'] = data['non-available_regions'].join(',')
+        productData.available_currencies = data.available_currencies.join('|')
+      }
+
       let productInfo = []
       productInfo.push(productData)
-      // console.log('after delete', productInfo)
-      
-      // console.log('serverValidation:::', serverValidation)
+
+      // console.log('productInfo:::', data)
       let pInfo_error = await this.proceedToValidate('Product Information', productInfo)
       if (data.pricing != undefined) {
-        pricingData = data.pricing
+        pricingData = lodash.cloneDeep(data.pricing)
         keyToDelete = ['import-tracker_id', 'price_range']
         pricingData.map(item => {
           keyToDelete.forEach(e => {
@@ -218,7 +240,7 @@ export default {
         let pPrice_error = await this.proceedToValidate('Product Price', pricingData)
       }
       if (data.imprint_data != undefined) {
-        imprintData = data.imprint_data
+        imprintData = lodash.cloneDeep(data.imprint_data)
         keyToDelete = ['import-tracker_id', 'imprint_data_range']
         imprintData.map(item => {
           keyToDelete.forEach(e => {
@@ -228,7 +250,7 @@ export default {
         let pImprint_error = await this.proceedToValidate('Product Imprint Data', imprintData)
       }
       if (data.images != undefined) {
-        imagesData = data.images
+        imagesData = lodash.cloneDeep(data.images)
         keyToDelete = ['import-tracker_id', 'images']
         imagesData.map(item => {
           keyToDelete.forEach(e => {
@@ -238,7 +260,7 @@ export default {
         let pImage_error = await this.proceedToValidate('Product Image', imagesData)
       }
       if (data.shipping != undefined) {
-        shippingData = data.shipping
+        shippingData = lodash.cloneDeep(data.shipping)
         keyToDelete = ['import-tracker_id', 'shipping_range']
         shippingData.map(item => {
           keyToDelete.forEach(e => {
@@ -249,8 +271,8 @@ export default {
       }
       if(this.activetab === 0) {
         this.simpleSubmitLoading = true
-        console.log('Simple Value:::', data)
-        let result = null
+        // console.log('Simple Value:::', data)
+        
         let srvVld = {
           data: productData,
           sheet_name: 'Product Information'
@@ -258,6 +280,10 @@ export default {
         api.request('post', '/product-validation', srvVld).then(async res => {
           this.mObj['Product Information'].errmsg = this.mObj['Product Information'].errmsg.concat(res.data)
         }).catch(err => {
+          this.$Notice.error({
+            title: "Validation not complete",
+            desc: "Can't perform server side validation"
+          })
           console.log('Error while doing server side validation', err)
         })
         _.forIn(this.mObj, (value, key) => {
@@ -272,7 +298,7 @@ export default {
         })
         result = this.mapData(data)
         if (this.simpleValidate) {
-          console.log('No error, simple data is going to live')
+          // console.log('No error, simple data is going to live')
           axios.patch(url, result, { headers: { vid: this.vid } }).then(res => {
             this.$Notice.success({
               title: 'Update Successfull',
@@ -291,7 +317,8 @@ export default {
         }
       } else if (this.activetab === 1) {
         this.advancedSubmitLoading = true
-        console.log('Advanced Value:::', data)
+        // console.log('Advanced Value:::', data)
+
         let validateServerside  = await this.validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData)
         for(let key in this.mObj) {
           if (this.mObj[key].errmsg.length > 0) {
@@ -302,9 +329,11 @@ export default {
             this.advancedValidate = true
           }
         }
+        result = this.mapData(data)
+        // console.log('RESULT::::', result)
         if (this.advancedValidate) {
-          console.log('No error, advanced data is going to live')
-          axios.patch(url, data, {
+          // console.log('No error, advanced data is going to live')
+          axios.patch(url, result, {
             headers: {
               vid: this.vid
             }
@@ -321,7 +350,7 @@ export default {
               })
             }
             this.advancedSubmitLoading = false
-            console.log('Updated Data::', res)
+            // console.log('Updated Data::', res)
           }).catch(err => {
             this.$Notice.error({
               title: 'Update Error',
@@ -362,6 +391,10 @@ export default {
             //   this.advancedValidate = false
             // }
           }).catch(err => {
+            this.$Notice.error({
+              title: "Validation not complete",
+              desc: "Can't perform server side validation"
+            })
             console.log('Error while doing server side validation', err)
           })
         }
@@ -379,13 +412,18 @@ export default {
     getSimpleData(data) {
       this.simpledata = {}
       for(let item in data){
-        // console.log("key",item) || item == 'min_price' || item == 'max_price'
+        // console.log("key",item) || item == 'min_price' || item == 'max_price' || item == '_id'
         if(item == 'sku' || item == 'price_1' || item == 'currency' ||
-        item == 'product_name' || item == 'language' || item == '_id' || item == 'min_price' || item == 'max_price' || item == 'country' || item == 'description') {
+        item == 'product_name' || item == 'language' || item == 'country' || item == 'description') {
           this.simpledata[item] = data[item]
         }
       }
       return this.simpledata
+    },
+    async getAdvancedData(data) {
+      let keyToDelete = ['_id', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'supplier_id', 'supplier', 'username', 'supplier_info', 'vid', 'nonavailable_regions']
+      keyToDelete.forEach(e => { delete data[e] })
+      return data
     },
     async generateForm (name){
       let tabname = 'tab' + name
@@ -399,6 +437,8 @@ export default {
         this.advanceDataLoader = true
         document.getElementById('editor_holder').innerHTML = ""
         await this.init(this.$route.params.id)
+        let advData = await this.getAdvancedData(this.pdata)
+
         editor = new JSONEditor(document.getElementById('editor_holder'),{
           // Enable fetching schemas via ajax
           ajax: true,
@@ -416,11 +456,6 @@ export default {
                 optional: false,
                 type: "string",
                 propertyOrder: 2
-              },
-              feature_1: {
-                title: "feature_1",
-                type: "string",
-                default: ""
               },
               _id: {
                 type: "string",
@@ -465,13 +500,12 @@ export default {
               },
               available_regions: {
                 title: "Available Regions",
-                type: "string",
-                propertyOrder: 10
-              },
-              nonavailable_regions:{
-                type: "string",
-                title: "Non-Available Regions",
-                propertyOrder: 11
+                type: "array",
+                format: "table",
+                items: {
+                  type: 'string'
+                },
+                propertyOrder: 40
               },
               activeSummary: {
                 title: "Active Summary",
@@ -619,50 +653,89 @@ export default {
                 format: "table",
                 options: {
                   disable_properties: true
-                },
-                propertyOrder: 40
+                }
               },
               categories: {
                 title: "Categories",
                 type: "array",
                 format: "table",
-                propertyOrder: 41
+                items: {
+                  type: 'string'
+                },
+                propertyOrder: 42
               },
               vid: {
                 type: "array",
                 title: "vid",
-                format: "table",
-                propertyOrder: 42
+                format: "table"
               },
               tags: {
                 type: "array",
                 title: "Tags",
+                format: "table",
+                items: {
+                  type: 'string'
+                },
                 propertyOrder: 43
               },
               'non-available_regions': {
                 type: "array",
                 title: 'Non Available Regions',
-                format: "table"
+                format: "table",
+                items: {
+                  type: 'string'
+                },
+                propertyOrder: 41,
               },
               available_currencies: {
                 title: "Available Currencies",
                 type: "array",
-                format: "table"
+                format: "table",
+                items: {
+                  type: 'string'
+                }
               },
               attributes: {
                 title: "Attributes",
                 type: "object",
                 options: {
                   disable_edit_json: true
-                }
+                },
+                propertyOrder: 44
               },
               images: {
                 title: "Images",
-                type: "array"
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    images: {
+                      type: "array",
+                      items: {
+                        properties: {
+                          type: "object",
+                          secure_url: {
+                            type: "string",
+                            links: [
+                              { 
+                                rel: "Preview Image",
+                                href: "{{self}}",
+                                mediaType: "image"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               },
               pricing: {
                 title: "Pricing",
-                type: "array"
+                type: "array",
+                items: {
+                  type: "object"
+                }
               },
               imprint_data: {
                 title: "Imprint Data",
@@ -670,21 +743,37 @@ export default {
               },
               shipping: {
                 title: "Shipping",
-                type: "array"
+                type: "array",
+                items: {
+                  type: "object"
+                }
               },
               search_keyword: {
                 title: "Search Keywords",
-                type: "array"
+                type: "array",
+                items: {
+                  type: "string"
+                }
               },
               features: {
-                title: "Feature",
+                title: "Features",
                 type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    key: {
+                      type: 'string'
+                    },
+                    value: {
+                      type: 'string'
+                    }
+                  }
+                },
                 propertyOrder: 1001
               },
               feature_1: {
                 type: "string",
-                title: "feature_1",
-                default: null
+                title: "feature_1"
               },
               feature_2: {
                 type: "string",
@@ -820,2082 +909,18 @@ export default {
               }
             },
             format: "grid"
-            /* "product": {
-              "title": "Product",
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "activeSummary": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "additional_charge": {
-                  "type": "nested",
-                  "properties": {
-                    "charge_name": {
-                      "type": "text"
-                    },
-                    "moq": {
-                      "type": "text"
-                    },
-                    "option_name": {
-                      "type": "text"
-                    },
-                    "price_range": {
-                      "type": "nested",
-                      "properties": {
-                        "net_price": {
-                          "type": "double"
-                        },
-                        "price": {
-                          "type": "double"
-                        },
-                        "qty": {
-                          "type": "integer_range"
-                        }
-                      }
-                    }
-                  }
-                },
-                "attr_colors": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "attr_decimal": {
-                  "type": "long"
-                },
-                "attr_imprint_color": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "attr_shape": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "attributes": {
-                  "properties": {
-                    "colors": {
-                      "type": "text",
-                      "fields": {
-                        "english": {
-                          "type": "text",
-                          "analyzer": "english"
-                        },
-                        "raw": {
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "decimal": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "shape": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "size": {
-                      "type": "text",
-                      "fields": {
-                        "raw": {
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                },
-                "available_currencies": {
-                  "type": "array",
-                  "title": "Available Currencies",
-                  "options": {
-                    "collapsed": true
-                  }
-                },
-                "available_regions": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "categories": {
-                  "type": "text",
-                  "fields": {
-                    "english": {
-                      "type": "text",
-                      "analyzer": "english"
-                    },
-                    "raw": {
-                      "type": "keyword"
-                    }
-                  },
-                  "fielddata": true
-                },
-                "company": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "country": {
-                  "type": "text"
-                },
-                "currency": {
-                  "type": "text"
-                },
-                "default_color": {
-                  "type": "text"
-                },
-                "default_image": {
-                  "type": "text"
-                },
-                "default_image_color_code": {
-                  "type": "text"
-                },
-                "description": {
-                  "type": "text",
-                  "fields": {
-                    "english": {
-                      "type": "text",
-                      "analyzer": "english"
-                    }
-                  }
-                },
-                "distributor_central_url": {
-                  "type": "text"
-                },
-                "feature_10": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_11": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_12": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_13": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_14": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_15": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_16": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_17": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_18": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_19": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_20": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_21": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_22": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_23": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_24": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_25": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_26": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_27": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_28": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_29": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_30": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_31": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_32": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_33": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_34": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_5": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_6": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_7": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_8": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "feature_9": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "features": {
-                  "properties": {
-                    "key": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "label": {
-                      "type": "text"
-                    },
-                    "value": {
-                      "type": "text",
-                      "fields": {
-                        "english": {
-                          "type": "text",
-                          "analyzer": "english"
-                        }
-                      }
-                    }
-                  }
-                },
-                "images": {
-                  "properties": {
-                    "Web_image_3": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "color": {
-                      "type": "text"
-                    },
-                    "image_color_code_1": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_10": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_11": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_12": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_13": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_14": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_15": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_16": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_17": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_18": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_2": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_3": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_4": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_5": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_6": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_7": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_8": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "image_color_code_9": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "images": {
-                      "properties": {
-                        "color": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "image_color_code": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "web_image": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "import-tracker_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "product_id": {
-                      "type": "long"
-                    },
-                    "sku": {
-                      "type": "long"
-                    },
-                    "web_image": {
-                      "type": "text"
-                    }
-                  }
-                },
-                "import-tracker_id": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "imprint_data": {
-                  "type": "nested",
-                  "properties": {
-                    "_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "additional_color_charge": {
-                      "type": "text"
-                    },
-                    "additional_location_charge": {
-                      "type": "text"
-                    },
-                    "code_1": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_10": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_2": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_3": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_4": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_5": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_6": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_7": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_8": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_9": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "full_color": {
-                      "type": "text"
-                    },
-                    "import-tracker_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "imprint_area": {
-                      "type": "text"
-                    },
-                    "imprint_method": {
-                      "type": "text"
-                    },
-                    "imprint_position": {
-                      "type": "text"
-                    },
-                    "is_pms_color_allow": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "location_price_included": {
-                      "type": "integer"
-                    },
-                    "ltm_charge": {
-                      "type": "text"
-                    },
-                    "matrix": {
-                      "type": "text"
-                    },
-                    "max_imprint_color_allowed": {
-                      "type": "integer"
-                    },
-                    "max_location_allowed": {
-                      "type": "integer"
-                    },
-                    "pms_charge": {
-                      "type": "text"
-                    },
-                    "price_1": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_10": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_2": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_3": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_4": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_5": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_6": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_7": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_8": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_9": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_included": {
-                      "type": "integer"
-                    },
-                    "price_range": {
-                      "type": "nested",
-                      "properties": {
-                        "price": {
-                          "type": "double"
-                        },
-                        "qty": {
-                          "type": "long_range"
-                        }
-                      }
-                    },
-                    "product_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "production_days": {
-                      "type": "text"
-                    },
-                    "production_unit": {
-                      "type": "text"
-                    },
-                    "qty_10_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_10_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_1_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_1_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_2_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_2_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_3_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_3_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_4_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_4_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_5_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_5_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_6_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_6_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_7_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_7_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_8_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_8_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_9_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_9_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "rush_charge": {
-                      "type": "text"
-                    },
-                    "setup_charge": {
-                      "type": "text"
-                    },
-                    "sku": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "type_of_charge": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    }
-                  }
-                },
-                "is_vmc": {
-                  "type": "boolean"
-                },
-                "language": {
-                  "type": "text"
-                },
-                "linename": {
-                  "type": "text",
-                  "fields": {
-                    "english": {
-                      "type": "text",
-                      "analyzer": "english"
-                    },
-                    "raw": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "matrix_frieght": {
-                  "type": "double"
-                },
-                "matrix_price": {
-                  "type": "double"
-                },
-                "max_price": {
-                  "type": "float"
-                },
-                "min_price": {
-                  "type": "float"
-                },
-                "nonavailable_regions": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "packaging_charges": {
-                  "type": "double"
-                },
-                "packaging_code": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "packaging_type": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "price": {
-                  "type": "double"
-                },
-                "price_1": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  },
-                  "fielddata": true
-                },
-                "pricing": {
-                  "properties": {
-                    "_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_2": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_3": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_4": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_5": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_6": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_7": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "code_8": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "currency": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "global_price_type": {
-                      "type": "text",
-                      "fields": {
-                        "english": {
-                          "type": "text",
-                          "analyzer": "english"
-                        },
-                        "raw": {
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "import-tracker_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_2": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_3": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_4": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_5": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_6": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_7": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_8": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_range": {
-                      "type": "nested",
-                      "properties": {
-                        "code": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "price": {
-                          "type": "double"
-                        },
-                        "qty": {
-                          "type": "integer_range"
-                        }
-                      }
-                    },
-                    "price_type": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "price_unit": {
-                      "type": "text",
-                      "fields": {
-                        "english": {
-                          "type": "text",
-                          "analyzer": "english"
-                        },
-                        "raw": {
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "product_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_2_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_2_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_3_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_3_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_4_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_4_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_5_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_5_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_6_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_6_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_7_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_7_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_8_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_8_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "sku": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "type": {
-                      "type": "text",
-                      "fields": {
-                        "english": {
-                          "type": "text",
-                          "analyzer": "english"
-                        },
-                        "raw": {
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                },
-                "private": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "product_id": {
-                  "type": "long"
-                },
-                "product_name": {
-                  "type": "text",
-                  "similarity": "BM25"
-                },
-                "search_keyword": {
-                  "type": "text",
-                  "fields": {
-                    "english": {
-                      "type": "text",
-                      "analyzer": "english"
-                    },
-                    "raw": {
-                      "type": "text",
-                      "analyzer": "keyword_lowercase_analyzer"
-                    }
-                  }
-                },
-                "shipping": {
-                  "properties": {
-                    "_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "carton_height": {
-                      "type": "text"
-                    },
-                    "carton_length": {
-                      "type": "double"
-                    },
-                    "carton_size_unit": {
-                      "type": "text"
-                    },
-                    "carton_weight": {
-                      "type": "text"
-                    },
-                    "carton_weight_unit": {
-                      "type": "text"
-                    },
-                    "carton_width": {
-                      "type": "text"
-                    },
-                    "fob_city": {
-                      "type": "text"
-                    },
-                    "fob_country_code": {
-                      "type": "text"
-                    },
-                    "fob_state_code": {
-                      "type": "text"
-                    },
-                    "fob_zip_code": {
-                      "type": "text"
-                    },
-                    "free_on_board": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "import-tracker_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "product_height": {
-                      "type": "text"
-                    },
-                    "product_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "product_length": {
-                      "type": "text"
-                    },
-                    "product_size_unit": {
-                      "type": "text"
-                    },
-                    "product_weight": {
-                      "type": "text"
-                    },
-                    "product_weight_unit": {
-                      "type": "text"
-                    },
-                    "product_width": {
-                      "type": "text"
-                    },
-                    "qty_10_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_10_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_1_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_1_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_2_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_2_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_3_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_3_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_4_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_4_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_5_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_5_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_6_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_6_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_7_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_7_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_8_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_8_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_9_max": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "qty_9_min": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "shipping_qty_per_carton": {
-                      "type": "double"
-                    },
-                    "shipping_range": {
-                      "properties": {
-                        "qty": {
-                          "properties": {
-                            "gte": {
-                              "type": "long"
-                            },
-                            "lte": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "sku": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sku": {
-                  "type": "number",
-                  "fields": {
-                    "english": {
-                      "type": "text",
-                      "analyzer": "english"
-                    },
-                    "raw": {
-                      "type": "text",
-                      "analyzer": "keyword_lowercase_analyzer"
-                    }
-                  },
-                  "fielddata": true
-                },
-                "special_price_valid_up_to": {
-                  "type": "date"
-                },
-                "status": {
-                  "type": "boolean"
-                },
-                "supplier": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "supplier_id": {
-                  "type": "text"
-                },
-                "supplier_info": {
-                  "type": "object",
-                  "title": "supplier info",
-                  "options":{
-                    "collapsed": true
-                  },
-                  "properties": {
-                    "company": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "email": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "supplier_name": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "username": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    }
-                  }
-                },
-                "username": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "valid_up_to": {
-                  "type": "date"
-                },
-                "vat": {
-                  "type": "double"
-                },
-                "vat_unit": {
-                  "type": "text"
-                },
-                "vid": {
-                  "type": "text",
-                  "fields": {
-                    "raw": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "video_url": {
-                  "type": "text"
-                }
-              }
-            } */
           },
           // Seed the form with a starting value
-          startval: this.pdata
+          startval: advData
         });
         editor.getEditor('root.sku').disable()
-        editor.getEditor('root._id').disable()
-        editor.getEditor('root.vid').disable()
-        editor.getEditor('root.username').disable()
-        editor.getEditor('root.supplier_id').disable()
+        // editor.getEditor('root._id').disable()
+        // editor.getEditor('root.vid').disable()
+        // editor.getEditor('root.username').disable()
+        // editor.getEditor('root.supplier_id').disable()
         editor.getEditor('root.product_id').disable()
-        editor.getEditor('root.supplier_info').disable()
-        editor.getEditor('root.import-tracker_id').disable()
+        // editor.getEditor('root.supplier_info').disable()
+        // editor.getEditor('root.import-tracker_id').disable()
         this.advanceDataLoader = false
         this.advancedSubmit = false
       } else if (tabname == 'tab0') {
@@ -2953,7 +978,11 @@ export default {
               },
               description: {
                 type: "string",
-                title: "Description"
+                title: "Description",
+                format: "html",
+                options: {
+                  wysiwyg: true
+                }
               },
               language: {
                 title: "Language",
@@ -2967,114 +996,12 @@ export default {
               }
             },
             format: "grid"
-            // "product": {
-              // "type": "object",
-              // "properties": {
-              //   "attributes": {
-              //     "properties": {
-              //       "colors": {
-              //         "type": "text",
-              //         "fields": {
-              //           "english": {
-              //             "type": "text",
-              //             "analyzer": "english"
-              //           },
-              //           "raw": {
-              //             "type": "keyword"
-              //           }
-              //         }
-              //       }
-              //     }
-              //   },
-              //   "currency": {
-              //     "type": "text"
-              //   },
-              //   "description": {
-              //     "type": "text",
-              //     "fields": {
-              //       "english": {
-              //         "type": "text",
-              //         "analyzer": "english"
-              //       }
-              //     }
-              //   },
-              //   "import-tracker_id": {
-              //     "type": "text",
-              //     "fields": {
-              //       "keyword": {
-              //         "type": "keyword",
-              //         "ignore_above": 256
-              //       }
-              //     }
-              //   },
-              //   "imprint_data": {
-              //     "type": "nested",
-              //     "properties": {
-              //       "imprint_method": {
-              //         "type": "text"
-              //       }
-              //     }
-              //   },
-              //   "language": {
-              //     "type": "text"
-              //   },
-              //   "max_price": {
-              //     "type": "float"
-              //   },
-              //   "min_price": {
-              //     "type": "float"
-              //   },
-              //   "price_1": {
-              //     "type": "text",
-              //     "fields": {
-              //       "keyword": {
-              //         "type": "keyword",
-              //         "ignore_above": 256
-              //       }
-              //     },
-              //     "fielddata": true
-              //   },
-              //   "product_id": {
-              //     "type": "long"
-              //   },
-              //   "product_name": {
-              //     "type": "text",
-              //     "similarity": "BM25"
-              //   },
-              //   "sku": {
-              //     "type": "string",
-              //     "description": "Enter SKU",
-              //     "minLength": 4
-              //   },
-              //   "supplier": {
-              //     "type": "text",
-              //     "fields": {
-              //       "keyword": {
-              //         "type": "keyword",
-              //         "ignore_above": 256
-              //       }
-              //     }
-              //   },
-              //   "supplier_id": {
-              //     "type": "text"
-              //   },
-              //   "username": {
-              //     "type": "text",
-              //     "fields": {
-              //       "keyword": {
-              //         "type": "keyword",
-              //         "ignore_above": 256
-              //       }
-              //     }
-              //   }
-              // }
-            // }
           },
           // Seed the form with a starting value
           startval: data
         });
         editor.getEditor('root.sku').disable();
-        editor.getEditor('root._id').disable();
+        // editor.getEditor('root._id').disable();
         this.simpleDataLoader = false
         this.simpleSubmit = false
       }
@@ -3436,30 +1363,14 @@ export default {
   async mounted () {
     await this.generateForm(0)
     let self = this
-    // editor.on("change",  function() {
-    //   // Get an array of errors from the validator
-    //   let errors = editor.validate();
-    //   if(self.activetab === 0) {
-    //     if (errors.length) {
-    //       self.simpleValidate = false
-    //       self.simpleSubmit = true
-    //     } else {
-    //       self.simpleSubmit = false
-    //     }
-    //   } else if (self.activetab === 1) {
-    //     if (errors.length) {
-    //       self.advancedValidate = false
-    //       self.advancedSubmit = true
-    //     } else {
-    //       self.advancedSubmit = false
-    //     }
-    //   }
-    // });
   }
 }
 </script>
 
 <style scoped>
+@import 'https://cdnjs.cloudflare.com/ajax/libs/foundation/3.2.5/stylesheets/foundation.min.css';
+@import '//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css';
+
 .pdmedit {
   padding: 40px;
 }

@@ -80,7 +80,7 @@ export default {
           vid: this.vid
         }
       }).then(async (res) => {
-        console.log('>>>>', res)
+        // console.log('>>>>', res)
         return axios.get(url, {
           params: {
             $limit: res.data.hits.total
@@ -96,8 +96,8 @@ export default {
           })
         })
         // console.log('resp: ', res)
-      }).catch(err => {
-        console.log('Error while getting products::', err)
+      }).catch(err => { // eslint-disable-line
+        // console.log('Error while getting products::', err)
         this.$Notice.error({
           title: 'Getting product list',
           desc: 'Please refresh page and try again.'
@@ -116,12 +116,12 @@ export default {
     this.pdata = await axios.get(url).then(res => {
       this.vid = res.data[0].id
       this.$cookie.set('vid', res.data[0].id)
-    }).catch(err => {
+    }).catch(err => { // eslint-disable-line
       this.$Notice.error({
         title: 'Can\'t find vshop id',
         desc: 'Please refresh page and try again.'
       })
-      console.log('Error while getting vid', err)
+      // console.log('Error while getting vid', err)
     })
     this.init()
   }

@@ -46,7 +46,7 @@ export const ProductInformationSchema = new Schema({
       maxLength : '',
       regEx:''
     },
-    nonavailable_regions:{
+    'non-available_regions': {
       type: "string",
       label: "Non-Available Regions",
       optional: true,
