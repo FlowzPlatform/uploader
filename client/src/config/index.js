@@ -11,8 +11,8 @@ if (isSSl === 'true') {
 }
 
 var temp = {
-  serverURI: protocol + '://172.16.230.161:' + serverPort,
-  socketURI: protocol + '://172.16.230.161:' + socketPort,
+  serverURI: protocol + '://localhost:' + serverPort,
+  socketURI: protocol + '://localhost:' + socketPort,
   fixedLayout: false,
   hideLogoOnMobile: false,
   microURI: 'https://api.' + domainkey + '/auth/api',
@@ -37,8 +37,8 @@ var temp = {
   flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
   crmUrl: 'https://www.crm.' + domainkey,
   websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
-  // pdmUrl: 'https://api.' + domainkey + '/pdmnew'
-  pdmUrl: 'http://localhost:3038'
+  pdmUrl: 'https://api.' + domainkey + '/pdmnew'
+  // pdmUrl: 'http://localhost:3038'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
