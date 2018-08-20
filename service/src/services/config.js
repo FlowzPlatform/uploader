@@ -9,6 +9,8 @@ let port = process.env.RDB_PORT ? config.get('rdb_port').trim() : '28015'
 var rethinkdb = {
   rethinkdb: {
     db: 'FlowzDBETL',
+    buffer: 20,
+    timeoutGb: 60000,
     servers: [{
       host: host,
       port: port,
