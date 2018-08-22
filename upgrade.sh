@@ -63,8 +63,11 @@ then
       cloudname="$cloudname_develop";
       apikey="$apikey_develop";
       apisecret="$apisecret_develop";
-      RDB_HOST="RDB_HOST_DEVELOP";
-      RDB_PORT="$RDB_PORT_PORT";
+      RDB_HOST="$RDB_HOST_DEVELOP";
+      RDB_PORT="$RDB_PORT_DEVELOP";
+      
+      mongodb_host="$mongodb_host_dev";
+      mongodb_port="$mongodb_port_dev";
   }
 elif [ "$TRAVIS_BRANCH" = "staging" ]
 then
@@ -114,6 +117,9 @@ else
       apisecret="$apisecret_qa";
       RDB_HOST="$RDB_HOST_QA";
       RDB_PORT="$RDB_PORT_QA";
+      
+      mongodb_host="$mongodb_host_qa";
+      mongodb_port="$mongodb_port_qa";
   }
 fi
 

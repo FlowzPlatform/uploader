@@ -1,80 +1,70 @@
 <template>
-  <div>
-    <Steps :current="currentStep" class="uploadSteps">
-       <Step content="Upload"></Step>
-       <Step content="Validate"></Step>
-       <Step content="Import"></Step>
-   </Steps>
-   <template v-if="currentStep === 0 && uploadStep">
-     <Row>
-          <Col span="6" class="tabList">
-                <vue-tabs active-tab-color="#494e6b"
-                          active-text-color="#fff"
-                          type="pills"
-                          direction="vertical"
-                          v-model="activeTab"
-                          :tab-change="hideHandson()">
-
-                     <div v-for="(files,fIndex) in fileTypes">
-                           <v-tab :title=files :id="changeIndex(files)">
-                              <!-- <img src="../assets/images/green_tick.jpg" alt="" style="width:20px;height:20px;"></img> -->
-                           </v-tab>
-                    </div>
-                </vue-tabs>
-                <div style="margin-top: 20px;position: absolute;top: 300px;">
-                      <Button type="success" class="sucessbtn" size="large" style="font-size:15px" :disabled="validate" @click="startValidation()">Start validation<i class="ivu-icon ivu-icon-android-arrow-dropright-circle" style="margin-left:7%"></i></Button>
+   <div>
+      <Steps :current="currentStep" class="uploadSteps">
+         <Step content="Upload"></Step>
+         <Step content="Validate"></Step>
+         <Step content="Import"></Step>
+      </Steps>
+      <template v-if="currentStep === 0 && uploadStep">
+         <Row>
+            <Col span="6" class="tabList">
+              <vue-tabs active-tab-color="#494e6b"
+                active-text-color="#fff"
+                type="pills"
+                direction="vertical"
+                v-model="activeTab"
+                :tab-change="hideHandson()">
+                <div v-for="(files,fIndex) in fileTypes">
+                    <v-tab :title=files :id="changeIndex(files)">
+                      <!-- <img src="../assets/images/green_tick.jpg" alt="" style="width:20px;height:20px;"></img> -->
+                    </v-tab>
                 </div>
-          </Col>
-          <Col span="18" class="tabView">
+              </vue-tabs>
+              <div style="margin-top: 20px;position: absolute;top: 300px;">
+                <Button type="success" class="sucessbtn" size="large" style="font-size:15px" :disabled="validate" @click="startValidation()">Start validation<i class="ivu-icon ivu-icon-android-arrow-dropright-circle" style="margin-left:7%"></i></Button>
+              </div>
+            </Col>
+            <Col span="18" class="tabView">
             <div id="uploadCsv" style="margin-top:5%;" v-model="mObj[activeTab]">
-                <div>
-                    <Form>
-                      <FormItem label="Field Mapping">
+               <div>
+                  <Form>
+                     <FormItem label="Field Mapping">
                         <Row>
-                        <Col span="5">
-                        <Select v-model="mObj[activeTab].selected_schema" style="width:200px" @on-change="changeSchema(activeTab,mObj[activeTab].selected_schema)">
-                            <Option v-for="schema in mObj[activeTab].schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
-                        </Select>
-                       </Col>
-
-
-
-                       <Col span="3">
-                        <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
-                          <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled mapping</a>
-                           <div class="api" slot="content">
-                             <Form inline>
-                               <FormItem>
-                                   <Input type="text" v-model="mObj[activeTab].new_schema"></Input>
-                               </FormItem>
-                                  <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
-                                  <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
-                           </Form>
-                           </div>
-                       </Poptip>
-                     </Col>
-
-
-
-                     <!-- <Col span="3">
+                           <Col span="5">
+                           <Select v-model="mObj[activeTab].selected_schema" style="width:200px" @on-change="changeSchema(activeTab,mObj[activeTab].selected_schema)">
+                              <Option v-for="schema in mObj[activeTab].schemaList" :value="schema.value" :key="schema.value">{{ schema.label }}</Option>
+                           </Select>
+                           </Col>
+                           <Col span="3">
+                           <Poptip placement="top" width="300" v-model = "mObj[activeTab].poptip_display">
+                              <a @click="mObj[activeTab].poptip_display = true" v-if="mObj[activeTab].display">Untitled mapping</a>
+                              <div class="api" slot="content">
+                  <Form inline>
+                  <FormItem>
+                  <Input type="text" v-model="mObj[activeTab].new_schema"></Input>
+                  </FormItem>
+                  <Button type="ghost" class="btnghost" icon="ios-checkmark" style="font-size: 25px;" @click="validateSchema(activeTab,mObj[activeTab].new_schema)"></Button>
+                  <Button type="ghost" class="btnghost" icon="ios-close" style="font-size: 25px;margin-left: -20px;" @click="mObj[activeTab].poptip_display = false"></Button>
+                  </Form>
+                  </div>
+                  </Poptip>
+                  </Col>
+                  <!-- <Col span="3">
                      <a @click="showUpload()" v-if="activeTab === 'Product Image'">Upload Image</a>
                      </Col> -->
-
-                     <Col span="1" v-if="loadingdot">
-                       <Spin></Spin>
-                     </Col>
-
-                     </Row>
-                     </FormItem>
-                   </Form>
-                </div>
-
-                <div id="upload-csv-zone" v-if="mObj[activeTab].uploadDisplay">
+                  <Col span="1" v-if="loadingdot">
+                  <Spin></Spin>
+                  </Col>
+                  </Row>
+                  </FormItem>
+                  </Form>
+               </div>
+               <div id="upload-csv-zone" v-if="mObj[activeTab].uploadDisplay">
                   <div class="file-zone">
-                      <span class="dz-message">Drop <span style="color: #494e6b">"{{activeTab}}"</span> files here<br/>
-                          <small>(only csv files are valid.)</small>
-                      </span>
-                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
+                     <span class="dz-message">Drop <span style="color: #494e6b">"{{activeTab}}"</span> files here<br/>
+                     <small>(only csv files are valid.)</small>
+                     </span>
+                     <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
                   </div>
               </div>
 
@@ -104,501 +94,564 @@
                  <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
                  <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
                </div>
-             </div>
-
-              <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
-                        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                        <div>Loading</div>
-                    </Spin></div>
-
-              <div v-if="mObj[activeTab].load" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
-                        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                        <div>Loading</div>
-                    </Spin></div>
-
-
-              <div v-if="mObj[activeTab].previewDisplay && mObj[activeTab].newUploadCSV.length !== 0 ">
-              <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
-               <div class="schema-form ivu-table-wrapper">
-                 <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
-                   <div class="ivu-table-body" style="overflow:auto !important;">
-                     <table style="min-width:1077px;overflow-x: auto;">
-                       <thead>
-                         <tr>
-                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure)" v-if="!map && header !== '_id'">
-                             <div>
-                               <span>{{header}}</span>
-                             </div>
-                           </th>
-                         </tr>
-                         <tr>
-                           <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0])" v-if="map && header !== '_id'">
-                             <div>
-                               <span>{{header}}</span>
-                             </div>
-                           </th>
-                         </tr>
-                       </thead>
-                       <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
-                         <tr class="ivu-table-row" v-if="(index<5)">
-                           <td class="" v-for="data in getwithoutid(item,4)" style="overflow:hidden;">
-                             {{data}}
-                           </td>
-                         </tr>
-
-                       </tbody>
-                     </table>
-                   </div>
-                 </div>
-             </div>
-             <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)" v-if="(mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay) && !nextBtn" :disabled="!proceedBtn" :loading="ProceedLoading">
-              <span v-if="ProceedLoading">Processing</span>
-              <span v-else>Proceed</span>
-             </Button>
-             <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
-           </div>
-
-           <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
-             <div class="recordsDisplay">
-             <h2 class="hclass">Uploaded Records of {{activeTab}}</h2>
-             <Button type="ghost" class="close" @click="deleteRecModal = true"><Icon type="close-circled" class="redIcon"></Icon></Button>
-            </div>
-            <Row>
-              <Col :span="12">
-                <Button type="error" class="delete" @click="deleteSelModal = true" :disabled="delete1"><Icon type="trash-b"></Icon> Delete</Button>
-              </Col>
-              <Col :span="12" style="margin-top:5px">
+               <!-- <div v-if="showWebImage" id="upload-image-zone">
+                  <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
+                     <span class="dz-message">Select Folder for Mass image upload<br/>
+                     <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
+                     </span>
+                     <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
+                  </form>
+                  <Button type="primary" style="margin-top:0px;color: #fff;margin-top:14px;float:right;padding: 6px 30px;margin-left:1%" @click="Back(activeTab)">Back</Button>
+                  <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)">Abort</Button>
+                  <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)"  :disabled="!proceedBtn" :loading="ProceedLoading">
+                  <span v-if="ProceedLoading">Processing</span>
+                  <span v-else>Proceed</span>
+                  </Button>
+                  <div v-if="image_err.length !== 0" style="margin-top:7%;">
+                     <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
+                     <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
+                     <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
+                        <Row>
+                           <div v-for="(item,index) in image_err">
+                              <Col span="5" >
+                              {{item}}</Col>
+                           </div>
+                        </Row>
+                     </div>
+                  </div>
+                  <div id="dirinfo">
+                     <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
+                     <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
+                  </div>
+               </div>
+               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">
+                  <Spin fix>
+                     <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                     <div>Loading</div>
+                  </Spin>
+               </div>
+               <div v-if="mObj[activeTab].load" class="demo-spin-col" style="margin-top:14px">
+                  <Spin fix>
+                     <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                     <div>Loading</div>
+                  </Spin>
+               </div> -->
+               <div v-if="mObj[activeTab].previewDisplay && mObj[activeTab].newUploadCSV.length !== 0 ">
+                  <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
+                  <div class="schema-form ivu-table-wrapper">
+                     <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
+                        <div class="ivu-table-body" style="overflow:auto !important;">
+                           <table style="min-width:1077px;overflow-x: auto;">
+                              <thead>
+                                 <tr>
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure)" v-if="!map && header !== '_id'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                                 <tr>
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].newUploadCSV[0])" v-if="map && header !== '_id'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].newUploadCSV">
+                                 <tr class="ivu-table-row" v-if="(index<5)">
+                                    <td class="" v-for="data in getwithoutid(item,4)" style="overflow:hidden;">
+                                       {{data}}
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+                  <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)" v-if="mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay">Abort</Button>
+                  <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)" v-if="(mObj[activeTab].headerDisplay || mObj[activeTab].newSchemaDisplay) && !nextBtn" :disabled="!proceedBtn" :loading="ProceedLoading">
+                  <span v-if="ProceedLoading">Processing</span>
+                  <span v-else>Proceed</span>
+                  </Button>
+                  <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
+               </div>
+               <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
+                  <div class="recordsDisplay">
+                     <h2 class="hclass">Uploaded Records of {{activeTab}}</h2>
+                     <Button type="ghost" class="close" @click="deleteRecModal = true">
+                        <Icon type="close-circled" class="redIcon"></Icon>
+                     </Button>
+                  </div>
                   <Row>
-                    <Col :span="19">
-                      <Input type="text"  class="" style="" placeholder="Filter" v-model="filterValue">
+                     <Col :span="12">
+                     <Button type="error" class="delete" @click="deleteSelModal = true" :disabled="delete1">
+                        <Icon type="trash-b"></Icon>
+                        Delete
+                     </Button>
+                     </Col>
+                     <Col :span="12" style="margin-top:5px">
+                     <Row>
+                        <Col :span="19">
+                        <Input type="text"  class="" style="" placeholder="Filter" v-model="filterValue">
                         <Icon type="funnel" slot="prepend" class="funnel"></Icon>
-                      </Input>
-                    </Col>
-                    <Col :span="5" class="buttons">
-                      <!-- <Button type="ghost" class="apply" @click = "filter(filterValue,activeTab)" icon="ios-checkmark"></Button>
-                      <Button type="ghost" class="reset" @click="reset()" icon="refresh"></Button> -->
-                      <button type="submit" class="apply" @click = "filter(filterValue,activeTab)"><Icon type="ios-checkmark"></Icon></button>
-                      <button type="submit" class="reset" @click="reset()" :disabled="disableReset"><Icon type="refresh"></Icon></button>
-                    </Col>
+                        </Input>
+                        </Col>
+                        <Col :span="5" class="buttons">
+                        <!-- <Button type="ghost" class="apply" @click = "filter(filterValue,activeTab)" icon="ios-checkmark"></Button>
+                           <Button type="ghost" class="reset" @click="reset()" icon="refresh"></Button> -->
+                        <button type="submit" class="apply" @click = "filter(filterValue,activeTab)">
+                           <Icon type="ios-checkmark"></Icon>
+                        </button>
+                        <button type="submit" class="reset" @click="reset()" :disabled="disableReset">
+                           <Icon type="refresh"></Icon>
+                        </button>
+                        </Col>
+                     </Row>
+                     </Col>
                   </Row>
-              </Col>
-            </Row>
-
-
-            <div class="schema-form ivu-table-wrapper previewtable">
-              <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
-                <div class="ivu-table-body">
-                  <table style="min-width:1077px;overflow-x: auto;" v-if="mObj[activeTab].main_arr.length !== 0">
-                    <thead>
-                      <tr>
-                        <!-- <th>
-                           <Checkbox ></Checkbox>
-                        </th> -->
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map && header !== '_id'">
-                          <div>
-                            <span>{{header}}</span>
-                          </div>
-                        </th>
-                      </tr>
-                      <tr>
-                        <th>
-                         <Checkbox v-model="mObj[activeTab].mPage[mObj[activeTab].cpage - 1].mCheck" @on-change="selectAllChunk()" class="check"></Checkbox>
-                        </th>
-                        <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[mObj[activeTab].cpage - 1][0]) " v-if="map && header !== '_id' && header !== 'is_checked'">
-                          <div>
-                            <span>{{header}}</span>
-                          </div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].main_arr[mObj[activeTab].cpage - 1]">
-                      <tr class="ivu-table-row">
-                        <td>
-                           <Checkbox v-model="item['is_checked']" @on-change="PushToArray(item)"></Checkbox>
-                        </td>
-                        <td class=""  v-for="data in getwithoutid(item)" style="overflow:hidden;padding-left:15px;padding-right:15px">{{data}}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="pagination">
-                  <Page :total="mObj[activeTab].newUploadCSV.length" :current="mObj[activeTab].cpage" @on-change="changePage" :page-size=5></Page>
-                </div>
-              </div>
-          </div>
-        </div>
-
-          <Modal v-model="deleteRecModal" width="500">
-           <p slot="header" style="color:#f60;text-align:center;font-size:20px">
-               <Icon type="information-circled"></Icon>
-               <span>Delete confirmation</span>
-           </p>
-           <div style="text-align:center">
-               <p style="font-size:15px">Are you sure you want to delete?</p>
-               <p style="font-size:15px">All your records will be deleted...</p>
-           </div>
-           <div slot="footer">
-               <Button type="error" @click="abortUploadedRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
-               <Button type="primary"  @click="deleteRecModal = false">No</Button>
-           </div>
-        </Modal>
-
-        <Modal v-model="deleteSelModal" width="500">
-         <p slot="header" style="color:#f60;text-align:center;font-size:20px">
-             <Icon type="information-circled"></Icon>
-             <span>Delete confirmation</span>
-         </p>
-         <div style="text-align:center">
-             <p style="font-size:15px">Are you sure you want to delete?</p>
-             <p style="font-size:15px">Your selected {{deletedValues.length}} records will be deleted...</p>
-         </div>
-         <div slot="footer">
-             <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
-             <Button type="primary"  @click="deleteSelModal = false">No</Button>
-         </div>
-      </Modal>
-
-            <div v-if="mObj[activeTab].headerDisplay && mObj[activeTab].mapping.length !== 0">
-            <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
-            <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
-             <div class="schema-form ivu-table-wrapper" >
-               <div class="ivu-table ivu-table-border customtable" >
-                 <div class="ivu-table-body">
-                   <table class="mapping-table" style="width:100%;overflow-y:auto;">
-                     <colgroup>
-                       <col width="35">
-                       <col width="35">
-                       <col width="30">
-                     </colgroup>
-                     <thead>
-                       <tr>
-                         <th class="">System headers</th>
-                         <th class="">CSV headers</th>
-                         <th class="">Transform</th>
-                       </tr>
-                     </thead>
-                     <tbody class="ivu-table-tbody">
-                       <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
-                         <td>
-                           <div class="ivu-table-cell" >
-                             <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span>{{item.sysHeader}}</span>
-                              <span v-else>{{item.sysHeader}}</span>
-                           </div>
-                         </td>
-                         <td>
-                           <div class="ivu-table-cell">
-                             <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
-                                 <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header" >{{ header}}</Option>
-                             </Select>
-                           </div>
-                         </td>
-                         <td class="transform-block">
-                           <div class="ivu-table-cell">
-                               <a  @click="modelshow(item,index)"><Icon type="compose"></Icon></a>
-                           </div>
-                           <div v-if="item.transformMethod" class="transform-function" title="">
-                               <span>{{item.transform}}</span>
-                               <span  @click="removeTransform(item,index)"><Icon type="close-circled" /></span>
-                           </div>
-                         </td>
-                       </tr>
-                     </tbody>
-                   </table>
-                 </div>
+                  <div class="schema-form ivu-table-wrapper previewtable">
+                     <div class="ivu-table ivu-table-border customtable" style="display:block;white-space: nowrap;">
+                        <div class="ivu-table-body">
+                           <table style="min-width:1077px;overflow-x: auto;" v-if="mObj[activeTab].main_arr.length !== 0">
+                              <thead>
+                                 <tr>
+                                    <!-- <th>
+                                       <Checkbox ></Checkbox>
+                                       </th> -->
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].schema.structure) " v-if="!map && header !== '_id'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                                 <tr>
+                                    <th>
+                                       <Checkbox v-model="mObj[activeTab].mPage[mObj[activeTab].cpage - 1].mCheck" @on-change="selectAllChunk()" class="check"></Checkbox>
+                                    </th>
+                                    <th v-for="(header,hindex) in Object.keys(mObj[activeTab].main_arr[mObj[activeTab].cpage - 1][0]) " v-if="map && header !== '_id' && header !== 'is_checked'">
+                                       <div>
+                                          <span>{{header}}</span>
+                                       </div>
+                                    </th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody" v-for="(item, index) in mObj[activeTab].main_arr[mObj[activeTab].cpage - 1]">
+                                 <tr class="ivu-table-row">
+                                    <td>
+                                       <Checkbox v-model="item['is_checked']" @on-change="PushToArray(item)"></Checkbox>
+                                    </td>
+                                    <td class=""  v-for="data in getwithoutid(item)" style="overflow:hidden;padding-left:15px;padding-right:15px">{{data}}</td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                        <div class="pagination">
+                           <Page :total="mObj[activeTab].newUploadCSV.length" :current="mObj[activeTab].cpage" @on-change="changePage" :page-size=5> </Page>
+                        </div>
+                     </div>
+                  </div>
                </div>
-           </div>
-         </div>
-
-         <div v-if="mObj[activeTab].newSchemaDisplay">
-         <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
-         <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
-         <div class="schema-form ivu-table-wrapper">
-           <div class="ivu-table ivu-table-border customtable" >
-             <div class="ivu-table-body">
-               <table class="mapping-table" style="width:100%;overflow-y:auto;">
-                 <colgroup>
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                 </colgroup>
-                 <thead>
-                   <tr>
-                     <th class="">System headers</th>
-                     <th class="">CSV headers</th>
-                     <th class="">Type</th>
-                     <th class="">Property</th>
-                     <th class="">Transform</th>
-                   </tr>
-                 </thead>
-                 <tbody class="ivu-table-tbody">
-                   <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
-                     <th>
-                       <div class="ivu-table-cell headercolor">
-                         <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span> {{item.sysHeader}}</span>
-                          <span v-else>{{item.sysHeader}}</span>
-                       </div>
-                     </th>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
-                             <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header">{{ header}}</Option>
-                         </Select>
-                       </div>
-                     </td>
-
-                     <td class="">
-                       <div class="ivu-table-cell">
-                         <Select v-model="item.schemaObj.type">
-                             <Option v-for="type in types" :value="type" :key="type">{{ type}}</Option>
-                         </Select>
-                       </div>
-                     </td>
-
-                     <td class="">
-                       <div class="property ivu-table-cell">
-                         <Poptip placement="left" width="300">
-                           <a>
-                             <Icon type="edit"></Icon>
-                           </a>
-                           <div slot="title">
-                             <h3>Property</h3></div>
-                           <div slot="content" class="prptycontent">
-                             <Form label-position="left" >
-                             <FormItem label="MaxLength" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.maxLength" ></Input>
-                             </FormItem>
-                             <FormItem  label="Allowed Value" :label-width="100">
-                                <input-tag  :tags="item.schemaObj.allowedValues" class="prpty-label"></input-tag>
-                             </FormItem>
-                             <FormItem  label="Default Value" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.defaultValue"></Input>
-                             </FormItem>
-                             <FormItem  label="regEx" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.regEx"></Input>
-                             </FormItem>
-                             <FormItem  label="label" :label-width="100">
-                               <Input size="small" v-model="item.schemaObj.label"></Input>
-                             </FormItem>
-                             <FormItem  label="" :label-width="100">
-                               <Checkbox  id="prptychckbox" class="propertychbx" v-model="item.schemaObj.optional">Optional</Checkbox>
-                             </FormItem>
-                           </Form>
-                           </div>
-                         </Poptip>
-                       </div>
-                     </td>
-
-                     <td class="transform-block">
-                       <div class="ivu-table-cell">
-                           <a  @click="modelshow(item,index)"><Icon type="compose"></Icon></a>
-                       </div>
-                       <div v-if="item.transformMethod" class="transform-function" title="">
-                           <span>{{item.transform}}</span>
-                           <span  @click="removeTransform(item,index)"><Icon type="close-circled" /></span>
-                       </div>
-                     </td>
-                   </tr>
-                 </tbody>
-               </table>
-             </div>
-           </div>
-       </div>
-     </div>
-
-         <div id="example1" class="hot handsontable htColumnHeaders" style="overflow-x: auto"></div>
-         <table>
-           <tr>
-           <td class="ivu-table-row" style="color:red;font-size:14px;word-break:break-word;">{{mObj[activeTab].errmsg[0]}}</td>
-         </tr>
-         </table>
-         <div id="hot-preview" v-if="mObj[activeTab].showHandson">
-           <Button type="error" @click="AbortValidation(activeTab)" style="float:right;margin-right:10px;">Abort Data</Button>
-         </div>
-         <div id="hot-preview" v-if="mObj[activeTab].showHandson">
-           <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
-         </div>
-
-         <Modal  v-model="model" title="Transform" @on-ok="handleModalOk" width="900px" :mask-closable="false ">
-           <Row style="padding: 10px;">
-             <Col span="18">
-                 <codemirror v-model="transformData" :options="editorOptions"></codemirror>
-             </Col>
-             <Col span="6">
-               <div class="transform-method" style="padding: 0px 30px !important;">
-                 <ul style="list-style-type:disc;">
-                   <li>
-                     <a href="javascript:void(0)" data-method="toUpperCase()" @click="transform">UpperCase</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="toLowerCase()" @click="transform">LowerCase</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="trimRight()" @click="transform">Right Trim</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="trimLeft()" @click="transform">Left Trim</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="concate()" @click="transform">Concat</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="capitalize()" @click="transform">Capitalize</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="stripHTMLTags()" @click="transform">Stripe HTML Tags</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="stripSpecialCharacter()" @click="transform">Stripe Special Character</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="formatDate('yyyy-mm-dd')" @click="transform">Date Format</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="toDecimal(2)" @click="transform">Decimal</a>
-                   </li>
-                   <li>
-                     <a href="javascript:void(0)" data-method="toInteger()" @click="transform">Integer</a>
-                   </li>
-                 </ul>
+               <Modal v-model="deleteRecModal" width="500">
+                  <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+                     <Icon type="information-circled"></Icon>
+                     <span>Delete confirmation</span>
+                  </p>
+                  <div style="text-align:center">
+                     <p style="font-size:15px">Are you sure you want to delete?</p>
+                     <p style="font-size:15px">All your records will be deleted...</p>
+                  </div>
+                  <div slot="footer">
+                     <Button type="error" @click="abortUploadedRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
+                     <Button type="primary"  @click="deleteRecModal = false">No</Button>
+                  </div>
+               </Modal>
+               <Modal v-model="deleteSelModal" width="500">
+                  <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+                     <Icon type="information-circled"></Icon>
+                     <span>Delete confirmation</span>
+                  </p>
+                  <div style="text-align:center">
+                     <p style="font-size:15px">Are you sure you want to delete?</p>
+                     <p style="font-size:15px">Your selected {{deletedValues.length}} records will be deleted...</p>
+                  </div>
+                  <div slot="footer">
+                     <Button type="error" @click="RemoveRecords(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Yes</Button>
+                     <Button type="primary"  @click="deleteSelModal = false">No</Button>
+                  </div>
+               </Modal>
+               <div v-if="mObj[activeTab].headerDisplay && mObj[activeTab].mapping.length !== 0">
+                  <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
+                  <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
+                  <div class="schema-form ivu-table-wrapper" >
+                     <div class="ivu-table ivu-table-border customtable" >
+                        <div class="ivu-table-body">
+                           <table class="mapping-table" style="width:100%;overflow-y:auto;">
+                              <colgroup>
+                                 <col width="35">
+                                 <col width="35">
+                                 <col width="30">
+                              </colgroup>
+                              <thead>
+                                 <tr>
+                                    <th class="">System headers</th>
+                                    <th class="">CSV headers</th>
+                                    <th class="">Transform</th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody">
+                                 <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
+                                    <td>
+                                       <div class="ivu-table-cell" >
+                                          <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span>{{item.sysHeader}}</span>
+                                          <span v-else>{{item.sysHeader}}</span>
+                                       </div>
+                                    </td>
+                                    <td>
+                                       <div class="ivu-table-cell">
+                                          <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
+                                             <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header" >{{ header}}</Option>
+                                          </Select>
+                                       </div>
+                                    </td>
+                                    <td class="transform-block">
+                                       <div class="ivu-table-cell">
+                                          <a  @click="modelshow(item,index)">
+                                             <Icon type="compose"></Icon>
+                                          </a>
+                                       </div>
+                                       <div v-if="item.transformMethod" class="transform-function" title="">
+                                          <span>{{item.transform}}</span>
+                                          <span  @click="removeTransform(item,index)">
+                                             <Icon type="close-circled" />
+                                          </span>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
                </div>
-             </Col>
-           </Row>
-         </Modal>
-
-         <Modal v-model="modal1" width="500" @on-cancel="cancel" >
-          <p slot="header" style="color:#f60;text-align:center;font-size:20px">
-              <Icon type="information-circled"></Icon>
-              <span>Some of your headers are not mapped ...</span>
-          </p>
-          <div style="text-align:center">
-              <p style="font-size:15px">Want to map headers or Continue as it is ?</p>
-              <p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p>
-          </div>
-          <div slot="footer">
-              <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
-              <Button type="primary"  @click="continuee(activeTab)"  style="background-color:#1fb58f;border-color:#1fb58f;" v-if="showContinue" :disabled="!showContinue">
-                <!-- <span v-if="showContinue">Continue</span>
-                <span v-else>Processing...</span> -->
-                Continue
-              </Button>
-          </div>
-       </Modal>
-
-        </div>
-      </Col>
-    </Row>
-    </template>
-    <template v-if="currentStep === 1 && validateStep">
-      <Card :bordered=false style="margin-top:30px">
-      <div v-if="validating" class="demo-spin-col">  <Spin fix>
-                <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                <div>Loading</div>
-            </Spin></div>
-
-        <div>
-        <h2 style="margin-bottom:1%;text-transform: capitalize;" v-if="showValidationTable">Validation Status</h2>
-         <div class="schema-form ivu-table-wrapper" >
-           <div class="ivu-table ivu-table-border customtable border" >
-             <div class="ivu-table-body">
-               <table class="mapping-table" style="width:100%;overflow-y:auto;" id="valid_err">
-                 <colgroup>
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                   <col width="20">
-                 </colgroup>
-                 <thead v-if="showValidationTable">
-                   <tr>
-                     <th class="">Validation File Type</th>
-                     <th class="">File Uploaded On</th>
-                     <th class="">Validation Status</th>
-                     <th class="">Total No of Records</th>
-                     <th class="">Validation Progress</th>
-                   </tr>
-                 </thead>
-                 <tbody class="ivu-table-tbody" v-if="!validation_data">
-                   <tr class="ivu-table-row" v-for="(item,index) in val_data" :id="item.name">
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>{{convert(item.name)}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                        <span>{{moment(item.data.uploadedAt).fromNow()}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>{{item.data.validateStatus}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>{{item.data.totalNoOfRecords}}</span>
-                       </div>
-                     </td>
-                     <td>
-                       <div class="ivu-table-cell">
-                         <span>
-                           <div class="ivu-table-cell">
-                             <i-circle :percent="item.progress" style="width:45px;height:45px;">
-                               <span style="font-size:12px">{{item.progress}}%</span>
-                             </i-circle>
-                           </div>
-                         </span>
-                       </div>
-                     </td>
-                   </tr>
-                   <!-- <tr>
-                    <td colspan="5">
-                       <div id="validation_err" class="hot handsontable htColumnHeaders"></div>
-                    </td> -->
-                     <!-- <table> -->
-                       <!-- <tr>
-                       <td class="ivu-table-row"  style="color:red;font-size:14px;" v-if="validation_err_fields !== ''">{{validation_err_fields}}</td>
-                     </tr> -->
-                     <!-- </table> -->
-                     <!-- <div id="hot-preview" v-if="proceedNext">
-                       <Button type="primary" @click="proceedToNext()" style="float: right;margin-right: 20px;">Proceed To Next</Button>
-                     </div> -->
-                   <!-- </tr> -->
-                 </tbody>
+               <div v-if="mObj[activeTab].newSchemaDisplay">
+                  <h2 style="margin-bottom:1%;text-transform: capitalize;margin-top:5%">Headers Mapping of {{activeTab}}</h2>
+                  <h3 style="color:red;font-size:13px;margin-bottom:1%">All the * marked fields are mandatory to map</h3>
+                  <div class="schema-form ivu-table-wrapper">
+                     <div class="ivu-table ivu-table-border customtable" >
+                        <div class="ivu-table-body">
+                           <table class="mapping-table" style="width:100%;overflow-y:auto;">
+                              <colgroup>
+                                 <col width="20">
+                                 <col width="20">
+                                 <col width="20">
+                                 <col width="20">
+                                 <col width="20">
+                              </colgroup>
+                              <thead>
+                                 <tr>
+                                    <th class="">System headers</th>
+                                    <th class="">CSV headers</th>
+                                    <th class="">Type</th>
+                                    <th class="">Property</th>
+                                    <th class="">Transform</th>
+                                 </tr>
+                              </thead>
+                              <tbody class="ivu-table-tbody">
+                                 <tr class="ivu-table-row" v-for="(item,index) in mObj[activeTab].mapping" v-if="item.sysHeader !== '_id'">
+                                    <th>
+                                       <div class="ivu-table-cell headercolor">
+                                          <span v-if="item.schemaObj.optional === false"><span style="color:red">*</span> {{item.sysHeader}}</span>
+                                          <span v-else>{{item.sysHeader}}</span>
+                                       </div>
+                                    </th>
+                                    <td>
+                                       <div class="ivu-table-cell">
+                                          <Select v-model="item.csvHeader" @on-change="mapHeader(item.sysHeader,item.csvHeader)">
+                                             <Option v-for="header in mObj[activeTab].headers" :value="header" :key="header">{{ header}}</Option>
+                                          </Select>
+                                       </div>
+                                    </td>
+                                    <td class="">
+                                       <div class="ivu-table-cell">
+                                          <Select v-model="item.schemaObj.type">
+                                             <Option v-for="type in types" :value="type" :key="type">{{ type}}</Option>
+                                          </Select>
+                                       </div>
+                                    </td>
+                                    <td class="">
+                                       <div class="property ivu-table-cell">
+                                          <Poptip placement="left" width="300">
+                                             <a>
+                                                <Icon type="edit"></Icon>
+                                             </a>
+                                             <div slot="title">
+                                                <h3>Property</h3>
+                                             </div>
+                                             <div slot="content" class="prptycontent">
+                                                <Form label-position="left" >
+                                                   <FormItem label="MaxLength" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.maxLength" ></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="Allowed Value" :label-width="100">
+                                                      <input-tag  :tags="item.schemaObj.allowedValues" class="prpty-label"></input-tag>
+                                                   </FormItem>
+                                                   <FormItem  label="Default Value" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.defaultValue"></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="regEx" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.regEx"></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="label" :label-width="100">
+                                                      <Input size="small" v-model="item.schemaObj.label"></Input>
+                                                   </FormItem>
+                                                   <FormItem  label="" :label-width="100">
+                                                      <Checkbox  id="prptychckbox" class="propertychbx" v-model="item.schemaObj.optional">Optional</Checkbox>
+                                                   </FormItem>
+                                                </Form>
+                                             </div>
+                                          </Poptip>
+                                       </div>
+                                    </td>
+                                    <td class="transform-block">
+                                       <div class="ivu-table-cell">
+                                          <a  @click="modelshow(item,index)">
+                                             <Icon type="compose"></Icon>
+                                          </a>
+                                       </div>
+                                       <div v-if="item.transformMethod" class="transform-function" title="">
+                                          <span>{{item.transform}}</span>
+                                          <span  @click="removeTransform(item,index)">
+                                             <Icon type="close-circled" />
+                                          </span>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div id="example1" class="hot handsontable htColumnHeaders" style="overflow-x: auto"></div>
+               <table>
+                  <tr>
+                     <td class="ivu-table-row" style="color:red;font-size:14px;word-break:break-word;">{{mObj[activeTab].errmsg[0]}}</td>
+                  </tr>
                </table>
-               <!-- <div id="validation_err" class="hot handsontable htColumnHeaders"></div> -->
-             </div>
-           </div>
-       </div>
-      </div>
-
-
-      <div v-if="validation_completed"><p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p></div>
-      <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
-      <Button type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Import</Button>
-      </Card>
-    </template>
-    <template v-if="currentStep === 2 && importStep">
-      <Card :bordered=false style="margin-top:30px">
-        <div v-if="!import1">
-          <h2>Import in progress</h2>
-          <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
-          <Progress :percent="progressPercent"></Progress>
-        </div>
-      <div v-if="import1"><h2>Import Completed</h2></div>
-      <div v-if="import1"><p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p></div>
-      <div v-if="import1"  style="font-size:18px;margin-top:20px"><div><b>Sync With</b></div><span>
-        <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
-        <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox></Checkbox>
-      </span></div>
-      <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
-      <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
-      </Card>
-    </template>
-    <!-- {{getValue()}} -->
+               <div id="hot-preview" v-if="mObj[activeTab].showHandson">
+                  <Button type="error" @click="AbortValidation(activeTab)" style="float:right;margin-right:10px;">Abort Data</Button>
+               </div>
+               <div id="hot-preview" v-if="mObj[activeTab].showHandson">
+                  <Button type="primary" @click="modifyData(activeTab)" style="float: right;margin-right: 20px;">Save Data</Button>
+               </div>
+               <Modal  v-model="model" title="Transform" @on-ok="handleModalOk" width="900px" :mask-closable="false ">
+                  <Row style="padding: 10px;">
+                     <Col span="18">
+                     <codemirror v-model="transformData" :options="editorOptions"></codemirror>
+                     </Col>
+                     <Col span="6">
+                     <div class="transform-method" style="padding: 0px 30px !important;">
+                        <ul style="list-style-type:disc;">
+                           <li>
+                              <a href="javascript:void(0)" data-method="toUpperCase()" @click="transform">UpperCase</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="toLowerCase()" @click="transform">LowerCase</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="trimRight()" @click="transform">Right Trim</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="trimLeft()" @click="transform">Left Trim</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="concate()" @click="transform">Concat</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="capitalize()" @click="transform">Capitalize</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="stripHTMLTags()" @click="transform">Stripe HTML Tags</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="stripSpecialCharacter()" @click="transform">Stripe Special Character</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="formatDate('yyyy-mm-dd')" @click="transform">Date Format</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="toDecimal(2)" @click="transform">Decimal</a>
+                           </li>
+                           <li>
+                              <a href="javascript:void(0)" data-method="toInteger()" @click="transform">Integer</a>
+                           </li>
+                        </ul>
+                     </div>
+                     </Col>
+                  </Row>
+               </Modal>
+               <Modal v-model="modal1" width="500" @on-cancel="cancel" >
+                  <p slot="header" style="color:#f60;text-align:center;font-size:20px">
+                     <Icon type="information-circled"></Icon>
+                     <span>Some of your headers are not mapped ...</span>
+                  </p>
+                  <div style="text-align:center">
+                     <p style="font-size:15px">Want to map headers or Continue as it is ?</p>
+                     <p style="font-size:15px">Click map to map headers and Continue to proceed as it is.</p>
+                  </div>
+                  <div slot="footer">
+                     <Button type="primary" @click="mapHeaders(activeTab)" style="backround-color:#13ce66,border-color:#13ce66">Map</Button>
+                     <Button type="primary"  @click="continuee(activeTab)"  style="background-color:#1fb58f;border-color:#1fb58f;" v-if="showContinue" :disabled="!showContinue">
+                        <!-- <span v-if="showContinue">Continue</span>
+                           <span v-else>Processing...</span> -->
+                        Continue
+                     </Button>
+                  </div>
+               </Modal>
+            </div>
+            </Col>
+         </Row>
+      </template>
+      <template v-if="currentStep === 1 && validateStep">
+         <Card :bordered=false style="margin-top:30px">
+            <div v-if="validating" class="demo-spin-col">
+               <Spin fix>
+                  <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                  <div>Loading</div>
+               </Spin>
+            </div>
+            <div>
+               <h2 style="margin-bottom:1%;text-transform: capitalize;" v-if="showValidationTable">Validation Status</h2>
+               <div class="schema-form ivu-table-wrapper" >
+                  <div class="ivu-table ivu-table-border customtable border" >
+                     <div class="ivu-table-body">
+                        <table class="mapping-table" style="width:100%;overflow-y:auto;" id="valid_err">
+                           <colgroup>
+                              <col width="20">
+                              <col width="20">
+                              <col width="20">
+                              <col width="20">
+                              <col width="20">
+                           </colgroup>
+                           <thead v-if="showValidationTable">
+                              <tr>
+                                 <th class="">Validation File Type</th>
+                                 <th class="">File Uploaded On</th>
+                                 <th class="">Validation Status</th>
+                                 <th class="">Total No of Records</th>
+                                 <th class="">Validation Progress</th>
+                              </tr>
+                           </thead>
+                           <tbody class="ivu-table-tbody" v-if="!validation_data">
+                              <tr class="ivu-table-row" v-for="(item,index) in val_data" :id="item.name">
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{convert(item.name)}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{moment(item.data.uploadedAt).fromNow()}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{item.data.validateStatus}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>{{item.data.totalNoOfRecords}}</span>
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <div class="ivu-table-cell">
+                                       <span>
+                                          <div class="ivu-table-cell">
+                                             <i-circle :percent="item.progress" style="width:45px;height:45px;">
+                                                <span style="font-size:12px">{{item.progress}}%</span>
+                                             </i-circle>
+                                          </div>
+                                       </span>
+                                    </div>
+                                 </td>
+                              </tr>
+                              <!-- <tr>
+                                 <td colspan="5">
+                                    <div id="validation_err" class="hot handsontable htColumnHeaders"></div>
+                                 </td> -->
+                              <!-- <table> -->
+                              <!-- <tr>
+                                 <td class="ivu-table-row"  style="color:red;font-size:14px;" v-if="validation_err_fields !== ''">{{validation_err_fields}}</td>
+                                 </tr> -->
+                              <!-- </table> -->
+                              <!-- <div id="hot-preview" v-if="proceedNext">
+                                 <Button type="primary" @click="proceedToNext()" style="float: right;margin-right: 20px;">Proceed To Next</Button>
+                                 </div> -->
+                              <!-- </tr> -->
+                           </tbody>
+                        </table>
+                        <!-- <div id="validation_err" class="hot handsontable htColumnHeaders"></div> -->
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div v-if="validation_completed">
+               <p style="font-size:18px;margin-top:20px;">The file has been successfully validated without any error. Now you can proceed to import it into PDM.</p>
+            </div>
+            <Button type="error" @click="abortImport()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
+            <Button :loading="importLoading" type="primary" @click="importToPDM()" v-if="validation_completed" style="font-size:15px;margin-top:25px;float:right;margin-right: 10px;">Import</Button>
+         </Card>
+      </template>
+      <template v-if="currentStep === 2 && importStep">
+         <Card :bordered=false style="margin-top:30px">
+            <div v-if="!import1">
+               <h2>Import in progress</h2>
+               <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
+               <Progress :percent="progressPercent"></Progress>
+            </div>
+            <div v-if="import1">
+               <h2>Import Completed</h2>
+            </div>
+            <div v-if="import1">
+               <p style="font-size:18px;margin-top:20px">Product data has been successfully imported into PDM. Ready to go live...!!!</p>
+            </div>
+            <div v-if="import1"  style="font-size:18px;margin-top:20px">
+               <h3>Sync With</h3>
+               <Row style="">
+                  <Col :span="6" style="padding:10px;">
+                  <Checkbox v-model="asiSync"><b>ASI</b></Checkbox>
+                  <div v-if="asiSync">
+                     <div style="padding-top:10px;">
+                        <div style="font-size:12px;">Select ASI configuration</div>
+                        <Select v-model="asiValue" multiple style="width:260px" filterable  @on-change="handleasiChange">
+                           <Option v-for="item in asiconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                        </Select>
+                        <div v-if="isasiValid" style="font-size:12px;color:red;">! credintial must required.</div>
+                     </div>
+                  </div>
+                  </Col>
+                  <Col :span="6" style="padding:10px;">
+                  <Checkbox v-model="sageSync"><b>SAGE</b></Checkbox>
+                  </Checkbox>
+                  <div v-if="sageSync">
+                     <div style="padding-top:10px;">
+                        <div style="font-size:12px;">Select SAGE configuration</div>
+                        <Select v-model="sageValue" multiple style="width:260px" filterable  @on-change="handlesageChange">
+                           <Option v-for="item in sageconfig" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                        </Select>
+                        <div v-if="issageValid" style="font-size:12px;color:red;">! credintial must required.</div>
+                     </div>
+                  </div>
+                  </Col>
+               </Row>
+            </div>
+            <Button type="error" @click="abortImportConfirm()"  v-if="abortImportBtn" style="font-size:15px;margin-top:25px;float:right;">Abort</Button>
+            <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
+         </Card>
+      </template>
+      <!-- {{getValue()}} -->
    </div>
 </template>
 
@@ -621,7 +674,6 @@ import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.css'
 import VueCodeMirror from 'vue-codemirror'
 import $ from 'jquery'
-var moment = require('moment')
 import ProductInformationSchema from '@/schema/product_information'
 import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
@@ -629,6 +681,9 @@ import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
+
+import asconfigModal from '@/api/asconfiguration'
+var moment = require('moment')
 
 Vue.use(VueCodeMirror)
 moment().format()
@@ -669,12 +724,19 @@ export default {
   components: {VueTabs, VTab, 'input-tag': InputTag, vueDropzone: vue2Dropzone},
   data () {
     return {
+      asiValue: [],
+      sageValue: [],
+      asiconfig: [],
+      sageconfig: [],
       asiSync: false,
       sageSync: false,
+      isasiValid: false,
+      issageValid: false,
       moment: moment,
       currentStep: 0,
       map: false,
-      fileTypes: ['Product Variation Price', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping', 'Product Additional Charges'],
+      // fileTypes: ['Product Variation Price', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping', 'Product Additional Charges'],
+      fileTypes: ['Product Shipping', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image'],
       activeTab: 'Product Information',
       fileNames: ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice'],
       validate: true,
@@ -684,6 +746,7 @@ export default {
       validation_data: false,
       import1: false,
       loading: false,
+      importLoading: false,
       transformData: '',
       transformMethod: '',
       modelIndex: '',
@@ -693,7 +756,7 @@ export default {
         theme: 'base16-light',
         lineNumbers: true,
         line: true,
-            // keyMap: 'sublime',
+        // keyMap: 'sublime',
         extraKeys: { 'Ctrl': 'autocomplete' },
         foldGutter: true,
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
@@ -1151,6 +1214,21 @@ export default {
     }
   },
   methods: {
+    handleasiChange (value) {
+      console.log('.................', value)
+      if (value.length === 0) {
+        this.isasiValid = true
+      } else {
+        this.isasiValid = false
+      }
+    },
+    handlesageChange (value) {
+      if (value.length === 0) {
+        this.issageValid = true
+      } else {
+        this.issageValid = false
+      }
+    },
     getValue () {
       let tab = this.activeTab
       return Object.keys(this.mObj[tab].schema.structure)
@@ -1177,7 +1255,7 @@ export default {
       if (fileExt !== 'csv') {
         self.$Notice.error({title: 'Only CSV files are allowed', duration: 1})
       } else {
-          // self.loadProcessing = false
+        // self.loadProcessing = false
         self.mObj[tab].uploadDisplay = false
         self.mObj[tab].load = true
         // let my_flag = true
@@ -1188,19 +1266,19 @@ export default {
           skipEmptyLines: true,
           preview: 5,
           chunk: await function (results, streamer) {
-              // map the user selected headers -> results
-              // do the validation`
-              // send results to server
-              // if abort pressed, discard the stored data on server
-              // else commit the stored data on server for import / live
+            // map the user selected headers -> results
+            // do the validation`
+            // send results to server
+            // if abort pressed, discard the stored data on server
+            // else commit the stored data on server for import / live
 
             self.mObj[tab].uploadCSV = results.data
             self.mObj[tab].headers = Object.keys(self.mObj[tab].uploadCSV[0])
             self.mObj[tab].headers.push('_id')
             self.mObj[tab].load = true
-            if (tab === 'Product Image') {
-              self.nextBtn = true
-            }
+            // if (tab === 'Product Image') {
+            //   self.nextBtn = true
+            // }
             if (self.mObj[tab].new_flag === 1) {
               self.mObj[tab].load = true
               setTimeout(function () {
@@ -1219,79 +1297,79 @@ export default {
         })
       }
     },
-    insertImageUrl (tab) {
-      return new Promise(async (resolve, reject) => {
-        let self = this
-        for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
-          for (let k in self.mObj[tab].uploadCSV[i]) {
-            let n = k.search('Web_Image')
-            if (n !== undefined && n !== -1 && n !== null) {
-              let check = lodash.find(self.secure_url_arr, {file_name: self.mObj[tab].uploadCSV[i][k]})
-              if (check !== undefined) {
-                let abc = k.split('_')
-                self.mObj[tab].uploadCSV[i]['secure_url_' + abc[2]] = check['secure_url']
-              }
-            }
-          }
-        }
-        resolve('done')
-      })
-    },
-    deleteImage (imgdata) {
-      let self = this
-      let resource = 'product_images/' + this.$route.params.id + '/' + imgdata.name
-      api.request('delete', '/upload-image/?resource=' + resource).then(response => {
-        let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
-        self.secure_url_arr.splice(indx, 1)
-        self.dirinfo[imgdata._index]['status'] = 'deleted'
-        self.img_no--
-      })
-    },
-    deleteImageFromList (imgdata) {
-      let self = this
-      if (imgdata.status === 'error') {
-        let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
-        self.secure_url_arr.splice(indx, 1)
-        self.dirinfo.splice(imgdata._index, 1)
-      } else if (imgdata.status === 'deleted') {
-        self.dirinfo.splice(imgdata._index, 1)
-      }
-    },
-    async handleImageChange (e, tab) {
-      let self = this
-      const reader = new FileReader()
-      let fileList = e.target.files
-
-      if (fileList.length < 10) {
-        isDone = true
-      }
-
-      for (let i = 0; i < fileList.length; i++) {
-        let value = lodash.find(self.dirinfo, {'name': fileList[i].name})
-        if (value === undefined) {
-          let fileSize = 0
-          if (fileList[i].size > 1024 * 1024) { fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB' } else { fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB' }
-
-          if (fileList[i].type !== undefined && fileList[i].type !== '') {
-            self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'type': fileList[i].type, 'status': 'Uploading...'})
-          } else if (fileList[i].type === undefined || fileList.type === '') {
-            self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'status': 'Uploading'})
-          }
-
-          reader.readAsDataURL(fileList[i])
-          let uri = await self.retResult(reader)
-          self.image_batch.push({'file': {'url': uri, 'filename': fileList[i].name}, 'folder': 'product_images/' + id + '/'})
-             // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
-          if (i === fileList.length - 1) {
-            isDone = true
-          }
-
-          self.total_image = self.dirinfo.length
-        }
-      }
-
-      $('.f-layout-copy').css('position', 'absolute')
-    },
+    // insertImageUrl (tab) {
+    //   return new Promise(async (resolve, reject) => {
+    //     let self = this
+    //     for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
+    //       for (let k in self.mObj[tab].uploadCSV[i]) {
+    //         let n = k.search('Web_Image')
+    //         if (n !== undefined && n !== -1 && n !== null) {
+    //           let check = lodash.find(self.secure_url_arr, {file_name: self.mObj[tab].uploadCSV[i][k]})
+    //           if (check !== undefined) {
+    //             let abc = k.split('_')
+    //             self.mObj[tab].uploadCSV[i]['secure_url_' + abc[2]] = check['secure_url']
+    //           }
+    //         }
+    //       }
+    //     }
+    //     resolve('done')
+    //   })
+    // },
+    // deleteImage (imgdata) {
+    //   let self = this
+    //   let resource = 'product_images/' + this.$route.params.id + '/' + imgdata.name
+    //   api.request('delete', '/upload-image/?resource=' + resource).then(response => {
+    //     let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
+    //     self.secure_url_arr.splice(indx, 1)
+    //     self.dirinfo[imgdata._index]['status'] = 'deleted'
+    //     self.img_no--
+    //   })
+    // },
+    // deleteImageFromList (imgdata) {
+    //   let self = this
+    //   if (imgdata.status === 'error') {
+    //     let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
+    //     self.secure_url_arr.splice(indx, 1)
+    //     self.dirinfo.splice(imgdata._index, 1)
+    //   } else if (imgdata.status === 'deleted') {
+    //     self.dirinfo.splice(imgdata._index, 1)
+    //   }
+    // },
+    // async handleImageChange (e, tab) {
+    //   let self = this
+    //   const reader = new FileReader()
+    //   let fileList = e.target.files
+    //
+    //   if (fileList.length < 10) {
+    //     isDone = true
+    //   }
+    //
+    //   for (let i = 0; i < fileList.length; i++) {
+    //     let value = lodash.find(self.dirinfo, {'name': fileList[i].name})
+    //     if (value === undefined) {
+    //       let fileSize = 0
+    //       if (fileList[i].size > 1024 * 1024) { fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB' } else { fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB' }
+    //
+    //       if (fileList[i].type !== undefined && fileList[i].type !== '') {
+    //         self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'type': fileList[i].type, 'status': 'Uploading...'})
+    //       } else if (fileList[i].type === undefined || fileList.type === '') {
+    //         self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'status': 'Uploading'})
+    //       }
+    //
+    //       reader.readAsDataURL(fileList[i])
+    //       let uri = await self.retResult(reader)
+    //       self.image_batch.push({'file': {'url': uri, 'filename': fileList[i].name}, 'folder': 'product_images/' + id + '/'})
+    //          // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
+    //       if (i === fileList.length - 1) {
+    //         isDone = true
+    //       }
+    //
+    //       self.total_image = self.dirinfo.length
+    //     }
+    //   }
+    //
+    //   $('.f-layout-copy').css('position', 'absolute')
+    // },
     setImportProgress (totalProduct, uploadedProduct) {
       let self = this
       self.progressPercent = Math.round(uploadedProduct / totalProduct * 100)
@@ -1302,7 +1380,7 @@ export default {
         reader.addEventListener('load', function () {
           let result = reader.result
           resolve(result)
-              // return result
+          // return result
         }, false)
       })
       return Promise.resolve(_promise)
@@ -1325,7 +1403,7 @@ export default {
       self.showWebImage = true
     },
 
-      // to reset the filter
+    // to reset the filter
     reset () {
       if (this.mObj[this.activeTab].filter_flag === true) {
         this.filterValue = ''
@@ -1336,7 +1414,7 @@ export default {
       }
     },
 
-      // filter data according to the selected value
+    // filter data according to the selected value
     filter (filterValue, tab) {
       this.mObj[tab].filter_flag = true
       let mainArray = []
@@ -1364,7 +1442,7 @@ export default {
       }
     },
 
-      // pagination
+    // pagination
     changePage (page) {
       this.mObj[this.activeTab].cpage = page
     },
@@ -1408,7 +1486,7 @@ export default {
       }
     },
 
-      // Pushes the selected values required to be deleted in an array
+    // Pushes the selected values required to be deleted in an array
     PushToArray (item) {
       this.delete1 = false
       this.mObj[this.activeTab].newUploadCSV = []
@@ -1428,7 +1506,7 @@ export default {
       }
     },
 
-      // Deletes the selected records
+    // Deletes the selected records
     RemoveRecords (tab) {
       let self = this
       self.deleteSelModal = false
@@ -1535,7 +1613,7 @@ export default {
         })
     },
 
-      // Removes id from the data to be displayed
+    // Removes id from the data to be displayed
     getwithoutid (obj, value) {
       if (obj.hasOwnProperty('is_checked')) {
         let pObj = lodash.cloneDeep(obj)
@@ -1549,7 +1627,7 @@ export default {
       let newIndex = files.replace(/ /g, '_')
       return newIndex
     },
-      // Manages the client side validation handson table in different tabs
+    // Manages the client side validation handson table in different tabs
     hideHandson () {
       let self = this
       if (errLength !== 0) {
@@ -1559,7 +1637,7 @@ export default {
             } else {
               document.getElementById('example1').style.display = 'none'
             }
-                 // document.getElementById('example1').innerHTML = ""
+            // document.getElementById('example1').innerHTML = ""
           } else {
 
           }
@@ -1578,7 +1656,7 @@ export default {
       }
     },
 
-      // Transform functions..........
+    // Transform functions..........
     setTransForm: function () {
       this.transformData = this.modelData
       if (this.mObj[this.activeTab].mapping[this.modelIndex].tranformMethod) {
@@ -1608,9 +1686,9 @@ export default {
         return _.reduce(row, function (result, value, key) {
           let inx = _.find(self.mObj[self.activeTab].mapping, (f) => { return (f.sysHeader === key) })
           if (inx.transform !== '') {
-                // var s = new Function('row', inx.transform).call(this, row)
+            // var s = new Function('row', inx.transform).call(this, row)
                 result[key] = new Function('row', inx.transform).call(this, row) // eslint-disable-line
-                // result[key] = s
+            // result[key] = s
           } else {
             result[key] = value
           }
@@ -1635,7 +1713,7 @@ export default {
       return this.transformData
     },
 
-      // ......Transform functions
+    // ......Transform functions
     getSelectedHeaders (header, data) {
       return data.filter((el) => {
         if (header === el) { return el }
@@ -1653,7 +1731,7 @@ export default {
       }
     },
 
-      // Starts server side validation
+    // Starts server side validation
     startValidation () {
       let self = this
       if (prodInfoUpld === false) {
@@ -1661,13 +1739,13 @@ export default {
           title: 'Please upload Product Information file...'
         })
       } else {
-          // self.uploadStep = false
-          // self.validateStep = true
-          // self.currentStep = 1
-          // $(".f-layout-copy").css("position","fixed");
-          // let obj2 = {
-          //   "stepStatus": "validation_running"
-          // }
+        // self.uploadStep = false
+        // self.validateStep = true
+        // self.currentStep = 1
+        // $(".f-layout-copy").css("position","fixed");
+        // let obj2 = {
+        //   "stepStatus": "validation_running"
+        // }
 
         api.request('get', '/uploader/' + id).then(response => {
           uploaderObj = response.data
@@ -1739,7 +1817,7 @@ export default {
       }
     },
 
-      // Validates all the sheets one by one
+    // Validates all the sheets one by one
     sheetwiseValidation (key, data) {
       let self = this
       this.$store.state.validationStatus = false
@@ -1769,53 +1847,53 @@ export default {
               stepStatus: 'validation_completed'
             }
             api.request('patch', '/uploader/' + id, updatedObj).then(res => {
-                    // this.showValidationTable = false
+              // this.showValidationTable = false
               this.validation_completed = true
             })
-                .catch(error => {
-                  if (error.response) {
-                    self.$Notice.error({
-                      title: error.response.data.name,
-                      desc: error.response.data.message,
-                      duration: 10
-                    })
-                  } else if (error.message === 'Network Error') {
-                    this.$Notice.error({
-                      title: 'API Service unavailable',
-                      duration: 10
-                    })
-                  }
-                })
+              .catch(error => {
+                if (error.response) {
+                  self.$Notice.error({
+                    title: error.response.data.name,
+                    desc: error.response.data.message,
+                    duration: 10
+                  })
+                } else if (error.message === 'Network Error') {
+                  this.$Notice.error({
+                    title: 'API Service unavailable',
+                    duration: 10
+                  })
+                }
+              })
           }
         }
       })
-          .catch(error => {
-            if (error.response) {
-              if (error.response.data.code === 500) {
-                self.$Notice.error({
-                  title: error.response.data.name,
-                  desc: error.response.data.message,
-                  duration: 10
-                })
-              } else if (error.response.data.code === 504) {
-                self.sheetwiseValidation(key, data)
-              } else {
-                self.$Notice.error({
-                  title: error.response.data.name,
-                  desc: error.response.data.message,
-                  duration: 10
-                })
-              }
-            } else if (error.message === 'Network Error') {
+        .catch(error => {
+          if (error.response) {
+            if (error.response.data.code === 500) {
               self.$Notice.error({
-                title: 'API Service unavailable',
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.response.data.code === 504) {
+              self.sheetwiseValidation(key, data)
+            } else {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
                 duration: 10
               })
             }
-          })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
 
-      // To show the server side validation handson
+    // To show the server side validation handson
     showValidationHandson (data, sheetName) {
       let self = this
       let errcols = []
@@ -1870,43 +1948,43 @@ export default {
       let errRow = ''
       let errCol = ''
       // let errArr = []
-          var ht1 =  new Handsontable(cell1, { // eslint-disable-line
-            data: self.error_data,
-            colHeaders: Object.keys(self.error_data[0]),
-            height: 200,
-            hiddenColumns: {
-              columns: [0],
-              indicators: false
-            },
-            cells: (row, col) => {
-              var cellProp = {}
-              _.forEach(errcols, (value, key) => {
-                if (col === value.cols && row === key) {
-                  errRow = key
-                  // errRow.push(key)
-                  // errRow = lodash.uniqBy(errRow)
-                  errCol = col
+      var ht1 =  new Handsontable(cell1, { // eslint-disable-line
+        data: self.error_data,
+        colHeaders: Object.keys(self.error_data[0]),
+        height: 200,
+        hiddenColumns: {
+          columns: [0],
+          indicators: false
+        },
+        cells: (row, col) => {
+          var cellProp = {}
+          _.forEach(errcols, (value, key) => {
+            if (col === value.cols && row === key) {
+              errRow = key
+              // errRow.push(key)
+              // errRow = lodash.uniqBy(errRow)
+              errCol = col
 
-                  cellProp.className = 'error'
-                }
-              })
-
-              return cellProp
-            },
-            afterChange: function (changes, source) {
-              if (changes !== null) {
-                self.updateProductData(changes, source, sheetName)
-              }
+              cellProp.className = 'error'
             }
           })
 
-          // ht1.selectCell(errRow[0],errCol,errRow[errRow.length-1],errCol,true)
+          return cellProp
+        },
+        afterChange: function (changes, source) {
+          if (changes !== null) {
+            self.updateProductData(changes, source, sheetName)
+          }
+        }
+      })
+
+      // ht1.selectCell(errRow[0],errCol,errRow[errRow.length-1],errCol,true)
       ht1.selectCell(errRow, errCol, errRow, errCol, true)
       $('.f-layout-copy').css('position', 'absolute')
       self.proceedNext = true
     },
 
-      // Updates the errors of server side validation on change
+    // Updates the errors of server side validation on change
     updateProductData (changes, source, sheetName) {
       let rowindex = changes[0][0]
       let columnname = changes[0][1]
@@ -1927,20 +2005,20 @@ export default {
         api.request('patch', '/uploader-validation/' + id, updateObj).then(res => {
 
         })
-        .catch(error => {
-          if (error.response) {
-            this.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
-          } else if (error.message === 'Network Error') {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          .catch(error => {
+            if (error.response) {
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       }
     },
 
@@ -1980,8 +2058,8 @@ export default {
             }
 
             api.request('patch', '/uploader/' + id, updatedObj).then(res => {
-                // this.showValidationTable = false
-                // this.$store.state.data = []
+              // this.showValidationTable = false
+              // this.$store.state.data = []
               this.validation_completed = true
             })
 
@@ -2018,13 +2096,13 @@ export default {
         })
     },
 
-      // Puts a entry in the jobqueue
+    // Puts a entry in the jobqueue
     importToPDM () {
       let self = this
       let jobQueueObj = {
         'importTrackerId': id
       }
-
+      self.importLoading = true
       api.request('post', '/import-to-jobqueue/', jobQueueObj).then(res => {
         if (res.data) {
           this.showValidationTable = false
@@ -2037,50 +2115,10 @@ export default {
             this.abortImportBtn = false
           }
         }
-      })
-              .catch(error => {
-                if (error.response) {
-                  self.$Notice.error({
-                    title: error.response.data.name,
-                    desc: error.response.data.message,
-                    duration: 10
-                  })
-                } else {
-                  self.$Notice.error({
-                    title: 'API Service unavailable',
-                    duration: 10
-                  })
-                }
-              })
-    },
-    convert (item) {
-      item = item.replace(/([A-Z])/g, ' $1').trim()
-      return item
-    },
-
-      // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
-    importToConfirm () {
-      let self = this
-      let SyncData = ''
-      this.abortImportBtn = false
-      if (this.asiSync & this.sageSync) {
-        SyncData = 'BOTH'
-      } else if (this.asiSync) {
-        SyncData = 'ASI'
-      } else if (this.sageSync) {
-        SyncData = 'SAGE'
-      }
-      let jobQueueObj = {
-        'importTrackerId': id,
-        'syncOn': SyncData
-      }
-
-      api.request('post', '/import-to-confirm/', jobQueueObj).then(res => {
-        if (res.data) {
-          self.importBtn = false
-        }
+        self.importLoading = false
       })
         .catch(error => {
+          self.importLoading = false
           if (error.response) {
             self.$Notice.error({
               title: error.response.data.name,
@@ -2094,6 +2132,84 @@ export default {
             })
           }
         })
+    },
+    convert (item) {
+      item = item.replace(/([A-Z])/g, ' $1').trim()
+      return item
+    },
+
+    // put an entry in the jobqueue and changes the uploader status to import_to_confirm_in_progress
+    importToConfirm () {
+      // let self = this
+      let SyncData = ''
+      let isValid = false
+      this.abortImportBtn = false
+      if (this.asiSync & this.sageSync) {
+        SyncData = 'BOTH'
+        if (this.asiValue.length > 0 && this.sageValue.length > 0) {
+          isValid = true
+        } else if (this.asiValue.length > 0) {
+          this.issageValid = true
+        } else if (this.sageValue.length > 0) {
+          this.isasiValid = true
+        } else {
+          this.issageValid = true
+          this.isasiValid = true
+        }
+      } else if (this.asiSync) {
+        SyncData = 'ASI'
+        if (this.asiValue.length > 0) {
+          isValid = true
+        } else {
+          this.isasiValid = true
+        }
+      } else if (this.sageSync) {
+        SyncData = 'SAGE'
+        if (this.sageValue.length > 0) {
+          isValid = true
+        } else {
+          this.issageValid = true
+        }
+      } else {
+        isValid = true
+      }
+      let jobQueueObj = {
+        'importTrackerId': id,
+        'syncOn': SyncData
+      }
+      // console.log(SyncData, jobQueueObj, isValid)
+      if (isValid) {
+        if (SyncData === 'ASI') {
+          jobQueueObj.asiConfig = this.asiValue
+        } else if (SyncData === 'SAGE') {
+          jobQueueObj.sageConfig = this.sageValue
+        } else if (SyncData === 'BOTH') {
+          jobQueueObj.asiConfig = this.asiValue
+          jobQueueObj.sageConfig = this.sageValue
+        }
+        console.log('jobQueueObj', jobQueueObj)
+        api.request('post', '/import-to-confirm/', jobQueueObj).then(res => {
+          if (res.data) {
+            self.importBtn = false
+          }
+        })
+          .catch(error => {
+            if (error.response) {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else {
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
+      } else {
+        // alert('validation error')
+      }
     },
     mapType (sysHeader, type) {
     },
@@ -2200,7 +2316,7 @@ export default {
                     }
                   }
                   obj['_id'] = uuidV1()
-                    //  await self.validateObj(schemaObj,obj,tab,errcols,i)
+                  //  await self.validateObj(schemaObj,obj,tab,errcols,i)
                   this.mObj[tab].newUploadCSV.push(obj)
 
                   this.mObj[tab].load = false
@@ -2213,7 +2329,7 @@ export default {
                 }
 
                 // let index = this.mObj[tab].newUploadCSV.length - 1
-                  //  this.mObj[tab].newUploadCSV.splice(index, 1)
+                //  this.mObj[tab].newUploadCSV.splice(index, 1)
                 this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
                 for (let k = 0; k < this.mObj[tab].mapping.length; k++) {
@@ -2342,22 +2458,22 @@ export default {
       this.ProceedLoading = false
       continueFlag = false
 
-      if (tab === 'Product Image') {
-        this.showWebImage = false
-        this.mObj[tab].previewDisplay = true
-        this.mObj[tab].headerDisplay = true
-      }
+      // if (tab === 'Product Image') {
+      //   // this.showWebImage = false
+      //   this.mObj[tab].previewDisplay = true
+      //   this.mObj[tab].headerDisplay = true
+      // }
     },
     async continuee (tab) {
       // this.loadProcessing = true
       continueFlag = true
       this.proceedBtn = true
       let self = this
-      if (tab === 'Product Image') {
-        await self.checkImg(tab)
-        // await self.ValidateImages(tab)
-      }
-      this.showContinue = false
+      // if (tab === 'Product Image') {
+      //   await self.checkImg(tab)
+      //   // await self.ValidateImages(tab)
+      // }
+      self.showContinue = true
       self.modal1 = false
       self.ProceedLoading = true
       await self.saveSchemaandMapping(tab)
@@ -2404,25 +2520,26 @@ export default {
           self.mObj[tab].newUploadCSV.push(obj)
           this.mObj[tab].csv_arr = this.mObj[tab].newUploadCSV
 
-         // for(let k=0;k<this.mObj[tab].mapping.length;k++){
-         //   if(this.mObj[tab].mapping[k].transform !== ""){
-         //     this.transformData = this.mObj[tab].mapping[k].transform
-         //     this.modelIndex = k
-         //     this.handleModalOk()
-         //   }
-         // }
+          // for(let k=0;k<this.mObj[tab].mapping.length;k++){
+          //   if(this.mObj[tab].mapping[k].transform !== ""){
+          //     this.transformData = this.mObj[tab].mapping[k].transform
+          //     this.modelIndex = k
+          //     this.handleModalOk()
+          //   }
+          // }
         }
-      // return;
+        // return;
         resolve('done')
       })
     },
     async Proceed (tab) {
       let self = this
-
+      self.ProceedLoading = true
+      self.showContinue = true
       if (mapFlag === false) {
-        if (tab === 'Product Image') {
-          await self.checkImg(tab)
-        }
+        // if (tab === 'Product Image') {
+        //   await self.checkImg(tab)
+        // }
 
         let checkHeaders = _.filter(self.mObj[tab].mapping, function (o) {
           if (o.schemaObj.optional === false && o.csvHeader === '') {
@@ -2454,10 +2571,10 @@ export default {
           }
         }
       } else {
-        self.ProceedLoading = true
-        if (tab === 'Product Image') {
-          await self.checkImg(tab)
-        }
+        self.ProceedLoading = false
+        // if (tab === 'Product Image') {
+        //   await self.checkImg(tab)
+        // }
         await self.saveSchemaandMapping(tab)
         await self.parseFile(tab)
       }
@@ -2477,15 +2594,15 @@ export default {
             streamer.pause()
             self.mObj[tab].uploadCSV = []
             self.mObj[tab].uploadCSV = results.data
-            if (tab === 'Product Image') {
-              await self.insertImageUrl(tab)
-            }
+            // if (tab === 'Product Image') {
+            //   await self.insertImageUrl(tab)
+            // }
             await self.makeNewUploadCSVObj(tab)
             await self.transformFromMapping(tab)
             globalValidateResolve = null
-            if (tab === 'Product Image') {
-              await self.ValidateImages(tab)
-            }
+            // if (tab === 'Product Image') {
+            //   await self.ValidateImages(tab)
+            // }
             await self.ProceedToValidate(tab)
             await self.saveData(tab)
             await self.socketResponse()
@@ -2504,56 +2621,56 @@ export default {
         }
       })
     },
-    ValidateImages (tab) {
-      return new Promise(async(resolve, reject) => {
-        let self = this
-        self.image_err = []
-        for (let i = 0; i < self.mObj[tab].newUploadCSV.length; i++) {
-          for (let k in self.mObj[tab].newUploadCSV[i]) {
-            if (k.search('web_image') !== undefined && k.search('web_image') !== -1) {
-              if (self.mObj[tab].newUploadCSV[i][k] !== '' && self.mObj[tab].newUploadCSV[i][k] !== null) {
-                let obj = lodash.find(self.dirinfo, {name: self.mObj[tab].newUploadCSV[i][k]})
-                if (obj === undefined) {
-                  self.image_err.push(self.mObj[tab].newUploadCSV[i][k])
-                }
-              }
-            }
-          }
-        }
-        if (self.image_err.length < 10) {
-          isDone = true
-        }
-        if (self.image_err.length !== 0) {
-          if (self.mObj[tab].load === true) {
-            self.mObj[tab].load = false
-          }
-          self.modal1 = false
-          self.showWebImage = true
-          $('#dirinfo').css('padding-top', '3%')
-
-          self.ProceedLoading = false
-          $('.f-layout-copy').css('position', 'absolute')
-        } else {
-          $('#dirinfo').css('padding-top', '6%')
-          resolve('done')
-        }
-      })
-    },
-    checkImg (tab) {
-      return new Promise(async(resolve, reject) => {
-        if (this.dirinfo.length === 0) {
-          this.ProceedLoading = false
-          this.modal1 = false
-          this.$Notice.error({
-            title: 'Please upload Images',
-            desc: 'Cannot proceed without uploading images',
-            duration: 5
-          })
-        } else if (this.dirinfo.length !== 0) {
-          resolve('done')
-        }
-      })
-    },
+    // ValidateImages (tab) {
+    //   return new Promise(async(resolve, reject) => {
+    //     let self = this
+    //     self.image_err = []
+    //     for (let i = 0; i < self.mObj[tab].newUploadCSV.length; i++) {
+    //       for (let k in self.mObj[tab].newUploadCSV[i]) {
+    //         if (k.search('web_image') !== undefined && k.search('web_image') !== -1) {
+    //           if (self.mObj[tab].newUploadCSV[i][k] !== '' && self.mObj[tab].newUploadCSV[i][k] !== null) {
+    //             let obj = lodash.find(self.dirinfo, {name: self.mObj[tab].newUploadCSV[i][k]})
+    //             if (obj === undefined) {
+    //               self.image_err.push(self.mObj[tab].newUploadCSV[i][k])
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //     if (self.image_err.length < 10) {
+    //       isDone = true
+    //     }
+    //     if (self.image_err.length !== 0) {
+    //       if (self.mObj[tab].load === true) {
+    //         self.mObj[tab].load = false
+    //       }
+    //       self.modal1 = false
+    //       self.showWebImage = true
+    //       $('#dirinfo').css('padding-top', '3%')
+    //
+    //       self.ProceedLoading = false
+    //       $('.f-layout-copy').css('position', 'absolute')
+    //     } else {
+    //       $('#dirinfo').css('padding-top', '6%')
+    //       resolve('done')
+    //     }
+    //   })
+    // },
+    // checkImg (tab) {
+    //   return new Promise(async(resolve, reject) => {
+    //     if (this.dirinfo.length === 0) {
+    //       this.ProceedLoading = false
+    //       this.modal1 = false
+    //       this.$Notice.error({
+    //         title: 'Please upload Images',
+    //         desc: 'Cannot proceed without uploading images',
+    //         duration: 5
+    //       })
+    //     } else if (this.dirinfo.length !== 0) {
+    //       resolve('done')
+    //     }
+    //   })
+    // },
     socketResponse () {
       if (this.$store.state.disconnect === false) {
         return new Promise(async (resolve, reject) => {
@@ -2593,20 +2710,20 @@ export default {
           this.proceedBtn = true
           totalRecords = 0
         })
-         .catch(error => {
-           if (error.response) {
-             self.$Notice.error({
-               title: error.response.data.name,
-               desc: error.response.data.message,
-               duration: 10
-             })
-           } else if (error.message === 'Network Error') {
-             self.$Notice.error({
-               title: 'API Service unavailable',
-               duration: 10
-             })
-           }
-         })
+          .catch(error => {
+            if (error.response) {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       }
     },
     saveSchemaandMapping (tab) {
@@ -2657,24 +2774,24 @@ export default {
           obj1[name]['schemaId'] = schemaId
           resolve('done')
         })
-    .catch(error => {
-      if (error.response) {
-        if (error.response.data.message === 'This mapping name already exists') {
-          resolve('done')
-        } else {
-          self.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
+          .catch(error => {
+            if (error.response) {
+              if (error.response.data.message === 'This mapping name already exists') {
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
           })
-        }
-      } else if (error.message === 'Network Error') {
-        this.$Notice.error({
-          title: 'API Service unavailable',
-          duration: 10
-        })
-      }
-    })
       })
     },
     saveCSVFiles (tab, name) {
@@ -2693,27 +2810,27 @@ export default {
           obj1[name]['id'] = CSVFileId
           resolve('done')
         })
-        .catch(error => {
-          if (error.response) {
-            if (error.response.data.message === 'This csv file entry already exists') {
-              CSVFileId = error.response.data.data.CSVFileId
-              obj1[name]['id'] = error.response.data.data.CSVFileId
-              obj1[name]['schemaId'] = schemaId
-              resolve('done')
-            } else {
-              self.$Notice.error({
-                title: error.response.data.name,
-                desc: error.response.data.message,
+          .catch(error => {
+            if (error.response) {
+              if (error.response.data.message === 'This csv file entry already exists') {
+                CSVFileId = error.response.data.data.CSVFileId
+                obj1[name]['id'] = error.response.data.data.CSVFileId
+                obj1[name]['schemaId'] = schemaId
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
                 duration: 10
               })
             }
-          } else if (error.message === 'Network Error') {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          })
       })
     },
     saveOnlyCSVFiles (tab, name) {
@@ -2739,27 +2856,27 @@ export default {
           obj1[name]['schemaId'] = schemaId
           resolve('done')
         })
-      .catch(error => {
-        if (error.response) {
-          if (error.response.data.message === 'This csv file entry already exists') {
-            CSVFileId = error.response.data.data.CSVFileId
-            obj1[name]['id'] = error.response.data.data.CSVFileId
-            obj1[name]['schemaId'] = schemaId
-            resolve('done')
-          } else {
-            self.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
-          }
-        } else if (error.message === 'Network Error') {
-          this.$Notice.error({
-            title: 'API Service unavailable',
-            duration: 10
+          .catch(error => {
+            if (error.response) {
+              if (error.response.data.message === 'This csv file entry already exists') {
+                CSVFileId = error.response.data.data.CSVFileId
+                obj1[name]['id'] = error.response.data.data.CSVFileId
+                obj1[name]['schemaId'] = schemaId
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
           })
-        }
-      })
       })
     },
     saveMapping (tab, name) {
@@ -2776,24 +2893,24 @@ export default {
         api.request('post', '/uploader-csv-file-mapping/', mappingObj).then(response => {
           resolve('done')
         })
-        .catch(error => {
-          if (error.response) {
-            if (error.response.data.message === 'This csv file mapping already exists') {
-              resolve('done')
-            } else {
-              self.$Notice.error({
-                title: error.response.data.name,
-                desc: error.response.data.message,
+          .catch(error => {
+            if (error.response) {
+              if (error.response.data.message === 'This csv file mapping already exists') {
+                resolve('done')
+              } else {
+                self.$Notice.error({
+                  title: error.response.data.name,
+                  desc: error.response.data.message,
+                  duration: 10
+                })
+              }
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
                 duration: 10
               })
             }
-          } else if (error.message === 'Network Error') {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          })
       })
     },
     ProceedToValidate (tab) {
@@ -3164,9 +3281,9 @@ export default {
                   self.mObj[tab].uploadDisplay = false
                   self.mObj[tab].showHandson = true
                   self.mObj[tab].errDisplay = true
-                  if (tab === 'Product Image') {
-                    self.showWebImage = false
-                  }
+                  // if (tab === 'Product Image') {
+                  //   self.showWebImage = false
+                  // }
                   if (self.mObj[tab].load === true) {
                     self.mObj[tab].load = false
                   }
@@ -3184,14 +3301,14 @@ export default {
     },
     Abort (tab) {
       let self = this
-      if (tab === 'Product Image') {
-        self.showWebImage = false
-        self.dirinfo = []
-        self.image_err = []
-        self.total_image = 0
-        self.img_no = 0
-        isDone = false
-      }
+      // if (tab === 'Product Image') {
+      //   self.showWebImage = false
+      //   self.dirinfo = []
+      //   self.image_err = []
+      //   self.total_image = 0
+      //   self.img_no = 0
+      //   isDone = false
+      // }
       self.proceedBtn = true
 
       continueFlag = false
@@ -3213,30 +3330,30 @@ export default {
         api.request('delete', '/upload-image/?resource=' + resource).then(response => {
           resolve(response)
         })
-        .catch(error => {
-          if (error.response) {
-            this.$Notice.error({
-              title: error.response.data.name,
-              desc: error.response.data.message,
-              duration: 10
-            })
-          } else {
-            this.$Notice.error({
-              title: 'API Service unavailable',
-              duration: 10
-            })
-          }
-        })
+          .catch(error => {
+            if (error.response) {
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       })
     },
     async abortUploadedRecords (tab) {
       this.deleteRecModal = false
       let tabName = tab.replace(/ /g, '')
-      if (tab === 'Product Image') {
-        this.dirinfo = []
-        this.image_err = []
-        await this.deleteFromCloudinary(id)
-      }
+      // if (tab === 'Product Image') {
+      //   this.dirinfo = []
+      //   this.image_err = []
+      //   await this.deleteFromCloudinary(id)
+      // }
       api.request('delete', '/pdm-uploader-data/' + this.$route.params.id + '?sheet_name=' + tab).then(res => {
         api.request('get', '/uploader/' + this.$route.params.id).then(res => {
           if (Object.keys(res.data).indexOf(tabName) >= 0) {
@@ -3270,6 +3387,21 @@ export default {
             })
           }
         })
+          .catch(error => {
+            if (error.response) {
+              this.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              this.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
+      })
         .catch(error => {
           if (error.response) {
             this.$Notice.error({
@@ -3277,41 +3409,26 @@ export default {
               desc: error.response.data.message,
               duration: 10
             })
-          } else if (error.message === 'Network Error') {
+          } else {
             this.$Notice.error({
               title: 'API Service unavailable',
               duration: 10
             })
           }
         })
-      })
-      .catch(error => {
-        if (error.response) {
-          this.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
-          })
-        } else {
-          this.$Notice.error({
-            title: 'API Service unavailable',
-            duration: 10
-          })
-        }
-      })
     },
 
     async AbortValidation (tab) {
       let self = this
-      if (tab === 'Product Image') {
-        self.dirinfo = []
-        self.image_err = []
-        totalRecords = 0
-        isDone = false
-        self.total_image = 0
-        self.img_no = 0
-        await self.deleteFromCloudinary(id)
-      }
+      // if (tab === 'Product Image') {
+      //   self.dirinfo = []
+      //   self.image_err = []
+      //   totalRecords = 0
+      //   isDone = false
+      //   self.total_image = 0
+      //   self.img_no = 0
+      //   await self.deleteFromCloudinary(id)
+      // }
       self.ProceedLoading = false
       self.proceedBtn = true
       self.mObj[tab].errmsg = []
@@ -3328,7 +3445,7 @@ export default {
         document.getElementsByClassName('ht_master handsontable')[0].remove()
       }
       if (document.getElementById('example1')) {
-          // document.getElementById('example1').style.display = 'none'
+        // document.getElementById('example1').style.display = 'none'
         document.getElementById('example1').innerHTML = ''
       }
       self.mObj[tab].showHandson = false
@@ -3337,11 +3454,11 @@ export default {
     },
     abortImport () {
       let self = this
-       // self.showValidationTable = false
-       // self.validation_data = true
-       // self.validation_completed = false
-       // self.val_data = []
-       // self.$store.state.data = []
+      // self.showValidationTable = false
+      // self.validation_data = true
+      // self.validation_completed = false
+      // self.val_data = []
+      // self.$store.state.data = []
       //  self.mObj["Product Information"].newUploadCSV = []
       //  self.mObj["Product Price"].newUploadCSV = []
       api.request('get', '/uploader/' + id).then(response => {
@@ -3354,35 +3471,35 @@ export default {
         api.request('put', '/uploader/' + id, obj[0]).then(result => {
           self.setPage(obj[1], obj[2], result.data)
         })
-         .catch(error => {
-           if (error.response) {
-             self.$Notice.error({
-               title: error.response.data.name,
-               desc: error.response.data.message,
-               duration: 10
-             })
-           } else if (error.message === 'Network Error') {
-             self.$Notice.error({
-               title: 'API Service unavailable',
-               duration: 10
-             })
-           }
-         })
+          .catch(error => {
+            if (error.response) {
+              self.$Notice.error({
+                title: error.response.data.name,
+                desc: error.response.data.message,
+                duration: 10
+              })
+            } else if (error.message === 'Network Error') {
+              self.$Notice.error({
+                title: 'API Service unavailable',
+                duration: 10
+              })
+            }
+          })
       })
-       .catch(error => {
-         if (error.response) {
-           self.$Notice.error({
-             title: error.response.data.name,
-             desc: error.response.data.message,
-             duration: 10
-           })
-         } else if (error.message === 'Network Error') {
-           self.$Notice.error({
-             title: 'API Service unavailable',
-             duration: 10
-           })
-         }
-       })
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
     abortImportConfirm () {
       let self = this
@@ -3399,25 +3516,25 @@ export default {
         self.validating = false
         self.validation_completed = true
         self.uploadStep = false
-         // self.importStep = false
-         // self.validateStep = true
+        // self.importStep = false
+        // self.validateStep = true
         self.currentStep = 1
         self.progressPercent = 0
       })
-       .catch(error => {
-         if (error.response) {
-           self.$Notice.error({
-             title: error.response.data.name,
-             desc: error.response.data.message,
-             duration: 10
-           })
-         } else if (error.message === 'Network Error') {
-           self.$Notice.error({
-             title: 'API Service unavailable',
-             duration: 10
-           })
-         }
-       })
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
     abortImportInProgress () {
       let self = this
@@ -3433,12 +3550,12 @@ export default {
         self.validateStep = true
         self.currentStep = 1
       })
-      .catch(error => {
-        self.$Notice.error({
-          title: error.response.message,
-          duration: 10
+        .catch(error => {
+          self.$Notice.error({
+            title: error.response.message,
+            duration: 10
+          })
         })
-      })
     },
     ModifyObj (data) {
       let keys = Object.keys(data)
@@ -3473,45 +3590,45 @@ export default {
         self.val_data = []
         self.setPage(obj1[1], obj1[2], result.data)
       })
-      .catch(error => {
-        if (error.response) {
-          self.$Notice.error({
-            title: error.response.data.name,
-            desc: error.response.data.message,
-            duration: 10
-          })
-        } else if (error.message === 'Network Error') {
-          self.$Notice.error({
-            title: 'API Service unavailable',
-            duration: 10
-          })
-        }
-      })
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        })
     },
     async showerrmsg (errcols, tab, schema) {
       var example1 = document.getElementById('example1')
       let row1
       let col1
       // let prop = {}
-     var ht = await(new Handsontable(example1, { // eslint-disable-line
-       data: [this.mObj[tab].data1[0]],
-       colHeaders: this.mObj[tab].headers1[0],
-       rowHeaders: true,
-       height: '100%',
-       stretchH: 'all',
-       cells: (row, col) => {
-         var cellProp = {}
-         _.forEach([errcols[0]], (value, key) => {
-           if (col === value.cols && row === key) {
-             row1 = key
-             col1 = value.cols
-             // cellProp.className = 'error'
-             // prop = cellProp
-           }
-         })
-         return cellProp
-       }
-     }))
+      var ht = await(new Handsontable(example1, { // eslint-disable-line
+        data: [this.mObj[tab].data1[0]],
+        colHeaders: this.mObj[tab].headers1[0],
+        rowHeaders: true,
+        height: '100%',
+        stretchH: 'all',
+        cells: (row, col) => {
+          var cellProp = {}
+          _.forEach([errcols[0]], (value, key) => {
+            if (col === value.cols && row === key) {
+              row1 = key
+              col1 = value.cols
+              // cellProp.className = 'error'
+              // prop = cellProp
+            }
+          })
+          return cellProp
+        }
+      }))
 
       setTimeout(function () {
         ht.selectCell(row1, col1, row1, col1, true)
@@ -3521,7 +3638,7 @@ export default {
       }
       $('.f-layout-copy').css('position', 'fixed')
 
-     // document.getElementById('hot-display-license-info').style.display = 'none'
+      // document.getElementById('hot-display-license-info').style.display = 'none'
     },
     async modifyData (tab) {
       let schema = this.mObj[tab].schema
@@ -3538,21 +3655,21 @@ export default {
         let valueToBeValidated = _.object(colHeaders, value)
         schema.validate(valueToBeValidated, (err, newP, errors) => {
           if (err) {} else {
-             // if (errors.length) {
-             //     // errorsLength = errors.length
-             //   newHotSettingsData.push(Object.values(value))
-             //   console.log("new...........",newHotSettingsData)
-             //   self.mObj[tab].data1 = newHotSettingsData
-             //   _.forEach(errors, (item) => {
-             //     errcols.push({
-             //       cols: _.indexOf(colHeaders, item.field),
-             //       rows: key
-             //     })
-             //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
-             //   })
-             //   self.mObj[tab].errmsg = errMsgArray
-             // }
-             // else {
+            // if (errors.length) {
+            //     // errorsLength = errors.length
+            //   newHotSettingsData.push(Object.values(value))
+            //   console.log("new...........",newHotSettingsData)
+            //   self.mObj[tab].data1 = newHotSettingsData
+            //   _.forEach(errors, (item) => {
+            //     errcols.push({
+            //       cols: _.indexOf(colHeaders, item.field),
+            //       rows: key
+            //     })
+            //     errMsgArray.push('* ' + item.message + ' at column: ' + item.field)
+            //   })
+            //   self.mObj[tab].errmsg = errMsgArray
+            // }
+            // else {
 
             let modifiedField = self.mObj[tab].errmsg[0].substring(self.mObj[tab].errmsg[0].indexOf(':') + 1)
             modifiedField = modifiedField.trim()
@@ -3571,7 +3688,7 @@ export default {
             userUploadedDataArr = []
             userUploadedDataArr = newArr
 
-             // }
+            // }
           }
         })
       })
@@ -3608,9 +3725,9 @@ export default {
     },
     saveData (tab) {
       let self = this
-      if (tab === 'Product Image') {
-        self.showWebImage = false
-      }
+      // if (tab === 'Product Image') {
+      //   self.showWebImage = false
+      // }
       self.mObj[tab].load = true
 
       if (this.$store.state.disconnect === false) {
@@ -3724,20 +3841,20 @@ export default {
       let res = await (api.request('get', '/pdm-uploader-data/?import_tracker_id=' + id + '&tables=' + tableName).then(res => {
         return res
       })
-    .catch(error => {
-      if (error.response) {
-        self.$Notice.error({
-          title: error.response.data.name,
-          desc: error.response.data.message,
-          duration: 10
-        })
-      } else if (error.message === 'Network Error') {
-        self.$Notice.error({
-          title: 'API Service unavailable',
-          duration: 10
-        })
-      }
-    }))
+        .catch(error => {
+          if (error.response) {
+            self.$Notice.error({
+              title: error.response.data.name,
+              desc: error.response.data.message,
+              duration: 10
+            })
+          } else if (error.message === 'Network Error') {
+            self.$Notice.error({
+              title: 'API Service unavailable',
+              duration: 10
+            })
+          }
+        }))
 
       self.mObj[tab].newUploadCSV = res.data
       self.mObj[tab].newUploadCSV = _.map(self.mObj[tab].newUploadCSV, function (element) {
@@ -3872,6 +3989,9 @@ export default {
               let oldTabIndex = ''
               _.forEach(self.fileTypes, function (value, key) {
                 if (value === self.activeTab) {
+                  if (self.fileTypes.length - 1 === key) {
+                    key = -1
+                  }
                   newTab = self.fileTypes[key + 1]
                   oldTabIndex = value.replace(/ /g, '_')
                 }
@@ -3929,9 +4049,9 @@ export default {
             if (self.validation_completed === true) {
               self.validation_completed = false
             }
-              // if(self.validation_data === false){
-              //   self.validation_data = true
-              // }
+            // if(self.validation_data === false){
+            //   self.validation_data = true
+            // }
             if (self.validateStep === true) {
               self.validateStep = false
             }
@@ -3965,10 +4085,8 @@ export default {
   watch: {
     'image_batch': function (batch) {
       let self = this
-      console.log('batch called....', batch)
       if (batch.length >= 2) {
         let batchChunk = lodash.chunk(batch, 2)
-        console.log('batch Chunk....', batchChunk)
         for (let i = 0; i < batchChunk.length; i++) {
           socket.emit('images', batchChunk[i], (err, data) => {
             console.log('data....', data)
@@ -3998,17 +4116,17 @@ export default {
     self.$store.state.disableuser = true
     self.$store.state.disablesubscription = true
     noticeFlag = true
-      // self.loadProceed = false
+    // self.loadProceed = false
 
     api.request('get', '/uploader/' + id).then(response => {
       if (response.data !== null) {
         let keys = Object.keys(response.data)
         let filteredKeys = []
-                // let filteredKeys = _.filter(keys, function(o) {
-                //   if(o === 'ProductInformation' || o === 'ProductPrice' || o === 'ProductImprintData' || o === 'ProductShipping' || o === 'ProductImage' || o === 'ProductVariationPrice' || o === "ProductAdditionalCharges"){
-                //     return o;
-                //   }
-                // });
+        // let filteredKeys = _.filter(keys, function(o) {
+        //   if(o === 'ProductInformation' || o === 'ProductPrice' || o === 'ProductImprintData' || o === 'ProductShipping' || o === 'ProductImage' || o === 'ProductVariationPrice' || o === "ProductAdditionalCharges"){
+        //     return o;
+        //   }
+        // });
 
         let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
         for (let i = 0; i < tabArray.length; i++) {
@@ -4018,7 +4136,19 @@ export default {
             }
           }
         }
-
+        // Get configuration of asi and sage
+        // this.$Spin.show()
+        asconfigModal.get({
+          userID: this.$store.state.user._id
+        }).then(resp => {
+          // console.log('............', resp)
+          this.asiconfig = _.filter(resp.data.data, {type: 'asi'})
+          this.sageconfig = _.filter(resp.data.data, {type: 'sage'})
+          this.$Spin.hide()
+        }).catch(err => {
+          this.$Spin.hide()
+          console.log('Error asconfig', err)
+        })
         if (response.data.stepStatus === 'upload_pending') {
           self.uploadStep = true
           self.setPage(keys, filteredKeys, response.data)
@@ -4047,7 +4177,7 @@ export default {
                   } else if (response.data[filteredKeys[i]].validateStatus === 'completed') {
                     self.val_data.push({'name': filteredKeys[i], 'data': uploaderObj[filteredKeys[i]], 'progress': 100})
                     remArr.push(filteredKeys[i])
-                          // propKeys.splice(i,1)
+                    // propKeys.splice(i,1)
                   }
                 }
               }
@@ -4069,7 +4199,7 @@ export default {
               self.setValData(response.data, filteredKeys)
             } else if (self.val_data.length > 0) {
               self.$store.state.validationStatus = true
-                        // self.setValData(response.data,filteredKeys)
+              // self.setValData(response.data,filteredKeys)
             }
           } else if (!response.data.validate_flag) {
             self.setValData(response.data, filteredKeys)
@@ -4079,7 +4209,7 @@ export default {
           this.uploadStep = false
           this.validateStep = true
           this.currentStep = 1
-                    // this.showValidationTable = false
+          // this.showValidationTable = false
           this.validation_completed = true
         } else if (response.data.stepStatus === 'import_in_progress') {
           this.uploadStep = false
@@ -4107,7 +4237,6 @@ export default {
         if (this.$store.state.disconnect === false) {
           socket.emit('uploader-schema::find', {'subscriptionId': this.$store.state.subscription_id, 'import_tracker_id': id}, (e, res) => {
             if (res) {
-              console.log('res......', res)
               self.existingSchemaData = res.data[0]
               let schemaNames = lodash.groupBy(res.data, 'tabname')
               let schemavalue = lodash.isEmpty(schemaNames)
@@ -4246,7 +4375,7 @@ export default {
           let index = lodash.findIndex(self.dirinfo, {name: response[i].file_name})
           console.log('success index.....', index)
           self.dirinfo[index].status = 'success'
-          self.img_no ++
+          self.img_no++
         }
       }
     })
@@ -4328,7 +4457,6 @@ x.prototype.formatDate = function (format) {
 y.prototype.toDecimal = function (precision) {
   return parseFloat(this).toFixed(precision)
 }
-
 </script>
 <style>
 table.zaklad {

@@ -41,29 +41,31 @@ function beforeCreate (hook) {
 }
 
 function aftercreateInstance(hook) {
+  // console.log('=================================')
   if (hook.data.id != undefined) {
-  let id = hook.data.id;
+    // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++', hook.data)
+    let id = hook.data.id;
     const Queue = require('rethinkdb-job-queue')
       //--------------- Connection Options -----------------
     const cxnOptions = app.rethinkdb
-    console.log('.....................', cxnOptions)
+    // console.log('.....................', cxnOptions)
     cxnOptions.servers[0].host = app.get("rdb_host")
     cxnOptions.servers[0].port = app.get("rdb_port")
-    console.log("&&&&&&&&&&&&&&", cxnOptions)
+    // console.log("&&&&&&&&&&&&&&", cxnOptions)
       //--------------- Queue Options -----------------
     const qOptions = {
       name: app.get('ProductSyncWorker')
     }
     const q = new Queue(cxnOptions, qOptions)
     var jobOptions = {}
-    jobOptions.data = {}
-    jobOptions.data.Sync_id = id
-    jobOptions.data.userdetails = {
-      // "vid": "b00ef491-d25e-4f50-9327-299bc78e5789",
-      // "vid": "b509c151-682c-46ec-9c2a-cb1288fbbeda",
-      "vid": hook.data.vid
-      // "fullname": "aakron"
-    }
+    jobOptions.data = hook.data
+    // jobOptions.data.Sync_id = id
+    // jobOptions.data.userdetails = {
+    //   // "vid": "b00ef491-d25e-4f50-9327-299bc78e5789",
+    //   // "vid": "b509c151-682c-46ec-9c2a-cb1288fbbeda",
+    //   "vid": hook.data.vid
+    //   // "fullname": "aakron"
+    // }
     jobOptions.timeout = app.get('qJobTimeout')
     jobOptions.retryMax = app.get('qJobRetryMax')
       //--------------- Create new job -----------------
