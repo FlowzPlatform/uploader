@@ -1,5 +1,7 @@
 <template>
 <div>
+  <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/foundation/3.2.5/stylesheets/foundation.min.css'>
   <Tabs @on-click="generateForm" v-model="activetab">
     <TabPane label="Simple" v-if="tab0">
       <div class="pdmsimple">
@@ -1399,8 +1401,8 @@ export default {
 </script>
 
 <style scoped>
-@import 'https://cdnjs.cloudflare.com/ajax/libs/foundation/3.2.5/stylesheets/foundation.min.css';
-@import '//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css';
+/* @import '/static/css/foundation.min.css'; */
+/* @import '/static/css/font-awesome.css'; */
 
 .pdmedit {
   padding: 40px;
@@ -1477,4 +1479,5 @@ fieldset {
 fieldset {
   border: 1px solid white;
 }
+
 </style>
