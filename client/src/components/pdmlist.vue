@@ -5,7 +5,7 @@
         <h3>Product List</h3>  
       </Col>
       <Col span="8">
-        <AutoComplete icon="ios-search" @on-search="handleSearch" @on-select="searchProduct" :clearable="true" style="margin-bottom:10px;" placeholder="Search product name">
+        <AutoComplete :disabled="productListLoading" icon="ios-search" @on-search="handleSearch" @on-select="searchProduct" :clearable="true" style="margin-bottom:10px;" placeholder="Search product name">
           <Option v-for="item in searchOptions" :value="item.product_name" :key="item.product_id">{{ item.product_name }}</Option>
         </AutoComplete>
       </Col>
