@@ -1,8 +1,18 @@
 <template>
-    <div class="pdmlist">
-        <Table :loading="productListLoading" :columns="columns" :data="productList" no-data-text="Products Not Found"></Table>
-        <Page class="pull-right" style="margin-top:10px;" :total="tdata.length" show-total :page-size="pageSize" :current="currentPage" @on-change="changePage"></Page>
-    </div>
+  <div class="pdmlist">
+    <Row type="flex" align="middle">
+      <Col span="16">
+        <h3>Product List</h3>  
+      </Col>
+      <Col span="8">
+        <AutoComplete icon="ios-search" @on-search="handleSearch" @on-select="searchProduct" :clearable="true" style="margin-bottom:10px;" placeholder="Search product name">
+          <Option v-for="item in searchOptions" :value="item.product_name" :key="item.product_id">{{ item.product_name }}</Option>
+        </AutoComplete>
+      </Col>
+    </Row>
+    <Table :loading="productListLoading" :columns="columns" :data="productList" no-data-text="Products Not Found"></Table>
+    <Page v-if="paginate" class="pull-right" style="margin-top:10px;" :total="tdata.length" show-total :page-size="pageSize" :current="currentPage" @on-change="changePage"></Page>
+  </div>
 </template>
 
 <script>
@@ -16,7 +26,7 @@ export default {
       vid: null,
       columns: [
         {
-          title: '_id',
+          title: 'ID',
           key: '_id'
         },
         {
@@ -52,6 +62,8 @@ export default {
       tdata: [],
       productList: [],
       productListLoading: true,
+      searchOptions: [],
+      paginate: true,
       currentPage: 1,
       pageSize: 10
     }
@@ -68,6 +80,30 @@ export default {
         }
       }
       return chunk.slice()
+    },
+    async handleSearch (value) {
+      let self = this
+      if (value !== '') {
+        this.searchOptions = await this.tdata.filter(function (item) {
+          if (item.product_name.toLowerCase().includes(value.toLowerCase())) {
+            return item
+          }
+        })
+      } else {
+        this.searchOptions = []
+        this.paginate = true
+        this.productList = await this.makeChunk(self.currentPage, self.pageSize)
+      }
+    },
+    async searchProduct (value) {
+      if (value !== '') {
+        this.productList = await this.tdata.filter(function (item) {
+          if (item.product_name.toLowerCase().includes(value.toLowerCase())) {
+            return item
+          }
+        })
+        this.paginate = false
+      }
     },
     async init () {
       let url = config.pdmUrl + '/pdm'
@@ -114,8 +150,8 @@ export default {
   async mounted () {
     let url = config.pdmUrl + '/vshop-list?all=1&supplier=true'
     this.pdata = await axios.get(url).then(res => {
-      this.vid = res.data[0].id
       this.$cookie.set('vid', res.data[0].id)
+      this.vid = res.data[0].id
     }).catch(err => { // eslint-disable-line
       this.$Notice.error({
         title: 'Can\'t find vshop id',
@@ -128,8 +164,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .pdmlist {
   padding: 40px;
+}
+
+.ivu-auto-complete.ivu-select-dropdown {
+  max-height: 250px!important;
 }
 </style>

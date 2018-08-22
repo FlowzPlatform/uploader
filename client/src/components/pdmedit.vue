@@ -184,7 +184,6 @@ export default {
         // console.log(err)
         return {}
       })
-      console.log('OLD Data::', this.pdata)
       this.realdata = lodash.cloneDeep(this.pdata)
     },
     mapData(data){
@@ -227,7 +226,7 @@ export default {
       let productInfo = []
       productInfo.push(productData)
 
-      // console.log('productInfo:::', data)
+      // console.log('productInfo:::', productInfo)
       let pInfo_error = await this.proceedToValidate('Product Information', productInfo)
       if (data.pricing != undefined) {
         pricingData = lodash.cloneDeep(data.pricing)
@@ -322,6 +321,7 @@ export default {
         let validateServerside  = await this.validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData)
         for(let key in this.mObj) {
           if (this.mObj[key].errmsg.length > 0) {
+            // console.log('Error', key, this.mObj[key].errmsg)
             this.advancedValidate = false
             this.advancedSubmitLoading = false
             return false
@@ -1197,6 +1197,25 @@ export default {
           }
         }
 
+        // let allowedValueValidatorFunc = function (obj, value, fieldName) {
+        //   var i
+        //   _.forEach(Object.keys(self.mObj[tab].schema.structure), function (value, key) {
+        //     if (fieldName === value) {
+        //       i = key
+        //     }
+        //   })
+        //   if (self.mObj[tab].mapping[i].schemaObj.allowedValues.length > 0) {
+        //     if (value !== undefined) {
+        //       let check = _.includes(self.mObj[tab].mapping[i].schemaObj.allowedValues, value)
+        //       if(check != true)
+        //       return  'System allowedvalues are ' + self.mObj[tab].mapping[i].schemaObj.allowedValues
+        //       else {
+        //         return
+        //       }
+        //     }
+        //   }
+        // }
+
         let allowedValueValidatorFunc = function (obj, value, fieldName) {
           var i
           _.forEach(Object.keys(self.mObj[tab].schema.structure), function (value, key) {
@@ -1205,12 +1224,24 @@ export default {
             }
           })
           if (self.mObj[tab].mapping[i].schemaObj.allowedValues.length > 0) {
-            if (value !== undefined) {
-              let check = _.includes(self.mObj[tab].mapping[i].schemaObj.allowedValues, value)
-              if(check != true)
-              return  'System allowedvalues are ' + self.mObj[tab].mapping[i].schemaObj.allowedValues
-              else {
-                return
+            if (fieldName === 'available_currencies') {
+              let value = obj['available_currencies'].split('|')
+              let arr = lodash.cloneDeep(self.mObj[tab].mapping[i].schemaObj.allowedValues)
+              for (let i = 0; i < value.length; i++) {
+                let check = _.includes(arr, value[i])
+                if (check !== true) {
+                  return 'System allowedvalues are USD, CAD, AUD, EUR, INR...'
+                  // return 'System allowedvalues are ' + arr
+                } else {
+                }
+              }
+              return
+            } else {
+              if (value !== undefined) {
+                let check = _.includes(self.mObj[tab].mapping[i].schemaObj.allowedValues, value)
+                if (check !== true) { return 'System allowedvalues are ' + self.mObj[tab].mapping[i].schemaObj.allowedValues } else {
+                  return
+                }
               }
             }
           }

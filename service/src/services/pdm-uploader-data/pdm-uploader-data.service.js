@@ -127,18 +127,27 @@ var connectToMongo = async function(url,data,socket){
     }
 
 
-    for(let i=0;i<data.newCSV.length;i++){
+   for(let i=0;i<data.newCSV.length;i++){
       for(key in data.newCSV[i]){
         for(let schema_key in schemarules){
           if(key == schema_key && schemarules[schema_key] == "string"){
             if(typeof(data.newCSV[i][key]) != "string"){
-              data.newCSV[i][key] =  data.newCSV[i][key].toString()
+              if(data.newCSV[i][key] != null){
+                data.newCSV[i][key] =  data.newCSV[i][key].toString()
+              }
+              else if(data.newCSV[i][key] == null){
+                data.newCSV[i][key] = ""
+              }
+            }
+          }
+          else if(key == schema_key && schemarules[schema_key] != "string"){
+            if(data.newCSV[i][key] == null){
+              data.newCSV[i][key] = ""
             }
           }
         }
       }
     }
-
 
 
      if(db){
