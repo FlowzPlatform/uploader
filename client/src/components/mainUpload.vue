@@ -66,33 +66,6 @@
                      </span>
                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
                   </div>
-              </div>
-
-             <div v-if="showWebImage" id="upload-image-zone">
-                <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
-                  <span class="dz-message">Mass image upload<br/>
-                      <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
-                  </span>
-                  <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
-               </form>
-               <Button type="primary" style="margin-top:0px;color: #fff;margin-top:14px;float:right;padding: 6px 30px;margin-left:1%" @click="Back(activeTab)">Back</Button>
-               <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)">Abort</Button>
-               <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)"  :disabled="!proceedBtn" :loading="ProceedLoading">
-                <span v-if="ProceedLoading">Processing</span>
-                <span v-else>Proceed</span>
-               </Button>
-               <div v-if="image_err.length !== 0" style="margin-top:7%;">
-                 <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
-                 <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
-                 <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
-                   <Row>
-                     <Col span="5" v-for="(item,index) in image_err" :key="index">{{item}}</Col>
-                   </Row>
-                 </div>
-              </div>
-               <div id="dirinfo">
-                 <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
-                 <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
                </div>
                <!-- <div v-if="showWebImage" id="upload-image-zone">
                   <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
