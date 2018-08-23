@@ -301,10 +301,17 @@ export default {
         if (this.simpleValidate) {
           // console.log('No error, simple data is going to live')
           axios.patch(url, result, { headers: { vid: this.vid } }).then(res => {
-            this.$Notice.success({
-              title: 'Update Successfull',
-              desc: 'Product details updated successfully.'
-            })
+            if (res.data.code && res.data.code == 406) {
+              this.$Notice.error({
+                title: 'Update Error',
+                desc: res.data.message
+              })
+            } else {
+              this.$Notice.success({
+                title: 'Update Successfull',
+                desc: 'Product details updated successfully.'
+              })
+            }
             this.simpleSubmitLoading = false
           }).catch(err => {
             this.$Notice.error({
@@ -352,14 +359,12 @@ export default {
               })
             }
             this.advancedSubmitLoading = false
-            // console.log('Updated Data::', res)
           }).catch(err => {
             this.$Notice.error({
               title: 'Update Error',
               desc: 'Error while updating product details'
             })
             this.advancedSubmitLoading = false
-            console.log('Error while updating data::', err)
           })
         } else {
           this.advancedSubmitLoading = false
@@ -374,7 +379,6 @@ export default {
       return new Promise(async (resolve, reject) => {
         for(let key in this.mObj) {
           srvVld.sheet_name = key
-          // console.log('>>>', value)
           if (key == 'Product Information') {
             srvVld.data = productData
           } else if (key == 'Product Price') {
@@ -1226,7 +1230,7 @@ export default {
             }
           })
           if (self.mObj[tab].mapping[i].schemaObj.allowedValues.length > 0) {
-            if (fieldName === 'available_currencies') {
+            if (fieldName === 'available_currencies' && obj['available_currencies'] !== undefined) {
               let value = obj['available_currencies'].split('|')
               let arr = lodash.cloneDeep(self.mObj[tab].mapping[i].schemaObj.allowedValues)
               for (let i = 0; i < value.length; i++) {
