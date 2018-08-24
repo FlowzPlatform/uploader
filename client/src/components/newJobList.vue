@@ -25,9 +25,8 @@ import Papa from 'papaparse'
 var JSZip = require('jszip')
 var FileSaver = require('file-saver')
 var zip = new JSZip()
-var _ = require('lodash')
 
-let axios = require('axios')
+var axios = require('axios')
 var lodash = require('lodash')
 var moment = require('moment')
 var flatten = require('flat')
@@ -131,7 +130,7 @@ export default {
   methods: {
     getStatus (status) {
       if (status !== '') {
-        var res = lodash.capitalize(status.replace(/_/g, ' '))
+        let res = lodash.capitalize(status.replace(/_/g, ' '))
         return res
       }
     },
@@ -257,7 +256,7 @@ export default {
       }
     },
     exportdata: async function () {
-      console.log('hello export')
+      // console.log('hello export')
       this.bloading = true
       await axios
         .get(config.vshoplist, {
@@ -285,54 +284,33 @@ export default {
               let imageData = []
               let productInfo = []
               let csvdata = []
-              _.forEach(productdata, async function (item) {
-                // console.log("item", item._source.shipping);
 
-                let shipping = _.forEach(item._source.shipping, async function (pship) {
-                  // console.log('pship', pship['_id'])
+              lodash.forEach(productdata, async function (item) {
+                let shipping = lodash.forEach(item._source.shipping, async function (pship) {
                   delete pship._id
                 })
-                let impData = _.forEach(item._source.imprint_data, async function (pimp) {
-                  // console.log('pimp', pimp['_id'])
+                let impData = lodash.forEach(item._source.imprint_data, async function (pimp) {
                   delete pimp._id
                 })
-                let pricing = _.forEach(item._source.pricing, async function (pprice) {
-                  // console.log('pprice', pprice)
+                let pricing = lodash.forEach(item._source.pricing, async function (pprice) {
                   delete pprice._id
-                  // pricingData.push(pprice)
                 })
-                let images = _.forEach(item._source.images, async function (pimages) {
-                  // console.log('pimages', pimages['_id'])
+                let images = lodash.forEach(item._source.images, async function (pimages) {
                   delete pimages._id
                 })
-                // console.log('pricing.length', pricing.length)
-                // console.log('pricing', pricing)
+
                 shippingData.push(shipping)
                 imprintData.push(impData)
                 pricingData.push(pricing)
                 imageData.push(images)
 
                 delete item._source.pricing
-                delete item._source.imprintData
-                delete item._source.shippingData
+                delete item._source.imprint_data
+                delete item._source.shipping
                 delete item._source.images
 
                 productInfo.push(item._source)
               })
-              //  console.log("csvdata", csvdata);
-              // console.log("shippingdata", shippingdata.length);
-              // console.log("shippingdata", shippingdata);
-              // console.log('..... shippingData', shippingData)
-              // console.log('..... imprintData', imprintData)
-              // console.log('..... pricingData', pricingData)
-              // console.log('..... imageData', imageData)
-              // console.log('..... productInfo', productInfo)
-
-              // console.log('..... shippingData.length', shippingData.length)
-              // console.log('..... imprintData.length', imprintData.length)
-              // console.log('..... pricingData.length', pricingData.length)
-              // console.log('..... imageData.length', imageData.length)
-              // console.log('..... productInfo', productInfo.length)
 
               csvdata.push(
                 shippingData,
@@ -342,32 +320,109 @@ export default {
                 productInfo
               )
               // console.log('csvdata', csvdata)
-              var mergedShipping = [].concat.apply([], csvdata[0])
-              var mergedImprint = [].concat.apply([], csvdata[1])
-              var mergedPricing = [].concat.apply([], csvdata[2])
-              var mergedImage = [].concat.apply([], csvdata[3])
-              var mergedProduct = [].concat.apply([], csvdata[4])
-              // console.log('mergedShipping', mergedShipping)
-              // console.log('mergedImprint', mergedImprint)
-              // console.log('mergedPricing', mergedPricing)
-              // console.log('mergedImage', mergedImage)
-              // console.log('mergedProduct', mergedProduct)
-              let filteredShipping = _.reject(mergedShipping, _.isUndefined)
-              let filteredImprint = _.reject(mergedImprint, _.isUndefined)
-              let filteredPricing = _.reject(mergedPricing, _.isUndefined)
-              let filteredImage = _.reject(mergedImage, _.isUndefined)
-              let filteredProduct = _.reject(mergedProduct, _.isUndefined)
+              let mergedShipping = [].concat.apply([], csvdata[0])
+              let mergedImprint = [].concat.apply([], csvdata[1])
+              let mergedPricing = [].concat.apply([], csvdata[2])
+              let mergedImage = [].concat.apply([], csvdata[3])
+              let mergedProduct = [].concat.apply([], csvdata[4])
 
-              const csvShipping = Papa.unparse(filteredShipping.map(flatten))
-              const csvImprint = Papa.unparse(filteredImprint.map(flatten))
-              const csvPricing = Papa.unparse(filteredPricing.map(flatten))
-              const csvImage = Papa.unparse(filteredImage.map(flatten))
-              const csvProduct = Papa.unparse(filteredProduct.map(flatten))
-              // console.log('<<< csvShipping >>>>', csvShipping)
-              // console.log('=== csvImprint ===', csvImprint)
-              // console.log('!!! csvPricing !!!', csvPricing)
-              // console.log(' $$$ csvImage $$$', csvImage)
-              // console.log('*** csvProduct ***', csvProduct)
+              let filteredShipping = lodash.reject(mergedShipping, lodash.isUndefined)
+              let filteredImprint = lodash.reject(mergedImprint, lodash.isUndefined)
+              let filteredPricing = lodash.reject(mergedPricing, lodash.isUndefined)
+              let filteredImage = lodash.reject(mergedImage, lodash.isUndefined)
+              let filteredProduct = lodash.reject(mergedProduct, lodash.isUndefined)
+
+              filteredProduct = filteredProduct.map((item) => {
+                if (item.attributes.imprint_color !== undefined) {
+                  item.Attr_Imprint_Color = item.attributes.imprint_color.join('|')
+                }
+
+                /* SEPARATE DATA BY (, | opeartor) */
+                item.available_currencies = item.available_currencies.join('|')
+                item.available_regions = item.available_regions.join(',')
+                item['non-available_regions'] = item['non-available_regions'].join(',')
+                item.categories = item.categories.join('|')
+                item.search_keyword = item.search_keyword.join('|')
+                item.attributes.colors = item.attributes.colors.join('|')
+                item.attributes.decimal = item.attributes.decimal.join(',')
+                item.vid = item.vid.join(',')
+
+                /* REPLACE NEW KEYS WITH VALUES */
+                item.attr_colors = item.attributes.colors
+                item.attr_decimal = item.attributes.decimal
+                /* DELETE KEYS */
+                delete item.attributes.colors
+                delete item.attributes.decimal
+                delete item.attributes.imprint_color
+                delete item.supplier_info
+                delete item.attr_imprint_color
+                delete item.attributes
+                delete item.username
+                delete item.supplier_id
+                delete item.vid
+                delete item.valid_up_to
+                Promise.resolve(item.available_currencies)
+                return item
+              })
+
+              let pricingFlatten = filteredPricing.map(flatten)
+              let imprintFlatten = filteredImprint.map(flatten)
+              let shippingFlatten = filteredShipping.map(flatten)
+              let productinfoFlatten = filteredProduct.map(flatten)
+              let imageFlatten = filteredImage.map(flatten)
+
+              /* pricingFlatten replace keys of gte & lte,code,price  */
+              for (let [index, item] of pricingFlatten.entries()) {
+                pricingFlatten[index] = this.changeGTEValue(item, 0)
+                pricingFlatten[index] = this.changeLTEValue(item, 0)
+                pricingFlatten[index] = this.changeCodeValue(item, 0)
+                pricingFlatten[index] = this.changePriceValue(item, 0)
+              }
+
+              /* shippingFlatten replace keys of gte & lte */
+              for (let [index, item] of shippingFlatten.entries()) {
+                shippingFlatten[index] = this.changeGTEValueShipping(item, 0)
+                shippingFlatten[index] = this.changeLTEValueShipping(item, 0)
+              }
+
+              /* imprintFlatten replace keys of gte & lte */
+              for (let [index, item] of imprintFlatten.entries()) {
+                imprintFlatten[index] = this.changeGTEValueImprint(item, 0)
+                imprintFlatten[index] = this.changeLTEValueImprint(item, 0)
+              }
+
+              /* imageFlatten changeWebImageValue */
+              for (let [index, item] of imageFlatten.entries()) {
+                imageFlatten[index] = this.changeWebImageValue(item, 0)
+                imageFlatten[index] = this.changeColorValue(item, 0)
+                imageFlatten[index] = this.changeImageColorCodeValue(item, 0)
+                imageFlatten[index] = this.changeSecureUrlValue(item, 0)
+              }
+              /* productinfoFlatten feature separate */
+              for (let a = 0; a < productinfoFlatten.length; a++) {
+                let c = 0
+                let z = -1
+                while (c <= 33 || z < 33) {
+                  c++
+                  z++
+                  productinfoFlatten[a]['feature_' + c] = productinfoFlatten[a]['features.' + z + '.key'] + '|' + productinfoFlatten[a]['features.' + z + '.value']
+                  delete productinfoFlatten[a]['features.' + z + '.key']
+                  delete productinfoFlatten[a]['features.' + z + '.value']
+
+                  if (productinfoFlatten[a]['feature_' + c] === 'undefined|undefined') {
+                    productinfoFlatten[a]['feature_' + c] = ''
+                  }
+                }
+              }
+              // console.log('productinfoFlatten *********', productinfoFlatten)
+              /* unparse flatten data */
+              const csvShipping = Papa.unparse(shippingFlatten)
+              const csvImprint = Papa.unparse(imprintFlatten)
+              const csvPricing = Papa.unparse(pricingFlatten)
+              const csvImage = Papa.unparse(imageFlatten)
+              const csvProduct = Papa.unparse(productinfoFlatten)
+
+              /* making zip file of csv */
               zip.file('shipping.csv', csvShipping)
               zip.file('imprint_charges.csv', csvImprint)
               zip.file('pricing.csv', csvPricing)
@@ -397,6 +452,138 @@ export default {
           this.bloading = false
         })
       this.bloading = false
+    },
+    changeGTEValue (item, value) {
+      let key = 'price_range.' + value + '.qty.gte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Max'] = item[key]
+        delete item[key]
+        item = this.changeGTEValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeLTEValue (item, value) {
+      let key = 'price_range.' + value + '.qty.lte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Min'] = item[key]
+        delete item[key]
+        item = this.changeLTEValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeGTEValueShipping (item, value) {
+      let key = 'shipping_range.' + value + '.qty.gte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Max'] = item[key]
+        delete item[key]
+        item = this.changeGTEValueShipping(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeLTEValueShipping (item, value) {
+      let key = 'shipping_range.' + value + '.qty.lte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Min'] = item[key]
+        delete item[key]
+        item = this.changeLTEValueShipping(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeGTEValueImprint (item, value) {
+      let key = 'imprint_data_range.' + value + '.qty.gte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Max'] = item[key]
+        delete item[key]
+        item = this.changeGTEValueImprint(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeLTEValueImprint (item, value) {
+      let key = 'imprint_data_range.' + value + '.qty.lte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Min'] = item[key]
+        delete item[key]
+        item = this.changeLTEValueImprint(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeCodeValue (item, value) {
+      let key = 'price_range.' + value + '.code'
+      if (item.hasOwnProperty(key)) {
+        item['code_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeCodeValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changePriceValue (item, value) {
+      let key = 'price_range.' + value + '.price'
+      if (item.hasOwnProperty(key)) {
+        item['price_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changePriceValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeWebImageValue (item, value) {
+      let key = 'images.' + value + '.web_image'
+      if (item.hasOwnProperty(key)) {
+        item['web_image_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeWebImageValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeColorValue (item, value) {
+      let key = 'images.' + value + '.color'
+      if (item.hasOwnProperty(key)) {
+        item['color_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeColorValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeImageColorCodeValue (item, value) {
+      let key = 'images.' + value + '.image_color_code'
+      if (item.hasOwnProperty(key)) {
+        item['image_color_code_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeImageColorCodeValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeSecureUrlValue (item, value) {
+      let key = 'images.' + value + '.secure_url'
+      if (item.hasOwnProperty(key)) {
+        item['secure_url_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeSecureUrlValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
     }
   },
   feathers: {
@@ -404,7 +591,7 @@ export default {
       updated (message) {
         let self = this
         if (message.user_id === self.$store.state.userId) {
-          for (var i = 0; i < self.data2.length; i++) {
+          for (let i = 0; i < self.data2.length; i++) {
             if (self.data2[i].id === message.id) {
               index = i
             }
