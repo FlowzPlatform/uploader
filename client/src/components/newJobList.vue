@@ -22,14 +22,14 @@ import Emitter from '@/mixins/emitter'
 import config from '@/config'
 import Cookies from 'js-cookie'
 import Papa from 'papaparse'
-var JSZip = require('jszip')
-var FileSaver = require('file-saver')
-var zip = new JSZip()
+let JSZip = require('jszip')
+let FileSaver = require('file-saver')
+let zip = new JSZip()
 
-var axios = require('axios')
-var lodash = require('lodash')
-var moment = require('moment')
-var flatten = require('flat')
+let axios = require('axios')
+let lodash = require('lodash')
+let moment = require('moment')
+let flatten = require('flat')
 moment().format()
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -665,7 +665,7 @@ export default {
     }
   },
   mounted () {
-    var self = this
+    let self = this
     this.loading = true
     if (this.$store.state.disableuser === true) {
       this.$store.state.disableuser = false
