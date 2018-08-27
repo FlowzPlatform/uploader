@@ -81,6 +81,11 @@ Vue.use(VueCookie)
 import VueSplit from 'vue-split-panel'
 Vue.use(VueSplit)
   /* eslint-disable no-new */
+
+import VueFormGenerator from 'vue-form-generator'
+import 'vue-form-generator/dist/vfg.css'
+Vue.use(VueFormGenerator)
+
   // Routing logic
 Vue.use(VueRouter)
 var router = new VueRouter({

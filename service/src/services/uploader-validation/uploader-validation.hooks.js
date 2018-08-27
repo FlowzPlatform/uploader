@@ -226,26 +226,17 @@ var checkImage = async function(imagedata,colname){
       let img_err_data = []
       for(let i=0;i<imagedata.length;i++){
         let secure_url = imagedata[i][colname]
-        var image_res = await(axios.get(secure_url).then(res => {
-          return res
-        })
+        await(axios.get(secure_url)
         .catch(err => {
-          if(err.response.status == 404){
-            img_err_data.push(imagedata[i])
-            return err.response
-          }
-          else{
-            console.log("err..",err)
-            return err
-          }
+          img_err_data.push(imagedata[i])
         })
         )
       }
 
-      if(img_err_data.length != 0){
+      if(img_err_data.length > 0){
         resolve(img_err_data)
       }
-      else if(img_err_data.length == 0){
+      else {
         resolve('done')
       }
   })
