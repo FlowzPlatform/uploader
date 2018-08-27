@@ -39,10 +39,11 @@ var temp = {
   crmUrl: 'https://www.crm.' + domainkey,
   websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
   pdmUrl: 'https://api.' + domainkey + '/pdmnew',
-  // pdmUrl: 'http://localhost:3038',
   cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload',
   vshopUrl: 'https://api.flowzcluster.tk/pdmnew/vshop-list?supplier=true&all=1',
-  asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/'
+  asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/',
+  vshoplist: 'https://api.' + domainkey + '/pdmnew/vshop-list',
+  pdmnew: 'https://api.' + domainkey + '/pdmnew/pdm?$limit=9999'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -76,7 +77,9 @@ if (process.env.MYENV !== 'development') {
     pdmUrl: 'https://api.' + domainkey + '/pdmnew',
     cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload',
     vshopUrl: 'https://api.' + domainkey + '/pdmnew/vshop-list?supplier=true&all=1',
-    asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/'
+    asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/',
+    vshoplist: 'https://api.' + domainkey + '/pdmnew/vshop-list',
+    pdmnew: 'https://api.' + domainkey + '/pdmnew/pdm?$limit=9999'
   }
 }
 
