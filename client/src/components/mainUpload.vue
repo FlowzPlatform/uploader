@@ -1631,7 +1631,7 @@ export default {
         sheet_name: sheetName,
         key: key
       }
-      api.request('post', '/uploader-validation/', validationObj).then(result => {
+      api.request('post', '/uploader-validation/', validationObj, null, {'Access-Control-Allow-Origin': '*'}).then(result => {
         if (result.data.length > 0) {
           self.showValidationHandson(result.data, sheetName)
         } else {
@@ -2819,7 +2819,7 @@ export default {
               if (value !== undefined) {
                 let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
                 if (check !== true) { return 'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues } else {
-                  return
+                   return
                 }
               }
             }
@@ -2861,7 +2861,7 @@ export default {
             if (value !== undefined && typeof (value) === 'string') {
               let check = (value.length).toString()
               if (check !== self.mObj[self.activeTab].mapping[i].schemaObj.maxLength) { return 'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength } else {
-                return
+                 return
               }
             }
           }
@@ -3754,7 +3754,7 @@ export default {
         asconfigModal.get({
           userID: this.$store.state.user._id
         }).then(resp => {
-           // console.log('............', resp)
+          // console.log('............', resp)
           this.asiconfig = _.filter(resp.data.data, {type: 'asi'})
           this.sageconfig = _.filter(resp.data.data, {type: 'sage'})
           this.$Spin.hide()
