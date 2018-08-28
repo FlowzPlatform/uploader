@@ -224,18 +224,18 @@ var UpdateInMongo = async function(hook,url){
 var checkImage = async function(imagedata,colname){
   return new Promise(async(resolve,reject) => {
       let img_err_data = []
-      // for(let i=0;i<imagedata.length;i++){
-      //   let secure_url = imagedata[i][colname]
-      //   await axios.get(secure_url).catch(err => {
-      //     img_err_data.push(imagedata[i])
-      //   })
-      // }
+      for(let i=0;i<imagedata.length;i++){
+        let secure_url = imagedata[i][colname]
+        await axios.get(secure_url).catch(err => {
+          img_err_data.push(imagedata[i])
+        })
+      }
 
-      // if(img_err_data.length > 0){
-      //   resolve(img_err_data)
-      // }
-      // else {
+      if(img_err_data.length > 0){
+        resolve(img_err_data)
+      }
+      else {
         resolve('done')
-      // }
+      }
   })
 }
