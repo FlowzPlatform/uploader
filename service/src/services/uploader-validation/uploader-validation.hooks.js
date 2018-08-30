@@ -226,11 +226,9 @@ var checkImage = async function(imagedata,colname){
       let img_err_data = []
       for(let i=0;i<imagedata.length;i++){
         let secure_url = imagedata[i][colname]
-        await(axios.get(secure_url)
-        .catch(err => {
+        await axios.get(secure_url).catch(err => {
           img_err_data.push(imagedata[i])
         })
-        )
       }
 
       if(img_err_data.length > 0){
