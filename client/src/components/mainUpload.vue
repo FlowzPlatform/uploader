@@ -764,7 +764,7 @@ export default {
                     },
                     on: {
                       click: () => {
-                        this.deleteImage(params.row)      // delete image from cloudinary
+                        this.deleteImage(params.row) // delete image from cloudinary
                       }
                     }
                   })
@@ -2161,7 +2161,7 @@ export default {
       } else {
         let flag = false
         for (let i = 0; i < this.mObj[tab].schemaList.length; i++) {
-          if (this.mObj[tab].schemaList.value === schema) {
+          if (this.mObj[tab].schemaList[i].value === schema) {
             this.$Notice.error({
               title: 'This mapping name already exists',
               duration: 5
@@ -2257,6 +2257,7 @@ export default {
       await self.parseFile(tab)
     },
     cancel () {
+      this.ProceedLoading = false
       this.proceedBtn = true
       continueFlag = false
     },
@@ -2637,38 +2638,37 @@ export default {
             let isValid = date.isValid()
             if (isValid !== true) return 'Invalid date. Please provide date in y-m-d format'
             date._d = moment(new Date(date._d)).format('YYYY/MM/DD')
-            return
           }
         }
         let urlValidatorFunc = function (obj, value, fieldName) {
           if (value !== '' || value !== undefined) {
             let re = /^((http[s]?|ftp):\/)?\/?([^:\s]+)((\/\w+)*\/)([\w]+[^#?\s]+)(.*)?(#[\w]+)?$/
-            if (re.test(value) !== true) { return 'Invalid url' } else { return }
+            if (re.test(value) !== true) { return 'Invalid url' } else { }
           }
         }
 
         let emailValidatorFunc = function (obj, value, fieldName) {
           if (value !== undefined || value !== '') {
             let re = /\S+@\S+\.\S+/
-            if (re.test(value) !== true) { return 'Invalid email address' } else { return }
+            if (re.test(value) !== true) { return 'Invalid email address' } else { }
           }
         }
 
         let optionalValidatorFunc = function (obj, value, fieldName) {
-          if (value === '') { return fieldName + ' cannot be left blank' } else { return }
+          if (value === '') { return fieldName + ' cannot be left blank' } else { }
         }
 
         let phoneValidatorFunc = function (obj, value, fieldName) {
         let re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im // eslint-disable-line
           if (value !== undefined || value !== '') {
-            if (re.test(value) !== true) { return 'Invalid phone number' } else { return }
+            if (re.test(value) !== true) { return 'Invalid phone number' } else { }
           }
         }
 
         let pincodeValidatorFunc = function (obj, value, fieldName) {
         let re = /^[0-9]{1,6}$/ // eslint-disable-line
           if (value !== undefined || value !== '') {
-            if (re.test(value) !== true) { return 'Invalid pin-code' } else { return }
+            if (re.test(value) !== true) { return 'Invalid pin-code' } else { }
           }
         }
 
@@ -2689,7 +2689,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
         let getFunctionUrl = function (obj, value, fieldName) {
@@ -2709,7 +2709,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
         let getFunctionEmail = function (obj, value, fieldName) {
@@ -2729,7 +2729,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -2750,7 +2750,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -2771,7 +2771,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -2792,7 +2792,7 @@ export default {
           } else if (func5 !== undefined) {
             return func5
           } else {
-            return
+
           }
         }
 
@@ -2814,12 +2814,11 @@ export default {
                 } else {
                 }
               }
-              return
             } else {
               if (value !== undefined) {
                 let check = _.includes(self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues, value)
                 if (check !== true) { return 'System allowedvalues are ' + self.mObj[self.activeTab].mapping[i].schemaObj.allowedValues } else {
-                   return
+
                 }
               }
             }
@@ -2838,13 +2837,13 @@ export default {
               if (value === '') {
                 return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
               } else {
-                return
+
               }
             } else if (self.mObj[self.activeTab].mapping[i].schemaObj.type === 'number') {
               if (value === 0) {
                 return 'default value should be ' + self.mObj[self.activeTab].mapping[i].schemaObj.defaultValue
               } else {
-                return
+
               }
             }
           }
@@ -2861,7 +2860,7 @@ export default {
             if (value !== undefined && typeof (value) === 'string') {
               let check = (value.length).toString()
               if (check !== self.mObj[self.activeTab].mapping[i].schemaObj.maxLength) { return 'maxLength value should be' + self.mObj[self.activeTab].mapping[i].schemaObj.maxLength } else {
-                 return
+
               }
             }
           }
@@ -3001,7 +3000,6 @@ export default {
     Abort (tab) {
       let self = this
       self.proceedBtn = true
-
       continueFlag = false
       self.showContinue = false
       self.mObj[tab].load = false
@@ -3503,7 +3501,6 @@ export default {
         self.mObj[tab].load = false
         self.mObj[tab].savePreviewDisplay = true
       }
-      return
     },
     setValData (data, filteredKeys) {
       uploaderObj = data
@@ -3541,7 +3538,6 @@ export default {
       } else {
         self.validation_completed = true
       }
-      return
     }
   },
   feathers: {
