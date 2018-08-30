@@ -4398,8 +4398,8 @@ table.zaklad {
 
 #importBtn[disabled] {
   color: #fff;
-  background-color: #1fb58f;
-  border-color: #1fb58f;
+  background-color: ##1fb58f;
+  border-color: ##1fb58f;
 }
 
 .apply {
