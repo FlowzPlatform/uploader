@@ -40,6 +40,11 @@ then
     apisecret="$apisecret_master";
     RDB_HOST="$RDB_HOST_MASTER";
     RDB_PORT="$RDB_PORT_MASTER";
+    
+    MONGODB_USER="$MONGODB_USER_MASTER";
+    MONGODB_PASS="$MONGODB_PASS_MASTER";
+    MONGODB_HOST="$MONGODB_HOST_MASTER";
+    MONGODB_PORT="$MONGODB_PORT_MASTER";
   }
 elif [ "$TRAVIS_BRANCH" = "develop" ]
 then
@@ -66,8 +71,10 @@ then
       RDB_HOST="$RDB_HOST_DEVELOP";
       RDB_PORT="$RDB_PORT_DEVELOP";
       
-      mongodb_host="$mongodb_host_dev";
-      mongodb_port="$mongodb_port_dev";
+      MONGODB_USER="$MONGODB_USER_DEVELOP";
+      MONGODB_PASS="$MONGODB_PASS_DEVELOP";
+      MONGODB_HOST="$MONGODB_HOST_DEVELOP";
+      MONGODB_PORT="$MONGODB_PORT_DEVELOP";
   }
 elif [ "$TRAVIS_BRANCH" = "staging" ]
 then
@@ -93,6 +100,11 @@ then
       apisecret="$apisecret_staging";
       RDB_HOST="$RDB_HOST_STAGING";
       RDB_PORT="$RDB_PORT_STAGING";
+      
+      MONGODB_USER="$MONGODB_USER_STAGING";
+      MONGODB_PASS="$MONGODB_PASS_STAGING";
+      MONGODB_HOST="$MONGODB_HOST_STAGING";
+      MONGODB_PORT="$MONGODB_PORT_STAGING";
   }  
 else
   {
@@ -118,8 +130,10 @@ else
       RDB_HOST="$RDB_HOST_QA";
       RDB_PORT="$RDB_PORT_QA";
       
-      mongodb_host="$mongodb_host_qa";
-      mongodb_port="$mongodb_port_qa";
+      MONGODB_USER="$MONGODB_USER_QA";
+      MONGODB_PASS="$MONGODB_PASS_QA";
+      MONGODB_HOST="$MONGODB_HOST_QA";
+      MONGODB_PORT="$MONGODB_PORT_QA";
   }
 fi
 
@@ -134,7 +148,7 @@ curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
-       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$BACKEND_HOST"'"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$mongodb_host"'","mongodb_port":"'"$mongodb_port"'","username":"'"$username_env"'","password":"'"$password"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'","cloudname":"'"$cloudname"'","apikey":"'"$apikey"'","apisecret":"'"$apisecret"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
+       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$BACKEND_HOST"'"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$MONGODB_HOST"'","mongodb_port":"'"$MONGODB_PORT"'","username":"'"$MONGODB_USER"'","password":"'"$MONGODB_PASS"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'","cloudname":"'"$cloudname"'","apikey":"'"$apikey"'","apisecret":"'"$apisecret"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
 $RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_BACKEND?action=upgrade
 
 curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
