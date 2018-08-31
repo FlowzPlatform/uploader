@@ -5,6 +5,7 @@ const ProductShippingRules = require('../../validation_rules/product_shipping');
 const ProductImagesRules = require('../../validation_rules/product_images');
 const ProductAdditionalChargesRules = require('../../validation_rules/product_additional_charge');
 const ProductVariationPriceRules = require('../../validation_rules/product_variation_pricing');
+const WebsiteInventoryRules = require('../../validation_rules/website_inventory');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const config1 = require('../../../config/default.json');
@@ -94,6 +95,9 @@ var connectToMongo = async function(hook,url){
   else if(hook.data.sheet_name == "Product Image"){
     rules = ProductImagesRules
   }
+  else if (hook.data.sheet_name == "Website Inventory") {
+    rules = WebsiteInventoryRules
+  } 
   else if(hook.data.sheet_name == "Product Additional Charges"){
     rules = ProductAdditionalChargesRules
   }

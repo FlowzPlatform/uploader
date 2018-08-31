@@ -14,10 +14,13 @@
                 direction="vertical"
                 v-model="activeTab"
                 :tab-change="hideHandson()">
-                <div v-for="(files,fIndex) in fileTypes">
-                    <v-tab :title=files :id="changeIndex(files)">
+                <div v-if="uploadMethod !== 'inventory'">
+                    <v-tab v-for="(files,fIndex) in fileTypes" :key="fIndex" :title=files :id="changeIndex(files)">
                       <!-- <img src="../assets/images/green_tick.jpg" alt="" style="width:20px;height:20px;"></img> -->
-                    </v-tab>
+                    </v-tab>                    
+                </div>
+                <div v-else>
+                  <v-tab title="Website Inventory" id="Website Inventory"></v-tab>
                 </div>
               </vue-tabs>
               <div style="margin-top: 20px;position: absolute;top: 300px;">
@@ -67,48 +70,6 @@
                      <input type="file" id="csv-file" name="files" accept=".csv" @change="handleFileChange($event,activeTab)"/>
                   </div>
                </div>
-               <!-- <div v-if="showWebImage" id="upload-image-zone">
-                  <form id="f1" class="file-zone" enctype="multipart/form-data" method="post">
-                     <span class="dz-message">Select Folder for Mass image upload<br/>
-                     <small>(only *.jpeg, *.jpg, *.png, *.gif files are valid.)</small>
-                     </span>
-                     <input name="dir" id="dir_input" @change="handleImageChange($event,activeTab) " type="file" webkitdirectory directory multiple/><br/>
-                  </form>
-                  <Button type="primary" style="margin-top:0px;color: #fff;margin-top:14px;float:right;padding: 6px 30px;margin-left:1%" @click="Back(activeTab)">Back</Button>
-                  <Button type="error" style="margin-top:14px;float:right;margin-left:1%;padding: 6px 30px;" @click="Abort(activeTab)">Abort</Button>
-                  <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Proceed(activeTab)"  :disabled="!proceedBtn" :loading="ProceedLoading">
-                  <span v-if="ProceedLoading">Processing</span>
-                  <span v-else>Proceed</span>
-                  </Button>
-                  <div v-if="image_err.length !== 0" style="margin-top:7%;">
-                     <h3 style="color:red">List of images available in the CSV but not available in the list of uploaded images</h3>
-                     <p style="color:red;font-size:14px;">Either upload these images or abort the process to upload again</p>
-                     <div style="border: 1px solid red;padding: 12px 12px;font-size:13px;margin-top:12px;">
-                        <Row>
-                           <div v-for="(item,index) in image_err">
-                              <Col span="5" >
-                              {{item}}</Col>
-                           </div>
-                        </Row>
-                     </div>
-                  </div>
-                  <div id="dirinfo">
-                     <Table border :columns="dircols" :data="dirinfo" class="dirinfo1"></Table>
-                     <div style="float:right;font-size:13px;">Uploaded {{img_no}} of total {{total_image}} images</div>
-                  </div>
-               </div>
-               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">
-                  <Spin fix>
-                     <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                     <div>Loading</div>
-                  </Spin>
-               </div>
-               <div v-if="mObj[activeTab].load" class="demo-spin-col" style="margin-top:14px">
-                  <Spin fix>
-                     <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-                     <div>Loading</div>
-                  </Spin>
-               </div> -->
                <div v-if="mObj[activeTab].previewDisplay && mObj[activeTab].newUploadCSV.length !== 0 ">
                   <h2 style="margin-bottom:1%;text-transform: capitalize;">Preview of {{activeTab}}</h2>
                   <div class="schema-form ivu-table-wrapper">
@@ -624,8 +585,8 @@
             <Button type="success" id="importBtn" @click="importToConfirm()"  v-if="import1" style="font-size:15px;margin-top:25px;float:right;margin-right:10px;" :disabled="!importBtn">Go Live</Button>
          </Card>
       </template>
-      <!-- {{getValue()}} -->
    </div>
+      <!-- {{getValue()}} -->
 </template>
 
 <!-- <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script> -->
@@ -654,6 +615,7 @@ import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
+import websiteInventorySchema from '@/schema/website_inventory'
 
 import asconfigModal from '@/api/asconfiguration'
 var moment = require('moment')
@@ -697,6 +659,7 @@ export default {
   components: {VueTabs, VTab, 'input-tag': InputTag, vueDropzone: vue2Dropzone},
   data () {
     return {
+      uploadMethod: null,
       asiValue: [],
       sageValue: [],
       asiconfig: [],
@@ -709,9 +672,9 @@ export default {
       currentStep: 0,
       map: false,
       // fileTypes: ['Product Variation Price', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping', 'Product Additional Charges'],
-      fileTypes: ['Product Shipping', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image'],
+      fileTypes: ['Website Inventory', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping'],
       activeTab: 'Product Information',
-      fileNames: ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice'],
+      fileNames: ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice'],
       validate: true,
       types: ['string', 'number', 'boolean', 'date', 'url', 'phone', 'pin-code'],
       existingSchemaData: [],
@@ -1182,13 +1145,51 @@ export default {
               label: '--Add new--'
             }
           ]
+        },
+        'Website Inventory': {
+          selected_schema: '',
+          display: false,
+          new_schema: 'Untitled mapping',
+          poptip_display: false,
+          allowedFileType: ['text/csv'],
+          uploadCSV: [],
+          headerDisplay: false,
+          previewDisplay: false,
+          headers: [],
+          uploadDisplay: false,
+          schema: websiteInventorySchema,
+          mapping: [],
+          errDisplay: false,
+          showHandson: false,
+          errmsg: [],
+          data1: [],
+          headers1: [],
+          newSchemaDisplay: false,
+          newUploadCSV: [],
+          new_flag: 0,
+          csv_arr: [],
+          savePreviewDisplay: false,
+          main_arr: [],
+          csv: [],
+          filter_flag: [],
+          load: false,
+          mPage: [],
+          cpage: 1,
+          tab_flag: false,
+          complete_flag: false,
+          schemaList: [
+            {
+              value: '--Add new--',
+              label: '--Add new--'
+            }
+          ]
         }
       }
     }
   },
   methods: {
     handleasiChange (value) {
-      console.log('.................', value)
+      // console.log('.................', value)
       if (value.length === 0) {
         this.isasiValid = true
       } else {
@@ -1270,79 +1271,6 @@ export default {
         })
       }
     },
-    // insertImageUrl (tab) {
-    //   return new Promise(async (resolve, reject) => {
-    //     let self = this
-    //     for (let i = 0; i < self.mObj[tab].uploadCSV.length; i++) {
-    //       for (let k in self.mObj[tab].uploadCSV[i]) {
-    //         let n = k.search('Web_Image')
-    //         if (n !== undefined && n !== -1 && n !== null) {
-    //           let check = lodash.find(self.secure_url_arr, {file_name: self.mObj[tab].uploadCSV[i][k]})
-    //           if (check !== undefined) {
-    //             let abc = k.split('_')
-    //             self.mObj[tab].uploadCSV[i]['secure_url_' + abc[2]] = check['secure_url']
-    //           }
-    //         }
-    //       }
-    //     }
-    //     resolve('done')
-    //   })
-    // },
-    // deleteImage (imgdata) {
-    //   let self = this
-    //   let resource = 'product_images/' + this.$route.params.id + '/' + imgdata.name
-    //   api.request('delete', '/upload-image/?resource=' + resource).then(response => {
-    //     let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
-    //     self.secure_url_arr.splice(indx, 1)
-    //     self.dirinfo[imgdata._index]['status'] = 'deleted'
-    //     self.img_no--
-    //   })
-    // },
-    // deleteImageFromList (imgdata) {
-    //   let self = this
-    //   if (imgdata.status === 'error') {
-    //     let indx = lodash.findIndex(self.secure_url_arr, {'file_name': imgdata.name})
-    //     self.secure_url_arr.splice(indx, 1)
-    //     self.dirinfo.splice(imgdata._index, 1)
-    //   } else if (imgdata.status === 'deleted') {
-    //     self.dirinfo.splice(imgdata._index, 1)
-    //   }
-    // },
-    // async handleImageChange (e, tab) {
-    //   let self = this
-    //   const reader = new FileReader()
-    //   let fileList = e.target.files
-    //
-    //   if (fileList.length < 10) {
-    //     isDone = true
-    //   }
-    //
-    //   for (let i = 0; i < fileList.length; i++) {
-    //     let value = lodash.find(self.dirinfo, {'name': fileList[i].name})
-    //     if (value === undefined) {
-    //       let fileSize = 0
-    //       if (fileList[i].size > 1024 * 1024) { fileSize = (Math.round(fileList[i].size * 100 / (1024 * 1024)) / 100).toString() + 'MB' } else { fileSize = (Math.round(fileList[i].size * 100 / 1024) / 100).toString() + 'KB' }
-    //
-    //       if (fileList[i].type !== undefined && fileList[i].type !== '') {
-    //         self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'type': fileList[i].type, 'status': 'Uploading...'})
-    //       } else if (fileList[i].type === undefined || fileList.type === '') {
-    //         self.dirinfo.push({'name': fileList[i].name, 'path': fileList[i].webkitRelativePath, 'size': fileSize, 'status': 'Uploading'})
-    //       }
-    //
-    //       reader.readAsDataURL(fileList[i])
-    //       let uri = await self.retResult(reader)
-    //       self.image_batch.push({'file': {'url': uri, 'filename': fileList[i].name}, 'folder': 'product_images/' + id + '/'})
-    //          // let image_res = self.saveImageToCloudinary(uri,fileList[i].name,self.dirinfo.length-1,fileList.length-1)
-    //       if (i === fileList.length - 1) {
-    //         isDone = true
-    //       }
-    //
-    //       self.total_image = self.dirinfo.length
-    //     }
-    //   }
-    //
-    //   $('.f-layout-copy').css('position', 'absolute')
-    // },
     setImportProgress (totalProduct, uploadedProduct) {
       let self = this
       self.progressPercent = Math.round(uploadedProduct / totalProduct * 100)
@@ -1734,7 +1662,7 @@ export default {
 
             let properties1 = Object.keys(response.data)
             let properties = []
-            let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
+            let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice']
             for (let i = 0; i < tabArray.length; i++) {
               for (let j = 0; j < properties1.length; j++) {
                 if (tabArray[i] === properties1[j]) {
@@ -1745,7 +1673,7 @@ export default {
 
             propKeys = []
             for (let i = 0; i < properties.length; i++) {
-              if (properties[i] === 'ProductInformation' || properties[i] === 'ProductPrice' || properties[i] === 'ProductImage' || properties[i] === 'ProductImprintData' || properties[i] === 'ProductShipping' || properties[i] === 'ProductAdditionalCharges' || properties[i] === 'ProductVariationPrice') {
+              if (properties[i] === 'ProductInformation' || properties[i] === 'ProductPrice' || properties[i] === 'ProductImage' || properties[i] === 'ProductImprintData' || properties[i] === 'ProductShipping' || properties[i] === 'WebsiteInventory' || properties[i] === 'ProductAdditionalCharges' || properties[i] === 'ProductVariationPrice') {
                 self.validating = false
                 self.showValidationTable = true
 
@@ -2249,6 +2177,8 @@ export default {
         this.mObj[tab].schema = lodash.cloneDeep(ProductImagesSchema)
       } else if (tab === 'Product Shipping') {
         this.mObj[tab].schema = lodash.cloneDeep(ProductShippingSchema)
+      } else if (tab === 'Website Inventory') {
+        this.mObj[tab].schema = lodash.cloneDeep(websiteInventorySchema)
       } else if (tab === 'Product Additional Charges') {
         this.mObj[tab].schema = lodash.cloneDeep(ProductAdditionalChargesSchema)
       } else if (tab === 'Product Variation Price') {
@@ -2273,6 +2203,7 @@ export default {
         if (this.$store.state.disconnect === false) {
           socket.emit('uploader-csv-file-mapping::find', {'fileTypeId': this.mObj[tab].selected_schema, 'subscriptionId': this.$store.state.subscription_id, 'import_tracker_id': id}, async (e, data) => {
             if (data) {
+              console.log('data:::', data)
               this.mObj[tab].mapping = data.data[0].mapping
               // let schemaKeys = _.keys(this.mObj[tab].schema.structure)
               if (this.mObj[tab].uploadCSV.length !== 0) {
@@ -2345,7 +2276,7 @@ export default {
       } else {
         let flag = false
         for (let i = 0; i < this.mObj[tab].schemaList.length; i++) {
-          if (this.mObj[tab].schemaList.value === schema) {
+          if (this.mObj[tab].schemaList[i].value === schema) {
             this.$Notice.error({
               title: 'This mapping name already exists',
               duration: 5
@@ -2454,6 +2385,7 @@ export default {
     },
     cancel () {
       this.proceedBtn = true
+      this.ProceedLoading = false
       continueFlag = false
     },
     transformFromMapping (tab) {
@@ -2533,17 +2465,20 @@ export default {
               self.modal1 = true
               continueFlag = true
             } else {
+              console.log('continue flag false')
               self.ProceedLoading = true
               await self.saveSchemaandMapping(tab)
               await self.parseFile(tab)
             }
           } else {
+            console.log('continue flag true')
             self.ProceedLoading = true
             await self.saveSchemaandMapping(tab)
             await self.parseFile(tab)
           }
         }
       } else {
+        console.log('mapFlag true')
         self.ProceedLoading = false
         // if (tab === 'Product Image') {
         //   await self.checkImg(tab)
@@ -2594,56 +2529,6 @@ export default {
         }
       })
     },
-    // ValidateImages (tab) {
-    //   return new Promise(async(resolve, reject) => {
-    //     let self = this
-    //     self.image_err = []
-    //     for (let i = 0; i < self.mObj[tab].newUploadCSV.length; i++) {
-    //       for (let k in self.mObj[tab].newUploadCSV[i]) {
-    //         if (k.search('web_image') !== undefined && k.search('web_image') !== -1) {
-    //           if (self.mObj[tab].newUploadCSV[i][k] !== '' && self.mObj[tab].newUploadCSV[i][k] !== null) {
-    //             let obj = lodash.find(self.dirinfo, {name: self.mObj[tab].newUploadCSV[i][k]})
-    //             if (obj === undefined) {
-    //               self.image_err.push(self.mObj[tab].newUploadCSV[i][k])
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-    //     if (self.image_err.length < 10) {
-    //       isDone = true
-    //     }
-    //     if (self.image_err.length !== 0) {
-    //       if (self.mObj[tab].load === true) {
-    //         self.mObj[tab].load = false
-    //       }
-    //       self.modal1 = false
-    //       self.showWebImage = true
-    //       $('#dirinfo').css('padding-top', '3%')
-    //
-    //       self.ProceedLoading = false
-    //       $('.f-layout-copy').css('position', 'absolute')
-    //     } else {
-    //       $('#dirinfo').css('padding-top', '6%')
-    //       resolve('done')
-    //     }
-    //   })
-    // },
-    // checkImg (tab) {
-    //   return new Promise(async(resolve, reject) => {
-    //     if (this.dirinfo.length === 0) {
-    //       this.ProceedLoading = false
-    //       this.modal1 = false
-    //       this.$Notice.error({
-    //         title: 'Please upload Images',
-    //         desc: 'Cannot proceed without uploading images',
-    //         duration: 5
-    //       })
-    //     } else if (this.dirinfo.length !== 0) {
-    //       resolve('done')
-    //     }
-    //   })
-    // },
     socketResponse () {
       if (this.$store.state.disconnect === false) {
         return new Promise(async (resolve, reject) => {
@@ -2830,6 +2715,7 @@ export default {
           resolve('done')
         })
           .catch(error => {
+            self.ProceedLoading = false
             if (error.response) {
               if (error.response.data.message === 'This csv file entry already exists') {
                 CSVFileId = error.response.data.data.CSVFileId
@@ -3274,14 +3160,6 @@ export default {
     },
     Abort (tab) {
       let self = this
-      // if (tab === 'Product Image') {
-      //   self.showWebImage = false
-      //   self.dirinfo = []
-      //   self.image_err = []
-      //   self.total_image = 0
-      //   self.img_no = 0
-      //   isDone = false
-      // }
       self.proceedBtn = true
 
       continueFlag = false
@@ -3788,6 +3666,11 @@ export default {
       } else {
         self.mObj['Product Image'].uploadDisplay = true
       }
+      if (Object.keys(response).indexOf('WebsiteInventory') >= 0) {
+        self.mObj['Website Inventory'].tab_flag = true
+      } else {
+        self.mObj['Website Inventory'].uploadDisplay = true
+      }
       if (Object.keys(response).indexOf('ProductAdditionalCharges') >= 0) {
         self.mObj['Product Additional Charges'].tab_flag = true
         // self.arrangeTab("ProductAdditionalCharges",response.id)
@@ -4093,15 +3976,15 @@ export default {
 
     api.request('get', '/uploader/' + id).then(response => {
       if (response.data !== null) {
+        console.log(response.data)
         let keys = Object.keys(response.data)
         let filteredKeys = []
-        // let filteredKeys = _.filter(keys, function(o) {
-        //   if(o === 'ProductInformation' || o === 'ProductPrice' || o === 'ProductImprintData' || o === 'ProductShipping' || o === 'ProductImage' || o === 'ProductVariationPrice' || o === "ProductAdditionalCharges"){
-        //     return o;
-        //   }
-        // });
+        self.uploadMethod = response.data.uploadType
+        if (response.data.uploadType === 'inventory') {
+          self.validate = false
+        }
 
-        let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
+        let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice']
         for (let i = 0; i < tabArray.length; i++) {
           for (let j = 0; j < keys.length; j++) {
             if (tabArray[i] === keys[j]) {
@@ -4276,77 +4159,17 @@ export default {
         }
       })
 
-      // if(this.$store.state.disconnect === false){
-      //   socket.emit('uploader-schema::find', {"subscriptionId":this.$store.state.subscription_id,"import_tracker_id":id}, (e, res) => {
-      //     if(res){
-      //       self.existingSchemaData = res.data[0]
-      //       let schemaNames = lodash.groupBy(res.data,"tabname");
-      //       let schemavalue = lodash.isEmpty(schemaNames)
-      //
-      //       if(schemavalue !== true){
-      //         _.forEach(schemaNames,(value,key) => {
-      //           for(let i=0;i<value.length;i++){
-      //             if(key !== undefined){
-      //               self.mObj[key].schemaList.push({"value":value[i].name,"label":value[i].name})
-      //             }
-      //           }
-      //         })
-      //         for(let i=0;i<self.fileTypes.length;i++){
-      //
-      //           self.mObj[self.fileTypes[i]].schemaList = lodash.orderBy(self.mObj[self.fileTypes[i]].schemaList, 'value', 'asc');
-      //           let newIndex = lodash.findIndex(self.mObj[self.fileTypes[i]].schemaList, function(o) { return o.value === '--Add new--'; });
-      //           self.mObj[self.fileTypes[i]].schemaList.splice(self.mObj[self.fileTypes[i]].schemaList.length-1,0,self.mObj[self.fileTypes[i]].schemaList.splice(newIndex,1)[0]);
-      //         }
-      //
-      //         for(let i=0;i<self.fileTypes.length;i++){
-      //           if(self.mObj[self.fileTypes[i]].schemaList[0].value === '--Add new--'){
-      //             self.mObj[self.fileTypes[i]].display = true
-      //           }
-      //         }
-      //       }
-      //
-      //
-      //       if(schemavalue === true){
-      //         for(let i=0;i<self.fileTypes.length;i++){
-      //           self.mObj[self.fileTypes[i]].selected_schema = "--Add new--"
-      //           self.mObj[self.fileTypes[i]].display = true
-      //         }
-      //         self.loading = false
-      //         for(let i=0;i<self.fileTypes.length;i++){
-      //           self.mObj[self.fileTypes[i]].uploadDisplay = true
-      //         }
-      //       }
-      //       else{
-      //         for(let i=0;i<self.fileTypes.length;i++){
-      //           self.mObj[self.fileTypes[i]].selected_schema = self.mObj[self.fileTypes[i]].schemaList[0].value
-      //         }
-      //         self.loading = false
-      //       }
-      //
-      //     }
-      //   })
-      // }
-      // else if(this.$store.state.disconnect === true){
-      //   console.log("^^^^^^^ error_flag",error_flag)
-      //   if(error_flag === false){
-      //     this.$Notice.error({
-      //       title: 'Service unavailable',
-      //       duration: 10
-      //     })
-      //   }
-      // }
-
     socket.on('img_res', (response) => {
       for (let i = 0; i < response.length; i++) {
-        console.log('response....', response)
+        // console.log('response....', response)
         if (response[i].hasOwnProperty('iserror')) {
           let index = lodash.findIndex(self.dirinfo, {name: response[i].filename})
-          console.log('err index.....', index)
+          // console.log('err index.....', index)
           self.dirinfo[index].status = 'error'
         } else {
           self.secure_url_arr.push({'file_name': response[i].file_name, 'secure_url': response[i].secure_url})
           let index = lodash.findIndex(self.dirinfo, {name: response[i].file_name})
-          console.log('success index.....', index)
+          // console.log('success index.....', index)
           self.dirinfo[index].status = 'success'
           self.img_no++
         }
