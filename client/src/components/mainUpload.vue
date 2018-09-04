@@ -2250,7 +2250,7 @@ export default {
       continueFlag = true
       this.proceedBtn = true
       let self = this
-      self.showContinue = true
+      this.showContinue = false
       self.modal1 = false
       self.ProceedLoading = true
       await self.saveSchemaandMapping(tab)
@@ -2303,8 +2303,6 @@ export default {
     },
     async Proceed (tab) {
       let self = this
-      self.ProceedLoading = true
-      self.showContinue = true
       if (mapFlag === false) {
         let checkHeaders = _.filter(self.mObj[tab].mapping, function (o) {
           if (o.schemaObj.optional === false && o.csvHeader === '') {
@@ -2336,7 +2334,7 @@ export default {
           }
         }
       } else {
-        self.ProceedLoading = false
+        self.ProceedLoading = true
         await self.saveSchemaandMapping(tab)
         await self.parseFile(tab)
       }
