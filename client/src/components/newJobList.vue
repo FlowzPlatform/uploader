@@ -304,9 +304,15 @@ export default {
               let filteredImage = lodash.reject(mergedImage, lodash.isUndefined)
               let filteredProduct = lodash.reject(mergedProduct, lodash.isUndefined)
 
-              filteredProduct = filteredProduct.map((item) => {
-                if (item.attributes.imprint_color !== undefined) {
-                  item.Attr_Imprint_Color = item.attributes.imprint_color.join('|')
+              filteredProduct = filteredProduct.map((item, index) => {
+                if (item.attributes.imprint_color !== undefined && item.attributes.hasOwnProperty('imprint_color') && item.attributes.hasOwnProperty('colors')) {
+                  item.attr_imprint_color = item.attributes.imprint_color.join('|')
+                } else if (item.attributes.colors !== undefined && item.attributes.hasOwnProperty('colors')) {
+                  item.attr_colors = item.attributes.colors.join('|')
+                } else if (item.attributes.decimal !== undefined && item.attributes.hasOwnProperty('decimal')) {
+                  item.attr_decimal = item.attributes.decimal.join(',')
+                } else if (item.attributes.shape !== undefined && item.attributes.hasOwnProperty('shape')) {
+                  item.attr_shape = item.attributes.shape.join('|')
                 }
 
                 /* SEPARATE DATA BY (, | opeartor) */
@@ -315,19 +321,10 @@ export default {
                 item['non-available_regions'] = item['non-available_regions'].join(',')
                 item.categories = item.categories.join('|')
                 item.search_keyword = item.search_keyword.join('|')
-                item.attributes.colors = item.attributes.colors.join('|')
-                item.attributes.decimal = item.attributes.decimal.join(',')
                 item.vid = item.vid.join(',')
 
-                /* REPLACE NEW KEYS WITH VALUES */
-                item.attr_colors = item.attributes.colors
-                item.attr_decimal = item.attributes.decimal
                 /* DELETE KEYS */
-                delete item.attributes.colors
-                delete item.attributes.decimal
-                delete item.attributes.imprint_color
                 delete item.supplier_info
-                delete item.attr_imprint_color
                 delete item.attributes
                 delete item.username
                 delete item.supplier_id
