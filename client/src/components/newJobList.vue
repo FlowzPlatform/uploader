@@ -305,13 +305,16 @@ export default {
               let filteredProduct = lodash.reject(mergedProduct, lodash.isUndefined)
 
               filteredProduct = filteredProduct.map((item, index) => {
-                if (item.attributes.imprint_color !== undefined && item.attributes.hasOwnProperty('imprint_color') && item.attributes.hasOwnProperty('colors')) {
+                if (item.attributes.imprint_color !== undefined && item.attributes.hasOwnProperty('imprint_color')) {
                   item.attr_imprint_color = item.attributes.imprint_color.join('|')
-                } else if (item.attributes.colors !== undefined && item.attributes.hasOwnProperty('colors')) {
+                }
+                if (item.attributes.colors !== undefined && item.attributes.hasOwnProperty('colors')) {
                   item.attr_colors = item.attributes.colors.join('|')
-                } else if (item.attributes.decimal !== undefined && item.attributes.hasOwnProperty('decimal')) {
+                }
+                if (item.attributes.decimal !== undefined && item.attributes.hasOwnProperty('decimal')) {
                   item.attr_decimal = item.attributes.decimal.join(',')
-                } else if (item.attributes.shape !== undefined && item.attributes.hasOwnProperty('shape')) {
+                }
+                if (item.attributes.shape !== undefined && item.attributes.hasOwnProperty('shape')) {
                   item.attr_shape = item.attributes.shape.join('|')
                 }
 
