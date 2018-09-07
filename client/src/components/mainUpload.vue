@@ -20,7 +20,7 @@
                     </v-tab>                    
                 </div>
                 <div v-else>
-                  <v-tab title="Website Inventory" id="Website Inventory"></v-tab>
+                  <v-tab title="Website Inventory" :id="changeIndex('Website Inventory')"></v-tab>
                 </div>
               </vue-tabs>
               <div style="margin-top: 20px;position: absolute;top: 300px;">
@@ -1274,7 +1274,7 @@ export default {
     setImportProgress (totalProduct, uploadedProduct) {
       let self = this
       self.progressPercent = Math.round(uploadedProduct / totalProduct * 100)
-      console.log('self.progressPercent...', self.progressPercent)
+      // console.log('self.progressPercent...', self.progressPercent)
     },
     retResult (reader) {
       let _promise = new Promise((resolve, reject) => {
@@ -1635,7 +1635,7 @@ export default {
     // Starts server side validation
     startValidation () {
       let self = this
-      if (prodInfoUpld === false) {
+      if (prodInfoUpld === false && this.uploadMethod !== 'inventory') {
         self.$Notice.error({
           title: 'Please upload Product Information file...'
         })
@@ -2088,7 +2088,7 @@ export default {
           jobQueueObj.asiConfig = this.asiValue
           jobQueueObj.sageConfig = this.sageValue
         }
-        console.log('jobQueueObj', jobQueueObj)
+        // console.log('jobQueueObj', jobQueueObj)
         api.request('post', '/import-to-confirm/', jobQueueObj).then(res => {
           if (res.data) {
             self.importBtn = false
@@ -2203,7 +2203,6 @@ export default {
         if (this.$store.state.disconnect === false) {
           socket.emit('uploader-csv-file-mapping::find', {'fileTypeId': this.mObj[tab].selected_schema, 'subscriptionId': this.$store.state.subscription_id, 'import_tracker_id': id}, async (e, data) => {
             if (data) {
-              console.log('data:::', data)
               this.mObj[tab].mapping = data.data[0].mapping
               // let schemaKeys = _.keys(this.mObj[tab].schema.structure)
               if (this.mObj[tab].uploadCSV.length !== 0) {
@@ -2465,20 +2464,17 @@ export default {
               self.modal1 = true
               continueFlag = true
             } else {
-              console.log('continue flag false')
               self.ProceedLoading = true
               await self.saveSchemaandMapping(tab)
               await self.parseFile(tab)
             }
           } else {
-            console.log('continue flag true')
             self.ProceedLoading = true
             await self.saveSchemaandMapping(tab)
             await self.parseFile(tab)
           }
         }
       } else {
-        console.log('mapFlag true')
         self.ProceedLoading = false
         // if (tab === 'Product Image') {
         //   await self.checkImg(tab)
@@ -3231,7 +3227,7 @@ export default {
               let tab1 = tab.replace(/ /g, '_')
               $('#t-' + tab1).css('background-color', '#fff', 'border-color', '#fff')
               $('#t-' + tab1).append(' <style>' + '#t-' + tab1 + '{font-size: 16px;list-style-type: none; position: relative; }' + '#t-' + tab1 + ':before{content: " ";display: none;border: solid 0.8em rgb(73,78,107); border-radius: .8em; top: 35%; margin-top: -0.5em;}' + '#t-' + tab1 + ':after {content: " ";display: none;width: 0.3em; height: 0.6em;border: solid white;border-width: 0 0.2em 0.2em 0; position: absolute;left: 1em;top: 40%;margin-top: -0.2em;-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg);-o-transform: rotate(45deg);transform: rotate(45deg);}</style>')
-              if (tab === 'Product Information') {
+              if (tab === 'Product Information' || this.uploadMethod === 'inventory') {
                 prodInfoUpld = false
                 this.validate = true
               }
@@ -3667,8 +3663,11 @@ export default {
         self.mObj['Product Image'].uploadDisplay = true
       }
       if (Object.keys(response).indexOf('WebsiteInventory') >= 0) {
+        console.log('WebsiteInventory file uploaded!!!')
+        self.validate = false
         self.mObj['Website Inventory'].tab_flag = true
       } else {
+        console.log('WebsiteInventory file NOT uploaded!!!')
         self.mObj['Website Inventory'].uploadDisplay = true
       }
       if (Object.keys(response).indexOf('ProductAdditionalCharges') >= 0) {
@@ -3841,6 +3840,10 @@ export default {
                 self.validate = false
               }
 
+              if (self.activeTab === 'Website Inventory' && self.uploadMethod === 'inventory') {
+                self.validate = false
+              }
+
               let newTab = ''
               let oldTabIndex = ''
               _.forEach(self.fileTypes, function (value, key) {
@@ -3945,7 +3948,7 @@ export default {
         let batchChunk = lodash.chunk(batch, 2)
         for (let i = 0; i < batchChunk.length; i++) {
           socket.emit('images', batchChunk[i], (err, data) => {
-            console.log('data....', data)
+            // console.log('data....', data)
             if (err) {
 
             }
@@ -3956,7 +3959,7 @@ export default {
 
       if (isDone === true && batch.length < 2 && batch.length !== 0) {
         socket.emit('images', batch, (err, data) => {
-          console.log('emitted.....')
+          // console.log('emitted.....')
           if (err) {
 
           }
@@ -3976,13 +3979,10 @@ export default {
 
     api.request('get', '/uploader/' + id).then(response => {
       if (response.data !== null) {
-        console.log(response.data)
+        // console.log(response.data)
         let keys = Object.keys(response.data)
         let filteredKeys = []
         self.uploadMethod = response.data.uploadType
-        if (response.data.uploadType === 'inventory') {
-          self.validate = false
-        }
 
         let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice']
         for (let i = 0; i < tabArray.length; i++) {
@@ -4001,9 +4001,9 @@ export default {
           this.asiconfig = _.filter(resp.data.data, {type: 'asi'})
           this.sageconfig = _.filter(resp.data.data, {type: 'sage'})
           this.$Spin.hide()
-        }).catch(err => {
+        }).catch(err => { // eslint-disable-line handle-callback-err
           this.$Spin.hide()
-          console.log('Error asconfig', err)
+          // console.log('Error asconfig', err)
         })
         if (response.data.stepStatus === 'upload_pending') {
           self.uploadStep = true

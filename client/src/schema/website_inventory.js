@@ -11,18 +11,27 @@ export const websiteInventorySchema = new Schema({
     maxLength: '',
     regEx: ''
   },
-  product_name: {
+  attr_colors: {
     type: 'string',
-    label: 'Product Name',
-    optional: false,
+    label: 'Color',
+    optional: true,
     allowedValues: [],
     defaultValue: '',
     maxLength: '',
     regEx: ''
   },
-  color: {
+  attr_style: {
     type: 'string',
-    label: 'Color',
+    label: 'Style',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
+  attr_size: {
+    type: 'string',
+    label: 'Size',
     optional: true,
     allowedValues: [],
     defaultValue: '',

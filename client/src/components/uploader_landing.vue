@@ -107,7 +107,7 @@
          </tr>
        </thead>
        <tbody v-for="(item,index) in Object.keys(job[0])">
-          <tr  v-if="item == 'ProductInformation' || item == 'ProductPrice' || item == 'ProductImprintData' || item == 'ProductImage' || item == 'ProductShipping' || item == 'ProductAdditionalCharges' || item == 'ProductVariationPrice'">
+          <tr  v-if="item == 'ProductInformation' || item == 'ProductPrice' || item == 'ProductImprintData' || item == 'ProductImage' || item == 'ProductShipping' || item == 'ProductAdditionalCharges' || item == 'ProductVariationPrice' || item == 'WebsiteInventory'">
             <td class="">
               <div class="ivu-table-cell upload">
                 <span style='font-weight:500px; font-size:16px !important'>{{convert(item)}}</span>
