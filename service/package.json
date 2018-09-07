@@ -57,7 +57,7 @@
     "feathers-swagger": "^0.5.0",
     "fibers": "^2.0.0",
     "flowz-error-handler": "0.0.3",
-    "flowz-subscription": "^0.2.2",
+    "flowz-subscription": "^0.2.7",
     "fs": "0.0.1-security",
     "fs-blob-store": "^5.2.1",
     "get-json": "^1.0.0",
