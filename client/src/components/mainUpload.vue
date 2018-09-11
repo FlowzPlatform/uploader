@@ -14,9 +14,13 @@
                 direction="vertical"
                 v-model="activeTab"
                 :tab-change="hideHandson()">
-                <div v-for="(files,fIndex) in fileTypes">
-                    <v-tab :title=files :id="changeIndex(files)">
-                    </v-tab>
+                <div v-if="uploadMethod !== 'inventory'">
+                    <v-tab v-for="(files,fIndex) in fileTypes" :key="fIndex" :title=files :id="changeIndex(files)">
+                      <!-- <img src="../assets/images/green_tick.jpg" alt="" style="width:20px;height:20px;"></img> -->
+                    </v-tab>                    
+                </div>
+                <div v-else>
+                  <v-tab title="Website Inventory" :id="changeIndex('Website Inventory')"></v-tab>
                 </div>
               </vue-tabs>
               <div style="margin-top: 20px;position: absolute;top: 300px;">
@@ -558,6 +562,7 @@
          </Card>
       </template>
    </div>
+      <!-- {{getValue()}} -->
 </template>
 
 <!-- <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script> -->
@@ -583,6 +588,7 @@ import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
 import ProductVariationSchema from '@/schema/product_variation_pricing'
 import ProductAdditionalChargesSchema from '@/schema/product_additional_charge'
+import websiteInventorySchema from '@/schema/website_inventory'
 
 import asconfigModal from '@/api/asconfiguration'
 var moment = require('moment')
@@ -621,6 +627,7 @@ export default {
   components: {VueTabs, VTab, 'input-tag': InputTag, vueDropzone: vue2Dropzone},
   data () {
     return {
+      uploadMethod: null,
       asiValue: [],
       sageValue: [],
       asiconfig: [],
@@ -632,9 +639,10 @@ export default {
       moment: moment,
       currentStep: 0,
       map: false,
-      fileTypes: ['Product Shipping', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image'],
+      // fileTypes: ['Product Variation Price', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping', 'Product Additional Charges'],
+      fileTypes: ['Website Inventory', 'Product Information', 'Product Price', 'Product Imprint Data', 'Product Image', 'Product Shipping'],
       activeTab: 'Product Information',
-      fileNames: ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice'],
+      fileNames: ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice'],
       validate: true,
       types: ['string', 'number', 'boolean', 'date', 'url', 'phone', 'pin-code'],
       existingSchemaData: [],
@@ -1105,13 +1113,51 @@ export default {
               label: '--Add new--'
             }
           ]
+        },
+        'Website Inventory': {
+          selected_schema: '',
+          display: false,
+          new_schema: 'Untitled mapping',
+          poptip_display: false,
+          allowedFileType: ['text/csv'],
+          uploadCSV: [],
+          headerDisplay: false,
+          previewDisplay: false,
+          headers: [],
+          uploadDisplay: false,
+          schema: websiteInventorySchema,
+          mapping: [],
+          errDisplay: false,
+          showHandson: false,
+          errmsg: [],
+          data1: [],
+          headers1: [],
+          newSchemaDisplay: false,
+          newUploadCSV: [],
+          new_flag: 0,
+          csv_arr: [],
+          savePreviewDisplay: false,
+          main_arr: [],
+          csv: [],
+          filter_flag: [],
+          load: false,
+          mPage: [],
+          cpage: 1,
+          tab_flag: false,
+          complete_flag: false,
+          schemaList: [
+            {
+              value: '--Add new--',
+              label: '--Add new--'
+            }
+          ]
         }
       }
     }
   },
   methods: {
     handleasiChange (value) {
-      console.log('.................', value)
+      // console.log('.................', value)
       if (value.length === 0) {
         this.isasiValid = true
       } else {
@@ -1543,7 +1589,7 @@ export default {
     // Starts server side validation
     startValidation () {
       let self = this
-      if (prodInfoUpld === false) {
+      if (prodInfoUpld === false && this.uploadMethod !== 'inventory') {
         self.$Notice.error({
           title: 'Please upload Product Information file...'
         })
@@ -1562,7 +1608,7 @@ export default {
 
             let properties1 = Object.keys(response.data)
             let properties = []
-            let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
+            let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice']
             for (let i = 0; i < tabArray.length; i++) {
               for (let j = 0; j < properties1.length; j++) {
                 if (tabArray[i] === properties1[j]) {
@@ -1573,7 +1619,7 @@ export default {
 
             propKeys = []
             for (let i = 0; i < properties.length; i++) {
-              if (properties[i] === 'ProductInformation' || properties[i] === 'ProductPrice' || properties[i] === 'ProductImage' || properties[i] === 'ProductImprintData' || properties[i] === 'ProductShipping' || properties[i] === 'ProductAdditionalCharges' || properties[i] === 'ProductVariationPrice') {
+              if (properties[i] === 'ProductInformation' || properties[i] === 'ProductPrice' || properties[i] === 'ProductImage' || properties[i] === 'ProductImprintData' || properties[i] === 'ProductShipping' || properties[i] === 'WebsiteInventory' || properties[i] === 'ProductAdditionalCharges' || properties[i] === 'ProductVariationPrice') {
                 self.validating = false
                 self.showValidationTable = true
 
@@ -1981,7 +2027,7 @@ export default {
           jobQueueObj.asiConfig = this.asiValue
           jobQueueObj.sageConfig = this.sageValue
         }
-        console.log('jobQueueObj', jobQueueObj)
+        // console.log('jobQueueObj', jobQueueObj)
         api.request('post', '/import-to-confirm/', jobQueueObj).then(res => {
           if (res.data) {
             self.importBtn = false
@@ -2069,6 +2115,8 @@ export default {
         this.mObj[tab].schema = lodash.cloneDeep(ProductImagesSchema)
       } else if (tab === 'Product Shipping') {
         this.mObj[tab].schema = lodash.cloneDeep(ProductShippingSchema)
+      } else if (tab === 'Website Inventory') {
+        this.mObj[tab].schema = lodash.cloneDeep(websiteInventorySchema)
       } else if (tab === 'Product Additional Charges') {
         this.mObj[tab].schema = lodash.cloneDeep(ProductAdditionalChargesSchema)
       } else if (tab === 'Product Variation Price') {
@@ -2259,6 +2307,7 @@ export default {
     cancel () {
       this.ProceedLoading = false
       this.proceedBtn = true
+      this.ProceedLoading = false
       continueFlag = false
     },
     transformFromMapping (tab) {
@@ -2561,6 +2610,7 @@ export default {
           resolve('done')
         })
           .catch(error => {
+            self.ProceedLoading = false
             if (error.response) {
               if (error.response.data.message === 'This csv file entry already exists') {
                 CSVFileId = error.response.data.data.CSVFileId
@@ -3062,7 +3112,7 @@ export default {
               let tab1 = tab.replace(/ /g, '_')
               $('#t-' + tab1).css('background-color', '#fff', 'border-color', '#fff')
               $('#t-' + tab1).append(' <style>' + '#t-' + tab1 + '{font-size: 16px;list-style-type: none; position: relative; }' + '#t-' + tab1 + ':before{content: " ";display: none;border: solid 0.8em rgb(73,78,107); border-radius: .8em; top: 35%; margin-top: -0.5em;}' + '#t-' + tab1 + ':after {content: " ";display: none;width: 0.3em; height: 0.6em;border: solid white;border-width: 0 0.2em 0.2em 0; position: absolute;left: 1em;top: 40%;margin-top: -0.2em;-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg);-o-transform: rotate(45deg);transform: rotate(45deg);}</style>')
-              if (tab === 'Product Information') {
+              if (tab === 'Product Information' || this.uploadMethod === 'inventory') {
                 prodInfoUpld = false
                 this.validate = true
               }
@@ -3440,6 +3490,12 @@ export default {
       } else {
         self.mObj['Product Image'].uploadDisplay = true
       }
+      if (Object.keys(response).indexOf('WebsiteInventory') >= 0) {
+        self.validate = false
+        self.mObj['Website Inventory'].tab_flag = true
+      } else {
+        self.mObj['Website Inventory'].uploadDisplay = true
+      }
       if (Object.keys(response).indexOf('ProductAdditionalCharges') >= 0) {
         self.mObj['Product Additional Charges'].tab_flag = true
       } else {
@@ -3604,6 +3660,10 @@ export default {
                 self.validate = false
               }
 
+              if (self.activeTab === 'Website Inventory' && self.uploadMethod === 'inventory') {
+                self.validate = false
+              }
+
               let newTab = ''
               let oldTabIndex = ''
               _.forEach(self.fileTypes, function (value, key) {
@@ -3733,9 +3793,12 @@ export default {
 
     api.request('get', '/uploader/' + id).then(response => {
       if (response.data !== null) {
+        // console.log(response.data)
         let keys = Object.keys(response.data)
         let filteredKeys = []
-        let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
+        self.uploadMethod = response.data.uploadType
+
+        let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice']
         for (let i = 0; i < tabArray.length; i++) {
           for (let j = 0; j < keys.length; j++) {
             if (tabArray[i] === keys[j]) {
@@ -3752,9 +3815,9 @@ export default {
           this.asiconfig = _.filter(resp.data.data, {type: 'asi'})
           this.sageconfig = _.filter(resp.data.data, {type: 'sage'})
           this.$Spin.hide()
-        }).catch(err => {
+        }).catch(err => { // eslint-disable-line handle-callback-err
           this.$Spin.hide()
-          console.log('Error asconfig', err)
+          // console.log('Error asconfig', err)
         })
         if (response.data.stepStatus === 'upload_pending') {
           self.uploadStep = true
