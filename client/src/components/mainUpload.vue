@@ -3663,11 +3663,9 @@ export default {
         self.mObj['Product Image'].uploadDisplay = true
       }
       if (Object.keys(response).indexOf('WebsiteInventory') >= 0) {
-        console.log('WebsiteInventory file uploaded!!!')
         self.validate = false
         self.mObj['Website Inventory'].tab_flag = true
       } else {
-        console.log('WebsiteInventory file NOT uploaded!!!')
         self.mObj['Website Inventory'].uploadDisplay = true
       }
       if (Object.keys(response).indexOf('ProductAdditionalCharges') >= 0) {
