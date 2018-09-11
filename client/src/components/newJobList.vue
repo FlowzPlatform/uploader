@@ -304,6 +304,23 @@ export default {
               let filteredImage = lodash.reject(mergedImage, lodash.isUndefined)
               let filteredProduct = lodash.reject(mergedProduct, lodash.isUndefined)
 
+              /* filtered & delete unnecessary key */
+              filteredShipping.map(async (item, index) => {
+                await delete item['import-tracker_id']
+              })
+
+              filteredImprint.map(async (item, index) => {
+                await delete item['import-tracker_id']
+              })
+
+              filteredPricing.map(async (item, index) => {
+                await delete item['import-tracker_id']
+              })
+
+              filteredImage.map(async (item, index) => {
+                await delete item['import-tracker_id']
+              })
+
               filteredProduct = filteredProduct.map((item, index) => {
                 if (item.attributes.imprint_color !== undefined && item.attributes.hasOwnProperty('imprint_color')) {
                   item.attr_imprint_color = item.attributes.imprint_color.join('|')
@@ -333,10 +350,11 @@ export default {
                 delete item.supplier_id
                 delete item.vid
                 delete item.valid_up_to
+                delete item['import-tracker_id']
                 Promise.resolve(item.available_currencies)
                 return item
               })
-
+              
               let pricingFlatten = filteredPricing.map(flatten)
               let imprintFlatten = filteredImprint.map(flatten)
               let shippingFlatten = filteredShipping.map(flatten)
