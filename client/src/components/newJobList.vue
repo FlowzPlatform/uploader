@@ -1,6 +1,10 @@
 <template>
   <div>
-    <h2 class="listUpld">List of Uploads</h2><br>
+    <Row>
+        <Col span="12"><h2 class="listUpld" style="font-size:24px;float:left">List of Uploads</h2><br></Col>
+        <Col span="12"><Button type="primary"  :loading="bloading" @click="exportdata" style="float:right">Export Live</Button></Col>
+    </Row>
+    <br>
     <Table :columns="columns1" :data="chunkData[cpage-1]" class="jobtable"></Table>
     <div class="pagination">
       <Page :total="data2.length" :current="cpage" @on-change="changePage" :page-size=10 show-total></Page>
@@ -13,13 +17,19 @@
 </template>
 <script>
 import innerJoblist from './innerJobList.vue'
-let axios = require('axios')
 import io from 'socket.io-client'
 import Emitter from '@/mixins/emitter'
 import config from '@/config'
 import Cookies from 'js-cookie'
-var lodash = require('lodash')
-var moment = require('moment')
+import Papa from 'papaparse'
+let JSZip = require('jszip')
+let FileSaver = require('file-saver')
+let zip = new JSZip()
+
+let axios = require('axios')
+let lodash = require('lodash')
+let moment = require('moment')
+let flatten = require('flat')
 moment().format()
 let socket
 if (process.env.NODE_ENV !== 'development') {
@@ -106,17 +116,20 @@ export default {
           }
         }
       ],
+      csv: '',
+      shipping: [],
       data2: [],
       chunkData: [],
       loading: true,
       cpage: 1,
-      uniq_users: []
+      uniq_users: [],
+      bloading: false
     }
   },
   methods: {
     getStatus (status) {
       if (status !== '') {
-        var res = lodash.capitalize(status.replace(/_/g, ' '))
+        let res = lodash.capitalize(status.replace(/_/g, ' '))
         return res
       }
     },
@@ -213,6 +226,336 @@ export default {
           duration: 10
         })
       }
+    },
+    exportdata: async function () {
+      // console.log('hello export')
+      this.bloading = true
+      await axios
+        .get(config.vshoplist, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;',
+            authorization: Cookies.get('auth_token')
+          }
+        })
+        .then(async response => {
+          // console.log('response', response.data)
+          await axios
+            .get(config.pdmnew, {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;',
+                vid: response.data[0].id
+              }
+            })
+            .then(async response => {
+              // console.log('response ------- ', response.data.hits.hits)
+              let productdata = response.data.hits.hits
+
+              let shippingData = []
+              let imprintData = []
+              let pricingData = []
+              let imageData = []
+              let productInfo = []
+              let csvdata = []
+
+              lodash.forEach(productdata, async function (item) {
+                let shipping = lodash.forEach(item._source.shipping, async function (pship) {
+                  delete pship._id
+                })
+                let impData = lodash.forEach(item._source.imprint_data, async function (pimp) {
+                  delete pimp._id
+                })
+                let pricing = lodash.forEach(item._source.pricing, async function (pprice) {
+                  delete pprice._id
+                })
+                let images = lodash.forEach(item._source.images, async function (pimages) {
+                  delete pimages._id
+                })
+
+                shippingData.push(shipping)
+                imprintData.push(impData)
+                pricingData.push(pricing)
+                imageData.push(images)
+
+                delete item._source.pricing
+                delete item._source.imprint_data
+                delete item._source.shipping
+                delete item._source.images
+
+                productInfo.push(item._source)
+              })
+
+              csvdata.push(
+                shippingData,
+                imprintData,
+                pricingData,
+                imageData,
+                productInfo
+              )
+              // console.log('csvdata', csvdata)
+              let mergedShipping = [].concat.apply([], csvdata[0])
+              let mergedImprint = [].concat.apply([], csvdata[1])
+              let mergedPricing = [].concat.apply([], csvdata[2])
+              let mergedImage = [].concat.apply([], csvdata[3])
+              let mergedProduct = [].concat.apply([], csvdata[4])
+
+              let filteredShipping = lodash.reject(mergedShipping, lodash.isUndefined)
+              let filteredImprint = lodash.reject(mergedImprint, lodash.isUndefined)
+              let filteredPricing = lodash.reject(mergedPricing, lodash.isUndefined)
+              let filteredImage = lodash.reject(mergedImage, lodash.isUndefined)
+              let filteredProduct = lodash.reject(mergedProduct, lodash.isUndefined)
+
+              filteredProduct = filteredProduct.map((item, index) => {
+                if (item.attributes.imprint_color !== undefined && item.attributes.hasOwnProperty('imprint_color')) {
+                  item.attr_imprint_color = item.attributes.imprint_color.join('|')
+                }
+                if (item.attributes.colors !== undefined && item.attributes.hasOwnProperty('colors')) {
+                  item.attr_colors = item.attributes.colors.join('|')
+                }
+                if (item.attributes.decimal !== undefined && item.attributes.hasOwnProperty('decimal')) {
+                  item.attr_decimal = item.attributes.decimal.join(',')
+                }
+                if (item.attributes.shape !== undefined && item.attributes.hasOwnProperty('shape')) {
+                  item.attr_shape = item.attributes.shape.join('|')
+                }
+
+                /* SEPARATE DATA BY (, | opeartor) */
+                item.available_currencies = item.available_currencies.join('|')
+                item.available_regions = item.available_regions.join(',')
+                item['non-available_regions'] = item['non-available_regions'].join(',')
+                item.categories = item.categories.join('|')
+                item.search_keyword = item.search_keyword.join('|')
+                item.vid = item.vid.join(',')
+
+                /* DELETE KEYS */
+                delete item.supplier_info
+                delete item.attributes
+                delete item.username
+                delete item.supplier_id
+                delete item.vid
+                delete item.valid_up_to
+                Promise.resolve(item.available_currencies)
+                return item
+              })
+
+              let pricingFlatten = filteredPricing.map(flatten)
+              let imprintFlatten = filteredImprint.map(flatten)
+              let shippingFlatten = filteredShipping.map(flatten)
+              let productinfoFlatten = filteredProduct.map(flatten)
+              let imageFlatten = filteredImage.map(flatten)
+
+              /* pricingFlatten replace keys of gte & lte,code,price  */
+              for (let [index, item] of pricingFlatten.entries()) {
+                pricingFlatten[index] = this.changeGTEValue(item, 0)
+                pricingFlatten[index] = this.changeLTEValue(item, 0)
+                pricingFlatten[index] = this.changeCodeValue(item, 0)
+                pricingFlatten[index] = this.changePriceValue(item, 0)
+              }
+
+              /* shippingFlatten replace keys of gte & lte */
+              for (let [index, item] of shippingFlatten.entries()) {
+                shippingFlatten[index] = this.changeGTEValueShipping(item, 0)
+                shippingFlatten[index] = this.changeLTEValueShipping(item, 0)
+              }
+
+              /* imprintFlatten replace keys of gte & lte */
+              for (let [index, item] of imprintFlatten.entries()) {
+                imprintFlatten[index] = this.changeGTEValueImprint(item, 0)
+                imprintFlatten[index] = this.changeLTEValueImprint(item, 0)
+              }
+
+              /* imageFlatten changeWebImageValue */
+              for (let [index, item] of imageFlatten.entries()) {
+                imageFlatten[index] = this.changeWebImageValue(item, 0)
+                imageFlatten[index] = this.changeColorValue(item, 0)
+                imageFlatten[index] = this.changeImageColorCodeValue(item, 0)
+                imageFlatten[index] = this.changeSecureUrlValue(item, 0)
+              }
+              /* productinfoFlatten feature separate */
+              for (let a = 0; a < productinfoFlatten.length; a++) {
+                let c = 0
+                let z = -1
+                while (c <= 33 || z < 33) {
+                  c++
+                  z++
+                  productinfoFlatten[a]['feature_' + c] = productinfoFlatten[a]['features.' + z + '.key'] + '|' + productinfoFlatten[a]['features.' + z + '.value']
+                  delete productinfoFlatten[a]['features.' + z + '.key']
+                  delete productinfoFlatten[a]['features.' + z + '.value']
+
+                  if (productinfoFlatten[a]['feature_' + c] === 'undefined|undefined') {
+                    productinfoFlatten[a]['feature_' + c] = ''
+                  }
+                }
+              }
+              // console.log('productinfoFlatten *********', productinfoFlatten)
+              /* unparse flatten data */
+              const csvShipping = Papa.unparse(shippingFlatten)
+              const csvImprint = Papa.unparse(imprintFlatten)
+              const csvPricing = Papa.unparse(pricingFlatten)
+              const csvImage = Papa.unparse(imageFlatten)
+              const csvProduct = Papa.unparse(productinfoFlatten)
+
+              /* making zip file of csv */
+              zip.file('shipping.csv', csvShipping)
+              zip.file('imprint_charges.csv', csvImprint)
+              zip.file('pricing.csv', csvPricing)
+              zip.file('images.csv', csvImage)
+              zip.file('productInfo.csv', csvProduct)
+              zip.generateAsync({ type: 'blob' }).then(function (content) {
+                // see FileSaver.js
+                FileSaver.saveAs(content, 'product-data.zip')
+              })
+            }).catch(err => {
+              console.log(err)
+              this.$Notice.error({
+                title: err.message,
+                // desc: err.message,
+                duration: 5
+              })
+              this.bloading = false
+            })
+        })
+        .catch(err => {
+          console.log(err)
+          this.$Notice.error({
+            title: err.message,
+            // desc: err.message,
+            duration: 5
+          })
+          this.bloading = false
+        })
+      this.bloading = false
+    },
+    changeGTEValue (item, value) {
+      let key = 'price_range.' + value + '.qty.gte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Max'] = item[key]
+        delete item[key]
+        item = this.changeGTEValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeLTEValue (item, value) {
+      let key = 'price_range.' + value + '.qty.lte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Min'] = item[key]
+        delete item[key]
+        item = this.changeLTEValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeGTEValueShipping (item, value) {
+      let key = 'shipping_range.' + value + '.qty.gte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Max'] = item[key]
+        delete item[key]
+        item = this.changeGTEValueShipping(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeLTEValueShipping (item, value) {
+      let key = 'shipping_range.' + value + '.qty.lte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Min'] = item[key]
+        delete item[key]
+        item = this.changeLTEValueShipping(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeGTEValueImprint (item, value) {
+      let key = 'imprint_data_range.' + value + '.qty.gte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Max'] = item[key]
+        delete item[key]
+        item = this.changeGTEValueImprint(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeLTEValueImprint (item, value) {
+      let key = 'imprint_data_range.' + value + '.qty.lte'
+      if (item.hasOwnProperty(key)) {
+        item['Qty_' + (value + 1) + '_Min'] = item[key]
+        delete item[key]
+        item = this.changeLTEValueImprint(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeCodeValue (item, value) {
+      let key = 'price_range.' + value + '.code'
+      if (item.hasOwnProperty(key)) {
+        item['code_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeCodeValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changePriceValue (item, value) {
+      let key = 'price_range.' + value + '.price'
+      if (item.hasOwnProperty(key)) {
+        item['price_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changePriceValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeWebImageValue (item, value) {
+      let key = 'images.' + value + '.web_image'
+      if (item.hasOwnProperty(key)) {
+        item['web_image_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeWebImageValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeColorValue (item, value) {
+      let key = 'images.' + value + '.color'
+      if (item.hasOwnProperty(key)) {
+        item['color_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeColorValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeImageColorCodeValue (item, value) {
+      let key = 'images.' + value + '.image_color_code'
+      if (item.hasOwnProperty(key)) {
+        item['image_color_code_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeImageColorCodeValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
+    },
+    changeSecureUrlValue (item, value) {
+      let key = 'images.' + value + '.secure_url'
+      if (item.hasOwnProperty(key)) {
+        item['secure_url_' + (value + 1)] = item[key]
+        delete item[key]
+        item = this.changeSecureUrlValue(item, value + 1)
+        return item
+      } else {
+        return item
+      }
     }
   },
   feathers: {
@@ -220,7 +563,7 @@ export default {
       updated (message) {
         let self = this
         if (message.user_id === self.$store.state.userId) {
-          for (var i = 0; i < self.data2.length; i++) {
+          for (let i = 0; i < self.data2.length; i++) {
             if (self.data2[i].id === message.id) {
               index = i
             }
@@ -286,7 +629,7 @@ export default {
     }
   },
   mounted () {
-    var self = this
+    let self = this
     this.loading = true
     if (this.$store.state.disableuser === true) {
       this.$store.state.disableuser = false
@@ -325,17 +668,17 @@ export default {
   overflow: inherit !important;
 }
 .demo-spin-icon-load{
-       animation: ani-demo-spin 1s linear infinite;
-   }
+  animation: ani-demo-spin 1s linear infinite;
+}
 @keyframes ani-demo-spin {
-   from { transform: rotate(0deg);}
-   50%  { transform: rotate(180deg);}
-   to   { transform: rotate(360deg);}
+  from { transform: rotate(0deg);}
+  50%  { transform: rotate(180deg);}
+  to   { transform: rotate(360deg);}
 }
 .demo-spin-col{
-   height: 100px;
-   position: relative;
-   border: 1px solid #eee;
+  height: 100px;
+  position: relative;
+  border: 1px solid #eee;
 }
 .pagination{
   margin-top: 10px;
@@ -348,12 +691,12 @@ export default {
 .jobtable .ivu-table-body table td .ivu-table-cell-expand {width: 100%; text-align: center;}
 .jobtable .ivu-table .ivu-table-tip {overflow-x: hidden;}
 .pagination .ivu-page-total {
-    display: inline-block;
-    height: 32px;
-    line-height: 32px;
-    margin-right: 10px;
-    font-size: 13px !important;
-    font-weight: 500 !important;
+  display: inline-block;
+  height: 32px;
+  line-height: 32px;
+  margin-right: 10px;
+  font-size: 13px !important;
+  font-weight: 500 !important;
 }
 
 </style>

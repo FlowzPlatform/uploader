@@ -285,7 +285,7 @@ export default {
             title: "Validation not complete",
             desc: "Can't perform server side validation"
           })
-          console.log('Error while doing server side validation', err)
+          // console.log('Error while doing server side validation', err)
         })
         _.forIn(this.mObj, (value, key) => {
           // console.log(':: :: ', key)
@@ -401,7 +401,7 @@ export default {
               title: "Validation not complete",
               desc: "Can't perform server side validation"
             })
-            console.log('Error while doing server side validation', err)
+            // console.log('Error while doing server side validation', err)
           })
         }
         resolve()
@@ -1078,11 +1078,11 @@ export default {
         }
 
         let getFunctionDate = function (obj, value, fieldName) {
-          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-          var func2 = regExValidatorFunc(obj, value, fieldName)
-          var func3 = dateValidatorFunc(obj, value, fieldName)
-          var func4 =  defaultValidatorFunc(obj, value, fieldName)
-          var func5 = optionalValidatorFunc(obj,value,fieldName)
+          let func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          let func2 = regExValidatorFunc(obj, value, fieldName)
+          let func3 = dateValidatorFunc(obj, value, fieldName)
+          let func4 =  defaultValidatorFunc(obj, value, fieldName)
+          let func5 = optionalValidatorFunc(obj,value,fieldName)
           if (func1 !== undefined) {
             return func1
           } else if (func2 !== undefined) {
@@ -1099,11 +1099,11 @@ export default {
         }
 
         let getFunctionUrl = function (obj, value, fieldName) {
-          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-          var func2 = regExValidatorFunc(obj, value, fieldName)
-          var func3 = urlValidatorFunc(obj, value, fieldName)
-          var func4 = defaultValidatorFunc(obj, value, fieldName)
-          var func5 = optionalValidatorFunc(obj,value,fieldName)
+          let func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          let func2 = regExValidatorFunc(obj, value, fieldName)
+          let func3 = urlValidatorFunc(obj, value, fieldName)
+          let func4 = defaultValidatorFunc(obj, value, fieldName)
+          let func5 = optionalValidatorFunc(obj,value,fieldName)
           if (func1 !== undefined) {
             return func1
           } else if (func2 !== undefined) {
@@ -1120,11 +1120,11 @@ export default {
         }
 
         let getFunctionEmail = function (obj, value, fieldName) {
-          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-          var func2 = regExValidatorFunc(obj, value, fieldName)
-          var func3 = emailValidatorFunc(obj, value, fieldName)
-          var func4 = defaultValidatorFunc(obj, value, fieldName)
-          var func5 = optionalValidatorFunc(obj,value,fieldName)
+          let func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          let func2 = regExValidatorFunc(obj, value, fieldName)
+          let func3 = emailValidatorFunc(obj, value, fieldName)
+          let func4 = defaultValidatorFunc(obj, value, fieldName)
+          let func5 = optionalValidatorFunc(obj,value,fieldName)
           if (func1 !== undefined) {
             return func1
           } else if (func2 !== undefined) {
@@ -1141,11 +1141,11 @@ export default {
         }
 
         let getFunctionPhone = function (obj, value, fieldName) {
-          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-          var func2 = regExValidatorFunc(obj, value, fieldName)
-          var func3 = phoneValidatorFunc(obj, value, fieldName)
-          var func4 = defaultValidatorFunc(obj, value, fieldName)
-          var func5 = optionalValidatorFunc(obj,value,fieldName)
+          let func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          let func2 = regExValidatorFunc(obj, value, fieldName)
+          let func3 = phoneValidatorFunc(obj, value, fieldName)
+          let func4 = defaultValidatorFunc(obj, value, fieldName)
+          let func5 = optionalValidatorFunc(obj,value,fieldName)
           if (func1 !== undefined) {
             return func1
           } else if (func2 !== undefined) {
@@ -1162,11 +1162,11 @@ export default {
         }
 
         let getFunctionPincode = function (obj, value, fieldName) {
-          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-          var func2 = regExValidatorFunc(obj, value, fieldName)
-          var func3 = getFunctionPincode(obj, value, fieldName)
-          var func4 = defaultValidatorFunc(obj, value, fieldName)
-          var func5 = optionalValidatorFunc(obj,value,fieldName)
+          let func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          let func2 = regExValidatorFunc(obj, value, fieldName)
+          let func3 = getFunctionPincode(obj, value, fieldName)
+          let func4 = defaultValidatorFunc(obj, value, fieldName)
+          let func5 = optionalValidatorFunc(obj,value,fieldName)
           if (func1 !== undefined) {
             return func1
           } else if (func2 !== undefined) {
@@ -1183,11 +1183,11 @@ export default {
         }
 
         let getFunctionText = function (obj, value, fieldName) {
-          var func1 = allowedValueValidatorFunc(obj, value, fieldName)
-          var func2 = regExValidatorFunc(obj, value, fieldName)
-          var func3 = defaultValidatorFunc(obj, value, fieldName)
-          var func4 = maxLengthValidatorFunc(obj, value, fieldName)
-          var func5 = optionalValidatorFunc(obj,value,fieldName)
+          let func1 = allowedValueValidatorFunc(obj, value, fieldName)
+          let func2 = regExValidatorFunc(obj, value, fieldName)
+          let func3 = defaultValidatorFunc(obj, value, fieldName)
+          let func4 = maxLengthValidatorFunc(obj, value, fieldName)
+          let func5 = optionalValidatorFunc(obj,value,fieldName)
           if (func1 !== undefined) {
             return func1
           } else if (func2 !== undefined) {
@@ -1204,7 +1204,7 @@ export default {
         }
 
         // let allowedValueValidatorFunc = function (obj, value, fieldName) {
-        //   var i
+        //   let i
         //   _.forEach(Object.keys(self.mObj[tab].schema.structure), function (value, key) {
         //     if (fieldName === value) {
         //       i = key
@@ -1223,7 +1223,7 @@ export default {
         // }
 
         let allowedValueValidatorFunc = function (obj, value, fieldName) {
-          var i
+          let i
           _.forEach(Object.keys(self.mObj[tab].schema.structure), function (value, key) {
             if (fieldName === value) {
               i = key
@@ -1254,7 +1254,7 @@ export default {
         }
 
         let defaultValidatorFunc = function (obj, value, fieldName) {
-          var i
+          let i
           _.forEach(Object.keys(self.mObj[tab].schema.structure), function (value, key) {
             if (fieldName === value) {
               i = key
@@ -1269,7 +1269,7 @@ export default {
         }
 
         let maxLengthValidatorFunc = function (obj, value, fieldName) {
-          var i
+          let i
           _.forEach(Object.keys(self.mObj[tab].schema.structure), function (value, key) {
             if (fieldName === value) {
               i = key
@@ -1288,7 +1288,7 @@ export default {
         }
 
         let regExValidatorFunc = function (obj, value, fieldName) {
-          var i
+          let i
           _.forEach(Object.keys(self.mObj[tab].schema.structure), function (value, key) {
             if (fieldName === value) {
               i = key
