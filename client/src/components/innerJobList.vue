@@ -113,7 +113,7 @@ export default {
   },
   mounted () {
     for (var key in this.row) {
-      if (key === 'ProductInformation' || key === 'ProductPrice' || key === 'ProductImprintData' || key === 'ProductImage' || key === 'ProductShipping' || key === 'ProductAdditionalCharges' || key === 'ProductVariationPrice') {
+      if (key === 'ProductInformation' || key === 'ProductPrice' || key === 'ProductImprintData' || key === 'ProductImage' || key === 'ProductShipping' || key === 'ProductAdditionalCharges' || key === 'ProductVariationPrice' || key === 'WebsiteInventory') {
         this.data3.push({'name': key, 'totalNoOfRecords': this.row[key].totalNoOfRecords, 'uploadstatus': this.row[key].uploadStatus, 'validatestatus': this.row[key].validateStatus})
       }
     }

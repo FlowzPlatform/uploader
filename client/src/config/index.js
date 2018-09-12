@@ -38,7 +38,12 @@ var temp = {
   flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
   crmUrl: 'https://www.crm.' + domainkey,
   websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
-  cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload'
+  pdmUrl: 'https://api.' + domainkey + '/pdmnew',
+  cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload',
+  vshopUrl: 'https://api.flowzcluster.tk/pdmnew/vshop-list?supplier=true&all=1',
+  asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/',
+  vshoplist: 'https://api.' + domainkey + '/pdmnew/vshop-list',
+  pdmnew: 'https://api.' + domainkey + '/pdmnew/pdm?$limit=9999'
 }
 if (process.env.MYENV !== 'development') {
   temp = {
@@ -69,7 +74,12 @@ if (process.env.MYENV !== 'development') {
     flowzDashboardUrl: 'https://www.dashboard.' + domainkey,
     crmUrl: 'https://www.crm.' + domainkey,
     websiteBuilderUrl: 'https://www.webbuilder.' + domainkey,
-    cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload'
+    pdmUrl: 'https://api.' + domainkey + '/pdmnew',
+    cloudinaryUrl: 'https://api.' + domainkey + '/crm/cloudinaryupload',
+    vshopUrl: 'https://api.' + domainkey + '/pdmnew/vshop-list?supplier=true&all=1',
+    asiUrl: 'https://sandbox-productservice.asicentral.com/api/v4/',
+    vshoplist: 'https://api.' + domainkey + '/pdmnew/vshop-list',
+    pdmnew: 'https://api.' + domainkey + '/pdmnew/pdm?$limit=9999'
   }
 }
 

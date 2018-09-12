@@ -5,6 +5,7 @@ const ProductShippingRules = require('../../validation_rules/product_shipping');
 const ProductImagesRules = require('../../validation_rules/product_images');
 const ProductAdditionalChargesRules = require('../../validation_rules/product_additional_charge');
 const ProductVariationPriceRules = require('../../validation_rules/product_variation_pricing');
+const WebsiteInventoryRules = require('../../validation_rules/website_inventory');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const config1 = require('../../../config/default.json');
@@ -94,6 +95,9 @@ var connectToMongo = async function(hook,url){
   else if(hook.data.sheet_name == "Product Image"){
     rules = ProductImagesRules
   }
+  else if (hook.data.sheet_name == "Website Inventory") {
+    rules = WebsiteInventoryRules
+  } 
   else if(hook.data.sheet_name == "Product Additional Charges"){
     rules = ProductAdditionalChargesRules
   }
@@ -224,29 +228,22 @@ var UpdateInMongo = async function(hook,url){
 var checkImage = async function(imagedata,colname){
   return new Promise(async(resolve,reject) => {
       let img_err_data = []
-      for(let i=0;i<imagedata.length;i++){
-        let secure_url = imagedata[i][colname]
-        var image_res = await(axios.get(secure_url).then(res => {
-          return res
-        })
-        .catch(err => {
-          if(err.response.status == 404){
-            img_err_data.push(imagedata[i])
-            return err.response
-          }
-          else{
-            console.log("err..",err)
-            return err
-          }
-        })
-        )
-      }
+      // for(let i=0;i<imagedata.length;i++){
+      //   let secure_url = imagedata[i][colname]
+      //   console.log('secure_url', secure_url)
+      //   await (axios.get(secure_url).catch(err => {
+      //     console.log('got error in secure url', err)
+      //     console.log('imagedata[i]', imagedata[i])
+      //     img_err_data.push(imagedata[i])
+      //   })
+      // )
+      // }
 
-      if(img_err_data.length != 0){
-        resolve(img_err_data)
-      }
-      else if(img_err_data.length == 0){
+      // if(img_err_data.length > 0){
+      //   resolve(img_err_data)
+      // }
+      // else {
         resolve('done')
-      }
+      // }
   })
 }

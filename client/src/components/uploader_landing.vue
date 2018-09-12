@@ -48,6 +48,11 @@
                     <i class="fa fa-circle-o" v-else></i>
                     Update
                   </span>
+                  <span>
+                    <i class="fa fa-dot-circle-o" v-if="job[0].uploadType == 'inventory'"></i>
+                    <i class="fa fa-circle-o" v-else></i>
+                    Inventory
+                  </span>
                 </div>
               </div>
               </td>
@@ -102,7 +107,7 @@
          </tr>
        </thead>
        <tbody v-for="(item,index) in Object.keys(job[0])">
-          <tr  v-if="item == 'ProductInformation' || item == 'ProductPrice' || item == 'ProductImprintData' || item == 'ProductImage' || item == 'ProductShipping' || item == 'ProductAdditionalCharges' || item == 'ProductVariationPrice'">
+          <tr  v-if="item == 'ProductInformation' || item == 'ProductPrice' || item == 'ProductImprintData' || item == 'ProductImage' || item == 'ProductShipping' || item == 'ProductAdditionalCharges' || item == 'ProductVariationPrice' || item == 'WebsiteInventory'">
             <td class="">
               <div class="ivu-table-cell upload">
                 <span style='font-weight:500px; font-size:16px !important'>{{convert(item)}}</span>
@@ -240,8 +245,7 @@ export default {
         socket.emit('uploader::find', {'subscriptionId': subId, 'id': this.$route.params.id, 'masterJobStatus': 'running'}, (e, data) => {
           if (data.data.length !== 0) {
             this.$store.state.jobData = data.data[0]
-
-            let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'ProductAdditionalCharges', 'ProductVariationPrice']
+            let tabArray = ['ProductInformation', 'ProductPrice', 'ProductImprintData', 'ProductImage', 'ProductShipping', 'WebsiteInventory', 'ProductAdditionalCharges', 'ProductVariationPrice']
             for (let i = 0; i < tabArray.length; i++) {
               for (let key in data.data[0]) {
                 if (tabArray[i] === key) {
@@ -257,7 +261,7 @@ export default {
             this.show_table = true
             this.keys = Object.keys(this.job[0])
             for (let i = 0; i < this.keys.length; i++) {
-              if (this.keys[i] === 'ProductInformation' || this.keys[i] === 'ProductPrice' || this.keys[i] === 'ProductShipping' || this.keys[i] === 'ProductImage' || this.keys[i] === 'ProductImprintData' || this.keys[i] === 'ProductAdditionalCharges' ||
+              if (this.keys[i] === 'ProductInformation' || this.keys[i] === 'ProductPrice' || this.keys[i] === 'ProductShipping' || this.keys[i] === 'ProductImage' || this.keys[i] === 'ProductImprintData' || this.keys[i] === 'WebsiteInventory' || this.keys[i] === 'ProductAdditionalCharges' ||
                 this.keys[i] === 'ProductVariationPrice') {
                 this.show = true
               }
@@ -315,7 +319,7 @@ export default {
   watch: {
     '$store.state.subscription_id': function (id) {
       let self = this
-      console.log('landing $store')
+      // console.log('landing $store')
       if (id === 'All') {
         self.loading = false
         // self.$Notice.error({
@@ -330,7 +334,7 @@ export default {
       }
     },
     '$store.state.user_list': function (list) {
-      console.log('landing list....', list)
+      // console.log('landing list....', list)
       if (list.length !== 0) {
         if (this.$store.state.storedUsername !== '') {
           let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })
@@ -341,7 +345,7 @@ export default {
               this.$store.state.subscription_list.splice(subId, 1)
               let self = this
               let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === self.$store.state.storedUsername })
-              console.log('&&&&&', filteredUser)
+              // console.log('&&&&&', filteredUser)
               let subsArr = []
 
               if (filteredUser.length !== 0) {
@@ -363,7 +367,7 @@ export default {
       }
     },
     '$store.state.storedUsername': function (selectedUser) {
-      console.log('called.....')
+      // console.log('called.....')
       let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
       let subsArr = []
 

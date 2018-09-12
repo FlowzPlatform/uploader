@@ -76,6 +76,7 @@ async function beforeCreate(hook) {
     "jobs":[
       {
         "importTrackerId":import_tracker_id,
+        "uploadType": tdata.uploadType,
         "userdetails":{
           "id":user_data.data.data._id,
           "email":user_data.data.data.email,
