@@ -13,7 +13,7 @@
         <Row class="uploaderRow" style="padding: 15px !important">
           <ul class="mySection">
             <div v-for="(method,mIndex) in methods1">
-              <Col span="6" style="padding: 0px">
+              <Col span="4" push="2" style="padding: 0px">
                 <li class="btn" @click="methodChanged(mIndex)" @mouseover="display(method.name)" @mouseout="hide(method.name)" >
                     <img src="../assets/images/tick.png" class="selected_tick" v-if="method.selected == true">
                     <label class="dropbtn" :id="mIndex">
@@ -71,7 +71,8 @@ export default {
            {name: 'REPLACE', selected: false},
            {name: 'APPEND', selected: false},
            {name: 'UPSERT', selected: false},
-           {name: 'UPDATE', selected: false}
+           {name: 'UPDATE', selected: false},
+           {name: 'INVENTORY', selected: false}
       ],
       selectedMethod: '',
       disabled: true,
@@ -116,6 +117,8 @@ export default {
         $('#get').html(" <p> By choosing <b>Upsert</b> method you can Keep all the old products , update old records and add the new one .</p><p><table border=1 style='position:absolute;left:37%;width:34%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'>A, B, <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr></table>")
       } else if (data === 'UPDATE') {
         $('#get').html("<p> By choosing <b>Update</b> method you can Keep all the old products and update old records . No new products can be added in this method</p><p>  <table border=1 style='position:absolute;left:34%;width:37%'><tr><th colspan='2' style='background-color:#494e6b;color:#fff;text-align:center'>Example</th></tr><tr><td> Old records </td><td> A, B, C </td></tr> <tr><td>New records </td><td> <span style='color:blue;font-weight:bold'>C'</span>, D, E</td></tr><tr><td style='background-color:#e2e2e2'> Result </td><td style='background-color:#e2e2e2'>A, B, <span style='color:blue;font-weight:bold'>C'</span> </td></tr></table>")
+      } else if (data === 'INVENTORY') {
+        $('#get').html('<p> By choosing <b>Inventory</b> method you can add or update your product inventory information.</p>')
       }
     },
      // creates a job in uploader service
@@ -188,7 +191,7 @@ export default {
     }
   },
   mounted () {
-    console.log('uploader called....')
+    // console.log('uploader called....')
     this.loading = true
     this.$store.state.validationStatus = false
     if (this.$store.state.disableuser === true) {
@@ -201,7 +204,7 @@ export default {
     if (this.$store.state.storedSubscriptionName !== '') {
       this.getData(this.$store.state.subscription_id)
     }
-    console.log('this.$store.state.storedUsername uploader .....', this.$store.state.storedUsername, this.$store.state.user_detail_list)
+    // console.log('this.$store.state.storedUsername uploader .....', this.$store.state.storedUsername, this.$store.state.user_detail_list)
     // let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === this.$store.state.storedUsername })
     // console.log('&&&&&', filteredUser)
     // let subsArr = []
@@ -219,7 +222,7 @@ export default {
   },
   watch: {
     '$store.state.subscription_id': function (id) {
-      console.log('$store')
+      // console.log('$store')
       if (id === 'All') {
         this.loading = false
       } else {
@@ -231,7 +234,7 @@ export default {
       }
     },
     '$store.state.user_list': function (list) {
-      console.log('list.....', list)
+      // console.log('list.....', list)
       if (list.length !== 0) {
         if (this.$store.state.storedUsername !== '') {
           let userId = lodash.findIndex(list, function (o) { return o.label === 'All' })
@@ -242,7 +245,7 @@ export default {
               this.$store.state.subscription_list.splice(subId, 1)
               let self = this
               let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === self.$store.state.storedUsername })
-              console.log('&&&&&', filteredUser)
+              // console.log('&&&&&', filteredUser)
               let subsArr = []
 
               if (filteredUser.length !== 0) {
@@ -256,7 +259,7 @@ export default {
                 self.$store.state.subscription_list = []
                 self.$store.state.subscription_list = subsArr
                 self.$store.state.storedSubscriptionName = subsArr[0].label
-                console.log('subsArr....', subsArr)
+                // console.log('subsArr....', subsArr)
                 self.$store.state.subscription_id = subsArr[0].value
               }
             }
@@ -265,7 +268,7 @@ export default {
       }
     },
     '$store.state.storedUsername': function (selectedUser) {
-      console.log('called.....')
+      // console.log('called.....')
       let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
       let subsArr = []
 

@@ -146,11 +146,11 @@ export default {
     },
     setSelectedUser () {
       // let self = this
-      console.log('cxalled.....')
+      // console.log('cxalled.....')
       if (this.selected_user === '') {
-        console.log('%%%%%%')
+        // console.log('%%%%%%')
         if (this.$store.state.user_list.length !== 0) {
-          console.log('########')
+          // console.log('########')
           this.selected_user = this.$store.state.user_list[0].label
         }
       }
@@ -198,10 +198,10 @@ export default {
       }
     },
     'selected_user': function (user) {
-      console.log('user....', user)
+      // console.log('user....', user)
       if (user !== '') {
         this.$store.state.storedUsername = this.selected_user
-        console.log('this.$store.state.storedUsername', this.$store.state.storedUsername)
+        // console.log('this.$store.state.storedUsername', this.$store.state.storedUsername)
         this.$store.state.selectedUserName = user
       } else {
       }

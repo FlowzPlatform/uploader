@@ -427,7 +427,7 @@ export default {
       return this.simpledata
     },
     async getAdvancedData(data) {
-      let keyToDelete = ['_id', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'supplier_id', 'supplier', 'username', 'supplier_info', 'vid', 'nonavailable_regions']
+      let keyToDelete = ['_id', 'createdAt', 'import-tracker_id', 'inventory', 'max_price', 'min_price', 'supplier_id', 'supplier', 'username', 'supplier_info', 'vid', 'nonavailable_regions']
       keyToDelete.forEach(e => { delete data[e] })
       return data
     },
