@@ -52,7 +52,7 @@
                   </div>
                   </Poptip>
                   </Col>
-                  <Col span="1" v-if="loadingdot && !mObj[activeTab].load">
+                  <Col span="1" v-if="loadingdot">
                   <Spin></Spin>
                   </Col>
                   </Row>
@@ -107,10 +107,10 @@
                   </Button>
                   <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
                </div>
-               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
+               <!-- <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
                   <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
                   <div>Loading</div>
-                </Spin></div>
+                </Spin></div> -->
 
               <div v-if="mObj[activeTab].load" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
                 <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
