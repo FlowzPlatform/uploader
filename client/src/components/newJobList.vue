@@ -354,7 +354,7 @@ export default {
                 Promise.resolve(item.available_currencies)
                 return item
               })
-              
+
               let pricingFlatten = filteredPricing.map(flatten)
               let imprintFlatten = filteredImprint.map(flatten)
               let shippingFlatten = filteredShipping.map(flatten)
@@ -423,7 +423,7 @@ export default {
                 FileSaver.saveAs(content, 'product-data.zip')
               })
             }).catch(err => {
-              console.log(err)
+              // console.log(err)
               this.$Notice.error({
                 title: err.message,
                 // desc: err.message,
@@ -433,7 +433,7 @@ export default {
             })
         })
         .catch(err => {
-          console.log(err)
+          // console.log(err)
           this.$Notice.error({
             title: err.message,
             // desc: err.message,
@@ -624,7 +624,7 @@ export default {
       // let self = this
     },
     '$store.state.storedUsername': function (selectedUser) {
-      console.log('called.....', selectedUser)
+      // console.log('called.....', selectedUser)
       if (selectedUser !== 'All') {
         let filteredUser = lodash.filter(this.$store.state.user_detail_list, function (o) { return o.name === selectedUser })
         let subsArr = []
@@ -639,7 +639,7 @@ export default {
         this.$store.state.subscription_list = subsArr
         this.$store.state.storedSubscriptionName = subsArr[0].label
       } else {
-        console.log('^^^^^^^^', this.$store.state.fullSubscriptionList)
+        // console.log('^^^^^^^^', this.$store.state.fullSubscriptionList)
         this.$store.state.subscription_list = []
         this.$store.state.subscription_list = this.$store.state.fullSubscriptionList
         this.$store.state.storedSubscriptionName = this.$store.state.fullSubscriptionList[0].label

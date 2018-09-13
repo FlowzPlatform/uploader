@@ -138,8 +138,8 @@ export default {
                             self.$Modal.remove()
                             self.asiData.splice(params.index, 1)
                             self.$Notice.success({title: 'Success!', desc: 'Successfully Deleted.', duration: 3})
-                          }).catch(err => {
-                            console.log('Error', err)
+                          }).catch(err => { // eslint-disable-line handle-callback-err
+                            // console.log('Error', err)
                             self.$Modal.remove()
                             self.$Notice.error({title: 'Error!', desc: 'Not Deleted.', duration: 3})
                           })
@@ -264,8 +264,8 @@ export default {
                             self.$Modal.remove()
                             self.sageData.splice(params.index, 1)
                             self.$Notice.success({title: 'Success!', desc: 'Successfully Deleted.', duration: 3})
-                          }).catch(err => {
-                            console.log('Error', err)
+                          }).catch(err => { // eslint-disable-line handle-callback-err
+                            // console.log('Error', err)
                             self.$Modal.remove()
                             self.$Notice.error({title: 'Error!', desc: 'Not Deleted.', duration: 3})
                           })
@@ -299,7 +299,7 @@ export default {
     }
   },
   mounted () {
-    console.log('this.$store.state.user', this.$store.state.user)
+    // console.log('this.$store.state.user', this.$store.state.user)
     if (this.$store.state.user._id !== undefined) {
       this.loading = true
       asconfigurationModel.get({
@@ -312,9 +312,9 @@ export default {
         this.asiData = _.filter(res.data.data, {type: 'asi'})
         this.sageData = _.filter(res.data.data, {type: 'sage'})
         this.loading = false
-      }).catch(err => {
+      }).catch(err => { // eslint-disable-line handle-callback-err
         this.loading = false
-        console.log('Error', err)
+        // console.log('Error', err)
         this.$Notice.error({title: 'Network Error'})
       })
     }
