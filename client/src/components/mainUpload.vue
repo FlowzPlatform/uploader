@@ -52,7 +52,7 @@
                   </div>
                   </Poptip>
                   </Col>
-                  <Col span="1" v-if="loadingdot">
+                  <Col span="1" v-if="loadingdot && !mObj[activeTab].load">
                   <Spin></Spin>
                   </Col>
                   </Row>
@@ -107,6 +107,15 @@
                   </Button>
                   <Button type="success" style="margin-top:0px;color: #fff;background-color: #1fb58f;border-color: #1fb58f;margin-top:14px;float:right;padding: 6px 30px;" @click="Next(activeTab)" v-if="nextBtn">Next</Button>
                </div>
+               <div v-if="loading" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
+                  <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                  <div>Loading</div>
+                </Spin></div>
+
+              <div v-if="mObj[activeTab].load" class="demo-spin-col" style="margin-top:14px">  <Spin fix>
+                <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                <div>Loading</div>
+              </Spin></div>
                <div v-if="mObj[activeTab].savePreviewDisplay" class="savePreview">
                   <div class="recordsDisplay">
                      <h2 class="hclass">Uploaded Records of {{activeTab}}</h2>
@@ -518,7 +527,7 @@
          <Card :bordered=false style="margin-top:30px">
             <div v-if="!import1">
                <h2>Import in progress</h2>
-               <p style="font-size:16px;margin-top:20px">It will take some time...Please wait...</p>
+               <p style="font-size:16px;margin-top:20px">It will take some time please wait...</p>
                <Progress :percent="progressPercent"></Progress>
             </div>
             <div v-if="import1">
@@ -3717,7 +3726,6 @@ export default {
               self.abortImportBtn = false
             }
             self.import1 = false
-
             if (message.totalProduct && message.uploadProduct) {
               self.setImportProgress(message.totalProduct, message.uploadProduct)
             }
