@@ -231,7 +231,7 @@ export default {
       // console.log('hello export')
       this.bloading = true
       await axios
-        .get(config.vshoplist, {
+        .get(config.vshopUrl, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;',
             authorization: Cookies.get('auth_token')
