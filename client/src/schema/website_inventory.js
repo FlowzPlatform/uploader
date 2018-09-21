@@ -38,6 +38,15 @@ export const websiteInventorySchema = new Schema({
     maxLength: '',
     regEx: ''
   },
+  min_qty: {
+    type: 'string',
+    label: 'Min Qty',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
   qty_on_hand: {
     type: 'string',
     label: 'Qty on Hand',

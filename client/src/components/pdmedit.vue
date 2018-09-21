@@ -1,7 +1,10 @@
 <template>
 <div>
+  <!-- Foundation CSS framework (Bootstrap and jQueryUI also supported) -->
+  <link rel='stylesheet' href='//cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'>
+  <!-- Font Awesome icons (Bootstrap, Foundation, and jQueryUI also supported) -->
   <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
-  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/foundation/3.2.5/stylesheets/foundation.min.css'>
+  
   <Tabs @on-click="generateForm" v-model="activetab">
     <TabPane label="Simple" v-if="tab0">
       <div class="pdmsimple">
@@ -110,10 +113,11 @@ import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
 import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
+import WebsiteInventorySchema from '@/schema/website_inventory'
 
 const Schema = require('simpleschema')
 let editor
-JSONEditor.defaults.theme = 'foundation3'
+JSONEditor.defaults.theme = 'foundation5'
 JSONEditor.defaults.iconlib = 'fontawesome4'
 
 let err_length = 0
@@ -162,6 +166,11 @@ export default {
           schema:ProductShippingSchema,
           mapping: [],
           errmsg: []
+        },
+        'Website Inventory': {
+          schema: WebsiteInventorySchema,
+          mapping: [],
+          errmsg: []
         }
       }
     }
@@ -193,14 +202,7 @@ export default {
         this.realdata[item] = data[item]
       }
       return this.realdata
-      // console.log("new data",this.realdata)
     },
-    // mapAdvData(data) {
-    //   for(let item in data) {
-    //     this.realdata[item] = data[item]
-    //   }
-    //   return this.realdata
-    // },
     async hanleSubmit () {
       let data = editor.getValue()
       _.forIn(this.mObj, (value, key) => {
@@ -213,8 +215,9 @@ export default {
       let imprintData = null
       let imagesData = null
       let shippingData = null
+      let inventoryData = null
       
-      let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'non-available_regions', 'attributes', 'images', 'pricing', 'imprint_data', 'shipping', 'features']
+      let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'attributes', 'images', 'inventory', 'pricing', 'imprint_data', 'shipping', 'features']
       keyToDelete.forEach(e => { delete productData[e] });
 
       if (this.activetab === 1) {
@@ -269,6 +272,16 @@ export default {
           })
         })
         let pShipping = await this.proceedToValidate('Product Shipping', shippingData)
+      }
+      if (data.inventory != undefined) {
+        inventoryData = lodash.cloneDeep(data.inventory)
+        keyToDelete = ['import-tracker_id', '_id', 'attr_style', 'attr_size', 'attr_colors']
+        inventoryData.map(item => {
+          keyToDelete.forEach(e => {
+            delete item[e]
+          })
+        })
+        let pInventory = await this.proceedToValidate('Website Inventory', inventoryData)
       }
       if(this.activetab === 0) {
         this.simpleSubmitLoading = true
@@ -427,7 +440,7 @@ export default {
       return this.simpledata
     },
     async getAdvancedData(data) {
-      let keyToDelete = ['_id', 'createdAt', 'import-tracker_id', 'inventory', 'max_price', 'min_price', 'supplier_id', 'supplier', 'username', 'supplier_info', 'vid', 'nonavailable_regions']
+      let keyToDelete = ['_id', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'supplier_id', 'supplier', 'username', 'supplier_info', 'vid', 'nonavailable_regions']
       keyToDelete.forEach(e => { delete data[e] })
       return data
     },
@@ -656,7 +669,6 @@ export default {
               supplier_info: {
                 title: "Supplier",
                 type: "object",
-                format: "table",
                 options: {
                   disable_properties: true
                 }
@@ -664,7 +676,6 @@ export default {
               categories: {
                 title: "Categories",
                 type: "array",
-                format: "table",
                 items: {
                   type: 'string'
                 },
@@ -672,13 +683,11 @@ export default {
               },
               vid: {
                 type: "array",
-                title: "vid",
-                format: "table"
+                title: "vid"
               },
               tags: {
                 type: "array",
                 title: "Tags",
-                format: "table",
                 items: {
                   type: 'string'
                 },
@@ -686,8 +695,11 @@ export default {
               },
               'non-available_regions': {
                 type: "array",
-                title: 'Non Available Regions',
-                format: "table",
+                title: 'Non-Available Regions',
+                format: 'table',
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
                   type: 'string'
                 },
@@ -696,7 +708,9 @@ export default {
               available_currencies: {
                 title: "Available Currencies",
                 type: "array",
-                format: "table",
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
                   type: 'string'
                 }
@@ -709,16 +723,29 @@ export default {
                 },
                 propertyOrder: 44
               },
+              inventory: {
+                title: "Inventory",
+                type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
+                items: {
+                  title: " ",
+                  type: "object"
+                }
+              },
               images: {
                 title: "Images",
                 type: "array",
                 items: {
+                  title: " ",
                   type: "object",
                   properties: {
                     images: {
                       type: "array",
                       items: {
                         properties: {
+                          title: " ",
                           type: "object",
                           secure_url: {
                             type: "string",
@@ -1405,8 +1432,8 @@ export default {
 </script>
 
 <style scoped>
-/* @import '/static/css/foundation.min.css'; */
-/* @import '/static/css/font-awesome.css'; */
+/* @import url('https://cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'); */
+/* @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'); */
 
 .pdmedit {
   padding: 40px;
