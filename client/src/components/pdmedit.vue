@@ -779,6 +779,9 @@ export default {
                           type: "array",
                           items: {
                             type: "string"
+                          },
+                          options: {
+                            disable_array_reorder: true
                           }
                         }
                       }
@@ -961,11 +964,11 @@ export default {
                             },
                             properties: {
                               gte: {
-                                title: "Greater-than",
+                                title: "Min",
                                 type: "number"
                               },
                               lte: {
-                                title: "Less-than",
+                                title: "Max",
                                 type: "number"
                               }
                             }
