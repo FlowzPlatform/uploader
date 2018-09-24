@@ -4,6 +4,7 @@ const ProductPriceRules = require('../../validation_rules/product_price');
 const ProductImprintDataRules = require('../../validation_rules/product_imprint_data');
 const ProductShippingRules = require('../../validation_rules/product_shipping');
 const ProductImagesRules = require('../../validation_rules/product_images');
+const WebsiteInventoryRules = require('../../validation_rules/website_inventory');
 
 module.exports = {
   before: {
@@ -40,20 +41,6 @@ module.exports = {
 };
 
 var beforeCreate = async function(hook) {
-  /* var db = await (MongoClient.connect(url).then(res => {
-    return res
-  })
-  .catch(err => {
-    throw new errors.GeneralError('Mongodb Service unavailable');
-  })) */
-
-  /* let collection_name = hook.data.sheet_name.split(" ")
-  let prod_name = collection_name[0]
-  collection_name.splice(0,1)
-  for(let i=0 ;i<collection_name.length;i++){
-    name = collection_name[i].toLowerCase()
-  }
-  collection_name = "uploader" + prod_name + name; */
   // console.log('HOOOK', hook)
   let rules = [];
   
@@ -67,6 +54,8 @@ var beforeCreate = async function(hook) {
     rules = ProductShippingRules;
   } else if (hook.data.sheet_name == "Product Image") {
     rules = ProductImagesRules;
+  } else if (hook.data.sheet_name == "Website Inventory") {
+    rules = WebsiteInventoryRules;
   } /* else if (hook.data.sheet_name == "Product Additional Charges") {
     rules = ProductAdditionalChargesRules;
   } else if (hook.data.sheet_name == "Product Variation Price") {
