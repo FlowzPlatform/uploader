@@ -13,11 +13,11 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="/pdm">PDM</a></li>
-        <li><a href="/syncstatus">Sync Status</a></li>
-        <li><a href="/uploader-joblist">Upload Status</a></li>
-        <li><a href="/uploader">Uploader</a></li>
-        <li><a href="/invite">Invite</a></li>
+        <li class="active"><a href="/pdm"><Icon type="navicon-round" :size="14"></Icon>&nbsp PDM</a></li>
+        <li><a href="/syncstatus"><Icon type="navicon-round" :size="14"></Icon>&nbsp Sync Status</a></li>
+        <li><a href="/uploader-joblist"><Icon type="navicon-round" :size="14"></Icon>&nbsp Status</a></li>
+        <li><a href="/uploader"><Icon type="cloud" :size="14"></Icon>&nbsp Uploader</a></li>
+        <li><a href="/invite"><Icon type="cash" :size="14"></Icon>&nbsp Invite</a></li>
         <form class="navbar-form navbar-left" action="/action_page.php">
           <Select v-model="selected_user" style="width:200px; margin-top: 8px;">
             <Option v-for="item in $store.state.user_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
