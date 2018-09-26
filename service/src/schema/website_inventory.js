@@ -7,7 +7,7 @@ const websiteInventorySchema = {
     qty_on_hand: 'string',
     qty_on_po: 'string',
     expected_qty: 'string',
-    expected_qty: 'arrival_date',
+    arrival_date: 'string',
     _id: 'string'
 };
 
