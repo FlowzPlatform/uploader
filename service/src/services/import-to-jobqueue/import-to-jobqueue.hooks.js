@@ -94,12 +94,16 @@ async function beforeCreate(hook) {
     "options":{
       "timeout": timeout
     }
-
   }
 
     try {
-        await axios.post(base_url,hook.data).then(res => {
-          if(res.status == 200){
+        await axios({
+          method: 'post',
+          url: base_url,
+          data: hook.data,
+          headers: {'content-type': 'application/json'}
+        }).then(res => {
+          if(res.status == 200 && res.data.error == undefined){
             let import_obj = {
               stepStatus : "import_in_progress"
             }
@@ -107,19 +111,20 @@ async function beforeCreate(hook) {
             })
             .catch(error => {
               throw new errors.GeneralError('Status not updated');
-            })
+            });
+          } else {
+            throw new errors.BadGateway('JobQueue not running');
           }
         })
         .catch(error => {
           if(error.response.status == 502 && error.response.data.message == "An invalid response was received from the upstream server"){
-            throw new errors.BadGateway('JobQueue not running')
+            throw new errors.BadGateway('JobQueue not running');
           }
           else{
-            throw error
+            throw error;
           }
-        })
+        });
   } catch (err) {
     throw err;
   }
-
 }

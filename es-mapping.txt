@@ -1,0 +1,2595 @@
+PUT pdm1
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "autocomplete": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "standard",
+            "lowercase",
+            "stop",
+            "ngram"
+          ]
+        },
+        "search_ngram": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": [
+            "standard",
+            "lowercase",
+            "stop",
+            "ngram"
+          ]
+        },
+        "keyword_lowercase_analyzer": {
+          "type": "custom",
+          "filter": [
+            "lowercase"
+          ],
+          "tokenizer": "keyword"
+        },
+        "analyzer_keyword": {
+          "tokenizer": "keyword",
+          "filter": "lowercase"
+        }
+      },
+      "filter": {
+        "ngram": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 15
+        }
+      }
+    }
+  },
+  "mappings": {
+    "product": {
+      "properties": {
+        "activeSummary": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "additional_charge": {
+          "type": "nested",
+          "properties": {
+            "charge_name": {
+              "type": "text",
+              "fielddata": true
+            },
+            "moq": {
+              "type": "text"
+            },
+            "option_name": {
+              "type": "text"
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "net_price": {
+                  "type": "double"
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            }
+          }
+        },
+        "attr_colors": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attr_decimal": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attr_imprint_color": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attr_shape": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attributes": {
+          "properties": {
+            "colors": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                },
+                "rawtextlower": {
+                  "type": "string",
+                  "analyzer": "keyword_lowercase_analyzer",
+                  "fielddata": true
+                }
+              }
+            },
+            "decimal": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "imprint_color": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "raw": {
+                  "type": "string",
+                  "analyzer": "keyword_lowercase_analyzer",
+                  "fielddata": true
+                }
+              }
+            },
+            "shape": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "size": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "available_currencies": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "available_regions": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "categories": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "keyword"
+            },
+            "rawtextlower": {
+              "type": "string",
+              "analyzer": "keyword_lowercase_analyzer",
+              "fielddata": true
+            }
+          },
+          "fielddata": true
+        },
+        "company": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "country": {
+          "type": "text",
+          "fielddata": true
+        },
+        "currency": {
+          "type": "text",
+          "fielddata": true
+        },
+        "default_color": {
+          "type": "text"
+        },
+        "default_image": {
+          "type": "text"
+        },
+        "default_image_color_code": {
+          "type": "text"
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            }
+          }
+        },
+        "distributor_central_url": {
+          "type": "text"
+        },
+        "features": {
+          "properties": {
+            "key": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "label": {
+              "type": "text"
+            },
+            "value": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                }
+              }
+            }
+          }
+        },
+        "images": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "images": {
+              "properties": {
+                "color": {
+                  "type": "text",
+                  "fielddata": true,
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "image_color_code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "web_image": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "import-tracker_id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "imprint_data": {
+          "type": "nested",
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "additional_color_charge": {
+              "type": "text"
+            },
+            "additional_location_charge": {
+              "type": "text"
+            },
+            "full_color": {
+              "type": "text"
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "imprint_area": {
+              "type": "text",
+              "fielddata": true
+            },
+            "imprint_data_range": {
+              "properties": {
+                "qty": {
+                  "properties": {
+                    "gte": {
+                      "type": "long"
+                    },
+                    "lte": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "imprint_method": {
+              "type": "text",
+              "fielddata": true
+            },
+            "imprint_position": {
+              "type": "text",
+              "fielddata": true
+            },
+            "is_pms_color_allow": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "location_price_included": {
+              "type": "integer"
+            },
+            "ltm_charge": {
+              "type": "text"
+            },
+            "matrix": {
+              "type": "text"
+            },
+            "max_imprint_color_allowed": {
+              "type": "integer"
+            },
+            "max_location_allowed": {
+              "type": "integer"
+            },
+            "pms_charge": {
+              "type": "text"
+            },
+            "price_included": {
+              "type": "integer"
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "long_range"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "production_days": {
+              "type": "text"
+            },
+            "production_unit": {
+              "type": "text"
+            },
+            "rush_charge": {
+              "type": "text"
+            },
+            "setup_charge": {
+              "type": "text"
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type_of_charge": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "is_vmc": {
+          "type": "boolean"
+        },
+        "language": {
+          "type": "text",
+          "fielddata": true
+        },
+        "linename": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "keyword"
+            },
+            "rawtextlower": {
+              "type": "string",
+              "analyzer": "keyword_lowercase_analyzer",
+              "fielddata": true
+            }
+          }
+        },
+        "matrix_frieght": {
+          "type": "double"
+        },
+        "matrix_price": {
+          "type": "double"
+        },
+        "max_price": {
+          "type": "double"
+        },
+        "min_price": {
+          "type": "double"
+        },
+        "nonavailable_regions": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "packaging_charges": {
+          "type": "double"
+        },
+        "packaging_code": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "packaging_type": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "pricing": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "pricing_USD": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "pricing_AUD": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "pricing_CAD": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "private": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "product_id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "product_name": {
+          "type": "text",
+          "similarity": "BM25",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            },
+            "rawtextlower": {
+              "type": "string",
+              "analyzer": "keyword_lowercase_analyzer",
+              "fielddata": true
+            }
+          },
+          "fielddata": true
+        },
+        "search_keyword": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "text",
+              "analyzer": "keyword_lowercase_analyzer"
+            }
+          }
+        },
+        "shipping": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "carton_height": {
+              "type": "text"
+            },
+            "carton_length": {
+              "type": "double"
+            },
+            "carton_size_unit": {
+              "type": "text"
+            },
+            "carton_weight": {
+              "type": "text"
+            },
+            "carton_weight_unit": {
+              "type": "text"
+            },
+            "carton_width": {
+              "type": "text"
+            },
+            "fob_city": {
+              "type": "text",
+              "fielddata": true
+            },
+            "fob_country_code": {
+              "type": "text",
+              "fielddata": true
+            },
+            "fob_state_code": {
+              "type": "text",
+              "fielddata": true
+            },
+            "fob_zip_code": {
+              "type": "text",
+              "fielddata": true
+            },
+            "free_on_board": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "fielddata": true
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "product_height": {
+              "type": "text"
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "product_length": {
+              "type": "text"
+            },
+            "product_size_unit": {
+              "type": "text"
+            },
+            "product_weight": {
+              "type": "text"
+            },
+            "product_weight_unit": {
+              "type": "text"
+            },
+            "product_width": {
+              "type": "text"
+            },
+            "shipping_qty_per_carton": {
+              "type": "double"
+            },
+            "shipping_range": {
+              "properties": {
+                "qty": {
+                  "properties": {
+                    "gte": {
+                      "type": "long"
+                    },
+                    "lte": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "sku": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "text",
+              "analyzer": "keyword_lowercase_analyzer"
+            }
+          },
+          "fielddata": true
+        },
+        "special_price_valid_up_to": {
+          "type": "date"
+        },
+        "status": {
+          "type": "boolean"
+        },
+        "supplier": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "rawtextlower": {
+              "type": "string",
+              "analyzer": "keyword_lowercase_analyzer",
+              "fielddata": true
+            }
+          }
+        },
+        "supplier_id": {
+          "type": "text",
+          "fielddata": true
+        },
+        "supplier_info": {
+          "properties": {
+            "company": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "email": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "supplier_name": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "username": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "username": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "valid_up_to": {
+          "type": "date"
+        },
+        "vat": {
+          "type": "double"
+        },
+        "vat_unit": {
+          "type": "text"
+        },
+        "vid": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "video_url": {
+          "type": "text"
+        },
+        "createdAt": {
+          "type": "date"
+        }
+      }
+    },
+    "dist_product": {
+      "_parent": {
+        "type": "product"
+      },
+      "properties": {
+        "activeSummary": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "additional_charge": {
+          "type": "nested",
+          "properties": {
+            "charge_name": {
+              "type": "text",
+              "fielddata": true
+            },
+            "moq": {
+              "type": "text"
+            },
+            "option_name": {
+              "type": "text"
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "net_price": {
+                  "type": "double"
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            }
+          }
+        },
+        "attr_colors": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attr_decimal": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attr_imprint_color": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attr_shape": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attributes": {
+          "properties": {
+            "colors": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "decimal": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "imprint_color": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "shape": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "size": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "available_currencies": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "available_regions": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "categories": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "keyword"
+            }
+          },
+          "fielddata": true
+        },
+        "company": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "country": {
+          "type": "text",
+          "fielddata": true
+        },
+        "currency": {
+          "type": "text",
+          "fielddata": true
+        },
+        "default_color": {
+          "type": "text"
+        },
+        "default_image": {
+          "type": "text"
+        },
+        "default_image_color_code": {
+          "type": "text"
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            }
+          }
+        },
+        "distributor_central_url": {
+          "type": "text"
+        },
+        "features": {
+          "properties": {
+            "key": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "label": {
+              "type": "text"
+            },
+            "value": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                }
+              }
+            }
+          }
+        },
+        "images": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "images": {
+              "properties": {
+                "color": {
+                  "type": "text",
+                  "fielddata": true,
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "image_color_code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "web_image": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "import-tracker_id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "imprint_data": {
+          "type": "nested",
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "additional_color_charge": {
+              "type": "text"
+            },
+            "additional_location_charge": {
+              "type": "text"
+            },
+            "full_color": {
+              "type": "text"
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "imprint_area": {
+              "type": "text",
+              "fielddata": true
+            },
+            "imprint_data_range": {
+              "properties": {
+                "qty": {
+                  "properties": {
+                    "gte": {
+                      "type": "long"
+                    },
+                    "lte": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "imprint_method": {
+              "type": "text",
+              "fielddata": true
+            },
+            "imprint_position": {
+              "type": "text",
+              "fielddata": true
+            },
+            "is_pms_color_allow": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "location_price_included": {
+              "type": "integer"
+            },
+            "ltm_charge": {
+              "type": "text"
+            },
+            "matrix": {
+              "type": "text"
+            },
+            "max_imprint_color_allowed": {
+              "type": "integer"
+            },
+            "max_location_allowed": {
+              "type": "integer"
+            },
+            "pms_charge": {
+              "type": "text"
+            },
+            "price_included": {
+              "type": "integer"
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "long_range"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "production_days": {
+              "type": "text"
+            },
+            "production_unit": {
+              "type": "text"
+            },
+            "rush_charge": {
+              "type": "text"
+            },
+            "setup_charge": {
+              "type": "text"
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type_of_charge": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "is_vmc": {
+          "type": "boolean"
+        },
+        "language": {
+          "type": "text",
+          "fielddata": true
+        },
+        "linename": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "matrix_frieght": {
+          "type": "double"
+        },
+        "matrix_price": {
+          "type": "double"
+        },
+        "max_price": {
+          "type": "double"
+        },
+        "min_price": {
+          "type": "double"
+        },
+        "nonavailable_regions": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "packaging_charges": {
+          "type": "double"
+        },
+        "packaging_code": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "packaging_type": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "pricing": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "pricing_USD": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "pricing_AUD": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "pricing_CAD": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "currency": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "global_price_type": {
+              "type": "text",
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_range": {
+              "type": "nested",
+              "properties": {
+                "code": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "price": {
+                  "type": "double"
+                },
+                "qty": {
+                  "type": "integer_range"
+                }
+              }
+            },
+            "price_type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "price_unit": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "type": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "english": {
+                  "type": "text",
+                  "analyzer": "english"
+                },
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "private": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "product_id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "product_name": {
+          "type": "text",
+          "fielddata": true,
+          "similarity": "BM25",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "search_keyword": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "text",
+              "analyzer": "keyword_lowercase_analyzer"
+            }
+          }
+        },
+        "shipping": {
+          "properties": {
+            "_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "carton_height": {
+              "type": "text"
+            },
+            "carton_length": {
+              "type": "double"
+            },
+            "carton_size_unit": {
+              "type": "text"
+            },
+            "carton_weight": {
+              "type": "text"
+            },
+            "carton_weight_unit": {
+              "type": "text"
+            },
+            "carton_width": {
+              "type": "text"
+            },
+            "fob_city": {
+              "type": "text",
+              "fielddata": true
+            },
+            "fob_country_code": {
+              "type": "text",
+              "fielddata": true
+            },
+            "fob_state_code": {
+              "type": "text",
+              "fielddata": true
+            },
+            "fob_zip_code": {
+              "type": "text",
+              "fielddata": true
+            },
+            "free_on_board": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "fielddata": true
+            },
+            "import-tracker_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "product_height": {
+              "type": "text"
+            },
+            "product_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "product_length": {
+              "type": "text"
+            },
+            "product_size_unit": {
+              "type": "text"
+            },
+            "product_weight": {
+              "type": "text"
+            },
+            "product_weight_unit": {
+              "type": "text"
+            },
+            "product_width": {
+              "type": "text"
+            },
+            "shipping_qty_per_carton": {
+              "type": "double"
+            },
+            "shipping_range": {
+              "properties": {
+                "qty": {
+                  "properties": {
+                    "gte": {
+                      "type": "long"
+                    },
+                    "lte": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "sku": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "sku": {
+          "type": "text",
+          "fields": {
+            "english": {
+              "type": "text",
+              "analyzer": "english"
+            },
+            "raw": {
+              "type": "text",
+              "analyzer": "keyword_lowercase_analyzer"
+            }
+          },
+          "fielddata": true
+        },
+        "special_price_valid_up_to": {
+          "type": "date"
+        },
+        "status": {
+          "type": "boolean"
+        },
+        "supplier": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "supplier_id": {
+          "type": "text",
+          "fielddata": true
+        },
+        "supplier_info": {
+          "properties": {
+            "company": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "email": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "supplier_name": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "username": {
+              "type": "text",
+              "fielddata": true,
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "username": {
+          "type": "text",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "valid_up_to": {
+          "type": "date"
+        },
+        "vat": {
+          "type": "double"
+        },
+        "vat_unit": {
+          "type": "text"
+        },
+        "vid": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "video_url": {
+          "type": "text"
+        },
+        "createdAt": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}
