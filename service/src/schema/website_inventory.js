@@ -3,6 +3,7 @@ const websiteInventorySchema = {
     attr_colors: 'string',
     attr_style: 'string',
     attr_size: 'string',
+    min_qty: 'string',
     qty_on_hand: 'string',
     qty_on_po: 'string',
     _id: 'string'
