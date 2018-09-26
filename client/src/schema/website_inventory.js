@@ -65,6 +65,24 @@ export const websiteInventorySchema = new Schema({
     maxLength: '',
     regEx: ''
   },
+  expected_qty: {
+    type: 'string',
+    label: 'Expected',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
+  arrival_date: {
+    type: 'string',
+    label: 'Arrival Date',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
   _id: {
     type: 'string',
     label: '_id',
