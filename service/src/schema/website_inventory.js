@@ -6,6 +6,8 @@ const websiteInventorySchema = {
     min_qty: 'string',
     qty_on_hand: 'string',
     qty_on_po: 'string',
+    expected_qty: 'string',
+    arrival_date: 'string',
     _id: 'string'
 };
 
