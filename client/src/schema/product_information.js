@@ -675,6 +675,15 @@ export const ProductInformationSchema = new Schema({
     maxLength: '',
     regEx: ''
   },
+  releated_sku: {
+    type: 'string',
+    label: 'Releated SKU',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
   _id: {
     type: 'string',
     label: '_id',
