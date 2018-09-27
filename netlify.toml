@@ -1,5 +1,4 @@
 [Settings]
-ID = "QA-I"
 [build]
   # This will be your default build command
   base = "client/"
