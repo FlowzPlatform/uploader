@@ -195,8 +195,8 @@ export default {
               }).then(resp => {
                 this.isresync = false
                 this.$Notice.success({title: 're-sync Started'})
-              }).catch(err => {
-                console.log('Error: ', err)
+              }).catch(err => { // eslint-disable-line handle-callback-err
+                // console.log('Error: ', err)
                 this.$Notice.error({title: 'Network Error'})
               })
             }
@@ -219,7 +219,7 @@ export default {
         userID: this.$store.state.user._id,
         type: 'asi'
       }).then(result => {
-        console.log('result', result)
+        // console.log('result', result)
         this.asiconfig = result.data.data
       }).catch(e => {
       })
@@ -243,21 +243,21 @@ export default {
             this.loading = false
           }).catch(errr => {
             this.loading = false
-            console.log('Error', errr)
+            // console.log('Error', errr)
           })
         } else {
           this.loading = false
         }
-      }).catch(err => {
+      }).catch(err => { // eslint-disable-line handle-callback-err
         this.loading = false
-        console.log('Error ::', err)
+        // console.log('Error ::', err)
       })
     }
   },
   feathers: {
     'product-sync': {
       created (data) {
-        console.log('Created ............', data)
+        // console.log('Created ............', data)
         if (data.vid === this.vid && data.syncOn === 'ASI') {
           data._disableExpand = true
           let finx = _.findIndex(this.statusData, {id: data.id})
@@ -267,7 +267,7 @@ export default {
         }
       },
       updated (data) {
-        console.log('Updated..............', data)
+        // console.log('Updated..............', data)
         if (data.vid === this.vid && data.syncOn === 'ASI') {
           // console.log('Match')
           if (data.asiStatus !== 'completed') {
@@ -282,7 +282,7 @@ export default {
         }
       },
       removed (data) {
-        console.log('Removed..............', data)
+        // console.log('Removed..............', data)
       }
     }
   }

@@ -109,8 +109,8 @@ var beforePatch = async function(hook){
             errors: { stepStatus: 'Invalid initial stepStatus' }
           });
         }
-        else if(pdata.stepStatus == 'upload_pending' && Object.keys(pdata).indexOf('ProductInformation') == -1){
-          throw new errors.GeneralError('No file uploaded...stepStatus cannot be changed');
+        else if(pdata.stepStatus == 'upload_pending' && Object.keys(pdata).indexOf('ProductInformation') == -1 && pdata.uploadType != 'inventory'){
+          throw new errors.GeneralError('Product Information file not uploaded.');
         }
       }
       else if(hook.data.stepStatus == 'validation_completed' && !hook.data["abort"]  && !hook.data["abort_from_import"]){

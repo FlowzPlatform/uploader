@@ -42,14 +42,14 @@ export default {
         userID: this.$store.state.user._id,
         name: value
       }).then(resp => {
-        console.log('resp.data.data', resp.data.data)
+        // console.log('resp.data.data', resp.data.data)
         if (resp.data.data.length > 0) {
           return {status: true, valid: false}
         } else {
           return {status: true, valid: true}
         }
-      }).catch(err => {
-        console.log('Error', err)
+      }).catch(err => { // eslint-disable-line handle-callback-err
+        // console.log('Error', err)
         return {status: false, valid: false}
       })
       if (res.status) {
@@ -70,14 +70,14 @@ export default {
           userID: this.$store.state.user._id,
           name: value
         }).then(resp => {
-          console.log('resp.data.data', resp.data.data)
+          // console.log('resp.data.data', resp.data.data)
           if (resp.data.data.length > 0) {
             return {status: true, valid: false}
           } else {
             return {status: true, valid: true}
           }
-        }).catch(err => {
-          console.log('Error', err)
+        }).catch(err => { // eslint-disable-line handle-callback-err
+          // console.log('Error', err)
           return {status: false, valid: false}
         })
         if (res.status) {
@@ -168,8 +168,8 @@ export default {
               await asconfigurationModel.post(this.formItem).then(res => {
                 this.$Notice.success({title: 'Success', desc: 'Successfully saved.', duration: 3})
                 this.$router.push('/settings')
-              }).catch(err => {
-                console.log('Error', err)
+              }).catch(err => { // eslint-disable-line handle-callback-err
+                // console.log('Error', err)
                 this.loading = false
                 this.$Notice.error({title: 'Error', desc: 'Not Saved.', duration: 3})
               })
@@ -188,10 +188,10 @@ export default {
         password: formItem.password
       }
       let res = await axios.post(config.asiUrl + 'Login', mdata).then(res => {
-        console.log('res=>', res)
+        // console.log('res=>', res)
         return { valid: true }
       }).catch(err => {
-        console.log('ASI Auth Error', err)
+        // console.log('ASI Auth Error', err)
         return {valid: false, msg: err.message}
       })
       return res
@@ -233,8 +233,8 @@ export default {
             await asconfigurationModel.put(this.formItem.id, this.formItem).then(res => {
               this.$Notice.success({title: 'Success', desc: 'Successfully saved.', duration: 3})
               this.$router.push('/settings')
-            }).catch(err => {
-              console.log('Error', err)
+            }).catch(err => { // eslint-disable-line handle-callback-err
+              // console.log('Error', err)
               this.loading = false
               this.$Notice.error({title: 'Error', desc: 'Not Saved.', duration: 3})
             })
@@ -245,18 +245,18 @@ export default {
   },
   mounted () {
     // this.$router.push('/uploader-joblist')
-    console.log('this.$route.params.type', this.$route.params.type, this.$route.params.id)
+    // console.log('this.$route.params.type', this.$route.params.type, this.$route.params.id)
     if (this.$route.params.type === 'asi' || this.$route.params.type === 'sage') {
       if (this.$route.params.id !== undefined) {
         this.$Spin.show()
         asconfigurationModel.getThis(this.$route.params.id).then(res => {
-          console.log('edit:', res)
+          // console.log('edit:', res)
           this.formItem = res.data
           this.validName = res.data.name
           this.$Spin.hide()
-        }).catch(err => {
+        }).catch(err => { // eslint-disable-line handle-callback-err
           this.$Spin.hide()
-          console.log('Error:: ', err)
+          // console.log('Error:: ', err)
         })
       }
       this.isShow = true

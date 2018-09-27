@@ -15,6 +15,7 @@ const ProductShippingSchema = require('../../schema/product_shipping');
 const ProductImageSchema = require('../../schema/product_images');
 const ProductVariationPriceSchema = require('../../schema/product_variation_pricing');
 const ProductAdditionalChargeSchema = require('../../schema/product_additional_charge');
+const websiteInventorySchema = require('../../schema/website_inventory');
 
 
 config1.mongodb_host = process.env.mongodb_host ? process.env.mongodb_host : 'localhost'
@@ -124,6 +125,9 @@ var connectToMongo = async function(url,data,socket){
     }
     else if(data.activetab == "Product Additional Charges"){
       schemarules = ProductAdditionalChargesSchema
+    } 
+    else if(data.activetab == "Website Inventory") {
+      schemarules = websiteInventorySchema
     }
 
 

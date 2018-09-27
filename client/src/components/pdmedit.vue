@@ -1,7 +1,10 @@
 <template>
 <div>
+  <!-- Foundation CSS framework (Bootstrap and jQueryUI also supported) -->
+  <link rel='stylesheet' href='//cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'>
+  <!-- Font Awesome icons (Bootstrap, Foundation, and jQueryUI also supported) -->
   <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
-  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/foundation/3.2.5/stylesheets/foundation.min.css'>
+  
   <Tabs @on-click="generateForm" v-model="activetab">
     <TabPane label="Simple" v-if="tab0">
       <div class="pdmsimple">
@@ -34,7 +37,7 @@
             <Col>
               <Spin v-if="simpleDataLoader" fix>
                 <Icon type="load-c" size=22 class="demo-spin-icon-load"></Icon>
-                <div>Loading</div>
+                <!-- <div>Loading</div> -->
               </Spin>
               <div id='editor_simple'></div>
             </Col>
@@ -80,7 +83,7 @@
           <Col>
             <Spin v-if="advanceDataLoader" fix>
               <Icon type="load-c" size=22 class="demo-spin-icon-load"></Icon>
-              <div>Loading</div>
+              <!-- <div>Loading</div> -->
             </Spin>
             <div id='editor_holder'></div>
           </Col>
@@ -110,10 +113,11 @@ import ProductPricingSchema from '@/schema/product_price'
 import ProductImagesSchema from '@/schema/product_images'
 import ProductImprintDataSchema from '@/schema/product_imprint_data'
 import ProductShippingSchema from '@/schema/product_shipping'
+import WebsiteInventorySchema from '@/schema/website_inventory'
 
 const Schema = require('simpleschema')
 let editor
-JSONEditor.defaults.theme = 'foundation3'
+JSONEditor.defaults.theme = 'foundation5'
 JSONEditor.defaults.iconlib = 'fontawesome4'
 
 let err_length = 0
@@ -162,6 +166,11 @@ export default {
           schema:ProductShippingSchema,
           mapping: [],
           errmsg: []
+        },
+        'Website Inventory': {
+          schema: WebsiteInventorySchema,
+          mapping: [],
+          errmsg: []
         }
       }
     }
@@ -193,14 +202,7 @@ export default {
         this.realdata[item] = data[item]
       }
       return this.realdata
-      // console.log("new data",this.realdata)
     },
-    // mapAdvData(data) {
-    //   for(let item in data) {
-    //     this.realdata[item] = data[item]
-    //   }
-    //   return this.realdata
-    // },
     async hanleSubmit () {
       let data = editor.getValue()
       _.forIn(this.mObj, (value, key) => {
@@ -213,8 +215,9 @@ export default {
       let imprintData = null
       let imagesData = null
       let shippingData = null
+      let inventoryData = null
       
-      let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'non-available_regions', 'attributes', 'images', 'pricing', 'imprint_data', 'shipping', 'features']
+      let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'attributes', 'images', 'inventory', 'pricing', 'imprint_data', 'shipping', 'features']
       keyToDelete.forEach(e => { delete productData[e] });
 
       if (this.activetab === 1) {
@@ -270,10 +273,18 @@ export default {
         })
         let pShipping = await this.proceedToValidate('Product Shipping', shippingData)
       }
+      if (data.inventory != undefined) {
+        inventoryData = lodash.cloneDeep(data.inventory)
+        keyToDelete = ['import-tracker_id', '_id', 'attr_style', 'attr_size', 'attr_colors', 'attributes']
+        inventoryData.map(item => {
+          keyToDelete.forEach(e => {
+            delete item[e]
+          })
+        })
+        let pInventory = await this.proceedToValidate('Website Inventory', inventoryData)
+      }
       if(this.activetab === 0) {
         this.simpleSubmitLoading = true
-        // console.log('Simple Value:::', data)
-        
         let srvVld = {
           data: productData,
           sheet_name: 'Product Information'
@@ -327,7 +338,7 @@ export default {
         this.advancedSubmitLoading = true
         // console.log('Advanced Value:::', data)
 
-        let validateServerside  = await this.validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData)
+        let validateServerside  = await this.validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData, inventoryData)
         for(let key in this.mObj) {
           if (this.mObj[key].errmsg.length > 0) {
             // console.log('Error', key, this.mObj[key].errmsg)
@@ -371,7 +382,7 @@ export default {
         }
       }
     },
-    validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData) {
+    validateAtServer(data, productData, pricingData, imagesData, imprintData, shippingData, inventoryData) {
       let srvVld = {
         data: data,
         sheet_name: null
@@ -389,6 +400,8 @@ export default {
             srvVld.data = imprintData
           } else if (key == 'Product Shipping') {
             srvVld.data = shippingData
+          } else if (key == 'Website Inventory') {
+            srvVld.data = inventoryData
           }
           await api.request('post', '/product-validation', srvVld).then(res => {
             // console.log('Validation Res.', key, res.data)
@@ -459,7 +472,6 @@ export default {
             properties: {
               sku: {
                 title: "SKU",
-                optional: false,
                 type: "string",
                 propertyOrder: 2
               },
@@ -486,7 +498,7 @@ export default {
               },
               price_1: {
                 title: "Price 1",
-                type: "string",
+                type: "number",
                 propertyOrder: 6
               },
               description: {
@@ -507,9 +519,11 @@ export default {
               available_regions: {
                 title: "Available Regions",
                 type: "array",
-                format: "table",
                 items: {
                   type: 'string'
+                },
+                options: {
+                  disable_array_reorder: true
                 },
                 propertyOrder: 40
               },
@@ -656,7 +670,6 @@ export default {
               supplier_info: {
                 title: "Supplier",
                 type: "object",
-                format: "table",
                 options: {
                   disable_properties: true
                 }
@@ -664,21 +677,21 @@ export default {
               categories: {
                 title: "Categories",
                 type: "array",
-                format: "table",
                 items: {
                   type: 'string'
+                },
+                options: {
+                  disable_array_reorder: true
                 },
                 propertyOrder: 42
               },
               vid: {
                 type: "array",
-                title: "vid",
-                format: "table"
+                title: "vid"
               },
               tags: {
                 type: "array",
                 title: "Tags",
-                format: "table",
                 items: {
                   type: 'string'
                 },
@@ -686,8 +699,10 @@ export default {
               },
               'non-available_regions': {
                 type: "array",
-                title: 'Non Available Regions',
-                format: "table",
+                title: 'Non-Available Regions',
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
                   type: 'string'
                 },
@@ -696,7 +711,9 @@ export default {
               available_currencies: {
                 title: "Available Currencies",
                 type: "array",
-                format: "table",
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
                   type: 'string'
                 }
@@ -704,59 +721,569 @@ export default {
               attributes: {
                 title: "Attributes",
                 type: "object",
+                format: "grid",
+                properties: {
+                  colors: {
+                    title: "Colors",
+                    type: "array",
+                    items: {
+                      type: "string"
+                    },
+                    options: {
+                      disable_array_reorder: true
+                    }
+                  }
+                },
                 options: {
                   disable_edit_json: true
                 },
                 propertyOrder: 44
               },
+              inventory: {
+                title: "Inventory",
+                type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
+                items: {
+                  title: " ",
+                  type: "object",
+                  format: "grid",
+                  options: {
+                    disable_edit_json: true,
+                    disable_properties: true
+                  },
+                  properties: {
+                    qty_on_hand: {
+                      title: "Qty on Hand",
+                      type: "string"
+                    },
+                    qty_on_po: {
+                      title: "Qty on PO",
+                      type: "string"
+                    },
+                    sku: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    attributes: {
+                      title: "attributes",
+                      type: "object",
+                      options: {
+                        disable_edit_json: true,
+                        disable_properties: true
+                      },
+                      properties: {
+                        colors: {
+                          type: "array",
+                          items: {
+                            type: "string"
+                          },
+                          options: {
+                            disable_array_reorder: true
+                          }
+                        }
+                      }
+                    },
+                    _id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    "import-tracker_id": {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    attr_style: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    attr_size: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    attr_color: {
+                      options: {
+                        hidden: true
+                      }
+                    }
+                  }
+                }
+              },
               images: {
                 title: "Images",
                 type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
+                  title: " ",
                   type: "object",
                   properties: {
                     images: {
                       type: "array",
                       items: {
+                        format: "grid",
                         properties: {
                           type: "object",
                           secure_url: {
+                            title: "Secure URL",
                             type: "string",
                             links: [
                               { 
-                                rel: "Preview Image",
-                                href: "{{self}}",
-                                mediaType: "image"
+                                rel: "👁 Image",
+                                href: "{{self}}"
+                                // mediaType: "image"
                               }
                             ]
+                          },
+                          web_image:{
+                            title: "Web image",
+                            type: "string"
+                          },
+                          color: {
+                            title: "Color",
+                            type: "string"
+                          },
+                          image_color_code: {
+                            title: "Image color code",
+                            type: "string"
                           }
+                        },
+                        options: {
+                          disable_edit_json: true,
+                          disable_properties: true
                         }
                       }
+                    },
+                    _id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    product_id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    sku: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    "import-tracker_id": {
+                      options: {
+                        hidden: true
+                      }
                     }
+                  },
+                  options: {
+                    disable_properties: true,
+                    disable_edit_json: true
                   }
                 }
               },
               pricing: {
                 title: "Pricing",
                 type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
-                  type: "object"
+                  title: " ",
+                  type: "object",
+                  format: "grid",
+                  options: {
+                    disable_properties: true,
+                    disable_edit_json: true
+                  },
+                  properties: {
+                    _id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    product_id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    sku: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    price_type: {
+                      title: "Price Type",
+                      type: "string"
+                    },
+                    type: {
+                      title: "Type",
+                      type: "string"
+                    },
+                    global_price_type: {
+                      title: "Global Price Type",
+                      type: "string"
+                    },
+                    currency: {
+                      title: "Currency",
+                      type: "string"
+                    },
+                    price_unit: {
+                      title: "Price Unit",
+                      type: "string"
+                    },
+                    "import-tracker_id": {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    price_range: {
+                      title: "Price Range",
+                      type: "array",
+                      items: {
+                        title: " ",
+                        type: "object",
+                        format: "grid",
+                        options: {
+                          disable_edit_json: true,
+                          disable_properties: true
+                        },
+                        properties: {
+                          qty: {
+                            title: "Quantity",
+                            type: "object",
+                            format: "grid",
+                            options: {
+                              disable_edit_json: true,
+                              disable_properties: true
+                            },
+                            properties: {
+                              gte: {
+                                title: "Min",
+                                type: "number"
+                              },
+                              lte: {
+                                title: "Max",
+                                type: "number"
+                              }
+                            }
+                          },
+                          price: {
+                            title: "Price",
+                            type: "number"
+                          },
+                          code: {
+                            title: "Code",
+                            type: "string"
+                          }
+                        }
+                      },
+                      options: {
+                        disable_array_reorder: true
+                      }
+                    }
+                  }
                 }
               },
               imprint_data: {
                 title: "Imprint Data",
-                type: "array"
+                type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
+                items: {
+                  title: " ",
+                  type: "object",
+                  format: "grid",
+                  properties: {
+                    production_unit: {
+                      title: "Production Unit",
+                      type: "string",
+                      propertyOrder: 1
+                    },
+                    imprint_position: {
+                      title: "Imprint Position",
+                      type: "string",
+                      propertyOrder: 2
+                    },
+                    imprint_area: {
+                      title: "Imprint Area",
+                      type: "string",
+                      propertyOrder: 4
+                    },
+                    matrix: {
+                      title: "Matrix",
+                      type: "string",
+                      propertyOrder: 3
+                    },
+                    max_imprint_color_allowed: {
+                      title: "Max Imprint Color Allowed",
+                      type: "number"
+                    },
+                    price_included: {
+                      title: "Price Included",
+                      type: "number",
+                      propertyOrder: 5
+                    },
+                    max_location_allowed: {
+                      title: "Max Location Allowed",
+                      type: "number",
+                      propertyOrder: 15
+                    },
+                    location_price_included: {
+                      title: "Location Price Included",
+                      type: "number"
+                    },
+                    production_days: {
+                      title: "Production Days",
+                      type: "string",
+                      propertyOrder: 6
+                    },
+                    setup_charge: {
+                      title: "Setup Charge",
+                      type: "string",
+                      propertyOrder: 7
+                    },
+                    rush_charge: {
+                      title: "Rush Charge",
+                      type: "string",
+                      propertyOrder: 8
+                    },
+                    additional_location_charge: {
+                      title: "Additional Location Charge",
+                      type: "string"
+                    },
+                    additional_color_charge: {
+                      title: "Additional Color Charge",
+                      type: "string",
+                      propertyOrder: 16
+                    },
+                    ltm_charge: {
+                      title: "LTM Charge",
+                      type: "string",
+                      propertyOrder: 9
+                    },
+                    pms_charge: {
+                      title: "PMS Charge",
+                      type: "string",
+                      propertyOrder: 10
+                    },
+                    type_of_charge: {
+                      title: "Type of Charge",
+                      type: "string",
+                      propertyOrder: 14
+                    },
+                    imprint_method: {
+                      title: "Imprint Method",
+                      type: "string",
+                      propertyOrder: 11
+                    },
+                    is_pms_color_allow: {
+                      title: "is PMS Color Allow",
+                      type: "string",
+                      propertyOrder: 13
+                    },
+                    full_color: {
+                      title: "Full Color",
+                      type: "string",
+                      propertyOrder: 12
+                    },
+                    imprint_data_range: {
+                      title: "Imprint Data Range",
+                      type: "array",
+                      items: {
+                        title: " ",
+                        type: "object",
+                        format: "grid",
+                        options: {
+                          disable_edit_json: true,
+                          disable_properties: true
+                        },
+                      },
+                      options: {
+                        disable_array_reorder: true
+                      }
+                    },
+                    _id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    sku: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    product_id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    "import-tracker_id": {
+                      options: {
+                        hidden: true
+                      }
+                    }
+                  },
+                  options: {
+                    disable_edit_json: true,
+                    disable_properties: true
+                  }
+                }
               },
               shipping: {
                 title: "Shipping",
                 type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
-                  type: "object"
+                  tite: " ",
+                  type: "object",
+                  format: "grid",
+                  properties: {
+                    _id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    "import-tracker_id": {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    sku: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    product_id: {
+                      options: {
+                        hidden: true
+                      }
+                    },
+                    carton_height: {
+                      title: "Carton Height",
+                      type: "string",
+                      propertyOrder: 7
+                    },
+                    free_on_board: {
+                      title: "Free on Board",
+                      type: "string",
+                      propertyOrder: 16
+                    },
+                    fob_city: {
+                      title: "Fob City",
+                      type: "string",
+                      propertyOrder: 3
+                    },
+                    fob_state_code: {
+                      title: "Fob State Code",
+                      type: "string",
+                      propertyOrder: 6
+                    },
+                    fob_country_code: {
+                      title: "Fob Country Code",
+                      type: "string",
+                      propertyOrder: 9
+                    },
+                    fob_zip_code: {
+                      title: "Fob Zip Code",
+                      type: "string",
+                      propertyOrder: 12
+                    },
+                    shipping_qty_per_carton: {
+                      title: "Shipping Qty Per Carton",
+                      type: "number"
+                    },
+                    carton_length: {
+                      title: "Carton Length",
+                      type: "number",
+                      propertyOrder: 11
+                    },
+                    carton_width: {
+                      title: "Carton Width",
+                      type: "string",
+                      propertyOrder: 8
+                    },
+                    carton_weight: {
+                      title: "Carton Weight",
+                      type: "string",
+                      propertyOrder: 10
+                    },
+                    product_length: {
+                      title: "Product Length",
+                      type: "string",
+                      propertyOrder: 5
+                    },
+                    product_width: {
+                      title: "Product Width",
+                      type: "string",
+                      propertyOrder: 2
+                    },
+                    product_height: {
+                      title: "Product Height",
+                      type: "string",
+                      propertyOrder: 1
+                    },
+                    product_weight: {
+                      title: "Product Weight",
+                      type: "string",
+                      propertyOrder: 4
+                    },
+                    carton_size_unit: {
+                      title: "Carton Size Unit",
+                      type: "string",
+                      propertyOrder: 13
+                    },
+                    carton_weight_unit: {
+                      title: "Carton Weight Unit",
+                      type: "string",
+                      propertyOrder: 14
+                    },
+                    product_size_unit: {
+                      title: "Product Size Unit",
+                      type: "string",
+                      propertyOrder: 15
+                    },
+                    product_weight_unit: {
+                      title: "Product Weight Unit",
+                      type: "string"
+                    },
+                    shipping_range: {
+                      title: "Shipping Range",
+                      type:"array",
+                      options: {
+                        disable_array_reorder: true
+                      },
+                      items: {
+                        title: " ",
+                        type: "object",
+                        format: "grid",
+                        options: {
+                          disable_edit_json: true,
+                          disable_properties: true
+                        }
+                      }
+                    }
+                  },
+                  options: {
+                    disable_edit_json: true,
+                    disable_properties: true
+                  }
                 }
               },
               search_keyword: {
                 title: "Search Keywords",
                 type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
                   type: "string"
                 }
@@ -764,8 +1291,17 @@ export default {
               features: {
                 title: "Features",
                 type: "array",
+                options: {
+                  disable_array_reorder: true
+                },
                 items: {
+                  title: " ",
                   type: "object",
+                  format: "grid",
+                  options: {
+                    disable_edit_json: true,
+                    disable_properties: true
+                  },
                   properties: {
                     key: {
                       type: 'string'
@@ -1405,8 +1941,8 @@ export default {
 </script>
 
 <style scoped>
-/* @import '/static/css/foundation.min.css'; */
-/* @import '/static/css/font-awesome.css'; */
+/* @import url('https://cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'); */
+/* @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'); */
 
 .pdmedit {
   padding: 40px;

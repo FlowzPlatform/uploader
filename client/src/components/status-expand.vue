@@ -50,7 +50,7 @@ export default {
     }
   },
   mounted () {
-    console.log('this.row', this.row)
+    // console.log('this.row', this.row)
     if (this.row.asiError !== undefined) {
       this.tdata = this.row.asiError
       this.mdata = _.chunk(this.tdata, 5)
