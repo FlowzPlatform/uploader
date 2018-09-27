@@ -25,7 +25,4 @@ ID = "Develop-I"
   force = true
   
   
-[build.environment]
-  domainkey = "flowzcluster.tk"
-  is_ssl = "true"
-  MYENV = "Production"
+
