@@ -695,6 +695,9 @@ export default {
                 items: {
                   type: 'string'
                 },
+                options: {
+                  disable_array_reorder: true
+                },
                 propertyOrder: 43
               },
               'non-available_regions': {
@@ -858,6 +861,9 @@ export default {
                           disable_edit_json: true,
                           disable_properties: true
                         }
+                      },
+                      options: {
+                        disable_array_reorder: true
                       }
                     },
                     _id: {
