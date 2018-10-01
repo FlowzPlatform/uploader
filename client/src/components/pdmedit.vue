@@ -765,6 +765,18 @@ export default {
                       title: "Qty on PO",
                       type: "string"
                     },
+                    min_qty: {
+                      title: "Min Qty",
+                      type: "string"
+                    },
+                    expected_qty: {
+                      title: "Expected Qty",
+                      type: "string"
+                    },
+                    arrival_date: {
+                      title: "Arrival Date",
+                      type: "string"
+                    },
                     sku: {
                       options: {
                         hidden: true
@@ -779,6 +791,16 @@ export default {
                       },
                       properties: {
                         colors: {
+                          type: "array",
+                          items: {
+                            type: "string"
+                          },
+                          options: {
+                            disable_array_reorder: true
+                          }
+                        },
+                        actual_colors: {
+                          title: "Actual Colors",
                           type: "array",
                           items: {
                             type: "string"
