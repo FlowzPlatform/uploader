@@ -20,6 +20,15 @@ export const websiteInventorySchema = new Schema({
     maxLength: '',
     regEx: ''
   },
+  attr_actual_colors: {
+    type: 'string',
+    label: 'Actual Color',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
   attr_style: {
     type: 'string',
     label: 'Style',
