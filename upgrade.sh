@@ -109,7 +109,7 @@ then
 else
   {
       echo "call $TRAVIS_BRANCH branch"
-      ENV_ID=`curl -u ""$RANCHER_ACCESSKEY_QA":"$RANCHER_SECRETKEY_QA"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL_QA/v2-beta/projects?name=Develop" | jq '.data[].id' | tr -d '"'`
+      ENV_ID=`curl -u ""$RANCHER_ACCESSKEY_QA":"$RANCHER_SECRETKEY_QA"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL_QA/v2-beta/projects?name=QA" | jq '.data[].id' | tr -d '"'`
       echo $ENV_ID
       USERNAME="$DOCKER_USERNAME";
       jobqueueUrl="$JOBQUEUEURL_QA";
@@ -140,21 +140,21 @@ fi
 SERVICE_ID_BACKEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_BACKEND" | jq '.data[].id' | tr -d '"'`
 echo $SERVICE_ID_BACKEND
 
-SERVICE_ID_FRONTEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_FRONTEND" | jq '.data[].id' | tr -d '"'`
-echo $SERVICE_ID_FRONTEND
+#SERVICE_ID_FRONTEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_FRONTEND" | jq '.data[].id' | tr -d '"'`
+#echo $SERVICE_ID_FRONTEND
 
 curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
 -X POST \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
-       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$BACKEND_HOST"'"},"ports": ["3040:3040/tcp","4040:4040/tcp"],"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$MONGODB_HOST"'","mongodb_port":"'"$MONGODB_PORT"'","username":"'"$MONGODB_USER"'","password":"'"$MONGODB_PASS"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'","cloudname":"'"$cloudname"'","apikey":"'"$apikey"'","apisecret":"'"$apisecret"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
+       "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$BACKEND_HOST"'"},"environment": {"RDB_HOST": "'"$RDB_HOST"'","RDB_PORT": "'"$RDB_PORT"'","mongodb_host":"'"$MONGODB_HOST"'","mongodb_port":"'"$MONGODB_PORT"'","username":"'"$MONGODB_USER"'","password":"'"$MONGODB_PASS"'","jobqueueUrl":"'"$jobqueueUrl"'","socket_port":"'"$socket_port"'","PORT":"'"$server_port"'","domainKey":"'"$DOMAINKEY"'","mongodb_database":"'"$MONGODB_DATABASE"'","cloudname":"'"$cloudname"'","apikey":"'"$apikey"'","apisecret":"'"$apisecret"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3040,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
 $RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_BACKEND?action=upgrade
 
-curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
--X POST \
--H 'Accept: application/json' \
--H 'Content-Type: application/json' \
--d '{
-     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_frontend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$FRONT_HOST"'","io.rancher.scheduler.affinity:container_label_soft_ne": "'"$STACK_SERVICE_NAME_FOR_FRONT"'"},"environment": {"server_port": "'"$server_port"'","socket_port": "'"$socket_port"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 80,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"requestLine": "GET \"http://localhost\" \"HTTP/1.0\"","responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
-$RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_FRONTEND?action=upgrade
+#curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
+#-X POST \
+#-H 'Accept: application/json' \
+#-H 'Content-Type: application/json' \
+#-d '{
+#     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/uploader_frontend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "'"$FRONT_HOST"'","io.rancher.scheduler.affinity:container_label_soft_ne": "'"$STACK_SERVICE_NAME_FOR_FRONT"'"},"environment": {"server_port": "'"$server_port"'","socket_port": "'"$socket_port"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 80,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"requestLine": "GET \"http://localhost\" \"HTTP/1.0\"","responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
+#$RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_FRONTEND?action=upgrade
