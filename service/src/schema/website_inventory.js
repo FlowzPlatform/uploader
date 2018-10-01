@@ -1,6 +1,7 @@
 const websiteInventorySchema = {
     sku: 'string',
     attr_colors: 'string',
+    attr_actual_colors: 'string',
     attr_style: 'string',
     attr_size: 'string',
     min_qty: 'string',
