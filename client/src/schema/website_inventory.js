@@ -56,6 +56,15 @@ export const websiteInventorySchema = new Schema({
     maxLength: '',
     regEx: ''
   },
+  related_sku: {
+    type: 'string',
+    label: 'Related SKU',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
   qty_on_hand: {
     type: 'string',
     label: 'Qty on Hand',

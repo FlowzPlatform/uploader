@@ -695,6 +695,9 @@ export default {
                 items: {
                   type: 'string'
                 },
+                options: {
+                  disable_array_reorder: true
+                },
                 propertyOrder: 43
               },
               'non-available_regions': {
@@ -762,6 +765,22 @@ export default {
                       title: "Qty on PO",
                       type: "string"
                     },
+                    min_qty: {
+                      title: "Min Qty",
+                      type: "string"
+                    },
+                    related_sku: {
+                      title: "Related SKU",
+                      type: "string"
+                    },
+                    expected_qty: {
+                      title: "Expected Qty",
+                      type: "string"
+                    },
+                    arrival_date: {
+                      title: "Arrival Date",
+                      type: "string"
+                    },
                     sku: {
                       options: {
                         hidden: true
@@ -776,6 +795,16 @@ export default {
                       },
                       properties: {
                         colors: {
+                          type: "array",
+                          items: {
+                            type: "string"
+                          },
+                          options: {
+                            disable_array_reorder: true
+                          }
+                        },
+                        actual_colors: {
+                          title: "Actual Colors",
                           type: "array",
                           items: {
                             type: "string"
@@ -858,6 +887,9 @@ export default {
                           disable_edit_json: true,
                           disable_properties: true
                         }
+                      },
+                      options: {
+                        disable_array_reorder: true
                       }
                     },
                     _id: {
