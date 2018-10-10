@@ -33,13 +33,8 @@ socket.on('reconnect', function (reconnect) {
 })
 
 socket.on('error', function (error) {
-  console.log('err....', error)
+  console.log('Socket.io ', error)
 })
-  // if (process.env.NODE_ENV !== 'development') {
-  //   socket = io(config.serverURI, { path: '/dbetl/socket.io' })
-  // } else {
-  //   socket = io(config.serverURI)
-  // }
 
 const feathers = Feathers()
   .configure(socketio(socket))
@@ -55,8 +50,7 @@ import 'element-ui/lib/theme-default/index.css'
 Vue.use(ElementUI, { element })
   /* vueTinymce */
 import vueTinymce from '@deveodk/vue-tinymce'
-// You need a specific loader for CSS files like https://github.com/webpack/css-loader
-// import '@deveodk/vue-tinymce/dist/@deveodk/vue-tinymce.css'
+
 Vue.use(vueTinymce)
   /* vueTinymce */
   /* IView */

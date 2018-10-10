@@ -95,7 +95,7 @@ let currentDate = new Date().toISOString().slice(0,10);
         errorString: "Matrix_Price field invalid, please input numeric value",
         errorCode: 'Matrix_PriceRegEx400',
         qryMongo : {$and:[{ "matrix_price": { $exists: true, $ne: "" } },{ "matrix_price" : {$not: /^\d{0,8}(\.\d{0,4})?$/ }}]},
-        qryObject: (matrix_price)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (matrix_price == undefined || matrix_price == "") { return true } else if(!regExp.test(matrix_price)) { return true } else { return false } },
+        qryObject: (matrix_price)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (matrix_price == undefined) { return true } else if(!regExp.test(matrix_price)) { return true } else { return false } },
         qryErrStr: "Matrix_Price field invalid, please input numeric value"
     },
     {
@@ -122,7 +122,7 @@ let currentDate = new Date().toISOString().slice(0,10);
         errorCode: 'Matrix_FreightRegEx400',
         qryMongo : {$and: [{ "matrix_frieght": { $exists: true, $ne: "" } },
          { "matrix_frieght" : {$not: /^\d{0,8}(\.\d{0,4})?$/ }}]},
-        qryObject: (matrix_frieght)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (matrix_frieght == undefined || matrix_frieght == "") { return true; } else if(!regExp.test(matrix_frieght)) { return true; } else { return false; } },
+        qryObject: (matrix_frieght)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (matrix_frieght == undefined) { return true; } else if(!regExp.test(matrix_frieght)) { return true; } else { return false; } },
         qryErrStr: "Matrix_Freight field invalid, please input numeric value"
    },
     {
@@ -131,7 +131,7 @@ let currentDate = new Date().toISOString().slice(0,10);
         errorCode: 'VatRegEx400',
         qryMongo : {$and: [{ "vat": { $exists: true, $ne: "" } },
          { "vat" : {$not: /^\d{0,8}(\.\d{0,4})?$/ }}]},
-        qryObject: (vat)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (vat == undefined || vat == "") { return true } else if(!regExp.test(vat)) { return true; } else { return false; } },
+        qryObject: (vat)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (vat == undefined) { return true } else if(!regExp.test(vat)) { return true; } else { return false; } },
         qryErrStr: "vat field invalid, please input numeric value"
    },
    {
@@ -140,7 +140,7 @@ let currentDate = new Date().toISOString().slice(0,10);
        errorCode: 'packaging_chargesRegEx400',
        qryMongo : {$and: [{ "packaging_charges": { $exists: true, $ne: "" } },
         { "packaging_charges" : {$not: /^\d{0,8}(\.\d{0,4})?$/ }}]},
-       qryObject: (packaging_charges)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (packaging_charges == undefined || packaging_charges == "") { return true; } else if(!regExp.test(packaging_charges)) { return true; } else { return false; } },
+       qryObject: (packaging_charges)=>{ let regExp = new RegExp(/^\d{0,8}(\.\d{0,4})?$/); if (packaging_charges == undefined) { return true; } else if(!regExp.test(packaging_charges)) { return true; } else { return false; } },
        qryErrStr: "Packaging_Charges field invalid, please input numeric value"
   },
   {
@@ -150,7 +150,7 @@ let currentDate = new Date().toISOString().slice(0,10);
     qryMongo : {$and:
     [{ "video_url": { $exists: true, $ne: "" } },
      { "video_url" : {$not: /https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*/ }}]},
-    qryObject: (video_url)=>{ let regExp = new RegExp(/https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*/); if (video_url == undefined || video_url == "") { return true; } else if(!regExp.test(video_url)) { return true; } else { return false; } },
+    qryObject: (video_url)=>{ let regExp = new RegExp(/https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*$?/); if (video_url == undefined) { return true; } else if(!regExp.test(video_url)) { return true; } else { return false; } },
     qryErrStr: "Video_URL field invalid, please input a valid URL"
 },
 {
@@ -160,7 +160,7 @@ let currentDate = new Date().toISOString().slice(0,10);
     qryMongo : {$and:
     [{ "distributor_central_url": { $exists: true, $ne: "" } },
      { "distributor_central_url" : {$not: /https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*/ }}]},
-    qryObject: (distributor_central_url)=>{ let regExp = new RegExp(/https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*/); if (distributor_central_url == undefined || distributor_central_url == "") { return true; } else if(!regExp.test(distributor_central_url)) { return true; } else { return false; } },
+    qryObject: (distributor_central_url)=>{ let regExp = new RegExp(/https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*/); if (distributor_central_url == undefined) { return true; } else if(!regExp.test(distributor_central_url)) { return true; } else { return false; } },
     qryErrStr: "Distributor_Central_URL field invalid, please input a valid URL"
 }
 ];

@@ -1,73 +1,177 @@
 <template>
-<div class="uploader-header">
-<nav class="navbar" style="background-color:#2d8cf0">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <!-- <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span> -->
-        <i class="fa fa-bars"></i>
-      </button>
-      <a class="navbar-brand" href="#"><img src="../assets/images/logo.png" class="img-responsive" alt="Responsive image"></img></a>
-    </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="/pdm"><Icon type="navicon-round" :size="14"></Icon>&nbsp PDM</a></li>
-        <li><a href="/syncstatus"><Icon type="navicon-round" :size="14"></Icon>&nbsp Sync Status</a></li>
-        <li><a href="/uploader-joblist"><Icon type="navicon-round" :size="14"></Icon>&nbsp Status</a></li>
-        <li><a href="/uploader"><Icon type="cloud" :size="14"></Icon>&nbsp Uploader</a></li>
-        <li><a href="/invite"><Icon type="cash" :size="14"></Icon>&nbsp Invite</a></li>
-        <form class="navbar-form navbar-left" action="/action_page.php">
-          <Select v-model="selected_user" style="width:200px; margin-top: 8px;">
-            <Option v-for="item in $store.state.user_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
+    <Menu mode="horizontal" theme="primary">
+      <div class="f-logo">
+        <img src="../assets/images/logo.png" style="vertical-align: inherit;">
+      </div>
+      <Row type="flex" justify="end">
+          <router-link to="/pdm">
+            <Menu-item name="1">
+              <Icon type="navicon-round" :size="14"></Icon>
+              &nbsp;PDM
+            </Menu-item>
+          </router-link>
+          <router-link to="/syncstatus">
+            <Menu-item name="2">
+              <Icon type="navicon-round" :size="14"></Icon>
+              &nbsp;Sync Status
+            </Menu-item>
+          </router-link>
+          <router-link to="/uploader-joblist">
+            <Menu-item name="3">
+              <Icon type="navicon-round" :size="14"></Icon>
+              &nbsp;Upload Status
+            </Menu-item>
+          </router-link>
+          <router-link to="/uploader">
+            <Menu-item name="4">
+              <Icon type="cloud" :size="14"></Icon>                              
+              &nbsp;Uploader
+            </Menu-item>
+          </router-link>
+          <router-link to="/invite">
+            <Menu-item name="5">
+              <Icon type="cash" :size="14"></Icon>
+              &nbsp;Invite
+            </Menu-item>
+          </router-link>
+          
+          <Menu-item name="6">
+            <Select v-model="selected_user" style="min-width:150px;max-width:150px" @on-change="setSelectedUser()" :disabled=$store.state.disableuser>
+              <Option v-for="item in $store.state.user_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
           </Select>
-          &nbsp
-          <Select v-model="selected_subscription_name" style="width:200px; margin-top: 8px;">
-            <Option v-for="item in $store.state.subscription_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
-          </Select>
+          </Menu-item>
+          <Menu-item name="6">
+            <Select v-model="selected_subscription_name" style="min-width:220px;max-width:220px" @on-change="getSubscriptionId()" :disabled=$store.state.disablesubscription>
+              <Option v-for="item in $store.state.subscription_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
+            </Select>
+          </Menu-item>
+          <Submenu name="7">
+            <template slot="title">
+              <Icon type="grid" :size="20"></Icon>
+            </template>
+            <MenuGroup title="Flowz-Products" style="font-size:14px">
+              <MenuItem name="7-1"><span @click="gotoDashboard" style="font-size:12px;">Flowz Dashboard</span></MenuItem>
+              <MenuItem name="7-2"><span @click="gotoWebsiteBuilder" style="font-size:12px;">Website Builder</span></MenuItem>
+              <MenuItem name="7-3"><span @click="gotoCRM" style="font-size:12px;">CRM</span></MenuItem>
+            </MenuGroup>
+          </Submenu>
+          <!-- <Menu-item name="8"> -->
+          <Submenu name="8">
+            <template slot="title">
+              <Icon type="person" :size="16"></Icon>
+              {{$store.state.user === null ? 'Guest' : $store.state.user.email}}
+            </template>
+            <Menu-item name="8-1">
+              <a @click="viewConfig">
+                <Icon type="gear-b" :size="16"></Icon>
+                ASI/SAGE Configuration
+              </a>
+            </Menu-item>
+            <Menu-item name="8-2">
+              <a @click="handleLogout()">
+                <Icon type="ios-locked-outline" :size="16"></Icon>
+                Logout
+              </a>
+            </Menu-item>
+          </Submenu>
+          <!-- </Menu-item> -->
+        </Col>
+      </Row>
+    </Menu>
+    <!-- <Menu mode="horizontal" :theme="'primary'">
+        <Row type="flex">
+        <Col span="4">
+            <div class="f-logo">
+                <img src="../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
+            </div>
+        </Col>
+        <Col span="20">
+            <Row type="flex" justify="end">
+                <div class="layout-nav">
+                  <router-link to="/pdm">
+                        <Menu-item name="1">
+                            <Icon type="navicon-round" :size="14"></Icon>
+                            &nbsp;PDM
+                        </Menu-item>
+                    </router-link>
+                    <router-link to="/syncstatus">
+                        <Menu-item name="1">
+                            <Icon type="navicon-round" :size="14"></Icon>
+                            &nbsp;Sync Status
+                        </Menu-item>
+                    </router-link>
+                    <router-link to="/uploader-joblist">
+                        <Menu-item name="2">
+                            <Icon type="navicon-round" :size="14"></Icon>
+                            &nbsp;Upload Status
+                        </Menu-item>
+                    </router-link>
+                    <router-link to="/uploader">
+                      <Menu-item name="3">
+                              <Icon type="cloud" :size="14"></Icon>                              
+                              &nbsp;Uploader
+                      </Menu-item>
+                   </router-link>
+                    <router-link to="/invite">
+                        <Menu-item name="4">
+                            <Icon type="cash" :size="14"></Icon>
+                            &nbsp;Invite
+                        </Menu-item>
+                    </router-link>
+                  <Menu-item name="4" >
+                    <Select v-model="selected_user" style="width:200px" @on-change="setSelectedUser()" :disabled=$store.state.disableuser>
+                      <Option v-for="item in $store.state.user_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
+                  </Select>
+                  </Menu-item>
+                  <Menu-item name="5">
+                    <Select v-model="selected_subscription_name" style="width:200px" @on-change="getSubscriptionId()" :disabled=$store.state.disablesubscription>
+                        <Option v-for="item in $store.state.subscription_list" :value="item.label" :key="item.label">{{ item.label }}</Option>
+                    </Select>
+                  </Menu-item>
+                    <Submenu name="6">
+           <template slot="title">
+                <Icon type="grid" :size="20"></Icon>
+           </template>
+           <MenuGroup title="Flowz-Products" style="font-size:14px">
+                      <MenuItem name="5-1"><span @click="gotoDashboard" style="font-size:12px;">Flowz Dashboard</span></MenuItem>
+                      <MenuItem name="5-2"><span @click="gotoWebsiteBuilder" style="font-size:12px;">Website Builder</span></MenuItem>
+                      <MenuItem name="5-3"><span @click="gotoCRM" style="font-size:12px;">CRM</span></MenuItem>
+                  </MenuGroup>
+                  </Submenu>
+                    <Menu-item name="7">
+                      <Submenu name="1">
+                        <template slot="title">
+                          <Icon type="person" :size="16"></Icon>
+                          {{$store.state.user === null ? 'Guest' : $store.state.user.email}}
+                        </template>
+                        <Menu-item name="1-1">
+                            <a @click="viewConfig">
+                                <Icon type="gear-b" :size="16"></Icon>
+                                  ASI/SAGE Configuration
+                            </a>
+                        </Menu-item>
+                        <Menu-item name="1-2">
+                            <a @click="handleLogout()">
+                                <Icon type="ios-locked-outline" :size="16"></Icon>
+                                  Logout
+                            </a>
+                        </Menu-item>
+                    </Submenu>
+                    </Menu-item>
+                </div>
+              </Row>
 
-        </form>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <Icon type="grid" :size="20"></Icon>&nbsp
-                        <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li class="disabled"><span style="font-size:12px;color:silver;margin-left:15px;">Flowz Products</span></li>
-                <li><a href="#"><span @click="gotoDashboard" style="font-size:12px;">Flowz Dashboard</span></a></li>
-                <li><a href="#"><span @click="gotoWebsiteBuilder" style="font-size:12px;">Website Builder</span></a></li>
-                <li><a href="#"><span @click="gotoCRM" style="font-size:12px;">CRM</span></a></li>
-              </ul>
-        </li>
-        <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" >
-                        <Icon type="person" :size="20"></Icon>&nbsp
-                        {{$store.state.user === null ? 'Guest' : $store.state.user.email}}
-                        <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a @click="viewConfig"><Icon type="gear-b"></Icon>&nbsp ASI/SAGE Configuration</a></li>
-                <li><a @click="handleLogout()"><Icon type="ios-locked-outline" :size="16"></Icon>&nbsp Logout</a></li>
-              </ul>
-        </li> 
-        </ul>
-    </div>&nbsp 
-  </div>
-</nav>
-</div>
+        </Col>
+        </Row>
+    </Menu> -->
 </template>
 <script>
 import psl from 'psl'
 import lodash from 'lodash'
 import config from '@/config'
-// import $ from 'jquery'
 // let domainkey = process.env.domainkey ? process.env.domainkey : 'flowzcluster.tk'
 
 export default {
-  name: 'uploader-header',
   data () {
     return {
       selected_subscription_name: '',
@@ -226,72 +330,24 @@ export default {
     self.flowzDashboardUrl = config.flowzDashboardUrl
     self.crmUrl = config.crmUrl
     self.websiteBuilderUrl = config.websiteBuilderUrl
-    // for(let i=0 ;i<self.$store.state.subscription_detail_list.length;i++){
-    //   self.subscription_list.push({"value":self.$store.state.subscription_detail_list[i].subscription_id,"label":self.$store.state.subscription_detail_list[i].name})
-    // }
+        // for(let i=0 ;i<self.$store.state.subscription_detail_list.length;i++){
+        //   self.subscription_list.push({"value":self.$store.state.subscription_detail_list[i].subscription_id,"label":self.$store.state.subscription_detail_list[i].name})
+        // }
 
-    // self.$store.state.subscription_list
+        // self.$store.state.subscription_list
     if (self.$store.state.storedSubscriptionName !== '' && self.$store.state.storedSubscriptionName !== 'All') {
       let subId = lodash.findIndex(self.$store.state.subscription_list, function (o) { return o.label === self.$store.state.storedSubscriptionName })
       if (subId !== -1) {
         self.selected_subscription_name = self.$store.state.subscription_list[subId].label
         self.$store.state.subscription_name = self.selected_subscription_name
       }
-      // self.selected_user = self.$store.state.user_list[0].label
+          // self.selected_user = self.$store.state.user_list[0].label
     } else {
       self.selected_subscription_name = self.$store.state.subscription_list[0].label
       self.$store.state.subscription_name = self.selected_subscription_name
     }
 
-    // }
+      // }
   }
 }
 </script>
-<style>
-.navbar-nav>li>a {
-  color: white !important;
-}
-
-.nav.navbar-nav {
-  margin-left:50px;
-}
-.nav > li > a:hover{
-    background-color:#1d77d6 !important;
-}
-.navbar {
-    border-radius: 0 !important;
-    height: 65px;
-}
-.navbar-brand > img {
-      max-height: 100%;
-      height: 100%;
-      -o-object-fit: contain;
-      object-fit: contain;
-      margin-top: 5px;
-}
-.scrollable-menu {
-    height: auto;
-    max-height: 200px;
-    overflow-x: hidden;
-}
-.navbar-nav>li>a {
-    color: white !important;
-    font-size: 14px;
-}
-.navbar-brand {
-  padding: 5px 15px;
-}
-
-.nav .open>a, .nav .open>a:focus, .nav .open>a:hover{
-  background-color: transparent;
-}
-
-.navbar-nav>li>a{
-  padding-top: 20px !important;
-  height: 63px;
-}
-.dropdown:hover .dropdown-menu {display: block;}
-.dropdown-menu > li > a { color: #1d77d6}
-.dropdown-menu > li > a:hover { color: #1d77d6}
-</style>
-
