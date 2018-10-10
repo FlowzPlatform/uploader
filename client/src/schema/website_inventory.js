@@ -20,6 +20,15 @@ export const websiteInventorySchema = new Schema({
     maxLength: '',
     regEx: ''
   },
+  attr_actual_colors: {
+    type: 'string',
+    label: 'Actual Color',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
   attr_style: {
     type: 'string',
     label: 'Style',
@@ -41,6 +50,15 @@ export const websiteInventorySchema = new Schema({
   min_qty: {
     type: 'string',
     label: 'Min Qty',
+    optional: true,
+    allowedValues: [],
+    defaultValue: '',
+    maxLength: '',
+    regEx: ''
+  },
+  related_sku: {
+    type: 'string',
+    label: 'Related SKU',
     optional: true,
     allowedValues: [],
     defaultValue: '',
