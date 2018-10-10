@@ -769,6 +769,10 @@ export default {
                       title: "Min Qty",
                       type: "string"
                     },
+                    related_sku: {
+                      title: "Related SKU",
+                      type: "string"
+                    },
                     expected_qty: {
                       title: "Expected Qty",
                       type: "string"
