@@ -217,7 +217,7 @@ export default {
       let shippingData = null
       let inventoryData = null
       
-      let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'attributes', 'images', 'inventory', 'pricing', 'imprint_data', 'shipping', 'features']
+      let keyToDelete = ['activeSummary', 'createdAt', 'import-tracker_id', 'max_price', 'min_price', 'username', 'supplier_info', 'vid', 'tags', 'product_tags', 'attributes', 'images', 'inventory', 'pricing', 'imprint_data', 'shipping', 'features']
       keyToDelete.forEach(e => { delete productData[e] });
 
       if (this.activetab === 1) {
@@ -687,7 +687,20 @@ export default {
               },
               vid: {
                 type: "array",
-                title: "vid"
+                title: "vid",
+                options: {
+                  hidden: true
+                }
+              },
+              releated_sku: {
+                type: "array",
+                title: "Related SKU",
+                items: {
+                  type: 'string'
+                },
+                options: {
+                  disable_array_reorder: true
+                }
               },
               tags: {
                 type: "array",
@@ -697,6 +710,18 @@ export default {
                 },
                 options: {
                   disable_array_reorder: true
+                },
+                propertyOrder: 43
+              },
+              product_tags: {
+                type: "array",
+                title: "Product Tags",
+                items: {
+                  type: 'string'
+                },
+                options: {
+                  disable_array_reorder: true,
+                  hidden: true                  
                 },
                 propertyOrder: 43
               },
